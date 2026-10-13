@@ -30,6 +30,11 @@ Depois:
   qualquer outra mudança de controle ou papel.
 - Linha do tempo da personagem mostrando as fases (jovem heroína → modelo → mentora).
 
+## Galerias de fotos da personagem
+
+Na aba Identidade, duas galerias opcionais: **civil** e **mascarada**, cada uma com 1..n imagens
+(navegação 1/n). Arte do jogador ou do mestre; o arquivo fica junto dos dados da personagem.
+
 ## Trazer personagem de outra campanha
 
 Levar uma personagem evoluída da campanha X para a sala Y ("o veterano").

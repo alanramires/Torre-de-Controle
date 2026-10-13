@@ -86,7 +86,7 @@ O ex-herói que vira mentor ainda tem a ficha de herói guardada.
 ### As quatro seções da ficha de herói
 
 ```text
-IDENTIDADE   nome · codinome · jogador · arquétipo · aparência · habilidades · histórico
+IDENTIDADE   nome · codinome · jogador · arquétipo · habilidades · aparência · breve resumo · perguntas de histórico
 NÚCLEO       Rótulos (e trancados) · condições · potencial · Influência · Hora da Verdade
 CRESCIMENTO  avanços marcados · cartas compradas (outros arquétipos, adultos)
 MÓDULOS      extras do arquétipo (Impulsos, Perdição, Chamas, Máscara…) e os comprados por avanço
@@ -94,6 +94,10 @@ MÓDULOS      extras do arquétipo (Impulsos, Perdição, Chamas, Máscara…) e
 
 - **Núcleo sobrevive à troca de arquétipo** (como multiclasse): Rótulos, condições, **potencial**
   (decidido em 2026-10-13: fica no Núcleo) e Influência continuam iguais.
+- **Perguntas de histórico ficam na Identidade** (decidido em 2026-10-13): a pergunta vem do arquétipo,
+  mas a resposta é da personagem. Só em "novo" trocar de arquétipo apaga as respostas; depois de aprovada,
+  elas ficam como passado, mesmo que ela troque de arquétipo por avanço.
+- **Aparência e breve resumo** são texto livre, editáveis sempre; só a aparência tem dica (as tags da ficha).
 - **Módulos nunca somem**: na troca de arquétipo, o mestre decide quais continuam; os outros são
   **inativados** com tudo o que foi marcado, e podem voltar.
 

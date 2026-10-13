@@ -7,6 +7,7 @@ using TorreDeControle.Core.Jogadores;
 using TorreDeControle.Core.Personagens;
 using UnityEngine;
 using UnityEngine.UI;
+using Regra = TorreDeControle.Core.Regras.RegrasArquetipos.RegraHabilidades;
 
 namespace TorreDeControle.UI
 {
@@ -36,6 +37,8 @@ namespace TorreDeControle.UI
         TextMeshProUGUI subtitulo;
         TextMeshProUGUI status;
         RectTransform filaAbas;
+        /// <summary>A moldura fixa da aba; dentro dela, a área rolável <see cref="conteudo"/>, refeita a cada troca.</summary>
+        RectTransform moldura;
         RectTransform conteudo;
         RectTransform rodape;
 
@@ -57,7 +60,7 @@ namespace TorreDeControle.UI
             cadastro = cadastroPersonagens;
             jogadores = cadastroJogadores;
             aoFechar = aoFecharFicha;
-            abaAtual = p.Status == StatusCriacao.Novo ? Aba.Nucleo : Aba.Identidade;
+            abaAtual = Aba.Identidade; // a ficha sempre abre pela Identidade
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
             Atualizar();
@@ -105,16 +108,15 @@ namespace TorreDeControle.UI
 
             filaAbas = Estilo.Fila(cartao, 56, 8);
 
-            conteudo = Estilo.Rect("Conteudo", cartao);
-            var lc = conteudo.gameObject.AddComponent<LayoutElement>();
+            moldura = Estilo.Rect("Moldura", cartao);
+            var lc = moldura.gameObject.AddComponent<LayoutElement>();
             lc.flexibleHeight = 1;
-            Estilo.Moldura(conteudo.gameObject, new Color(0, 0, 0, 0.18f), Estilo.BordaApagada);
-            var vc = conteudo.gameObject.AddComponent<VerticalLayoutGroup>();
-            vc.padding = new RectOffset(36, 36, 22, 22);
-            vc.spacing = 8;
+            Estilo.Moldura(moldura.gameObject, new Color(0, 0, 0, 0.18f), Estilo.BordaApagada);
+            var vc = moldura.gameObject.AddComponent<VerticalLayoutGroup>();
+            vc.padding = new RectOffset(30, 30, 18, 18);
             vc.childControlWidth = true;
             vc.childControlHeight = true;
-            vc.childForceExpandHeight = false;
+            vc.childForceExpandHeight = true;
 
             rodape = Estilo.Fila(cartao, 60);
         }
@@ -169,7 +171,8 @@ namespace TorreDeControle.UI
 
         void MontarConteudo()
         {
-            Limpar(conteudo);
+            Limpar(moldura);
+            conteudo = Estilo.ListaRolavel(moldura, 8);
             switch (abaAtual)
             {
                 case Aba.Identidade: AbaIdentidade(); break;
@@ -274,11 +277,237 @@ namespace TorreDeControle.UI
                 id => SalvarIdentidade(p.Identidade.Nome, p.Identidade.Codinome, p.Identidade.Arquetipo, id));
 
             var vao = Estilo.Rect("Vao", conteudo);
-            vao.gameObject.AddComponent<LayoutElement>().minHeight = 20;
-            var futuro = Estilo.Rotulo(conteudo, "Aparência, habilidades e histórico entram numa próxima etapa.", 22,
-                Estilo.TextoApagado, FontStyles.Italic);
-            futuro.gameObject.AddComponent<LayoutElement>().minHeight = 30;
+            vao.gameObject.AddComponent<LayoutElement>().minHeight = 12;
+            SecaoHabilidades();
+
+            var vao2 = Estilo.Rect("Vao", conteudo);
+            vao2.gameObject.AddComponent<LayoutElement>().minHeight = 12;
+            SecaoTextosLivres();
         }
+
+        // ---------- aparência e histórico: texto livre, a ficha só inspira ----------
+
+        void SecaoTextosLivres()
+        {
+            var regra = cadastro.RegraDoArquetipo(p);
+
+            var tags = regra == null ? string.Empty
+                : "Tags da ficha (só inspiração):" + Itens(regra.Visual.Select(g => string.Join(", ", g)));
+            SecaoComDica("APARÊNCIA", "dicas da ficha", tags);
+            var aparencia = Estilo.AreaTexto(conteudo, "Como ela é, como se veste, o uniforme... escreva do seu jeito.", 130);
+            aparencia.text = p.Identidade.Aparencia;
+
+            SecaoComDica("BREVE RESUMO", null, null);
+            var resumo = Estilo.AreaTexto(conteudo, "Quem é a personagem e de onde veio, do seu jeito.", 150);
+            resumo.text = p.Identidade.Resumo;
+
+            // Grava ao sair do campo (Enter aqui quebra linha). Sem redesenhar, por causa do Tab.
+            aparencia.onDeselect.AddListener(_ => cadastro.AlterarTextos(p.Id, aparencia.text, resumo.text));
+            resumo.onDeselect.AddListener(_ => cadastro.AlterarTextos(p.Id, aparencia.text, resumo.text));
+
+            // As perguntas de histórico da ficha, cada uma com a sua resposta (a validação cobra).
+            if (regra == null || regra.Historico.Count == 0)
+                return;
+            SecaoComDica("PERGUNTAS DE HISTÓRICO", null, null);
+            var respostas = p.Identidade.RespostasHistorico;
+            for (var k = 0; k < regra.Historico.Count; k++)
+            {
+                var pergunta = Estilo.Rotulo(conteudo, regra.Historico[k], 22, Estilo.TextoSuave, FontStyles.Italic);
+                pergunta.textWrappingMode = TextWrappingModes.Normal;
+                var campo = Estilo.AreaTexto(conteudo, "resposta", 64);
+                campo.text = k < respostas.Count ? respostas[k] : string.Empty;
+                var indice = k;
+                campo.onDeselect.AddListener(t => { cadastro.ResponderHistorico(p.Id, indice, t); MontarRodape(); });
+            }
+        }
+
+        static string Itens(IEnumerable<string> itens) =>
+            string.Concat(itens.Select(i => System.Environment.NewLine + "• " + i));
+
+        void SecaoComDica(string nome, string rotuloDica, string dica)
+        {
+            var fila = Estilo.Fila(conteudo, 40);
+            var t = Estilo.Rotulo(fila, nome, 22, Estilo.Dourado, FontStyles.Bold);
+            t.characterSpacing = 5;
+            Estilo.ColunaElastica(t);
+            if (!string.IsNullOrEmpty(dica))
+                Estilo.SeloDica(fila, rotuloDica, dica);
+        }
+
+        // ---------- habilidades (o modelo vem de arquetipos.json) ----------
+
+        enum EstadoChip { Fixa, Escolhida, Livre, Bloqueada, Negada }
+
+        void SecaoHabilidades()
+        {
+            var regra = cadastro.RegraDeHabilidades(p);
+            var e = p.Criacao.Habilidades;
+            var emCriacao = p.Status == StatusCriacao.Novo;
+            Secao("HABILIDADES", regra.Nota);
+
+            if (emCriacao)
+            {
+                switch (regra.Tipo)
+                {
+                    case Regra.Fixas:
+                        var gradeFixas = Grade();
+                        foreach (var f in regra.FixasDadas)
+                            Chip(gradeFixas, f.Nome, EstadoChip.Fixa, () => { });
+                        break;
+
+                    case Regra.Lista:
+                        var max = regra.MaximoEscolhas;
+                        var alem = regra.FixasDadas.Count > 0 ? " além das que já vêm marcadas" : string.Empty;
+                        Contador(regra.EscolherAte.HasValue ? $"escolha até {max}{alem}" : $"escolha {max}{alem}", e.Escolhidas.Count, max);
+                        var grade = Grade();
+                        // As que o arquétipo dá: marcadas e travadas, na mesma grade das escolhas.
+                        foreach (var f in regra.FixasDadas)
+                            Chip(grade, f.Nome, EstadoChip.Fixa, () => { });
+                        foreach (var o in regra.Opcoes)
+                        {
+                            var id = o.Id;
+                            var estado = e.Escolhidas.Contains(id) ? EstadoChip.Escolhida
+                                : e.Escolhidas.Count >= max ? EstadoChip.Bloqueada : EstadoChip.Livre;
+                            Chip(grade, o.Nome, estado, () => Aplicar(cadastro.AlternarHabilidade(p.Id, id)));
+                        }
+                        break;
+
+                    case Regra.Linha:
+                        var filaLinha = FilaRotulada("LINHA");
+                        var opcoesLinha = new List<(string id, string nome)> { (string.Empty, "escolha a linha") };
+                        opcoesLinha.AddRange(regra.Linhas.Select(l => (l.Id, l.Nome)));
+                        Estilo.ListaSuspensa(filaLinha, 420, opcoesLinha, e.Linha ?? string.Empty,
+                            id => Aplicar(cadastro.EscolherLinha(p.Id, id.Length == 0 ? null : id)));
+                        var linha = regra.Linhas.FirstOrDefault(l => l.Id == e.Linha);
+                        if (linha == null)
+                            break;
+                        Contador($"negue {regra.Negar} (clique para negar ou devolver)", e.Negadas.Count, regra.Negar);
+                        var gradeLinha = Grade();
+                        foreach (var poder in linha.Poderes)
+                        {
+                            var id = poder.Id;
+                            var estado = e.Negadas.Contains(id) ? EstadoChip.Negada
+                                : e.Negadas.Count >= regra.Negar ? EstadoChip.Bloqueada : EstadoChip.Livre;
+                            Chip(gradeLinha, poder.Nome, estado, () => Aplicar(cadastro.AlternarNegada(p.Id, id)));
+                        }
+                        break;
+
+                    case Regra.Mentora:
+                        foreach (var vaga in regra.Vagas)
+                        {
+                            var v = vaga.Id;
+                            var fila = FilaRotulada(vaga.Nome.ToUpperInvariant());
+                            var opcoes = new List<(string id, string nome)> { (string.Empty, "—") };
+                            opcoes.AddRange(regra.Opcoes.Select(o => (o.Id, o.Nome)));
+                            Estilo.ListaSuspensa(fila, 420, opcoes, e.Vagas.TryGetValue(v, out var atual) ? atual : string.Empty,
+                                id => Aplicar(cadastro.DefinirVaga(p.Id, v, id.Length == 0 ? null : id)));
+                        }
+                        break;
+                }
+            }
+
+            // Descrição só onde a ficha do arquétipo pede (Bruta: cada uma; Transformado: as escolhidas).
+            // Depois de aprovada, a lista aparece sempre, só para leitura.
+            var pede = regra.Descrever;
+            if (emCriacao && pede == null)
+                return;
+            var naFicha = cadastro.HabilidadesAtuais(p)
+                .Where(h => !emCriacao || pede == Regra.DescreverCada || !h.Fixa);
+            foreach (var h in naFicha)
+            {
+                var fila = Estilo.Fila(conteudo, 50, 10);
+                var nome = Estilo.Rotulo(fila, h.Nome, 22, h.Fixa ? Estilo.Dourado : Estilo.Texto, FontStyles.Bold);
+                nome.textWrappingMode = TextWrappingModes.NoWrap;
+                nome.overflowMode = TextOverflowModes.Ellipsis;
+                nome.gameObject.AddComponent<LayoutElement>().preferredWidth = 460;
+
+                if (!emCriacao)
+                {
+                    var d = Estilo.Rotulo(fila, h.Descricao, 22, Estilo.TextoSuave, FontStyles.Italic);
+                    Estilo.ColunaElastica(d);
+                    continue;
+                }
+
+                var campo = Estilo.CampoTexto(fila,
+                    pede == Regra.DescreverEscolhidas ? "como a deixa grotesca" : "como se manifesta");
+                campo.text = h.Descricao;
+                Estilo.ColunaElastica(campo);
+                var hid = h.Id;
+                // Não redesenha: o Tab precisa achar o próximo campo vivo. Só o rodapé muda.
+                campo.onSubmit.AddListener(t => { cadastro.DescreverHabilidade(p.Id, hid, t); MontarRodape(); });
+                campo.onDeselect.AddListener(t => { cadastro.DescreverHabilidade(p.Id, hid, t); MontarRodape(); });
+            }
+        }
+
+        void Aplicar(Resultado resultado)
+        {
+            MontarConteudo();
+            MontarRodape();
+            if (!resultado.Ok)
+                Aviso(resultado.Erro);
+        }
+
+        void Contador(string regra, int atual, int maximo)
+        {
+            var fila = Estilo.Fila(conteudo, 30);
+            var t = Estilo.Rotulo(fila, $"{regra}  ·  {atual}/{maximo}", 20,
+                atual == maximo ? Estilo.Dourado : Estilo.TextoSuave, FontStyles.Italic);
+            Estilo.ColunaElastica(t);
+        }
+
+        RectTransform Grade()
+        {
+            var grade = Estilo.Rect("Grade", conteudo);
+            var g = grade.gameObject.AddComponent<GridLayoutGroup>();
+            g.cellSize = new Vector2(360, 46);
+            g.spacing = new Vector2(10, 10);
+            g.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            g.constraintCount = 4;
+            return grade;
+        }
+
+        static void Chip(Transform pai, string texto, EstadoChip estado, UnityEngine.Events.UnityAction aoClicar)
+        {
+            var rect = Estilo.Rect("Chip " + texto, pai);
+            var (fundo, borda, cor) = estado switch
+            {
+                EstadoChip.Fixa => (Estilo.DouradoEscuro, Estilo.Dourado, Estilo.Dourado),
+                EstadoChip.Escolhida => (Estilo.Dourado, Estilo.Dourado, Estilo.Cartao),
+                EstadoChip.Livre => (new Color(Estilo.Dourado.r, Estilo.Dourado.g, Estilo.Dourado.b, 0.08f), Estilo.Dourado, Estilo.Dourado),
+                _ => (Estilo.Campo, Estilo.BordaApagada, Estilo.TextoApagado),
+            };
+            var imagem = Estilo.Moldura(rect.gameObject, fundo, borda);
+            var botao = rect.gameObject.AddComponent<Button>();
+            botao.targetGraphic = imagem;
+            botao.interactable = estado != EstadoChip.Bloqueada && estado != EstadoChip.Fixa;
+            if (estado == EstadoChip.Fixa)
+            {
+                // Travada, mas sem o cinza de "desligado": é uma marca que já vem com o arquétipo.
+                var cores = botao.colors;
+                cores.disabledColor = Color.white;
+                botao.colors = cores;
+            }
+            else
+            {
+                botao.onClick.AddListener(aoClicar);
+                rect.gameObject.AddComponent<Tabulavel>();
+            }
+            var rotulo = estado switch
+            {
+                EstadoChip.Negada => $"<s>{texto}</s>",
+                EstadoChip.Fixa => texto,
+                _ => texto,
+            };
+            var t = Estilo.Rotulo(rect, rotulo, 22, cor,
+                estado == EstadoChip.Escolhida || estado == EstadoChip.Fixa ? FontStyles.Bold : FontStyles.Normal);
+            t.alignment = TextAlignmentOptions.Center;
+            t.textWrappingMode = TextWrappingModes.NoWrap;
+            t.overflowMode = TextOverflowModes.Ellipsis;
+            Estilo.Esticar(t.rectTransform);
+            t.rectTransform.offsetMin = new Vector2(10, 0);
+            t.rectTransform.offsetMax = new Vector2(-10, 0);
+        }
+
 
         TMP_InputField CampoRotulado(string rotulo, string valor)
         {
@@ -333,15 +562,16 @@ namespace TorreDeControle.UI
                 Atualizar();
             }
 
-            if (!p.Criacao.TemEscolhas)
+            if (!cadastro.TrocaDeArquetipoApaga(p))
             {
                 Aplicar();
                 return;
             }
 
             Estilo.Confirmar(transform,
-                $"Trocar para {Arquetipos.Nome(novo)} apaga as escolhas de criação de " +
-                $"{Arquetipos.Nome(p.Identidade.Arquetipo)} (o +1 livre). A identidade fica. Continuar?",
+                $"Trocar para {Arquetipos.Nome(novo)} apaga o que foi feito para " +
+                $"{Arquetipos.Nome(p.Identidade.Arquetipo)}: +1 livre, habilidades e respostas de histórico. " +
+                "Nome, codinome, jogador, aparência e resumo ficam. Continuar?",
                 "Trocar",
                 Aplicar,
                 aoCancelar: MontarConteudo);

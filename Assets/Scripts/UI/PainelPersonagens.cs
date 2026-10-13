@@ -170,6 +170,7 @@ namespace TorreDeControle.UI
         {
             var fila = Estilo.Fila(pai, 30);
             fila.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(10, 10, 0, 0);
+            Estilo.VaoDaAlca(fila);
             Coluna(fila, "CODINOME", -1);
             Coluna(fila, "NOME CIVIL", -1);
             Coluna(fila, "ARQUÉTIPO", LarguraArquetipo);
@@ -200,6 +201,7 @@ namespace TorreDeControle.UI
             if (jogadores.Buscar(jogadorNovo) == null)
                 jogadorNovo = SemJogador;
 
+            Estilo.VaoDaAlca(filaNovo);
             campoCodinome = Estilo.CampoTexto(filaNovo, "Codinome");
             Estilo.ColunaElastica(campoCodinome);
             campoCodinome.onSubmit.AddListener(_ => Adicionar());
@@ -229,15 +231,25 @@ namespace TorreDeControle.UI
                 return;
             }
 
-            foreach (var personagem in todas)
-                Linha(personagem);
+            // Dois blocos, cada um na ordem que o mestre arrastar.
+            foreach (var (ativo, titulo) in new[] { (true, "ATIVAS"), (false, "INATIVAS") })
+            {
+                var doBloco = todas.Where(p => p.Ativo == ativo).ToList();
+                if (doBloco.Count == 0)
+                    continue;
+                var bloco = Estilo.Bloco(lista, titulo, doBloco.Count);
+                foreach (var personagem in doBloco)
+                    Linha(personagem, bloco);
+            }
         }
 
-        void Linha(Personagem p)
+        void Linha(Personagem p, RectTransform bloco)
         {
-            var linha = Estilo.Fila(lista, 64);
+            var linha = Estilo.Fila(bloco, 64);
             linha.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(10, 10, 8, 8);
             Estilo.Moldura(linha.gameObject, Estilo.Linha, p.Ativo ? Estilo.Borda : Estilo.BordaApagada);
+            // Não redesenha ao soltar: a linha já está no lugar novo.
+            Estilo.Alca(linha, indice => Mostrar(cadastro.Mover(p.Id, indice)));
 
             var i = p.Identidade;
             var codinome = Estilo.CampoTexto(linha, "codinome");

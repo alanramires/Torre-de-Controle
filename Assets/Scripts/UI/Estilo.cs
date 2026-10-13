@@ -371,6 +371,87 @@ namespace TorreDeControle.UI
             });
         }
 
+        public const float LarguraAlca = 34;
+
+        /// <summary>
+        /// A alça "=" (dois traços) no começo de uma linha ordenável. Arrastar por ela reordena
+        /// a linha dentro do bloco; <paramref name="aoSoltar"/> recebe a posição final.
+        /// </summary>
+        public static void Alca(RectTransform linha, System.Action<int> aoSoltar)
+        {
+            var rect = Rect("Alca", linha);
+            rect.SetAsFirstSibling();
+            var area = rect.gameObject.AddComponent<Image>();
+            area.color = new Color(0, 0, 0, 0); // recebe o clique em toda a área da alça
+            rect.gameObject.AddComponent<LayoutElement>().preferredWidth = LarguraAlca;
+            foreach (var deslocamento in new[] { 5f, -5f })
+            {
+                var traco = Rect("Traco", rect);
+                traco.anchorMin = traco.anchorMax = new Vector2(0.5f, 0.5f);
+                traco.sizeDelta = new Vector2(22, 3);
+                traco.anchoredPosition = new Vector2(0, deslocamento);
+                var imagem = traco.gameObject.AddComponent<Image>();
+                imagem.color = new Color(Dourado.r, Dourado.g, Dourado.b, 0.7f);
+                imagem.raycastTarget = false;
+            }
+            rect.gameObject.AddComponent<AlcaArrastar>().Configurar(linha, aoSoltar);
+        }
+
+        /// <summary>Espaço do tamanho da alça, para cabeçalhos e a linha de criação alinharem com as linhas.</summary>
+        public static void VaoDaAlca(Transform fila)
+        {
+            var vao = Rect("VaoAlca", fila);
+            vao.SetAsFirstSibling();
+            vao.gameObject.AddComponent<LayoutElement>().preferredWidth = LarguraAlca;
+        }
+
+        /// <summary>Bloco de uma lista (ATIVOS / INATIVOS): título e o contêiner das linhas.</summary>
+        public static RectTransform Bloco(Transform lista, string titulo, int quantidade)
+        {
+            var cabeca = Fila(lista, 34);
+            cabeca.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(6, 6, 8, 0);
+            var t = Rotulo(cabeca, $"{titulo}  ·  {quantidade}", 20, TextoSuave, FontStyles.Bold);
+            t.characterSpacing = 5;
+            ColunaElastica(t);
+
+            var bloco = Rect("Bloco " + titulo, lista);
+            var v = bloco.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.spacing = 10;
+            v.childControlWidth = true;
+            v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+            return bloco;
+        }
+
+        /// <summary>Campo de várias linhas (Enter quebra a linha; grava ao sair).</summary>
+        public static TMP_InputField AreaTexto(Transform pai, string dica, float altura)
+        {
+            var campo = CampoTexto(pai, dica);
+            campo.lineType = TMP_InputField.LineType.MultiLineNewline;
+            foreach (var t in new[] { (TextMeshProUGUI)campo.textComponent, (TextMeshProUGUI)campo.placeholder })
+            {
+                t.alignment = TextAlignmentOptions.TopLeft;
+                t.textWrappingMode = TextWrappingModes.Normal;
+                t.fontSize = 24;
+            }
+            var layout = campo.GetComponent<LayoutElement>() ?? campo.gameObject.AddComponent<LayoutElement>();
+            layout.minHeight = altura;
+            layout.preferredHeight = altura;
+            return campo;
+        }
+
+        /// <summary>Selo "? dicas da ficha": com o mouse em cima, mostra o texto num balão.</summary>
+        public static void SeloDica(Transform pai, string rotulo, string conteudo)
+        {
+            var rect = Rect("SeloDica", pai);
+            Moldura(rect.gameObject, new Color(Dourado.r, Dourado.g, Dourado.b, 0.08f), Dourado);
+            rect.gameObject.AddComponent<LayoutElement>().preferredWidth = 230;
+            var t = Rotulo(rect, "?  " + rotulo, 20, Dourado, FontStyles.Bold);
+            t.alignment = TextAlignmentOptions.Center;
+            Esticar(t.rectTransform);
+            rect.gameObject.AddComponent<Dica>().Configurar(conteudo);
+        }
+
         public static RectTransform ListaRolavel(Transform pai, float espaco = 10)
         {
             var rect = Rect("Lista", pai);
@@ -400,6 +481,27 @@ namespace TorreDeControle.UI
 
             scroll.viewport = viewport;
             scroll.content = conteudo;
+
+            // Barra de rolagem na lateral: some sozinha quando tudo cabe (e devolve a largura à lista).
+            var barra = Rect("Barra", rect);
+            barra.anchorMin = new Vector2(1, 0);
+            barra.anchorMax = new Vector2(1, 1);
+            barra.pivot = new Vector2(1, 0.5f);
+            barra.sizeDelta = new Vector2(12, 0);
+            barra.gameObject.AddComponent<Image>().color = Campo;
+            var rolagem = barra.gameObject.AddComponent<Scrollbar>();
+            rolagem.direction = Scrollbar.Direction.BottomToTop;
+            var trilho = Rect("Trilho", barra);
+            Esticar(trilho);
+            var alca = Rect("Alca", trilho);
+            Esticar(alca);
+            var imagemAlca = alca.gameObject.AddComponent<Image>();
+            imagemAlca.color = new Color(Dourado.r, Dourado.g, Dourado.b, 0.75f);
+            rolagem.handleRect = alca;
+            rolagem.targetGraphic = imagemAlca;
+            scroll.verticalScrollbar = rolagem;
+            scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
+            scroll.verticalScrollbarSpacing = 10;
             return conteudo;
         }
     }

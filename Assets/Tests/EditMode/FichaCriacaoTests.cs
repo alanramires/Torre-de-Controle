@@ -85,7 +85,7 @@ namespace TorreDeControle.Tests
             Assert.That(p.Status, Is.EqualTo(StatusCriacao.Novo));
 
             Assert.That(cadastro.Aprovar(p.Id, aceitarAvisos: true).Ok, Is.True);
-            Assert.That(p.Foto.AvisosAceitos, Has.Count.EqualTo(1));
+            Assert.That(p.Foto.AvisosAceitos, Has.Member("Falta escolher o +1 livre."));
         }
 
         [Test]
@@ -93,7 +93,11 @@ namespace TorreDeControle.Tests
         {
             var p = Nova("nova");
             cadastro.EscolherBonusLivre(p.Id, Rotulos.Superior);
+            cadastro.AlternarHabilidade(p.Id, "feiticaria");
+            for (var k = 0; k < 5; k++)
+                cadastro.ResponderHistorico(p.Id, k, "resposta " + k);
             Assert.That(cadastro.Aprovar(p.Id, aceitarAvisos: false).Ok, Is.True);
+            Assert.That(p.Foto.Habilidades.Single().Nome, Is.EqualTo("Feitiçaria"));
 
             Assert.That(p.Status, Is.EqualTo(StatusCriacao.Criado));
             Assert.That(p.Foto.Rotulos[Rotulos.Superior], Is.EqualTo(1));
@@ -103,6 +107,97 @@ namespace TorreDeControle.Tests
             var recarregada = CadastroPersonagens.Carregar(armazenamento, RegrasDeTeste.Arquetipos()).Buscar(p.Id);
             Assert.That(recarregada.Foto.Rotulos[Rotulos.Superior], Is.EqualTo(1));
             Assert.That(recarregada.Status, Is.EqualTo(StatusCriacao.Criado));
+        }
+    
+
+        // ---------- habilidades ----------
+
+        [Test]
+        public void Lista_escolhe_ate_o_maximo_e_cobra_o_que_falta()
+        {
+            var p = Nova("farol");
+            Assert.That(cadastro.AlternarHabilidade(p.Id, "espadas").Ok, Is.True);
+            Assert.That(cadastro.Validar(p).avisos, Has.Some.Contains("faltam 1"));
+            Assert.That(cadastro.AlternarHabilidade(p.Id, "acrobacia").Ok, Is.True);
+            Assert.That(cadastro.AlternarHabilidade(p.Id, "artes-marciais").Ok, Is.False);
+            Assert.That(cadastro.Validar(p).avisos, Has.None.Contains("Habilidades"));
+        }
+
+        [Test]
+        public void Janus_tem_a_fixa_mais_as_escolhidas()
+        {
+            var p = Nova("janus");
+            cadastro.AlternarHabilidade(p.Id, "absorcao-de-energia");
+            var atuais = cadastro.HabilidadesAtuais(p);
+            Assert.That(atuais.Select(h => h.Nome), Is.EqualTo(new[] { "Força", "Agilidade", "Resistência", "Absorção de energia" }));
+            Assert.That(atuais.Count(h => h.Fixa), Is.EqualTo(3));
+            Assert.That(cadastro.Validar(p).avisos, Has.Some.Contains("faltam 1"));
+        }
+
+        [Test]
+        public void Legado_escolhe_a_linha_nega_dois_e_fica_com_tres()
+        {
+            var p = Nova("legado");
+            Assert.That(cadastro.AlternarNegada(p.Id, "voo").Ok, Is.False);
+            cadastro.EscolherLinha(p.Id, "classica");
+            cadastro.AlternarNegada(p.Id, "raios-oculares");
+            cadastro.AlternarNegada(p.Id, "supersentidos");
+            Assert.That(cadastro.AlternarNegada(p.Id, "voo").Ok, Is.False);
+            Assert.That(cadastro.HabilidadesAtuais(p).Select(h => h.Id),
+                Is.EqualTo(new[] { "superforca", "invulnerabilidade", "voo" }));
+
+            cadastro.EscolherLinha(p.Id, "sombras");
+            Assert.That(p.Criacao.Habilidades.Negadas, Is.Empty);
+        }
+
+        [Test]
+        public void Discipula_preenche_tres_vagas_diferentes()
+        {
+            var p = Nova("discipula");
+            Assert.That(cadastro.DefinirVaga(p.Id, "compartilhada", "luta-impossivel").Ok, Is.True);
+            Assert.That(cadastro.DefinirVaga(p.Id, "sua", "luta-impossivel").Ok, Is.False);
+            cadastro.DefinirVaga(p.Id, "sua", "telepatia-e-telecinese");
+            Assert.That(cadastro.Validar(p).avisos, Has.Some.Contains("da mentora"));
+            cadastro.DefinirVaga(p.Id, "mentora", "controle-elemental");
+            Assert.That(cadastro.HabilidadesAtuais(p), Has.Count.EqualTo(3));
+            Assert.That(cadastro.HabilidadesAtuais(p)[0].Nome, Is.EqualTo("Luta impossível (compartilhada)"));
+        }
+
+        [Test]
+        public void Bruta_pede_descricao_de_cada_fixa()
+        {
+            var p = Nova("bruta");
+            Assert.That(cadastro.HabilidadesAtuais(p), Has.Count.EqualTo(3));
+            Assert.That(cadastro.Validar(p).avisos, Has.Some.Contains("Superresistente"));
+            cadastro.DescreverHabilidade(p.Id, "superresistente", "dobra de tamanho");
+            Assert.That(cadastro.HabilidadesAtuais(p)[0].Descricao, Is.EqualTo("dobra de tamanho"));
+            Assert.That(cadastro.Validar(p).avisos, Has.None.Contains("Superresistente"));
+        }
+
+        [Test]
+        public void Perguntas_de_historico_sao_cobradas_e_trocar_de_arquetipo_apaga_as_respostas()
+        {
+            var p = Nova("bruta");
+            Assert.That(cadastro.Validar(p).avisos, Has.Some.Contains("faltam 5"));
+            cadastro.ResponderHistorico(p.Id, 0, "O laboratório da Fundação.");
+            Assert.That(cadastro.Validar(p).avisos, Has.Some.Contains("faltam 4"));
+            cadastro.AlterarTextos(p.Id, "Alta, cheia de cicatrizes.", "Fugiu aos 15.");
+            Assert.That(cadastro.TrocaDeArquetipoApaga(p), Is.True);
+
+            cadastro.AlterarIdentidade(p.Id, "Teste", "", "farol", null);
+            Assert.That(p.Identidade.RespostasHistorico, Is.Empty);
+            Assert.That(p.Identidade.Aparencia, Is.EqualTo("Alta, cheia de cicatrizes."));
+            Assert.That(p.Identidade.Resumo, Is.EqualTo("Fugiu aos 15."));
+        }
+
+        [Test]
+        public void Trocar_de_arquetipo_zera_as_habilidades()
+        {
+            var p = Nova("farol");
+            cadastro.AlternarHabilidade(p.Id, "espadas");
+            Assert.That(p.Criacao.TemEscolhas, Is.True);
+            cadastro.AlterarIdentidade(p.Id, "Teste", "", "nova", null);
+            Assert.That(cadastro.HabilidadesAtuais(p), Is.Empty);
         }
     }
 }

@@ -39,6 +39,54 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("id")] public string Id { get; set; }
             [JsonProperty("nome")] public string Nome { get; set; }
             [JsonProperty("rotulos")] public Dictionary<string, int> Rotulos { get; set; } = new Dictionary<string, int>();
+            [JsonProperty("habilidades")] public RegraHabilidades Habilidades { get; set; } = new RegraHabilidades();
+            /// <summary>Grupos de tags de aparência da ficha: só inspiração (a aparência é texto livre).</summary>
+            [JsonProperty("visual")] public List<List<string>> Visual { get; set; } = new List<List<string>>();
+            /// <summary>Perguntas de histórico da ficha: guia (o histórico é texto livre).</summary>
+            [JsonProperty("historico")] public List<string> Historico { get; set; } = new List<string>();
+        }
+
+        /// <summary>Uma opção nomeada (habilidade, linha, vaga).</summary>
+        public sealed class Opcao
+        {
+            [JsonProperty("id")] public string Id { get; set; }
+            [JsonProperty("nome")] public string Nome { get; set; }
+        }
+
+        public sealed class LinhaDePoderes
+        {
+            [JsonProperty("id")] public string Id { get; set; }
+            [JsonProperty("nome")] public string Nome { get; set; }
+            [JsonProperty("poderes")] public List<Opcao> Poderes { get; set; } = new List<Opcao>();
+        }
+
+        /// <summary>
+        /// Modelo da subseção Habilidades. <see cref="Tipo"/> diz como a tela desenha e como validar:
+        /// lista (escolher N das opções, com fixas opcionais), fixas, linha (escolhe a linha e nega N)
+        /// e mentora (uma opção por vaga, todas diferentes).
+        /// </summary>
+        public sealed class RegraHabilidades
+        {
+            public const string Lista = "lista";
+            public const string Fixas = "fixas";
+            public const string Linha = "linha";
+            public const string Mentora = "mentora";
+            public const string DescreverCada = "cada";
+            public const string DescreverEscolhidas = "escolhidas";
+
+            [JsonProperty("tipo")] public string Tipo { get; set; } = Lista;
+            [JsonProperty("escolher")] public int? Escolher { get; set; }
+            [JsonProperty("escolher_ate")] public int? EscolherAte { get; set; }
+            [JsonProperty("opcoes")] public List<Opcao> Opcoes { get; set; } = new List<Opcao>();
+            [JsonProperty("fixas")] public List<Opcao> FixasDadas { get; set; } = new List<Opcao>();
+            [JsonProperty("linhas")] public List<LinhaDePoderes> Linhas { get; set; } = new List<LinhaDePoderes>();
+            [JsonProperty("negar")] public int Negar { get; set; }
+            [JsonProperty("vagas")] public List<Opcao> Vagas { get; set; } = new List<Opcao>();
+            [JsonProperty("descrever")] public string Descrever { get; set; }
+            [JsonProperty("nota")] public string Nota { get; set; }
+
+            /// <summary>Máximo de escolhas da lista (escolher ou escolher_ate).</summary>
+            [JsonIgnore] public int MaximoEscolhas => Escolher ?? EscolherAte ?? 0;
         }
 
         sealed class ArquivoJson

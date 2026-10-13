@@ -33,12 +33,19 @@ namespace TorreDeControle.Core.Jogadores
             return new CadastroJogadores(armazenamento, arquivo.Jogadores ?? new List<Jogador>());
         }
 
-        /// <summary>Ativos primeiro, depois por nome.</summary>
-        public IReadOnlyList<Jogador> Listar() =>
-            jogadores
-                .OrderByDescending(j => j.Ativo)
-                .ThenBy(j => j.Nome, StringComparer.CurrentCultureIgnoreCase)
-                .ToList();
+        /// <summary>Ativos primeiro; cada bloco na ordem que o mestre arrastou.</summary>
+        public IReadOnlyList<Jogador> Listar() => Ordenacao.Ordenar(jogadores, j => j.Nome);
+
+        /// <summary>Leva o jogador para a posição <paramref name="indice"/> do bloco dele (ativos ou inativos).</summary>
+        public Resultado Mover(string id, int indice)
+        {
+            var jogador = Buscar(id);
+            if (jogador == null)
+                return Resultado.Falha("Jogador não encontrado.");
+            Ordenacao.Mover(jogadores, jogador, indice, j => j.Nome);
+            Gravar();
+            return Resultado.Sucesso();
+        }
 
         public Jogador Buscar(string id) => jogadores.FirstOrDefault(j => j.Id == id);
 
@@ -49,7 +56,10 @@ namespace TorreDeControle.Core.Jogadores
             if (erro != null)
                 return Resultado.Falha(erro);
 
-            jogadores.Add(new Jogador { Id = Guid.NewGuid().ToString("N"), Nome = limpo, Ativo = true });
+            jogadores.Add(new Jogador
+            {
+                Id = Guid.NewGuid().ToString("N"), Nome = limpo, Ativo = true, Ordem = Ordenacao.Fim(jogadores),
+            });
             Gravar();
             return Resultado.Sucesso();
         }
@@ -82,6 +92,7 @@ namespace TorreDeControle.Core.Jogadores
                 return Resultado.Sucesso();
 
             jogador.Ativo = ativo;
+            jogador.Ordem = Ordenacao.Fim(jogadores); // entra no fim do outro bloco
             Gravar();
             return Resultado.Sucesso();
         }

@@ -1,3 +1,4 @@
+using System.Linq;
 using NUnit.Framework;
 using TorreDeControle.Core.Personagens;
 
@@ -77,6 +78,24 @@ namespace TorreDeControle.Tests
             Assert.That(p.Identidade.Codinome, Is.EqualTo("Raposa Prateada"));
             Assert.That(p.Identidade.Jogador, Is.EqualTo("j1"));
             Assert.That(p.Ativo, Is.False);
+        }
+
+        [Test]
+        public void Ordem_manual_dentro_de_cada_bloco()
+        {
+            cadastro.Criar("A", "", "farol", null);
+            cadastro.Criar("B", "", "farol", null);
+            cadastro.Criar("C", "", "farol", null);
+            var c = cadastro.Listar()[2];
+            cadastro.Mover(c.Id, 0);
+            Assert.That(cadastro.Listar().Select(p => p.NomeExibicao), Is.EqualTo(new[] { "C", "A", "B" }));
+
+            // Inativar manda para o fim; o bloco dos inativos fica embaixo.
+            cadastro.DefinirAtivo(c.Id, false);
+            Assert.That(cadastro.Listar().Select(p => p.NomeExibicao), Is.EqualTo(new[] { "A", "B", "C" }));
+
+            var recarregado = CadastroPersonagens.Carregar(armazenamento, RegrasDeTeste.Arquetipos());
+            Assert.That(recarregado.Listar().Select(p => p.NomeExibicao), Is.EqualTo(new[] { "A", "B", "C" }));
         }
     }
 }

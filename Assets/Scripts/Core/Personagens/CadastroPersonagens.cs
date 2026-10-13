@@ -11,7 +11,7 @@ namespace TorreDeControle.Core.Personagens
     /// Laboratório de personagens (fora de sala): criar, editar a identidade, ativar/inativar,
     /// montar a ficha de criação (hoje: o +1 livre) e aprovar. Toda mudança grava na hora.
     /// </summary>
-    public sealed class CadastroPersonagens
+    public sealed partial class CadastroPersonagens
     {
         public const string Chave = "personagens";
         const int VersaoArquivo = 1;
@@ -35,16 +35,26 @@ namespace TorreDeControle.Core.Personagens
                 : JsonConvert.DeserializeObject<Arquivo>(texto) ?? new Arquivo();
             var lista = arquivo.Personagens ?? new List<Personagem>();
             foreach (var p in lista)
+            {
                 p.Criacao ??= new RascunhoCriacao();
+                p.Criacao.Habilidades ??= new EscolhasHabilidades();
+            }
             return new CadastroPersonagens(armazenamento, regras, lista);
         }
 
-        /// <summary>Ativas primeiro, depois pelo nome de exibição.</summary>
-        public IReadOnlyList<Personagem> Listar() =>
-            personagens
-                .OrderByDescending(p => p.Ativo)
-                .ThenBy(p => p.NomeExibicao, StringComparer.CurrentCultureIgnoreCase)
-                .ToList();
+        /// <summary>Ativas primeiro; cada bloco na ordem que o mestre arrastou.</summary>
+        public IReadOnlyList<Personagem> Listar() => Ordenacao.Ordenar(personagens, p => p.NomeExibicao);
+
+        /// <summary>Leva a personagem para a posição <paramref name="indice"/> do bloco dela (ativas ou inativas).</summary>
+        public Resultado Mover(string id, int indice)
+        {
+            var personagem = Buscar(id);
+            if (personagem == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            Ordenacao.Mover(personagens, personagem, indice, p => p.NomeExibicao);
+            Gravar();
+            return Resultado.Sucesso();
+        }
 
         public Personagem Buscar(string id) => personagens.FirstOrDefault(p => p.Id == id);
 
@@ -56,7 +66,10 @@ namespace TorreDeControle.Core.Personagens
             if (erro != null)
                 return Resultado.Falha(erro);
 
-            personagens.Add(new Personagem { Id = Guid.NewGuid().ToString("N"), Identidade = identidade });
+            personagens.Add(new Personagem
+            {
+                Id = Guid.NewGuid().ToString("N"), Identidade = identidade, Ordem = Ordenacao.Fim(personagens),
+            });
             Gravar();
             return Resultado.Sucesso();
         }
@@ -81,6 +94,11 @@ namespace TorreDeControle.Core.Personagens
             if (identidade.Arquetipo != personagem.Identidade.Arquetipo)
                 personagem.Criacao = new RascunhoCriacao();
 
+            identidade.Aparencia = personagem.Identidade.Aparencia;
+            identidade.Resumo = personagem.Identidade.Resumo;
+            // As respostas são das perguntas do arquétipo: trocar de arquétipo as apaga.
+            if (identidade.Arquetipo == personagem.Identidade.Arquetipo)
+                identidade.RespostasHistorico = personagem.Identidade.RespostasHistorico;
             personagem.Identidade = identidade;
             Gravar();
             return Resultado.Sucesso();
@@ -142,6 +160,10 @@ namespace TorreDeControle.Core.Personagens
                 erros.Add("Arquétipo sem regras de criação.");
             if (p.Criacao.BonusLivre == null)
                 avisos.Add("Falta escolher o +1 livre.");
+            ValidarHabilidades(p, avisos);
+            var semResposta = PerguntasSemResposta(p);
+            if (semResposta > 0)
+                avisos.Add($"Histórico: responda as perguntas da ficha (faltam {semResposta}).");
             return (erros, avisos);
         }
 
@@ -165,6 +187,7 @@ namespace TorreDeControle.Core.Personagens
                 AprovadaEm = DateTime.Now.ToString("s"),
                 Arquetipo = p.Identidade.Arquetipo,
                 Rotulos = new Dictionary<string, int>(RotulosAtuais(p)),
+                Habilidades = HabilidadesAtuais(p).ToList(),
                 AvisosAceitos = new List<string>(avisos),
             };
             p.Status = StatusCriacao.Criado;
@@ -181,9 +204,70 @@ namespace TorreDeControle.Core.Personagens
                 return Resultado.Sucesso();
 
             personagem.Ativo = ativo;
+            personagem.Ordem = Ordenacao.Fim(personagens); // entra no fim do outro bloco
             Gravar();
             return Resultado.Sucesso();
         }
+
+        /// <summary>
+        /// Aparência e breve resumo: texto livre, editável a qualquer momento (não fazem parte da foto
+        /// mecânica; descrever a personagem não é regra).
+        /// </summary>
+        public Resultado AlterarTextos(string id, string aparencia, string resumo)
+        {
+            var personagem = Buscar(id);
+            if (personagem == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            var a = (aparencia ?? string.Empty).Trim();
+            var r = (resumo ?? string.Empty).Trim();
+            if (a == personagem.Identidade.Aparencia && r == personagem.Identidade.Resumo)
+                return Resultado.Sucesso();
+            personagem.Identidade.Aparencia = a;
+            personagem.Identidade.Resumo = r;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>Resposta à pergunta de histórico de número <paramref name="indice"/> (ordem da ficha).</summary>
+        public Resultado ResponderHistorico(string id, int indice, string resposta)
+        {
+            var personagem = Buscar(id);
+            if (personagem == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            var perguntas = RegraDoArquetipo(personagem)?.Historico ?? new List<string>();
+            if (indice < 0 || indice >= perguntas.Count)
+                return Resultado.Falha("Pergunta desconhecida.");
+
+            var respostas = personagem.Identidade.RespostasHistorico;
+            while (respostas.Count < perguntas.Count)
+                respostas.Add(string.Empty);
+            var limpa = (resposta ?? string.Empty).Trim();
+            if (respostas[indice] == limpa)
+                return Resultado.Sucesso();
+            respostas[indice] = limpa;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>Quantas perguntas de histórico ainda estão sem resposta.</summary>
+        public int PerguntasSemResposta(Personagem p)
+        {
+            var perguntas = RegraDoArquetipo(p)?.Historico ?? new List<string>();
+            var respostas = p.Identidade.RespostasHistorico;
+            var faltam = 0;
+            for (var k = 0; k < perguntas.Count; k++)
+                if (k >= respostas.Count || string.IsNullOrWhiteSpace(respostas[k]))
+                    faltam++;
+            return faltam;
+        }
+
+        /// <summary>Trocar de arquétipo agora apagaria algo? (escolhas de criação ou respostas de histórico)</summary>
+        public bool TrocaDeArquetipoApaga(Personagem p) =>
+            p.Criacao.TemEscolhas || p.Identidade.RespostasHistorico.Any(r => !string.IsNullOrWhiteSpace(r));
+
+        /// <summary>Regras do arquétipo da personagem (o da foto, se aprovada).</summary>
+        public RegrasArquetipos.RegraArquetipo RegraDoArquetipo(Personagem p) =>
+            regras.Buscar(p.Foto?.Arquetipo ?? p.Identidade.Arquetipo);
 
         static Identidade Montar(string nome, string codinome, string arquetipo, string jogador) =>
             new Identidade

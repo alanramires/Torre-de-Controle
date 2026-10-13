@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using TorreDeControle.Core;
 
 namespace TorreDeControle.Core.Personagens
 {
@@ -27,6 +28,15 @@ namespace TorreDeControle.Core.Personagens
         /// <summary>Id do jogador, ou null. Associação opcional: no laboratório ninguém é obrigado a ter dono.</summary>
         [JsonProperty("jogador")] public string Jogador { get; set; }
         [JsonProperty("arquetipo")] public string Arquetipo { get; set; }
+        /// <summary>Texto livre. As tags de visual da ficha são só inspiração.</summary>
+        [JsonProperty("aparencia")] public string Aparencia { get; set; } = string.Empty;
+        /// <summary>Breve resumo da personagem e das origens: texto livre, sem regra.</summary>
+        [JsonProperty("resumo")] public string Resumo { get; set; } = string.Empty;
+        /// <summary>
+        /// Respostas às perguntas de histórico do arquétipo, na ordem da ficha. Dependem das perguntas,
+        /// então trocar de arquétipo em "novo" as apaga.
+        /// </summary>
+        [JsonProperty("respostas_historico")] public List<string> RespostasHistorico { get; set; } = new List<string>();
     }
 
     /// <summary>
@@ -36,8 +46,37 @@ namespace TorreDeControle.Core.Personagens
     {
         /// <summary>Rótulo que recebe o +1 livre, ou null se ainda não escolhido.</summary>
         [JsonProperty("bonus_livre")] public string BonusLivre { get; set; }
+        [JsonProperty("habilidades")] public EscolhasHabilidades Habilidades { get; set; } = new EscolhasHabilidades();
 
-        [JsonIgnore] public bool TemEscolhas => BonusLivre != null;
+        [JsonIgnore] public bool TemEscolhas => BonusLivre != null || (Habilidades?.TemAlgo ?? false);
+    }
+
+    /// <summary>
+    /// O que foi escolhido na subseção Habilidades. Cada tipo de regra usa uma parte:
+    /// lista → Escolhidas; linha → Linha + Negadas; mentora → Vagas. Descrições valem para todos.
+    /// </summary>
+    public sealed class EscolhasHabilidades
+    {
+        [JsonProperty("escolhidas")] public List<string> Escolhidas { get; set; } = new List<string>();
+        [JsonProperty("linha")] public string Linha { get; set; }
+        [JsonProperty("negadas")] public List<string> Negadas { get; set; } = new List<string>();
+        [JsonProperty("vagas")] public Dictionary<string, string> Vagas { get; set; } = new Dictionary<string, string>();
+        /// <summary>"Como se manifesta", por id de habilidade.</summary>
+        [JsonProperty("descricoes")] public Dictionary<string, string> Descricoes { get; set; } = new Dictionary<string, string>();
+
+        [JsonIgnore]
+        public bool TemAlgo =>
+            Escolhidas.Count > 0 || Linha != null || Negadas.Count > 0 || Vagas.Count > 0 || Descricoes.Count > 0;
+    }
+
+    /// <summary>Uma habilidade como fica na ficha: nome e como se manifesta.</summary>
+    public sealed class Habilidade
+    {
+        [JsonProperty("id")] public string Id { get; set; }
+        [JsonProperty("nome")] public string Nome { get; set; }
+        [JsonProperty("descricao")] public string Descricao { get; set; } = string.Empty;
+        /// <summary>Veio dada pelo arquétipo (não foi escolha).</summary>
+        [JsonProperty("fixa")] public bool Fixa { get; set; }
     }
 
     /// <summary>
@@ -48,6 +87,7 @@ namespace TorreDeControle.Core.Personagens
         [JsonProperty("aprovada_em")] public string AprovadaEm { get; set; }
         [JsonProperty("arquetipo")] public string Arquetipo { get; set; }
         [JsonProperty("rotulos")] public Dictionary<string, int> Rotulos { get; set; } = new Dictionary<string, int>();
+        [JsonProperty("habilidades")] public List<Habilidade> Habilidades { get; set; } = new List<Habilidade>();
         /// <summary>Avisos da validação que o mestre aceitou ao aprovar (a decisão é dele, fica registrada).</summary>
         [JsonProperty("avisos_aceitos")] public List<string> AvisosAceitos { get; set; } = new List<string>();
     }
@@ -57,7 +97,7 @@ namespace TorreDeControle.Core.Personagens
     /// Núcleo, Crescimento e Módulos entram nas próximas partes da ficha.
     /// Não se exclui: se inativa.
     /// </summary>
-    public sealed class Personagem
+    public sealed class Personagem : IOrdenavel
     {
         [JsonProperty("id")] public string Id { get; set; }
         [JsonProperty("identidade")] public Identidade Identidade { get; set; } = new Identidade();
@@ -66,6 +106,8 @@ namespace TorreDeControle.Core.Personagens
         [JsonProperty("papel")] public Papel Papel { get; set; } = Papel.Heroi;
         [JsonProperty("status")] public StatusCriacao Status { get; set; } = StatusCriacao.Novo;
         [JsonProperty("ativo")] public bool Ativo { get; set; } = true;
+        /// <summary>Posição na lista, dentro do bloco ativo/inativo (o mestre arrasta).</summary>
+        [JsonProperty("ordem")] public int Ordem { get; set; }
         [JsonProperty("criacao")] public RascunhoCriacao Criacao { get; set; } = new RascunhoCriacao();
         /// <summary>Null até a aprovação.</summary>
         [JsonProperty("foto")] public FotoCriacao Foto { get; set; }

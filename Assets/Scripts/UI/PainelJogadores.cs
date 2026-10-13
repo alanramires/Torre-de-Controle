@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using TorreDeControle.Core;
 using TorreDeControle.Core.Jogadores;
@@ -118,6 +119,8 @@ namespace TorreDeControle.UI
 
             // Novo jogador
             var novo = Estilo.Fila(cartao, 62);
+            novo.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(10, 10, 0, 0);
+            Estilo.VaoDaAlca(novo);
             campoNovo = Estilo.CampoTexto(novo, "Nome do novo jogador e Enter");
             Estilo.ColunaElastica(campoNovo);
             campoNovo.onSubmit.AddListener(Adicionar);
@@ -157,29 +160,45 @@ namespace TorreDeControle.UI
                 return;
             }
 
-            foreach (var jogador in todos)
+            // Dois blocos, cada um na ordem que o mestre arrastar.
+            foreach (var (ativo, titulo) in new[] { (true, "ATIVOS"), (false, "INATIVOS") })
             {
-                var linha = Estilo.Fila(lista, 64);
-                linha.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(10, 10, 8, 8);
-                Estilo.Moldura(linha.gameObject, Estilo.Linha, jogador.Ativo ? Estilo.Borda : Estilo.BordaApagada);
-
-                var campo = Estilo.CampoTexto(linha, string.Empty);
-                campo.text = jogador.Nome;
-                if (!jogador.Ativo)
-                {
-                    campo.textComponent.color = Estilo.TextoApagado;
-                    campo.textComponent.fontStyle = FontStyles.Italic;
-                }
-                Estilo.ColunaElastica(campo);
-                campo.onSubmit.AddListener(_ => Renomear(jogador, campo));
-                campo.onDeselect.AddListener(_ => Renomear(jogador, campo));
-
-                var j = jogador;
-                if (jogador.Ativo)
-                    Estilo.BotaoContorno(linha, "Ativo", 190, Estilo.Dourado, () => AlternarAtivo(j));
-                else
-                    Estilo.BotaoContorno(linha, "Inativo", 190, Estilo.TextoApagado, () => AlternarAtivo(j));
+                var doBloco = new List<Jogador>();
+                foreach (var j in todos)
+                    if (j.Ativo == ativo)
+                        doBloco.Add(j);
+                if (doBloco.Count == 0)
+                    continue;
+                var bloco = Estilo.Bloco(lista, titulo, doBloco.Count);
+                foreach (var jogador in doBloco)
+                    Linha(jogador, bloco);
             }
+        }
+
+        void Linha(Jogador jogador, RectTransform bloco)
+        {
+            var linha = Estilo.Fila(bloco, 64);
+            linha.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(10, 10, 8, 8);
+            Estilo.Moldura(linha.gameObject, Estilo.Linha, jogador.Ativo ? Estilo.Borda : Estilo.BordaApagada);
+            // Não redesenha ao soltar: a linha já está no lugar novo.
+            Estilo.Alca(linha, indice => Mostrar(cadastro.Mover(jogador.Id, indice)));
+
+            var campo = Estilo.CampoTexto(linha, string.Empty);
+            campo.text = jogador.Nome;
+            if (!jogador.Ativo)
+            {
+                campo.textComponent.color = Estilo.TextoApagado;
+                campo.textComponent.fontStyle = FontStyles.Italic;
+            }
+            Estilo.ColunaElastica(campo);
+            campo.onSubmit.AddListener(_ => Renomear(jogador, campo));
+            campo.onDeselect.AddListener(_ => Renomear(jogador, campo));
+
+            var j = jogador;
+            if (jogador.Ativo)
+                Estilo.BotaoContorno(linha, "Ativo", 190, Estilo.Dourado, () => AlternarAtivo(j));
+            else
+                Estilo.BotaoContorno(linha, "Inativo", 190, Estilo.TextoApagado, () => AlternarAtivo(j));
         }
     }
 }
