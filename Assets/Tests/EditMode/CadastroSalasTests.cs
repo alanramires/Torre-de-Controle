@@ -143,6 +143,50 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Original_com_instancia_em_vaga_nao_volta_para_novo()
+        {
+            var sala = NovaSala();
+            var original = FichaPronta.Criada(personagens, "Estrela");
+            salas.PorPersonagem(sala.Id, 0, original.Id, false);
+            Assert.That(personagens.ReabrirCriacao(original.Id).Ok, Is.False);
+
+            // Tirada da vaga, a original volta a poder.
+            salas.TirarPersonagem(sala.Id, 0);
+            Assert.That(personagens.ReabrirCriacao(original.Id).Ok, Is.True);
+        }
+
+        [Test]
+        public void Instancia_reaberta_fica_na_vaga_e_volta_a_carreira_ao_concluir()
+        {
+            var sala = NovaSala();
+            var original = FichaPronta.Criada(personagens, "Estrela");
+            salas.PorPersonagem(sala.Id, 0, original.Id, false);
+            var copia = personagens.Buscar(sala.Slots[0].Personagem);
+            copia.Potencial = 3;
+
+            Assert.That(personagens.ReabrirCriacao(copia.Id).Ok, Is.True);
+            Assert.That(copia.Status, Is.EqualTo(StatusCriacao.Novo));
+            Assert.That(copia.Foto, Is.Null);
+            Assert.That(sala.Slots[0].Personagem, Is.EqualTo(copia.Id));
+            Assert.That(copia.Potencial, Is.EqualTo(3)); // o jogo marcado fica
+
+            Assert.That(personagens.Aprovar(copia.Id).Ok, Is.True);
+            Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmCarreira));
+            Assert.That(original.Status, Is.EqualTo(StatusCriacao.Criado));
+        }
+
+        [Test]
+        public void Instancia_do_arquivo_nao_volta_para_novo()
+        {
+            var sala = NovaSala();
+            var original = FichaPronta.Criada(personagens, "Estrela");
+            salas.PorPersonagem(sala.Id, 0, original.Id, false);
+            var copia = sala.Slots[0].Personagem;
+            salas.TirarPersonagem(sala.Id, 0);
+            Assert.That(personagens.ReabrirCriacao(copia).Ok, Is.False);
+        }
+
+        [Test]
         public void Salas_e_copias_sobrevivem_a_recarga()
         {
             var sala = NovaSala();

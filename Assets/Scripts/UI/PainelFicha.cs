@@ -57,11 +57,16 @@ namespace TorreDeControle.UI
         }
 
         /// <param name="nomeDaSala">Nome da campanha, quando a ficha é a instância de uma sala.</param>
+        /// <param name="abertaPelaSala">
+        /// A instância só volta para "novo" quando aberta de dentro da sala (pelo laboratório é só consulta).
+        /// </param>
         public void Abrir(Personagem personagem, CadastroPersonagens cadastroPersonagens,
-            CadastroJogadores cadastroJogadores, Action aoFecharFicha, string nomeDaSala = null)
+            CadastroJogadores cadastroJogadores, Action aoFecharFicha, string nomeDaSala = null,
+            bool abertaPelaSala = false)
         {
             p = personagem;
             campanha = nomeDaSala;
+            pelaSala = abertaPelaSala;
             cadastro = cadastroPersonagens;
             jogadores = cadastroJogadores;
             aoFechar = aoFecharFicha;
@@ -97,6 +102,15 @@ namespace TorreDeControle.UI
             coluna.childForceExpandHeight = false;
 
             var cabecalho = Estilo.Fila(cartao, 76);
+            var molduraRetrato = Estilo.Rect("Retrato", cabecalho);
+            molduraRetrato.gameObject.AddComponent<LayoutElement>().preferredWidth = 76;
+            Estilo.Moldura(molduraRetrato.gameObject, Estilo.Campo, Estilo.Dourado);
+            var miolo = Estilo.Rect("Imagem", molduraRetrato);
+            Estilo.Esticar(miolo);
+            miolo.offsetMin = new Vector2(2, 2);
+            miolo.offsetMax = new Vector2(-2, -2);
+            retrato = miolo.gameObject.AddComponent<RawImage>();
+            retrato.raycastTarget = false;
             var titulos = Estilo.Rect("Titulos", cabecalho);
             Estilo.ColunaElastica(titulos);
             var pilha = titulos.gameObject.AddComponent<VerticalLayoutGroup>();
@@ -108,14 +122,18 @@ namespace TorreDeControle.UI
             titulo.characterSpacing = 4;
             subtitulo = Estilo.Rotulo(titulos, string.Empty, 24, Estilo.TextoSuave);
 
-            // Interruptor do modo teste (playground do mestre): refeito a cada atualização do cabeçalho.
-            vagaTeste = Estilo.Rect("ModoTeste", cabecalho);
-            vagaTeste.gameObject.AddComponent<LayoutElement>().preferredWidth = 330;
-
             status = Estilo.Rotulo(cabecalho, string.Empty, 26, Estilo.Dourado, FontStyles.Bold);
             status.alignment = TextAlignmentOptions.Center;
             status.characterSpacing = 4;
             status.gameObject.AddComponent<LayoutElement>().preferredWidth = 220;
+            // O status vira botão quando a ficha pode voltar para "novo" (ver Cabecalho). O alvo é o
+            // próprio texto: um objeto só aceita um gráfico, e o TMP já é um (um Image aqui vem nulo).
+            botaoStatus = status.gameObject.AddComponent<Button>();
+            botaoStatus.targetGraphic = status;
+            var cores = botaoStatus.colors;
+            cores.disabledColor = Color.white; // travado, o status mantém a cor
+            botaoStatus.colors = cores;
+            botaoStatus.onClick.AddListener(Reabrir);
             Estilo.BotaoContorno(cabecalho, "Voltar", 190, Estilo.TextoSuave, Fechar);
 
             filaAbas = Estilo.Fila(cartao, 56, 8);
@@ -145,11 +163,25 @@ namespace TorreDeControle.UI
 
         /// <summary>Nome da sala, se a ficha aberta é a instância de uma; null no laboratório.</summary>
         string campanha;
+        bool pelaSala;
+        RawImage retrato;
+
+        /// <summary>A arte quadrada do arquétipo da personagem (null se não houver).</summary>
+        Texture2D RetratoDoArquetipo => Retratos.Buscar(cadastro.RegraDoArquetipo(p)?.Retrato);
+        Button botaoStatus;
+
+        /// <summary>
+        /// Ficha do arquivo da sala (cópia tirada da vaga): só consulta. Nada se edita, sem modo teste
+        /// nem Variáveis.
+        /// </summary>
+        bool Consulta => p.Sala != null && !p.Ativo;
 
         void Cabecalho()
         {
-            BotaoModoTeste();
             var i = p.Identidade;
+            var arte = RetratoDoArquetipo;
+            retrato.texture = arte;
+            retrato.transform.parent.gameObject.SetActive(arte != null);
             titulo.text = p.NomeExibicao.ToUpperInvariant();
             // Instância de sala: a campanha ao lado do nome. Laboratório: só o nome.
             if (p.Sala != null && !string.IsNullOrEmpty(campanha))
@@ -169,13 +201,37 @@ namespace TorreDeControle.UI
                 StatusCriacao.Criado => "CRIADO",
                 _ => "EM CARREIRA",
             };
+            var podeReabrir = cadastro.MotivoParaNaoReabrir(p) == null && (p.Sala == null || pelaSala);
+            botaoStatus.interactable = podeReabrir;
+            if (podeReabrir)
+                status.text = $"<u>{status.text}</u>";
+        }
+
+        /// <summary>Clicar no status: volta a ficha para "novo" para refazer as escolhas da criação.</summary>
+        void Reabrir()
+        {
+            var mensagem = p.Sala == null
+                ? "Voltar a ficha para \"novo\"? A foto da criação é descartada e a criação fica editável de novo."
+                : "Voltar esta instância para \"novo\"? Ela continua na vaga; a foto da criação é descartada para " +
+                  "refazer as escolhas, e ao concluir de novo volta a \"em carreira\". O que foi marcado em jogo fica.";
+            Estilo.Confirmar(transform, mensagem, "Voltar para novo", () =>
+            {
+                var r = cadastro.ReabrirCriacao(p.Id);
+                Atualizar();
+                if (!r.Ok)
+                    Aviso(r.Erro);
+            });
         }
 
         void MontarAbas()
         {
             Limpar(filaAbas);
+            if (Consulta && abaAtual == Aba.Variaveis)
+                abaAtual = Aba.Identidade;
             foreach (var (aba, nome) in Abas)
             {
+                if (Consulta && aba == Aba.Variaveis)
+                    continue;
                 var a = aba;
                 // Variáveis é do mestre: aparece com outra cor para não se confundir com a ficha do jogador.
                 var corContorno = aba == Aba.Variaveis ? Estilo.Azul : Estilo.TextoSuave;
@@ -203,6 +259,10 @@ namespace TorreDeControle.UI
             Limpar(moldura);
             conteudo = Estilo.ListaRolavel(moldura, 8);
             MontarAbaAtual();
+            if (Consulta)
+                foreach (var s in conteudo.GetComponentsInChildren<Selectable>(true))
+                    if (!(s is Scrollbar))
+                        s.interactable = false;
             if (manterRolagem && posicao > 0)
             {
                 LayoutRebuilder.ForceRebuildLayoutImmediate(moldura);
@@ -232,7 +292,22 @@ namespace TorreDeControle.UI
             var mensagem = Estilo.Rotulo(rodape, string.Empty, 22, Estilo.TextoSuave);
             mensagem.textWrappingMode = TextWrappingModes.Normal;
             Estilo.ColunaElastica(mensagem);
+            if (Consulta)
+            {
+                mensagem.text = "Arquivo da sala (vaga liberada): só consulta.";
+                mensagem.color = Estilo.TextoApagado;
+                return;
+            }
+            MensagemDoRodape(mensagem);
 
+            // Interruptor do modo teste (playground do mestre), no fim do rodapé.
+            vagaTeste = Estilo.Rect("ModoTeste", rodape);
+            vagaTeste.gameObject.AddComponent<LayoutElement>().preferredWidth = 330;
+            BotaoModoTeste();
+        }
+
+        void MensagemDoRodape(TextMeshProUGUI mensagem)
+        {
             if (p.Status != StatusCriacao.Novo)
             {
                 var data = DateTime.TryParse(p.Foto?.AprovadaEm, out var d) ? d.ToString("dd/MM/yyyy HH:mm") : "?";
@@ -304,34 +379,47 @@ namespace TorreDeControle.UI
         void AbaIdentidade()
         {
             var i = p.Identidade;
-            var codinome = CampoRotulado("CODINOME", i.Codinome);
-            var nome = CampoRotulado("NOME CIVIL", i.Nome);
+
+            // Topo: os quatro campos à esquerda, as duas fotos (links) à direita.
+            var topo = Estilo.Fila(conteudo, 300, 18);
+            topo.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.UpperLeft;
+            var campos = Estilo.Rect("Campos", topo);
+            Estilo.ColunaElastica(campos);
+            var pilha = campos.gameObject.AddComponent<VerticalLayoutGroup>();
+            pilha.spacing = 8;
+            pilha.childControlWidth = true;
+            pilha.childControlHeight = true;
+            pilha.childForceExpandHeight = false;
+            Fotos(topo);
+
+            var codinome = CampoRotulado("CODINOME", i.Codinome, campos);
+            var nome = CampoRotulado("NOME CIVIL", i.Nome, campos);
             foreach (var campo in new[] { codinome, nome })
             {
                 campo.onSubmit.AddListener(_ => SalvarIdentidade(nome.text, codinome.text, p.Identidade.Arquetipo, p.Identidade.Jogador));
                 campo.onDeselect.AddListener(_ => SalvarIdentidade(nome.text, codinome.text, p.Identidade.Arquetipo, p.Identidade.Jogador));
             }
 
-            var filaArquetipo = FilaRotulada("ARQUÉTIPO");
-            Estilo.ListaSuspensa(filaArquetipo, 420,
+            var filaArquetipo = FilaRotulada("ARQUÉTIPO", campos);
+            var listaArquetipo = Estilo.ListaSuspensa(filaArquetipo, 420,
                 Arquetipos.Todos.Select(a => (a.Id, a.Nome)).ToList(), i.Arquetipo, TrocarArquetipo,
                 editavel: p.Status == StatusCriacao.Novo);
-            if (p.Status == StatusCriacao.Novo)
-                Nota(filaArquetipo, "Trocar de arquétipo zera as escolhas de criação.");
-            else
-                Nota(filaArquetipo, "Depois de aprovada, trocar de arquétipo é um avanço.");
+            // A nota vira balão com o mouse em cima (como as regras dos chips), para não apertar a linha.
+            listaArquetipo.gameObject.AddComponent<Dica>().Configurar(p.Status == StatusCriacao.Novo
+                ? "Trocar de arquétipo zera as escolhas de criação."
+                : "Depois de aprovada, trocar de arquétipo é um avanço.");
 
-            var filaJogador = FilaRotulada("JOGADOR");
+            var filaJogador = FilaRotulada("JOGADOR", campos);
             var opcoes = new List<(string id, string nome)> { (string.Empty, "sem jogador") };
             foreach (var j in jogadores.Listar())
                 if (j.Ativo || j.Id == i.Jogador)
                     opcoes.Add((j.Id, j.Ativo ? j.Nome : j.Nome + " (inativo)"));
             // Na sala, quem decide o jogador é o slot.
-            Estilo.ListaSuspensa(filaJogador, 420, opcoes, i.Jogador ?? string.Empty,
+            var listaJogador = Estilo.ListaSuspensa(filaJogador, 420, opcoes, i.Jogador ?? string.Empty,
                 id => SalvarIdentidade(p.Identidade.Nome, p.Identidade.Codinome, p.Identidade.Arquetipo, id),
                 editavel: p.Sala == null);
             if (p.Sala != null)
-                Nota(filaJogador, "Na sala, o jogador se troca na vaga.");
+                listaJogador.gameObject.AddComponent<Dica>().Configurar("Na sala, o jogador se troca na vaga.");
 
             var vao = Estilo.Rect("Vao", conteudo);
             vao.gameObject.AddComponent<LayoutElement>().minHeight = 12;
@@ -340,6 +428,144 @@ namespace TorreDeControle.UI
             var vao2 = Estilo.Rect("Vao", conteudo);
             vao2.gameObject.AddComponent<LayoutElement>().minHeight = 12;
             SecaoTextosLivres();
+        }
+
+        // ---------- fotos: links para páginas web (de herói e civil) ----------
+
+        /// <summary>
+        /// Dois quadros (de herói e civil), cada um com o campo do link embaixo. Com link, clicar no
+        /// quadro abre a página no navegador. Os quadros se chamam "FotoHeroica" e "FotoCivil" para a
+        /// prévia da imagem ser encaixada neles depois.
+        /// </summary>
+        void Fotos(Transform topo)
+        {
+            var i = p.Identidade;
+            TMP_InputField heroica = null, civil = null;
+            void Gravar()
+            {
+                var antes = (p.Identidade.FotoHeroica, p.Identidade.FotoCivil);
+                var r = cadastro.AlterarFotos(p.Id, heroica.text, civil.text);
+                if (!r.Ok)
+                {
+                    Aviso(r.Erro);
+                    return;
+                }
+                // Link trocado volta a "aguardando": refaz a aba para o quadro mostrar. Sem mudança,
+                // não refaz (o Tab precisa achar vivo o próximo campo).
+                if (antes != (p.Identidade.FotoHeroica, p.Identidade.FotoCivil))
+                    MontarConteudo(manterRolagem: true);
+            }
+            heroica = Foto(topo, "FotoHeroica", "FOTO DE HERÓI", i.FotoHeroica, i.FotoHeroicaAprovacao, true, Gravar,
+                padrao: RetratoDoArquetipo);
+            civil = Foto(topo, "FotoCivil", "FOTO CIVIL", i.FotoCivil, i.FotoCivilAprovacao, false, Gravar);
+        }
+
+        /// <param name="padrao">Sem link, mostra esta imagem (o retrato do arquétipo) no lugar de "sem foto".</param>
+        TMP_InputField Foto(Transform topo, string nomeDoQuadro, string titulo, string link,
+            AprovacaoFoto aprovacao, bool ehHeroica, Action aoMudar, Texture2D padrao = null)
+        {
+            var coluna = Estilo.Rect("Coluna " + nomeDoQuadro, topo);
+            // Largura fixa: sem isto a coluna herda "esticável" do campo do link e divide a sobra com os
+            // campos da esquerda, espremendo-os.
+            var lcol = coluna.gameObject.AddComponent<LayoutElement>();
+            lcol.layoutPriority = 2;
+            lcol.minWidth = 200;
+            lcol.preferredWidth = 200;
+            lcol.flexibleWidth = 0;
+            var v = coluna.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.spacing = 6;
+            v.childControlWidth = true;
+            v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+
+            var quadro = Estilo.Rect(nomeDoQuadro, coluna);
+            var le = quadro.gameObject.AddComponent<LayoutElement>();
+            le.minHeight = 196;
+            le.preferredHeight = 196;
+            var temLink = !string.IsNullOrEmpty(link);
+            // Aprovar é na instância da sala (o mestre aceita a foto para a campanha). No laboratório
+            // a imagem só aparece.
+            var naSala = p.Sala != null;
+            var borda = !temLink ? Estilo.BordaApagada
+                : !naSala || aprovacao == AprovacaoFoto.Aprovada ? Estilo.Dourado
+                : aprovacao == AprovacaoFoto.Recusada ? Estilo.Erro
+                : Estilo.TextoSuave;
+            var fundo = Estilo.Moldura(quadro.gameObject, Estilo.Campo, borda);
+            var botao = quadro.gameObject.AddComponent<Button>();
+            botao.targetGraphic = fundo;
+            botao.interactable = temLink;
+            var cores = botao.colors;
+            cores.disabledColor = Color.white;
+            botao.colors = cores;
+            if (temLink)
+                botao.onClick.AddListener(() => Application.OpenURL(link));
+
+            // A imagem do link, dentro do quadro (sem pegar o clique: o quadro abre o link).
+            var area = Estilo.Rect("Imagem", quadro);
+            Estilo.Esticar(area);
+            area.offsetMin = new Vector2(4, 4);
+            area.offsetMax = new Vector2(-4, -4);
+            var miolo = Estilo.Rect("Miolo", area);
+            var imagem = miolo.gameObject.AddComponent<RawImage>();
+            imagem.raycastTarget = false;
+            var proporcao = miolo.gameObject.AddComponent<AspectRatioFitter>();
+            proporcao.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+
+            var usaPadrao = !temLink && padrao != null;
+            var texto = Estilo.Rotulo(quadro, temLink || usaPadrao ? string.Empty : $"{titulo}\n\n<size=80%>sem foto</size>",
+                18, temLink ? Estilo.TextoSuave : Estilo.TextoApagado, FontStyles.Bold);
+            texto.alignment = TextAlignmentOptions.Center;
+            texto.textWrappingMode = TextWrappingModes.Normal;
+            texto.raycastTarget = false;
+            Estilo.Esticar(texto.rectTransform);
+            texto.rectTransform.offsetMin = new Vector2(10, 10);
+            texto.rectTransform.offsetMax = new Vector2(-10, -10);
+            if (temLink)
+                quadro.gameObject.AddComponent<FotoDaWeb>().Mostrar(link, imagem, proporcao, texto);
+            else if (usaPadrao)
+            {
+                imagem.texture = padrao;
+                proporcao.aspectRatio = (float)padrao.width / Mathf.Max(1, padrao.height);
+            }
+            else
+                imagem.enabled = false;
+
+            var campo = Estilo.CampoTexto(coluna, "link .jpg / .png");
+            campo.text = link;
+            foreach (var t in new[] { (TextMeshProUGUI)campo.textComponent, (TextMeshProUGUI)campo.placeholder })
+                t.fontSize = 18;
+            var lc = campo.GetComponent<LayoutElement>() ?? campo.gameObject.AddComponent<LayoutElement>();
+            lc.minHeight = 44;
+            lc.preferredHeight = 44;
+            campo.onSubmit.AddListener(_ => aoMudar());
+            campo.onDeselect.AddListener(_ => aoMudar());
+
+            // O olho do mestre, na sala: aprovar ou recusar (clicar de novo no escolhido volta a aguardar).
+            if (temLink && naSala)
+            {
+                var botoes = Estilo.Fila(coluna, 40, 6);
+                foreach (var (alvo, nome, cor) in new[]
+                         {
+                             (AprovacaoFoto.Aprovada, "Aprovar", Estilo.Dourado),
+                             (AprovacaoFoto.Recusada, "Recusar", Estilo.Erro),
+                         })
+                {
+                    var novo = aprovacao == alvo ? AprovacaoFoto.Aguardando : alvo;
+                    UnityEngine.Events.UnityAction clicar = () =>
+                    {
+                        cadastro.AvaliarFoto(p.Id, ehHeroica, novo);
+                        MontarConteudo(manterRolagem: true);
+                    };
+                    var b = aprovacao == alvo
+                        ? Estilo.BotaoPrincipal(botoes, nome, 0, clicar)
+                        : Estilo.BotaoContorno(botoes, nome, 0, cor, clicar);
+                    b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                    var t = b.GetComponentInChildren<TextMeshProUGUI>();
+                    t.fontSize = 16;
+                    t.characterSpacing = 1;
+                }
+            }
+            return campo;
         }
 
         // ---------- aparência e histórico: texto livre, a ficha só inspira ----------
@@ -1442,18 +1668,18 @@ namespace TorreDeControle.UI
         }
 
 
-        TMP_InputField CampoRotulado(string rotulo, string valor)
+        TMP_InputField CampoRotulado(string rotulo, string valor, Transform pai = null)
         {
-            var fila = FilaRotulada(rotulo);
+            var fila = FilaRotulada(rotulo, pai);
             var campo = Estilo.CampoTexto(fila, rotulo.ToLowerInvariant());
             campo.text = valor;
             Estilo.ColunaElastica(campo);
             return campo;
         }
 
-        RectTransform FilaRotulada(string rotulo)
+        RectTransform FilaRotulada(string rotulo, Transform pai = null)
         {
-            var fila = Estilo.Fila(conteudo, 58);
+            var fila = Estilo.Fila(pai != null ? pai : conteudo, 58);
             var r = Estilo.Rotulo(fila, rotulo, 20, Estilo.TextoSuave, FontStyles.Bold);
             r.characterSpacing = 4;
             r.gameObject.AddComponent<LayoutElement>().preferredWidth = 240;

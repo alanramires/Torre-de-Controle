@@ -20,6 +20,13 @@ namespace TorreDeControle.Core.Personagens
     [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
     public enum StatusCriacao { Novo, Criado, EmCarreira }
 
+    /// <summary>
+    /// O mestre olhou a foto (link)? Avalia na instância da sala, vendo a imagem. Trocar o link volta
+    /// para "aguardando": é outra imagem.
+    /// </summary>
+    [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
+    public enum AprovacaoFoto { Aguardando, Aprovada, Recusada }
+
     /// <summary>Seção Identidade da ficha.</summary>
     public sealed class Identidade
     {
@@ -32,6 +39,12 @@ namespace TorreDeControle.Core.Personagens
         [JsonProperty("aparencia")] public string Aparencia { get; set; } = string.Empty;
         /// <summary>Breve resumo da personagem e das origens: texto livre, sem regra.</summary>
         [JsonProperty("resumo")] public string Resumo { get; set; } = string.Empty;
+        /// <summary>Link (página web) da foto de herói; vazio se não houver. Não é regra: editável sempre.</summary>
+        [JsonProperty("foto_heroica")] public string FotoHeroica { get; set; } = string.Empty;
+        /// <summary>Link (página web) da foto civil; vazio se não houver.</summary>
+        [JsonProperty("foto_civil")] public string FotoCivil { get; set; } = string.Empty;
+        [JsonProperty("foto_heroica_aprovacao")] public AprovacaoFoto FotoHeroicaAprovacao { get; set; }
+        [JsonProperty("foto_civil_aprovacao")] public AprovacaoFoto FotoCivilAprovacao { get; set; }
         /// <summary>
         /// Respostas às perguntas de histórico do arquétipo, na ordem da ficha. Dependem das perguntas,
         /// então trocar de arquétipo em "novo" as apaga.
@@ -129,6 +142,7 @@ namespace TorreDeControle.Core.Personagens
         [JsonProperty("papel")] public Papel Papel { get; set; } = Papel.Heroi;
         [JsonProperty("status")] public StatusCriacao Status { get; set; } = StatusCriacao.Novo;
         [JsonProperty("ativo")] public bool Ativo { get; set; } = true;
+        [JsonProperty("favorito")] public bool Favorito { get; set; }
         /// <summary>Posição na lista, dentro do bloco ativo/inativo (o mestre arrasta).</summary>
         [JsonProperty("ordem")] public int Ordem { get; set; }
         [JsonProperty("criacao")] public RascunhoCriacao Criacao { get; set; } = new RascunhoCriacao();

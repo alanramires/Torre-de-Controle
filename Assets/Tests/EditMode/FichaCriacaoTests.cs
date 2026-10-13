@@ -31,6 +31,7 @@ namespace TorreDeControle.Tests
                 var regra = regras.Buscar(a.Id);
                 Assert.That(regra, Is.Not.Null, a.Id);
                 Assert.That(regra.Rotulos.Values.Sum(), Is.EqualTo(2), a.Id);
+                Assert.That(regra.Retrato, Is.EqualTo(a.Id + "_retrato"), a.Id);
             }
         }
 
@@ -119,6 +120,38 @@ namespace TorreDeControle.Tests
 
             var recarregado = CadastroPersonagens.Carregar(armazenamento, RegrasDeTeste.Arquetipos());
             Assert.That(recarregado.MovimentosNaFicha(recarregado.Buscar(p.Id)), Is.EquivalentTo(antes));
+        }
+
+        [Test]
+        public void Fotos_sao_links_web_e_sobrevivem_a_troca_de_identidade()
+        {
+            var p = Nova("bruta");
+            Assert.That(cadastro.AlterarFotos(p.Id, "C:/fotos/titania.png", "").Ok, Is.False);
+            Assert.That(cadastro.AlterarFotos(p.Id, "javascript:alert(1)", "").Ok, Is.False);
+            Assert.That(cadastro.AlterarFotos(p.Id, "https://exemplo.com/titania", "").Ok, Is.False); // página
+            Assert.That(cadastro.AlterarFotos(p.Id, "https://exemplo.com/titania.gif", "").Ok, Is.False);
+            Assert.That(cadastro.AlterarFotos(p.Id, "https://exemplo.com/titania.PNG?w=300", "http://exemplo.com/kima.jpeg").Ok, Is.True);
+            Assert.That(cadastro.AlterarFotos(p.Id, "https://exemplo.com/titania.jpg", "http://exemplo.com/kima.jpeg").Ok, Is.True);
+            cadastro.AlterarIdentidade(p.Id, "Kima", "Titânia", "bruta", null);
+            Assert.That(p.Identidade.FotoHeroica, Is.EqualTo("https://exemplo.com/titania.jpg"));
+            Assert.That(p.Identidade.FotoCivil, Is.EqualTo("http://exemplo.com/kima.jpeg"));
+            Assert.That(cadastro.AlterarFotos(p.Id, "", "").Ok, Is.True);
+            Assert.That(p.Identidade.FotoHeroica, Is.Empty);
+        }
+
+        [Test]
+        public void Foto_aprovada_volta_a_aguardar_quando_o_link_muda()
+        {
+            var p = Nova("bruta");
+            Assert.That(cadastro.AvaliarFoto(p.Id, true, AprovacaoFoto.Aprovada).Ok, Is.False); // sem link
+            cadastro.AlterarFotos(p.Id, "https://exemplo.com/a.png", "https://exemplo.com/b.png");
+            cadastro.AvaliarFoto(p.Id, true, AprovacaoFoto.Aprovada);
+            cadastro.AvaliarFoto(p.Id, false, AprovacaoFoto.Recusada);
+            Assert.That(p.Identidade.FotoHeroicaAprovacao, Is.EqualTo(AprovacaoFoto.Aprovada));
+
+            cadastro.AlterarFotos(p.Id, "https://exemplo.com/outra.png", "https://exemplo.com/b.png");
+            Assert.That(p.Identidade.FotoHeroicaAprovacao, Is.EqualTo(AprovacaoFoto.Aguardando));
+            Assert.That(p.Identidade.FotoCivilAprovacao, Is.EqualTo(AprovacaoFoto.Recusada));
         }
 
         [Test]

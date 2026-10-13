@@ -21,6 +21,7 @@ namespace TorreDeControle.UI
         const float LarguraStatus = 150;
         const float LarguraAtivo = 170;
         const float LarguraFicha = 150;
+        const float LarguraFavorito = 36;
         const string SemJogador = "";
 
         CadastroPersonagens cadastro;
@@ -36,6 +37,7 @@ namespace TorreDeControle.UI
         TextMeshProUGUI mensagem;
         TextMeshProUGUI contagem;
         RectTransform lista;
+        static Texture2D texturaFavorito;
 
         public static PainelPersonagens Criar(Transform pai)
         {
@@ -175,6 +177,7 @@ namespace TorreDeControle.UI
             var fila = Estilo.Fila(pai, 30);
             fila.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(10, 10, 0, 0);
             Estilo.VaoDaAlca(fila);
+            VaoFavorito(fila);
             Coluna(fila, "CODINOME", -1);
             Coluna(fila, "NOME CIVIL", -1);
             Coluna(fila, "ARQUÉTIPO", LarguraArquetipo);
@@ -206,6 +209,7 @@ namespace TorreDeControle.UI
                 jogadorNovo = SemJogador;
 
             Estilo.VaoDaAlca(filaNovo);
+            VaoFavorito(filaNovo);
             campoCodinome = Estilo.CampoTexto(filaNovo, "Codinome");
             Estilo.ColunaElastica(campoCodinome);
             campoCodinome.onSubmit.AddListener(_ => Adicionar());
@@ -235,10 +239,13 @@ namespace TorreDeControle.UI
                 return;
             }
 
-            // Dois blocos, cada um na ordem que o mestre arrastar.
-            foreach (var (ativo, titulo) in new[] { (true, "ATIVAS"), (false, "INATIVAS") })
+            // Favoritas têm seção própria; o estado ativo/inativo continua na linha.
+            foreach (var titulo in new[] { "FAVORITOS", "ATIVAS", "INATIVAS" })
             {
-                var doBloco = todas.Where(p => p.Ativo == ativo).ToList();
+                var doBloco = todas.Where(p => titulo == "FAVORITOS" ? p.Favorito
+                    : !p.Favorito && p.Ativo == (titulo == "ATIVAS"))
+                    .OrderBy(p => p.Ordem)
+                    .ThenBy(p => p.NomeExibicao, System.StringComparer.CurrentCultureIgnoreCase).ToList();
                 if (doBloco.Count == 0)
                     continue;
                 var bloco = Estilo.Bloco(lista, titulo, doBloco.Count);
@@ -254,6 +261,7 @@ namespace TorreDeControle.UI
             Estilo.Moldura(linha.gameObject, Estilo.Linha, p.Ativo ? Estilo.Borda : Estilo.BordaApagada);
             // Não redesenha ao soltar: a linha já está no lugar novo.
             Estilo.Alca(linha, indice => Mostrar(cadastro.Mover(p.Id, indice)));
+            BotaoFavorito(p, linha);
 
             var i = p.Identidade;
             var codinome = Estilo.CampoTexto(linha, "codinome");
@@ -281,7 +289,7 @@ namespace TorreDeControle.UI
             Estilo.ListaSuspensa(linha, LarguraJogador, OpcoesJogador(i.Jogador), i.Jogador ?? SemJogador,
                 id => Alterar(p, p.Identidade.Nome, p.Identidade.Codinome, p.Identidade.Arquetipo, id));
 
-            if (p.Status == StatusCriacao.Criado)
+            if (p.Status == StatusCriacao.Criado && cadastro.MotivoParaNaoReabrir(p) == null)
             {
                 // Provisório, enquanto a ficha está em construção: clicar volta para "novo".
                 Estilo.BotaoContorno(linha, TextoStatus(p.Status), LarguraStatus, Estilo.Dourado, () => Reabrir(p));
@@ -300,6 +308,42 @@ namespace TorreDeControle.UI
                 Estilo.BotaoContorno(linha, "Inativa", LarguraAtivo, Estilo.TextoApagado, () => AlternarAtivo(p));
 
             Estilo.BotaoPrincipal(linha, "Ficha", LarguraFicha, () => EscolherFicha(p));
+        }
+
+        static void VaoFavorito(Transform pai)
+        {
+            var vao = Estilo.Rect("VaoFavorito", pai);
+            vao.gameObject.AddComponent<LayoutElement>().preferredWidth = LarguraFavorito;
+        }
+
+        void BotaoFavorito(Personagem p, Transform pai)
+        {
+            var rect = Estilo.Rect("Favorito", pai);
+            rect.gameObject.AddComponent<LayoutElement>().preferredWidth = LarguraFavorito;
+            var alvo = rect.gameObject.AddComponent<Image>();
+            alvo.color = Color.clear;
+            var botao = rect.gameObject.AddComponent<Button>();
+            botao.targetGraphic = alvo;
+            var quadrado = Estilo.Rect("Marca", rect);
+            quadrado.anchorMin = quadrado.anchorMax = new Vector2(0.5f, 0.5f);
+            quadrado.sizeDelta = new Vector2(28, 28);
+            if (texturaFavorito == null)
+                texturaFavorito = Resources.Load<Texture2D>("Icones/favorito");
+            var imagem = quadrado.gameObject.AddComponent<RawImage>();
+            imagem.texture = texturaFavorito;
+            imagem.color = p.Favorito ? Color.white : new Color(0.45f, 0.45f, 0.45f, 0.55f);
+            imagem.raycastTarget = false;
+            var dica = rect.gameObject.AddComponent<Dica>();
+            dica.Configurar(p.Favorito ? "Remover dos favoritos" : "Marcar como favorito");
+            botao.onClick.AddListener(() =>
+            {
+                var resultado = cadastro.DefinirFavorito(p.Id, !p.Favorito);
+                Mostrar(resultado);
+                if (!resultado.Ok) return;
+                imagem.color = p.Favorito ? Color.white : new Color(0.45f, 0.45f, 0.45f, 0.55f);
+                dica.Configurar(p.Favorito ? "Remover dos favoritos" : "Marcar como favorito");
+                Redesenhar();
+            });
         }
 
         /// <summary>

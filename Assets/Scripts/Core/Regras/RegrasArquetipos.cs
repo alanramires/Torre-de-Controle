@@ -38,6 +38,8 @@ namespace TorreDeControle.Core.Regras
         {
             [JsonProperty("id")] public string Id { get; set; }
             [JsonProperty("nome")] public string Nome { get; set; }
+            /// <summary>Nome da arte quadrada do arquétipo (a tela acha a textura por esse nome).</summary>
+            [JsonProperty("retrato")] public string Retrato { get; set; }
             [JsonProperty("rotulos")] public Dictionary<string, int> Rotulos { get; set; } = new Dictionary<string, int>();
             [JsonProperty("habilidades")] public RegraHabilidades Habilidades { get; set; } = new RegraHabilidades();
             /// <summary>Grupos de tags de aparência da ficha: só inspiração (a aparência é texto livre).</summary>

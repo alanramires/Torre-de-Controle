@@ -32,6 +32,7 @@
   "arquetipos": [
     {
       "id": "amaldicoada",
+      "retrato": "amaldicoada_retrato",
       "nome": "Amaldiçoada",
       "nome_en": "The Doomed",
       "rotulos": {
@@ -440,6 +441,7 @@
     },
     {
       "id": "bruta",
+      "retrato": "bruta_retrato",
       "nome": "Bruta",
       "nome_en": "The Bull",
       "rotulos": {
@@ -672,6 +674,7 @@
     },
     {
       "id": "delinquente",
+      "retrato": "delinquente_retrato",
       "nome": "Delinquente",
       "nome_en": "The Delinquent",
       "rotulos": {
@@ -869,6 +872,7 @@
     },
     {
       "id": "discipula",
+      "retrato": "discipula_retrato",
       "nome": "Discípula",
       "nome_en": "The Protégé",
       "rotulos": {
@@ -1208,6 +1212,7 @@
     },
     {
       "id": "farol",
+      "retrato": "farol_retrato",
       "nome": "Farol",
       "nome_en": "The Beacon",
       "rotulos": {
@@ -1568,6 +1573,7 @@
     },
     {
       "id": "forasteira",
+      "retrato": "forasteira_retrato",
       "nome": "Forasteira",
       "nome_en": "The Outsider",
       "rotulos": {
@@ -1923,6 +1929,7 @@
     },
     {
       "id": "janus",
+      "retrato": "janus_retrato",
       "nome": "Janus",
       "nome_en": "The Janus",
       "rotulos": {
@@ -2259,6 +2266,7 @@
     },
     {
       "id": "legado",
+      "retrato": "legado_retrato",
       "nome": "Legado",
       "nome_en": "The Legacy",
       "rotulos": {
@@ -2586,6 +2594,7 @@
     },
     {
       "id": "nova",
+      "retrato": "nova_retrato",
       "nome": "Nova",
       "nome_en": "The Nova",
       "rotulos": {
@@ -2836,6 +2845,7 @@
     },
     {
       "id": "transformado",
+      "retrato": "transformado_retrato",
       "nome": "Transformado",
       "nome_en": "The Transformed",
       "rotulos": {

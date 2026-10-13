@@ -71,6 +71,19 @@ namespace TorreDeControle.Core.Personagens
             var personagem = Buscar(id);
             if (personagem == null)
                 return Resultado.Falha("Personagem não encontrada.");
+            if (personagem.Sala == null)
+            {
+                var bloco = DoLaboratorio.Where(p => personagem.Favorito ? p.Favorito
+                    : !p.Favorito && p.Ativo == personagem.Ativo)
+                    .OrderBy(p => p.Ordem)
+                    .ThenBy(p => p.NomeExibicao, StringComparer.CurrentCultureIgnoreCase).ToList();
+                bloco.Remove(personagem);
+                bloco.Insert(Math.Max(0, Math.Min(indice, bloco.Count)), personagem);
+                for (var k = 0; k < bloco.Count; k++)
+                    bloco[k].Ordem = k;
+                Gravar();
+                return Resultado.Sucesso();
+            }
             // Na sala, heróis e NPCs são listas separadas.
             var lista = personagem.Sala == null
                 ? DoLaboratorio
@@ -120,6 +133,10 @@ namespace TorreDeControle.Core.Personagens
 
             identidade.Aparencia = personagem.Identidade.Aparencia;
             identidade.Resumo = personagem.Identidade.Resumo;
+            identidade.FotoHeroica = personagem.Identidade.FotoHeroica;
+            identidade.FotoCivil = personagem.Identidade.FotoCivil;
+            identidade.FotoHeroicaAprovacao = personagem.Identidade.FotoHeroicaAprovacao;
+            identidade.FotoCivilAprovacao = personagem.Identidade.FotoCivilAprovacao;
             // As respostas são das perguntas do arquétipo: trocar de arquétipo as apaga.
             if (identidade.Arquetipo == personagem.Identidade.Arquetipo)
                 identidade.RespostasHistorico = personagem.Identidade.RespostasHistorico;
@@ -223,22 +240,44 @@ namespace TorreDeControle.Core.Personagens
             };
             CongelarModulos(p, foto);
             p.Foto = foto;
-            p.Status = StatusCriacao.Criado;
+            // A instância de uma sala, reaberta e concluída de novo, volta a jogar na vaga.
+            p.Status = p.Sala != null ? StatusCriacao.EmCarreira : StatusCriacao.Criado;
             Gravar();
             return Resultado.Sucesso();
         }
 
+        /// <summary>Pode voltar para "novo"? (null = pode; senão, o motivo)</summary>
+        public string MotivoParaNaoReabrir(Personagem p)
+        {
+            if (p.Controle != Controle.Jogador)
+                return "NPC não tem ciclo de criação.";
+            if (p.Sala == null)
+            {
+                if (p.Status != StatusCriacao.Criado)
+                    return "Só ficha criada volta para novo.";
+                var emVaga = CopiasDe(p.Id).Where(c => c.Ativo).ToList();
+                return emVaga.Count > 0
+                    ? "Tem instância numa vaga: corrija a instância, pela sala."
+                    : null;
+            }
+            if (!p.Ativo)
+                return "Ficha do arquivo da sala (vaga liberada): só consulta.";
+            return p.Status == StatusCriacao.EmCarreira ? null : "Só ficha em carreira volta para novo.";
+        }
+
         /// <summary>
-        /// Provisório, enquanto a ficha ainda está sendo construída: devolve uma ficha criada para "novo"
-        /// (descarta a foto da criação) para refazer a criação. Ficha em carreira não volta.
+        /// Devolve a ficha para "novo" (descarta a foto da criação) para refazer as escolhas.
+        /// No laboratório: a original, se não tiver instância numa vaga. Na sala: a instância, que
+        /// continua na vaga; concluída de novo, volta a "em carreira".
         /// </summary>
         public Resultado ReabrirCriacao(string id)
         {
             var p = Buscar(id);
             if (p == null)
                 return Resultado.Falha("Personagem não encontrada.");
-            if (p.Status != StatusCriacao.Criado)
-                return Resultado.Falha("Só uma ficha criada (fora de sala) volta para novo.");
+            var motivo = MotivoParaNaoReabrir(p);
+            if (motivo != null)
+                return Resultado.Falha(motivo);
 
             p.Foto = null;
             p.Status = StatusCriacao.Novo;
@@ -307,6 +346,18 @@ namespace TorreDeControle.Core.Personagens
             Gravar();
         }
 
+        public Resultado DefinirFavorito(string id, bool favorito)
+        {
+            var personagem = Buscar(id);
+            if (personagem == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            if (personagem.Favorito == favorito)
+                return Resultado.Sucesso();
+            personagem.Favorito = favorito;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
         public Resultado DefinirAtivo(string id, bool ativo)
         {
             var personagem = Buscar(id);
@@ -339,6 +390,60 @@ namespace TorreDeControle.Core.Personagens
             Gravar();
             return Resultado.Sucesso();
         }
+
+        /// <summary>
+        /// Links das fotos (de herói e civil): páginas web. Vazio tira. Como aparência e resumo,
+        /// não fazem parte da foto da criação: editáveis a qualquer momento.
+        /// </summary>
+        public Resultado AlterarFotos(string id, string heroica, string civil)
+        {
+            var personagem = Buscar(id);
+            if (personagem == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            var h = (heroica ?? string.Empty).Trim();
+            var c = (civil ?? string.Empty).Trim();
+            foreach (var link in new[] { h, c })
+                if (link.Length > 0 && !LinkValido(link))
+                    return Resultado.Falha("O link da foto precisa ser http(s) e terminar em .jpg, .jpeg ou .png.");
+            var i = personagem.Identidade;
+            if (h == i.FotoHeroica && c == i.FotoCivil)
+                return Resultado.Sucesso();
+            // Link novo é imagem nova: volta a aguardar o olho do mestre.
+            if (h != i.FotoHeroica)
+                i.FotoHeroicaAprovacao = AprovacaoFoto.Aguardando;
+            if (c != i.FotoCivil)
+                i.FotoCivilAprovacao = AprovacaoFoto.Aguardando;
+            i.FotoHeroica = h;
+            i.FotoCivil = c;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>O mestre aprova ou recusa a foto (<paramref name="heroica"/>: a de herói; senão, a civil).</summary>
+        public Resultado AvaliarFoto(string id, bool heroica, AprovacaoFoto aprovacao)
+        {
+            var personagem = Buscar(id);
+            if (personagem == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            var i = personagem.Identidade;
+            if (string.IsNullOrEmpty(heroica ? i.FotoHeroica : i.FotoCivil))
+                return Resultado.Falha("Sem link, não há foto para avaliar.");
+            if (heroica)
+                i.FotoHeroicaAprovacao = aprovacao;
+            else
+                i.FotoCivilAprovacao = aprovacao;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>Formatos de foto aceitos (os que a Torre consegue mostrar).</summary>
+        public static readonly IReadOnlyList<string> FormatosDeFoto = new[] { ".jpg", ".jpeg", ".png" };
+
+        /// <summary>Link http(s) direto para uma imagem .jpg, .jpeg ou .png (o "?..." no fim não conta).</summary>
+        public static bool LinkValido(string link) =>
+            Uri.TryCreate(link, UriKind.Absolute, out var uri) &&
+            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps) &&
+            FormatosDeFoto.Any(f => uri.AbsolutePath.EndsWith(f, StringComparison.OrdinalIgnoreCase));
 
         /// <summary>Resposta à pergunta de histórico de número <paramref name="indice"/> (ordem da ficha).</summary>
         public Resultado ResponderHistorico(string id, int indice, string resposta)
