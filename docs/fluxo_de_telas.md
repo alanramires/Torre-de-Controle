@@ -9,7 +9,7 @@
 | Entidade | O que é |
 |---|---|
 | **Banco de jogadores** | todos os jogadores que o mestre já cadastrou (podem ser 20). Nome e status **ativo · inativo** |
-| **Banco de personagens** | fichas criadas **sem sala e sem jogador** — é por aqui que tudo começa |
+| **Banco de personagens** | fichas criadas **sem sala**, com ou sem jogador — é por aqui que tudo começa. Um jogador pode ter várias |
 | **Sala** | uma campanha: número de **slots** (ex.: 6), NPCs, pilha de Equipe, log |
 | **Slot** | lugar à mesa (ideia dos slots do `MatchController` do Map Room): **um jogador + uma personagem da sala** |
 | **NPC** | personagem do mestre, modelo leve: nome, descrição, motivação/objetivo simples ("quero encontrar meu pai") e Influência com os PJs |
@@ -42,10 +42,30 @@ Nos dois casos a personagem fica **associada ao jogador do slot**. Jogador sumiu
 - Rolar dados (o mestre rola por todos)
 - Exportar a colheita da rodada para o fórum
 
+## Fora da sala é laboratório; dentro, o mestre é suserano
+
+(Decidido em 2026-10-13. Sim, Crusader Kings.)
+
+- **Fora da sala** as personagens são **experimentos**: cria quantas quiser, dá potencial, faz multiclasse,
+  testa avanços. Nada disso tem consequência.
+- **Pôr no slot cria uma cópia** (a instância do Arkham). A personagem do banco não muda e pode virar
+  cópia em outras salas.
+- **Dentro da sala** a cópia é **vassala**: só o mestre mexe nela, pelo motor de regras.
+
+### Como a instância é guardada: camada sobre camada
+
+```text
+instância = origem (id da personagem do banco)
+          + foto da criação   (estado aprovado, imutável)
+          + log de eventos    (cada mudança desde a foto, com autor e quando)
+estado atual = foto da criação + eventos aplicados em ordem
+```
+
+A **foto** é tirada quando o mestre põe a personagem no slot: esse gesto é a aprovação.
+Desfazer = tirar o último evento. Histórico da ficha e colheita do post = ler os eventos.
+Se reaplicar tudo ficar lento um dia, guarda-se um cache do estado atual, mas a verdade é foto + log.
+
 ## Em aberto
 
-1. **Personagem do banco no slot: cópia ou a própria?** Sugestão: **cópia** (a instância do Arkham).
-   O banco vira um conjunto de modelos que nunca mudam, a cópia passa a pertencer à sala, e os dois
-   caminhos acabam iguais: todo slot tem uma personagem da sala. Também deixa a mesma ficha do banco
-   entrar em duas campanhas.
-2. **Validação de ficha** na criação (regras de Rótulos iniciais por arquétipo): avisa, quem decide é o mestre.
+1. **Validação de ficha** (regras de Rótulos iniciais por arquétipo): avisa no laboratório e na hora de
+   pôr no slot; quem decide é o mestre.
