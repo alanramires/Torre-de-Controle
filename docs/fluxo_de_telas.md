@@ -148,9 +148,9 @@ estado atual = foto da criação + eventos aplicados em ordem
 ### Entrada
 
 - Jogadores: criar, editar, ativar/inativar
-- Personagens (laboratório): criar, editar, excluir heróis
-- NPCs (laboratório): criar, editar, excluir; promover a vilão
-- Salas: criar (com número de slots), entrar
+- Personagens (laboratório): criar, editar, inativar heróis
+- NPCs (laboratório): criar, editar, inativar; promover a vilão
+- Salas: criar (com número de slots), entrar, inativar (campanha encerrada)
 
 ### Na sala
 

@@ -89,6 +89,16 @@ Regra nova ou corrigida entra lá, com `origem`. Em dúvida, conferir no texto d
 - Rolador 2d6 + Rótulo que aplica condições e limites e registra no log. **Só o mestre rola no MVP** (jogador rolar fica previsto no motor, desligado).
 - Exportar o log da rodada como texto para o fórum.
 
+## Nada se exclui, se inativa
+
+Regra do Alan (2026-10-13, "como no Protheus/TOTVS: nunca perder o que se cria"). Jogador, personagem,
+NPC e sala **não têm exclusão**: têm **inativar** (some das listas do dia a dia, continua no arquivo e
+no histórico, pode ser reativado). Motivo: o log de eventos aponta para eles por id, e uma exclusão
+deixaria o histórico apontando para o nada. Correção de dado também não apaga: é evento de correção.
+
+Exceção possível, só se o Alan pedir: rascunho que nunca foi usado (personagem `novo` que nunca entrou
+em sala nem gerou evento).
+
 ## Estilo herdado do The Map Room
 
 (`D:/Unity Projects/The Map Room`, lido em 2026-10-13.)

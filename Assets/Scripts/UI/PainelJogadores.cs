@@ -7,31 +7,26 @@ using UnityEngine.UI;
 namespace TorreDeControle.UI
 {
     /// <summary>
-    /// Gestão de Jogadores. Montado por código (sem prefab) por cima da tela que o abre.
+    /// Gestão de Jogadores. Montado por código (sem prefab) por cima da tela que o abre: um véu escuro
+    /// sobre a tela e um cartão no centro, no visual do menu (ver <see cref="Estilo"/>).
     /// Digitar o nome + Enter cria; editar o nome na lista + Enter renomeia; o botão alterna ativo/inativo.
     /// </summary>
     public sealed class PainelJogadores : MonoBehaviour
     {
-        static readonly Color CorFundo = new Color(0.08f, 0.09f, 0.12f, 0.97f);
-        static readonly Color CorLinha = new Color(1f, 1f, 1f, 0.06f);
-        static readonly Color CorAtivo = new Color(0.25f, 0.6f, 0.35f);
-        static readonly Color CorInativo = new Color(0.45f, 0.45f, 0.45f);
-        static readonly Color CorTextoInativo = new Color(0.68f, 0.68f, 0.68f);
-        static readonly Color CorCampo = new Color(0.13f, 0.14f, 0.18f, 0.95f);
-        static readonly Color CorErro = new Color(1f, 0.45f, 0.4f);
-
         CadastroJogadores cadastro;
         TMP_InputField campoNovo;
         TextMeshProUGUI mensagem;
+        TextMeshProUGUI contagem;
         RectTransform lista;
 
         public static PainelJogadores Criar(Transform pai)
         {
-            var raiz = NovoRect("PainelJogadores", pai);
-            Esticar(raiz);
-            raiz.gameObject.AddComponent<Image>().color = CorFundo;
-            var painel = raiz.gameObject.AddComponent<PainelJogadores>();
-            painel.Montar(raiz);
+            var veu = Estilo.Rect("PainelJogadores", pai);
+            Estilo.Esticar(veu);
+            // O véu bloqueia cliques na tela de baixo.
+            veu.gameObject.AddComponent<Image>().color = Estilo.Veu;
+            var painel = veu.gameObject.AddComponent<PainelJogadores>();
+            painel.Montar(veu);
             return painel;
         }
 
@@ -89,33 +84,57 @@ namespace TorreDeControle.UI
 
         // ---------- montagem ----------
 
-        void Montar(RectTransform raiz)
+        void Montar(RectTransform veu)
         {
-            var coluna = raiz.gameObject.AddComponent<VerticalLayoutGroup>();
-            coluna.padding = new RectOffset(80, 80, 60, 60);
-            coluna.spacing = 16;
+            var cartao = Estilo.Rect("Cartao", veu);
+            cartao.anchorMin = new Vector2(0.5f, 0.5f);
+            cartao.anchorMax = new Vector2(0.5f, 0.5f);
+            cartao.sizeDelta = new Vector2(1180, 860);
+            Estilo.Moldura(cartao.gameObject, Estilo.Cartao, Estilo.Borda);
+
+            var coluna = cartao.gameObject.AddComponent<VerticalLayoutGroup>();
+            coluna.padding = new RectOffset(56, 56, 44, 44);
+            coluna.spacing = 14;
             coluna.childControlWidth = true;
             coluna.childControlHeight = true;
             coluna.childForceExpandHeight = false;
 
-            // Cabeçalho: título + voltar
-            var cabecalho = Linha(raiz, 60);
-            var titulo = Texto(cabecalho, "Jogadores", 44, FontStyles.Bold);
-            titulo.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
-            Botao(cabecalho, "Voltar", 200, new Color(0.3f, 0.3f, 0.35f), Fechar);
+            // Cabeçalho: título dourado + subtítulo, voltar à direita
+            var cabecalho = Estilo.Fila(cartao, 84);
+            var titulos = Estilo.Rect("Titulos", cabecalho);
+            titulos.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            var pilha = titulos.gameObject.AddComponent<VerticalLayoutGroup>();
+            pilha.childControlWidth = true;
+            pilha.childControlHeight = true;
+            pilha.childForceExpandHeight = false;
+            pilha.childAlignment = TextAnchor.MiddleLeft;
+            var titulo = Estilo.Rotulo(titulos, "JOGADORES", 44, Estilo.Dourado, FontStyles.Bold);
+            titulo.characterSpacing = 6;
+            contagem = Estilo.Rotulo(titulos, string.Empty, 24, Estilo.TextoSuave);
+            Estilo.BotaoContorno(cabecalho, "Voltar", 190, Estilo.TextoSuave, Fechar);
+
+            Divisoria(cartao);
 
             // Novo jogador
-            var novo = Linha(raiz, 64);
-            campoNovo = Campo(novo, "Nome do novo jogador e Enter");
+            var novo = Estilo.Fila(cartao, 62);
+            campoNovo = Estilo.CampoTexto(novo, "Nome do novo jogador e Enter");
             campoNovo.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
             campoNovo.onSubmit.AddListener(Adicionar);
-            Botao(novo, "Adicionar", 200, CorAtivo, () => Adicionar(campoNovo.text));
+            Estilo.BotaoPrincipal(novo, "Adicionar", 230, () => Adicionar(campoNovo.text));
 
-            mensagem = Texto(raiz, string.Empty, 26, FontStyles.Normal);
-            mensagem.color = CorErro;
-            mensagem.gameObject.AddComponent<LayoutElement>().minHeight = 34;
+            mensagem = Estilo.Rotulo(cartao, string.Empty, 22, Estilo.Erro);
+            mensagem.gameObject.AddComponent<LayoutElement>().minHeight = 28;
 
-            lista = Rolagem(raiz);
+            lista = Estilo.ListaRolavel(cartao);
+        }
+
+        static void Divisoria(Transform pai)
+        {
+            var linha = Estilo.Rect("Divisoria", pai);
+            linha.gameObject.AddComponent<Image>().color = new Color(Estilo.Dourado.r, Estilo.Dourado.g, Estilo.Dourado.b, 0.35f);
+            var layout = linha.gameObject.AddComponent<LayoutElement>();
+            layout.minHeight = 2;
+            layout.preferredHeight = 2;
         }
 
         void Redesenhar()
@@ -124,23 +143,30 @@ namespace TorreDeControle.UI
                 Destroy(lista.GetChild(i).gameObject);
 
             var todos = cadastro.Listar();
+            var ativos = 0;
+            foreach (var j in todos)
+                if (j.Ativo) ativos++;
+            contagem.text = todos.Count == 0
+                ? "Cadastros e status"
+                : $"{ativos} ativo{(ativos == 1 ? "" : "s")} · {todos.Count - ativos} inativo{(todos.Count - ativos == 1 ? "" : "s")}";
+
             if (todos.Count == 0)
             {
-                var vazio = Texto(lista, "Nenhum jogador ainda.", 28, FontStyles.Italic);
-                vazio.color = CorInativo;
+                Estilo.Rotulo(lista, "Nenhum jogador ainda. Digite um nome acima.", 26, Estilo.TextoApagado, FontStyles.Italic);
                 return;
             }
 
             foreach (var jogador in todos)
             {
-                var linha = Linha(lista, 60);
-                linha.gameObject.AddComponent<Image>().color = CorLinha;
+                var linha = Estilo.Fila(lista, 64);
+                linha.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(10, 10, 8, 8);
+                Estilo.Moldura(linha.gameObject, Estilo.Linha, jogador.Ativo ? Estilo.Borda : Estilo.BordaApagada);
 
-                var campo = Campo(linha, string.Empty);
+                var campo = Estilo.CampoTexto(linha, string.Empty);
                 campo.text = jogador.Nome;
                 if (!jogador.Ativo)
                 {
-                    campo.textComponent.color = CorTextoInativo;
+                    campo.textComponent.color = Estilo.TextoApagado;
                     campo.textComponent.fontStyle = FontStyles.Italic;
                 }
                 campo.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
@@ -148,132 +174,11 @@ namespace TorreDeControle.UI
                 campo.onDeselect.AddListener(_ => Renomear(jogador, campo));
 
                 var j = jogador;
-                Botao(linha, jogador.Ativo ? "Ativo" : "Inativo", 200,
-                    jogador.Ativo ? CorAtivo : CorInativo, () => AlternarAtivo(j));
+                if (jogador.Ativo)
+                    Estilo.BotaoContorno(linha, "Ativo", 190, Estilo.Dourado, () => AlternarAtivo(j));
+                else
+                    Estilo.BotaoContorno(linha, "Inativo", 190, Estilo.TextoApagado, () => AlternarAtivo(j));
             }
-        }
-
-        // ---------- peças ----------
-
-        static RectTransform NovoRect(string nome, Transform pai)
-        {
-            var go = new GameObject(nome, typeof(RectTransform));
-            go.transform.SetParent(pai, false);
-            return (RectTransform)go.transform;
-        }
-
-        static void Esticar(RectTransform rect)
-        {
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
-        }
-
-        static RectTransform Linha(Transform pai, float altura)
-        {
-            var linha = NovoRect("Linha", pai);
-            var h = linha.gameObject.AddComponent<HorizontalLayoutGroup>();
-            h.spacing = 12;
-            h.padding = new RectOffset(8, 8, 4, 4);
-            h.childControlWidth = true;
-            h.childControlHeight = true;
-            h.childForceExpandWidth = false;
-            h.childForceExpandHeight = true;
-            var layout = linha.gameObject.AddComponent<LayoutElement>();
-            layout.minHeight = altura;
-            layout.preferredHeight = altura;
-            // Sem isto o HorizontalLayoutGroup se declara esticável (childForceExpandHeight)
-            // e a linha rouba a altura que era da lista.
-            layout.flexibleHeight = 0;
-            return linha;
-        }
-
-        static TextMeshProUGUI Texto(Transform pai, string conteudo, float tamanho, FontStyles estilo)
-        {
-            var rect = NovoRect("Texto", pai);
-            var texto = rect.gameObject.AddComponent<TextMeshProUGUI>();
-            texto.text = conteudo;
-            texto.fontSize = tamanho;
-            texto.fontStyle = estilo;
-            texto.color = Color.white;
-            texto.alignment = TextAlignmentOptions.MidlineLeft;
-            return texto;
-        }
-
-        static void Botao(Transform pai, string rotulo, float largura, Color cor, UnityEngine.Events.UnityAction aoClicar)
-        {
-            var rect = NovoRect("Botao " + rotulo, pai);
-            var imagem = rect.gameObject.AddComponent<Image>();
-            imagem.color = cor;
-            var botao = rect.gameObject.AddComponent<Button>();
-            botao.targetGraphic = imagem;
-            botao.onClick.AddListener(aoClicar);
-            rect.gameObject.AddComponent<LayoutElement>().preferredWidth = largura;
-
-            var texto = Texto(rect, rotulo, 28, FontStyles.Bold);
-            texto.alignment = TextAlignmentOptions.Center;
-            Esticar(texto.rectTransform);
-        }
-
-        static TMP_InputField Campo(Transform pai, string dica)
-        {
-            var rect = NovoRect("Campo", pai);
-            // Montado desligado: o TMP_InputField cria o cursor no OnEnable, e só consegue
-            // se o textComponent já estiver ligado. Ligar antes deixa o campo sem edição.
-            rect.gameObject.SetActive(false);
-            rect.gameObject.AddComponent<Image>().color = CorCampo;
-            var campo = rect.gameObject.AddComponent<TMP_InputField>();
-
-            var area = NovoRect("Area", rect);
-            Esticar(area);
-            area.offsetMin = new Vector2(14, 6);
-            area.offsetMax = new Vector2(-14, -6);
-            area.gameObject.AddComponent<RectMask2D>();
-
-            var placeholder = Texto(area, dica, 28, FontStyles.Italic);
-            placeholder.color = new Color(1f, 1f, 1f, 0.35f);
-            Esticar(placeholder.rectTransform);
-
-            var texto = Texto(area, string.Empty, 28, FontStyles.Normal);
-            Esticar(texto.rectTransform);
-
-            campo.textViewport = area;
-            campo.textComponent = texto;
-            campo.placeholder = placeholder;
-            campo.lineType = TMP_InputField.LineType.SingleLine;
-            rect.gameObject.SetActive(true);
-            return campo;
-        }
-
-        static RectTransform Rolagem(Transform pai)
-        {
-            var rect = NovoRect("Lista", pai);
-            rect.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
-            var scroll = rect.gameObject.AddComponent<ScrollRect>();
-            scroll.horizontal = false;
-            scroll.scrollSensitivity = 30;
-
-            var viewport = NovoRect("Viewport", rect);
-            Esticar(viewport);
-            viewport.gameObject.AddComponent<RectMask2D>();
-
-            var conteudo = NovoRect("Conteudo", viewport);
-            conteudo.anchorMin = new Vector2(0, 1);
-            conteudo.anchorMax = new Vector2(1, 1);
-            conteudo.pivot = new Vector2(0.5f, 1);
-            conteudo.offsetMin = Vector2.zero;
-            conteudo.offsetMax = Vector2.zero;
-            var v = conteudo.gameObject.AddComponent<VerticalLayoutGroup>();
-            v.spacing = 8;
-            v.childControlWidth = true;
-            v.childControlHeight = true;
-            v.childForceExpandHeight = false;
-            conteudo.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            scroll.viewport = viewport;
-            scroll.content = conteudo;
-            return conteudo;
         }
     }
 }

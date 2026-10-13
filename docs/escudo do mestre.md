@@ -37,7 +37,7 @@ jogador (MVP). Personagem pode existir sem jogador.
 
 **Entrada**
 - Jogadores: criar, editar, ativar/inativar
-- Personagens (laboratório): criar, editar, excluir — com ou sem jogador
+- Personagens (laboratório): criar, editar, inativar — com ou sem jogador
 - Criar sala (com número de slots)
 - Entrar na sala
 
