@@ -211,27 +211,54 @@ namespace TorreDeControle.Tests
             var mov = cadastro.MovimentosDoArquetipo(p);
             foreach (var o in mov.Opcoes.Where(o => !mov.Obrigatorios.Contains(o.Id)).Take(mov.Escolher))
                 cadastro.AlternarMovimento(p.Id, o.Id);
-            foreach (var extra in cadastro.ExtrasDoArquetipo(p))
-            foreach (var c in extra.Campos)
+            var secoes = cadastro.ExtrasDoArquetipo(p).Select(e => (e.Id, e.Campos))
+                .Concat(cadastro.MovimentosComSubsecao(p).Select(m => (CadastroPersonagens.ExtraDoMovimento(m.Id), m.Campos)))
+                .ToList();
+            foreach (var (extra, campos) in secoes)
+            foreach (var c in campos)
             {
                 switch (c.Tipo)
                 {
                     case "lista":
                         foreach (var o in c.Opcoes.Take(c.Escolher ?? 1))
-                            cadastro.AlternarOpcaoDeExtra(p.Id, extra.Id, c.Id, o.Id);
+                        {
+                            cadastro.AlternarOpcaoDeExtra(p.Id, extra, c.Id, o.Id);
+                            if (c.Descrever)
+                                cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, o.Id, "descrição");
+                        }
                         break;
                     case "rotulo":
-                        cadastro.AlternarOpcaoDeExtra(p.Id, extra.Id, c.Id, c.Rotulos[0]);
+                        cadastro.AlternarOpcaoDeExtra(p.Id, extra, c.Id, c.Rotulos[0]);
                         break;
                     case "texto" when !c.NaSala:
-                        cadastro.DefinirTextoDeExtra(p.Id, extra.Id, c.Id, null, "texto");
+                        cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, null, "texto");
                         break;
                     case "textos":
                         foreach (var v in c.Vagas.Take(c.Minimo))
-                            cadastro.DefinirTextoDeExtra(p.Id, extra.Id, c.Id, v.Id, "nome");
+                            cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, v.Id, "nome");
                         break;
                 }
             }
+        }
+
+        [Test]
+        public void Movimento_com_subsecao_cobra_e_desmarcar_apaga()
+        {
+            var p = Nova("farol");
+            const string sortudo = "mov:vamos-sortudo";
+            cadastro.AlternarMovimento(p.Id, "vamos-sortudo");
+            Assert.That(cadastro.MovimentosComSubsecao(p).Select(m => m.Id), Is.EqualTo(new[] { "vamos-sortudo" }));
+            Assert.That(cadastro.Validar(p).avisos, Has.Some.Contains("Vamos, Sortudo!"));
+
+            cadastro.DefinirTextoDeExtra(p.Id, sortudo, "bicho", null, "Sortudo, um vira-lata de três patas");
+            cadastro.AlternarOpcaoDeExtra(p.Id, sortudo, "movimentos", "basico/defender");
+            Assert.That(cadastro.DefinirTextoDeExtra(p.Id, sortudo, "movimentos", "basico/provocar", "late").Ok, Is.False);
+            cadastro.DefinirTextoDeExtra(p.Id, sortudo, "movimentos", "basico/defender", "pula na frente");
+            Assert.That(cadastro.TextoDoExtra(p, sortudo, "movimentos", "basico/defender"), Is.EqualTo("pula na frente"));
+
+            cadastro.AlternarMovimento(p.Id, "vamos-sortudo");
+            Assert.That(p.Criacao.ExtrasTextos.Keys, Has.None.StartsWith(sortudo));
+            Assert.That(p.Criacao.ExtrasEscolhas.Keys, Has.None.StartsWith(sortudo));
         }
 
         // ---------- módulos ----------
@@ -295,7 +322,61 @@ namespace TorreDeControle.Tests
         {
             var p = Nova(arquetipo);
             p.Status = StatusCriacao.Criado; // atalho: o teste é do Crescimento, não da criação
+            p.Potencial = 70;                // potencial de sobra: 14 avanços
             return p;
+        }
+
+        [Test]
+        public void Potencial_corrido_rende_um_avanco_a_cada_cinco()
+        {
+            var p = Nova("farol");
+            Assert.That(cadastro.AjustarPotencial(p.Id, 1).Ok, Is.False, "potencial é do jogo");
+            p.Status = StatusCriacao.Criado;
+
+            for (var k = 0; k < 4; k++)
+                cadastro.AjustarPotencial(p.Id, 1);
+            Assert.That(cadastro.AvancosPendentes(p), Is.EqualTo(0));
+            Assert.That(cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Cima, 0).Ok, Is.False);
+
+            cadastro.AjustarPotencial(p.Id, 1); // 5
+            cadastro.AjustarPotencial(p.Id, 1); // 6: a marcação continua
+            Assert.That(cadastro.AvancosPendentes(p), Is.EqualTo(1));
+            Assert.That(cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Cima, 0).Ok, Is.True);
+            Assert.That(cadastro.AvancosPendentes(p), Is.EqualTo(0));
+            Assert.That(cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Cima, 1).Ok, Is.False);
+
+            // Não tira o potencial que já virou avanço.
+            Assert.That(cadastro.AjustarPotencial(p.Id, -2).Ok, Is.False);
+            Assert.That(cadastro.AjustarPotencial(p.Id, -1).Ok, Is.True); // 5
+        }
+
+        [Test]
+        public void Aposentar_encerra_a_carreira()
+        {
+            var p = Concluida("farol");
+            for (var k = 0; k < 5; k++)
+                cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Cima, k);
+            Assert.That(cadastro.CarreiraEncerrada(p), Is.False);
+            cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Baixo, 5); // "Aposente-se ou torne-se um modelo"
+            Assert.That(cadastro.CarreiraEncerrada(p), Is.True);
+        }
+
+        [Test]
+        public void Impulso_marcado_se_cumpre_com_um_beneficio()
+        {
+            var p = Nova("farol");
+            cadastro.AlternarOpcaoDeExtra(p.Id, "farol/impulsos", "marcados", "salvar-a-vida-de-um-colega");
+            Assert.That(cadastro.AlternarCumprido(p.Id, "farol/impulsos", "salvar-a-vida-de-um-colega").Ok, Is.False);
+
+            CompletarModulos(p);
+            p.Status = StatusCriacao.Criado; // atalho: o teste é do jogo
+            p.Foto = new FotoCriacao { ExtrasEscolhas = p.Criacao.ExtrasEscolhas };
+            Assert.That(cadastro.AlternarCumprido(p.Id, "farol/impulsos", "terminar-com-alguem").Ok, Is.False);
+            Assert.That(cadastro.EscolherBeneficio(p.Id, "farol/impulsos", "salvar-a-vida-de-um-colega", "potencial").Ok, Is.False);
+
+            cadastro.AlternarCumprido(p.Id, "farol/impulsos", "salvar-a-vida-de-um-colega");
+            cadastro.EscolherBeneficio(p.Id, "farol/impulsos", "salvar-a-vida-de-um-colega", "potencial");
+            Assert.That(cadastro.BeneficioEscolhido(p, "farol/impulsos", "salvar-a-vida-de-um-colega"), Is.EqualTo("potencial"));
         }
 
         [Test]

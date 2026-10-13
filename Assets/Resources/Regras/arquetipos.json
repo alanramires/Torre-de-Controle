@@ -1189,7 +1189,15 @@
           },
           {
             "id": "sem-poderes-e-quase-sem-treino",
-            "nome": "Sem poderes e quase sem treino"
+            "nome": "Sem poderes e quase sem treino",
+            "regra": "Na primeira vez que usar cada equipamento para enfrentar diretamente, liberar seus poderes ou defender, role + Mundano no lugar do Rótulo do movimento.",
+            "campos": [
+              {
+                "id": "equipamento",
+                "tipo": "texto",
+                "rotulo": "Equipamento (vira uma habilidade nova se a linha estiver vazia)"
+              }
+            ]
           },
           {
             "id": "nao-vou-te-decepcionar",
@@ -1201,7 +1209,57 @@
           },
           {
             "id": "vamos-sortudo",
-            "nome": "Vamos, Sortudo!"
+            "nome": "Vamos, Sortudo!",
+            "regra": "+1 sempre que o bicho puder ajudar; se ele se ferir, é como tomar um golpe poderoso.",
+            "campos": [
+              {
+                "id": "bicho",
+                "tipo": "texto",
+                "rotulo": "Seu bicho: quem é e como é"
+              },
+              {
+                "id": "movimentos",
+                "tipo": "lista",
+                "rotulo": "3 movimentos básicos em que ele ajuda",
+                "opcoes": [
+                  {
+                    "id": "basico/enfrentar",
+                    "nome": "Enfrentar diretamente a ameaça"
+                  },
+                  {
+                    "id": "basico/liberar-poderes",
+                    "nome": "Liberar seus poderes"
+                  },
+                  {
+                    "id": "basico/defender",
+                    "nome": "Defender"
+                  },
+                  {
+                    "id": "basico/avaliar",
+                    "nome": "Avaliar a situação"
+                  },
+                  {
+                    "id": "basico/provocar",
+                    "nome": "Provocar"
+                  },
+                  {
+                    "id": "basico/confortar",
+                    "nome": "Confortar ou apoiar"
+                  },
+                  {
+                    "id": "basico/perfurar-mascara",
+                    "nome": "Perfurar a máscara"
+                  },
+                  {
+                    "id": "basico/golpe-poderoso",
+                    "nome": "Tomar um golpe poderoso"
+                  }
+                ],
+                "escolher": 3,
+                "descrever": true,
+                "nota": "diga como ele ajuda em cada um"
+              }
+            ]
           },
           {
             "id": "chupa-domiciano",
@@ -1307,6 +1365,21 @@
                 }
               ],
               "escolher": 4
+            }
+          ],
+          "cumpre_campo": "marcados",
+          "ao_cumprir": [
+            {
+              "id": "potencial",
+              "nome": "Marcar potencial"
+            },
+            {
+              "id": "condicao",
+              "nome": "Remover uma condição"
+            },
+            {
+              "id": "influencia",
+              "nome": "Influência sobre alguém envolvido"
             }
           ]
         }
@@ -2735,5 +2808,5 @@
   "_visual_historico": "'visual': grupos de tags de aparência (só inspiração; a aparência é texto livre). 'historico': as perguntas de histórico da ficha (guia; o histórico é texto livre). Traduzidos por nós a partir da ficha em inglês.",
   "_equipe": "'equipe': a pergunta 'quando a equipe se reuniu' e as 2 frases de relacionamento ('___' é o colega). Respondidas na sala, com a equipe. 'influencia.texto': a regra de Influência inicial em uma frase. Traduzido por nós a partir da ficha em inglês.",
   "_avancos": "'avancos': a lista de avanços da ficha. 'cima' (8) e 'baixo' (tardios, liberam com 5 de cima). Cada item só se marca uma vez; itens repetidos (ex.: dois 'movimento de outro arquétipo') são casas diferentes. 'id' é a operação (ver avancos.json). Traduzido por nós a partir da ficha em inglês.",
-  "_modulos": "'movimentos': deck do arquétipo (escolher N além dos obrigatórios). 'extras': cada um com 'campos' por tipo: lista (escolher/escolher_ate), texto, textos (vagas, mínimo), rotulo (um dos ids em 'rotulos'), trilha (só exibe). 'na_sala': preenchido com a equipe. Nomes traduzidos por nós a partir da ficha em inglês; 'Eu sou o monstro' segue a errata do acervo."
+  "_modulos": "'movimentos': deck do arquétipo (escolher N além dos obrigatórios). 'extras': cada um com 'campos' por tipo: lista (escolher/escolher_ate), texto, textos (vagas, mínimo), rotulo (um dos ids em 'rotulos'), trilha (só exibe). 'na_sala': preenchido com a equipe. Nomes traduzidos por nós a partir da ficha em inglês; 'Eu sou o monstro' segue a errata do acervo. Movimentos podem ter 'campos' (subseção que abre quando o movimento está na ficha) e 'regra' (a regra em uma frase). Campo lista com 'descrever': cada escolhida pede um texto. Extra com 'cumpre_campo' e 'ao_cumprir': no jogo, cada escolha daquele campo pode ser marcada como cumprida, com um benefício da lista."
 }

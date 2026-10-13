@@ -129,6 +129,16 @@ namespace TorreDeControle.Core.Personagens
         /// nas outras seções e sem evento: é só a marca.
         /// </summary>
         [JsonProperty("avancos_marcados")] public List<string> AvancosMarcados { get; set; } = new List<string>();
+        /// <summary>
+        /// Núcleo: potencial em pontos corridos (não zera). A cada múltiplo de 5 nasce um avanço;
+        /// pendentes = potencial / 5 − avanços marcados. Quem dá potencial é o mestre (painel, no jogo).
+        /// </summary>
+        [JsonProperty("potencial")] public int Potencial { get; set; }
+        /// <summary>
+        /// No jogo (protótipo): escolhas de extra cumpridas, por "extra|opcao", com o benefício escolhido
+        /// (vazio enquanto não escolheu). Ex.: impulsos do Farol. Só a marca, sem efeito ainda.
+        /// </summary>
+        [JsonProperty("cumpridos")] public Dictionary<string, string> Cumpridos { get; set; } = new Dictionary<string, string>();
         /// <summary>De onde foi copiada (laboratório → sala); null no laboratório.</summary>
         [JsonProperty("origem")] public string Origem { get; set; }
 

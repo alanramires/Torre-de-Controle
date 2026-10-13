@@ -42,6 +42,7 @@ namespace TorreDeControle.Core.Personagens
                 p.Criacao.ExtrasEscolhas ??= new Dictionary<string, List<string>>();
                 p.Criacao.ExtrasTextos ??= new Dictionary<string, string>();
                 p.AvancosMarcados ??= new List<string>();
+                p.Cumpridos ??= new Dictionary<string, string>();
             }
             return new CadastroPersonagens(armazenamento, regras, lista);
         }

@@ -192,6 +192,37 @@ estado atual = foto da criação + eventos aplicados em ordem
 - Rolar dados (o mestre rola por todos)
 - Rodada: abrir, registrar, fechar e exportar a colheita em BBCode
 
+## Ficha × painel de controle do mestre
+
+A ficha tem duas naturezas (decidido em 2026-10-13):
+
+- **Criação** (definitiva na ficha): identidade, habilidades, histórico, Rótulos e +1 livre, movimentos e
+  extras. Escolhido antes de jogar; congela na foto ao concluir.
+- **Placeholders de jogo** (a ficha só vai *mostrar*): tudo que muda durante a partida será feito pelo
+  **painel de controle do mestre**, como comando → evento no log (com rodada e motivo). Até o painel
+  existir, a ficha permite marcar à mão para enxergar onde cada coisa mora; depois, esses lugares
+  ficam só de leitura.
+
+| Na ficha | Hoje | Com o painel |
+|---|---|---|
+| Crescimento (avanços) | marca à mão | o painel aplica o avanço (potencial, carta, Rótulo) |
+| Impulsos cumpridos | marca + benefício | o painel registra e aplica o benefício |
+| Condições, potencial, Hora da Verdade | só leitura, zerados | o painel marca/desmarca na rodada |
+| Equipe, relacionamentos, Influência | desativados ("na sala") | preenchidos na sala; Influência muda pelo painel |
+| `regra` dos movimentos | texto na tela | o motor/rolador aplica ao rolar |
+
+## Potencial e avanços (decidido em 2026-10-13)
+
+- **Potencial é pontos corridos** (não zera): o mestre dá pelo painel; a cada múltiplo de 5 nasce
+  **1 avanço pendente** ("level up"), e a contagem segue 6, 7, 8...
+- Com avanço pendente, as listas do Crescimento ficam disponíveis e se marca **1 avanço** por pendente.
+  Os **tardios** liberam com 5 marcados em cima; a lista de cima continua disponível.
+- São **14 avanços** nas listas; o último possível é "aposente-se / vire modelo": a carreira termina aí.
+- Faixa da carreira pelos avanços: 1–5 iniciante (sem tardios ainda), 6–10 veterano, 11–14 fim de carreira.
+- Por ora tudo em **texto** ("7 de potencial (2/5 para o próximo avanço)"); as estrelas do Alan entram
+  no fim (ver `implementacao_futura.md`).
+  Até o painel existir, há um "+1 provisório" no Núcleo.
+
 ## Em aberto
 
 1. **Validação de ficha** (Rótulos iniciais por arquétipo): avisa no laboratório e ao pôr na sala;

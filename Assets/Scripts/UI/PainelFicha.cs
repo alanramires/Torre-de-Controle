@@ -345,13 +345,116 @@ namespace TorreDeControle.UI
                 }
             }
 
+            // Movimentos que abrem subseção (ex.: o equipamento, o bicho do "Vamos, Sortudo!").
+            foreach (var m in cadastro.MovimentosComSubsecao(p))
+            {
+                var vao = Estilo.Rect("Vao", conteudo);
+                vao.gameObject.AddComponent<LayoutElement>().minHeight = 10;
+                Secao(m.Nome.ToUpperInvariant(), m.Regra);
+                foreach (var c in m.Campos)
+                    CampoDeExtra(CadastroPersonagens.ExtraDoMovimento(m.Id), c, emCriacao);
+            }
+
             foreach (var extra in cadastro.ExtrasDoArquetipo(p))
             {
                 var vao = Estilo.Rect("Vao", conteudo);
                 vao.gameObject.AddComponent<LayoutElement>().minHeight = 10;
                 Secao(extra.Nome.ToUpperInvariant(), extra.Nota);
                 foreach (var c in extra.Campos)
-                    CampoDeExtra(extra.Id, c, emCriacao);
+                {
+                    if (c.Id == extra.CumpreCampo)
+                        ListaDeCumprimento(extra, c, emCriacao);
+                    else
+                        CampoDeExtra(extra.Id, c, emCriacao);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Lista "de cumprir" (ex.: impulsos do Farol) em 2 colunas, uma linha por opção com tudo dela:
+        /// [marcar] nome [cumprido] [benefício ▾]. Na criação só a marca funciona; no jogo (protótipo,
+        /// depois o painel do mestre) a marca trava e os marcados ganham cumprido e benefício.
+        /// </summary>
+        void ListaDeCumprimento(Core.Regras.RegrasArquetipos.RegraExtra extra,
+            Core.Regras.RegrasArquetipos.CampoExtra c, bool emCriacao)
+        {
+            var escolhidas = cadastro.Escolhas(p, extra.Id, c.Id);
+            var max = c.MaximoEscolhas;
+            if (emCriacao)
+            {
+                Contador(c.Titulo, escolhidas.Count, max);
+                Subtitulo("Depois de concluir a criação, cada marcado ganha aqui na linha o \"cumprido\" e o benefício.");
+            }
+            else
+            {
+                Subtitulo("Cumprido e benefício: só leitura aqui; quem marca é o painel do mestre, no jogo.");
+            }
+
+            var grade = Estilo.Rect("Grade", conteudo);
+            var g = grade.gameObject.AddComponent<GridLayoutGroup>();
+            g.cellSize = new Vector2(720, 48); // 2 colunas cabem com a barra de rolagem
+            g.spacing = new Vector2(24, 6);
+            g.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            g.constraintCount = 2;
+
+            var beneficios = new List<(string id, string nome)> { (string.Empty, "benefício") };
+            beneficios.AddRange(extra.AoCumprir.Select(b => (b.Id, b.Nome)));
+
+            foreach (var o in c.Opcoes)
+            {
+                var id = o.Id;
+                var marcada = escolhidas.Contains(id);
+                var cumprido = marcada && cadastro.Cumprido(p, extra.Id, id);
+
+                var linha = Estilo.Rect("Linha " + o.Nome, grade);
+                var h = linha.gameObject.AddComponent<HorizontalLayoutGroup>();
+                h.spacing = 10;
+                h.childControlWidth = true;
+                h.childControlHeight = true;
+                h.childForceExpandWidth = false;
+                h.childForceExpandHeight = true;
+                h.padding = new RectOffset(0, 0, 4, 4);
+
+                var podeMarcar = emCriacao && (marcada || escolhidas.Count < max);
+                Caixa(linha, marcada, podeMarcar, () => Aplicar(cadastro.AlternarOpcaoDeExtra(p.Id, extra.Id, c.Id, id)));
+
+                var cor = marcada ? Estilo.Texto : podeMarcar ? Estilo.TextoSuave : Estilo.TextoApagado;
+                var nome = Estilo.Rotulo(linha, o.Nome, 21, cor,
+                    cumprido ? FontStyles.Strikethrough : marcada ? FontStyles.Bold : FontStyles.Normal);
+                nome.textWrappingMode = TextWrappingModes.NoWrap;
+                nome.overflowMode = TextOverflowModes.Ellipsis;
+                Estilo.ColunaElastica(nome);
+
+                if (emCriacao || !marcada)
+                    continue;
+
+                // Só leitura: quem cumpre e escolhe o benefício é o painel do mestre, durante o jogo.
+                Caixa(linha, cumprido, false, () => { });
+                var beneficio = beneficios.FirstOrDefault(b => b.id.Length > 0 && b.id == cadastro.BeneficioEscolhido(p, extra.Id, id)).nome;
+                var rotuloBeneficio = Estilo.Rotulo(linha, cumprido ? beneficio ?? "sem benefício" : string.Empty, 20,
+                    Estilo.Dourado, FontStyles.Italic);
+                rotuloBeneficio.gameObject.AddComponent<LayoutElement>().preferredWidth = 240;
+            }
+        }
+
+        /// <summary>Caixinha de marcar (quadrado dourado quando marcada).</summary>
+        static void Caixa(Transform pai, bool marcada, bool ativa, UnityEngine.Events.UnityAction aoClicar)
+        {
+            var rect = Estilo.Rect("Caixa", pai);
+            rect.gameObject.AddComponent<LayoutElement>().preferredWidth = 38;
+            var fundo = marcada ? Estilo.Dourado : Estilo.Campo;
+            var borda = ativa || marcada ? Estilo.Dourado : Estilo.BordaApagada;
+            var imagem = Estilo.Moldura(rect.gameObject, fundo, borda);
+            var botao = rect.gameObject.AddComponent<Button>();
+            botao.targetGraphic = imagem;
+            botao.interactable = ativa;
+            var cores = botao.colors;
+            cores.disabledColor = Color.white; // travada mantém o desenho (marcada continua dourada)
+            botao.colors = cores;
+            if (ativa)
+            {
+                botao.onClick.AddListener(aoClicar);
+                rect.gameObject.AddComponent<Tabulavel>();
             }
         }
 
@@ -375,6 +478,18 @@ namespace TorreDeControle.UI
                             : escolhidas.Contains(id) ? EstadoChip.Escolhida
                             : escolhidas.Count >= max ? EstadoChip.Bloqueada : EstadoChip.Livre;
                         Chip(grade, o.Nome, estado, () => Aplicar(cadastro.AlternarOpcaoDeExtra(p.Id, extra, c.Id, id)));
+                    }
+
+                    // Lista que pede descrição: cada escolhida ganha o seu campo (ex.: como o bicho ajuda).
+                    if (c.Descrever)
+                    {
+                        foreach (var o in c.Opcoes.Where(o => escolhidas.Contains(o.Id)))
+                        {
+                            var fila = FilaRotulada(o.Nome);
+                            fila.GetComponentInChildren<TextMeshProUGUI>().textWrappingMode = TextWrappingModes.Normal;
+                            var campo = CampoTextoDeExtra(extra, c, o.Id, emCriacao, fila, c.Nota ?? "descreva");
+                            Estilo.ColunaElastica(campo);
+                        }
                     }
                     break;
                 }
@@ -416,9 +531,10 @@ namespace TorreDeControle.UI
         }
 
         TMP_InputField CampoTextoDeExtra(string extra, Core.Regras.RegrasArquetipos.CampoExtra c, string vaga,
-            bool emCriacao, Transform pai = null)
+            bool emCriacao, Transform pai = null, string dica = null)
         {
-            var campo = Estilo.CampoTexto(pai != null ? pai : conteudo, c.NaSala ? "na sala" : c.Titulo.ToLowerInvariant());
+            var campo = Estilo.CampoTexto(pai != null ? pai : conteudo,
+                c.NaSala ? "na sala" : dica ?? c.Titulo.ToLowerInvariant());
             campo.text = cadastro.TextoDoExtra(p, extra, c.Id, vaga);
             if (pai == null)
             {
@@ -453,9 +569,19 @@ namespace TorreDeControle.UI
             var emCima = cadastro.MarcadosEmCima(p);
             var baixoLiberado = cadastro.BaixoLiberado(p);
 
-            Secao("AVANÇOS", emCriacao
-                ? "liberam depois de concluir a criação"
-                : $"marque ao ganhar um avanço  ·  {emCima}/{avancos.Cima.Count} marcados");
+            // Só texto por enquanto (as estrelas do Alan entram no fim, junto com as outras marcas visuais).
+            var pendentes = cadastro.AvancosPendentes(p);
+            var topo = Estilo.Fila(conteudo, 44, 14);
+            var resumo = cadastro.CarreiraEncerrada(p)
+                ? "Carreira encerrada: aposentou ou virou modelo para a cidade."
+                : emCriacao ? "Avanços vêm depois de concluir a criação."
+                : pendentes > 0 ? $"{p.AvancosMarcados.Count} avanço(s) pego(s) ({FaixaDaCarreira()})  ·  {pendentes} pendente(s): escolha abaixo"
+                : $"{p.AvancosMarcados.Count} avanço(s) pego(s) ({FaixaDaCarreira()})  ·  sem avanço pendente  ·  potencial {p.Potencial}, {ProgressoDoPotencial()}";
+            var t = Estilo.Rotulo(topo, resumo, 24, pendentes > 0 ? Estilo.Dourado : Estilo.TextoSuave,
+                pendentes > 0 ? FontStyles.Bold : FontStyles.Normal);
+            Estilo.ColunaElastica(t);
+
+            Secao("AVANÇOS", emCriacao ? null : $"{emCima}/{avancos.Cima.Count} marcados");
             for (var k = 0; k < avancos.Cima.Count; k++)
                 LinhaAvanco(CadastroPersonagens.Cima, k, avancos.Cima[k].Texto, emCriacao);
 
@@ -473,6 +599,27 @@ namespace TorreDeControle.UI
             nota.gameObject.AddComponent<LayoutElement>().minHeight = 34;
         }
 
+        /// <summary>
+        /// Faixa da carreira pelos avanços (em texto por enquanto; as estrelas do Alan entram no fim):
+        /// 1–5 sem tardios ainda, 6–10 veterano, 11–14 fim de carreira; aposentou encerra.
+        /// </summary>
+        string FaixaDaCarreira()
+        {
+            if (cadastro.CarreiraEncerrada(p))
+                return "carreira encerrada";
+            var a = p.AvancosMarcados.Count;
+            return a == 0 ? "sem avanços ainda" : a <= 5 ? "iniciante" : a <= 10 ? "veterano" : "fim de carreira";
+        }
+
+        /// <summary>Caminho do potencial até o próximo avanço, em texto ("2/5").</summary>
+        string ProgressoDoPotencial()
+        {
+            var porAvanco = CadastroPersonagens.PotencialPorAvanco;
+            var resto = p.Potencial % porAvanco;
+            var cheio = resto == 0 && p.Potencial > 0 && cadastro.AvancosPendentes(p) > 0;
+            return $"{(cheio ? porAvanco : resto)}/{porAvanco} para o próximo avanço";
+        }
+
         void LinhaAvanco(string lista, int indice, string texto, bool travadaPorRegra)
         {
             var marcado = cadastro.Marcado(p, lista, indice);
@@ -488,7 +635,9 @@ namespace TorreDeControle.UI
             cores.highlightedColor = new Color(1, 1, 1, 0.06f);
             cores.disabledColor = new Color(1, 1, 1, 0);
             botao.colors = cores;
-            botao.interactable = p.Status != StatusCriacao.Novo && estado != EstadoAvanco.Travado;
+            // Marcar exige avanço pendente; desmarcar (desfazer) sempre pode.
+            botao.interactable = p.Status != StatusCriacao.Novo && estado != EstadoAvanco.Travado &&
+                                 (marcado || cadastro.AvancosPendentes(p) > 0);
             botao.onClick.AddListener(() => Aplicar(cadastro.AlternarAvanco(p.Id, lista, indice)));
             if (botao.interactable)
                 fila.gameObject.AddComponent<Tabulavel>();
@@ -853,12 +1002,22 @@ namespace TorreDeControle.UI
             foreach (var c in new[] { "Assustado", "Irritado", "Culpado", "Desesperançoso", "Inseguro" })
                 Selo(condicoes, c, 230);
 
-            Secao("POTENCIAL E HORA DA VERDADE", null);
-            var outros = Estilo.Fila(conteudo, 44, 10);
-            for (var k = 0; k < 5; k++)
-                Selo(outros, string.Empty, 56);
+            Secao("POTENCIAL E HORA DA VERDADE", "pontos corridos: a cada 5, um avanço");
+            var outros = Estilo.Fila(conteudo, 56, 12);
+            var pendentes = cadastro.AvancosPendentes(p);
+            var textoPotencial = Estilo.Rotulo(outros,
+                $"{p.Potencial} de potencial ({ProgressoDoPotencial()})" +
+                (pendentes > 0 ? $"  ·  {pendentes} avanço(s) pendente(s)" : string.Empty),
+                24, pendentes > 0 ? Estilo.Dourado : Estilo.TextoSuave, pendentes > 0 ? FontStyles.Bold : FontStyles.Normal);
+            textoPotencial.gameObject.AddComponent<LayoutElement>().preferredWidth = 640;
+            if (p.Status != StatusCriacao.Novo)
+            {
+                // PROVISÓRIO: no jogo, quem dá potencial é o painel do mestre.
+                Estilo.BotaoContorno(outros, "−1", 80, Estilo.TextoSuave, () => Aplicar(cadastro.AjustarPotencial(p.Id, -1)));
+                Estilo.BotaoContorno(outros, "+1 provisório", 230, Estilo.Dourado, () => Aplicar(cadastro.AjustarPotencial(p.Id, 1)));
+            }
             var vao2 = Estilo.Rect("Vao", outros);
-            vao2.gameObject.AddComponent<LayoutElement>().preferredWidth = 40;
+            vao2.gameObject.AddComponent<LayoutElement>().preferredWidth = 30;
             Selo(outros, "Hora da Verdade: bloqueada", 400);
 
             // Influência é Núcleo (sobrevive à troca de arquétipo), mas a inicial se dá aos colegas: na sala.

@@ -30,6 +30,13 @@ Depois:
   qualquer outra mudança de controle ou papel.
 - Linha do tempo da personagem mostrando as fases (jovem heroína → modelo → mentora).
 
+## Marcas visuais (no fim)
+
+Por ora tudo funciona em texto. No fim entram as marcas visuais, como as estrelas do Alan
+(acervo `botoes/`): selo de avanços **bronze 1–5** (avanços 1–5), **prata 1–5** (6–10, veterano),
+**ouro 1–5** (11–15, fim de carreira); marcadores do potencial até o próximo avanço; pentagramas
+da trilha da perdição.
+
 ## Galerias de fotos da personagem
 
 Na aba Identidade, duas galerias opcionais: **civil** e **mascarada**, cada uma com 1..n imagens

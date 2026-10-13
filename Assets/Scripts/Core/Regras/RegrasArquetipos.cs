@@ -58,8 +58,20 @@ namespace TorreDeControle.Core.Regras
         {
             [JsonProperty("escolher")] public int Escolher { get; set; }
             [JsonProperty("obrigatorios")] public List<string> Obrigatorios { get; set; } = new List<string>();
-            [JsonProperty("opcoes")] public List<Opcao> Opcoes { get; set; } = new List<Opcao>();
+            [JsonProperty("opcoes")] public List<MovimentoDoArquetipo> Opcoes { get; set; } = new List<MovimentoDoArquetipo>();
             [JsonProperty("nota")] public string Nota { get; set; }
+        }
+
+        /// <summary>
+        /// Um movimento do deck. Alguns abrem uma subseção na ficha quando escolhidos (<see cref="Campos"/>,
+        /// os mesmos tipos de campo dos extras), e trazem a regra em uma frase para a tela e, depois, o motor.
+        /// </summary>
+        public sealed class MovimentoDoArquetipo
+        {
+            [JsonProperty("id")] public string Id { get; set; }
+            [JsonProperty("nome")] public string Nome { get; set; }
+            [JsonProperty("regra")] public string Regra { get; set; }
+            [JsonProperty("campos")] public List<CampoExtra> Campos { get; set; } = new List<CampoExtra>();
         }
 
         public sealed class RegraExtra
@@ -68,6 +80,10 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("nome")] public string Nome { get; set; }
             [JsonProperty("nota")] public string Nota { get; set; }
             [JsonProperty("campos")] public List<CampoExtra> Campos { get; set; } = new List<CampoExtra>();
+            /// <summary>No jogo, as escolhas deste campo podem ser cumpridas (ex.: os impulsos marcados do Farol).</summary>
+            [JsonProperty("cumpre_campo")] public string CumpreCampo { get; set; }
+            /// <summary>Benefícios para escolher ao cumprir.</summary>
+            [JsonProperty("ao_cumprir")] public List<Opcao> AoCumprir { get; set; } = new List<Opcao>();
         }
 
         /// <summary>
@@ -94,6 +110,8 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("tamanho")] public int Tamanho { get; set; }
             /// <summary>Preenchido na sala, com a equipe (ex.: amor e rival da Bruta).</summary>
             [JsonProperty("na_sala")] public bool NaSala { get; set; }
+            /// <summary>Lista: cada opção escolhida pede um texto (ex.: como o bicho ajuda em cada movimento).</summary>
+            [JsonProperty("descrever")] public bool Descrever { get; set; }
             [JsonProperty("nota")] public string Nota { get; set; }
 
             [JsonIgnore] public int MaximoEscolhas => Escolher ?? EscolherAte ?? 0;
