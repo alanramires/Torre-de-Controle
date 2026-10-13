@@ -6,7 +6,7 @@ namespace TorreDeControle.Core.Personagens
     /// <summary>
     /// Os dez arquétipos do livro base: só identidade (id e nome). Os ids batem com o catálogo de
     /// cartas do acervo (equipe/farol, ...). Rótulos iniciais e regras de criação virão de
-    /// Assets/Regras/arquetipos.json (parte 2 da ficha).
+    /// Assets/Resources/Regras/arquetipos.json (parte 2 da ficha).
     /// </summary>
     public static class Arquetipos
     {

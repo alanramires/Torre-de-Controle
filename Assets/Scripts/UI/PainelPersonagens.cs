@@ -19,10 +19,12 @@ namespace TorreDeControle.UI
         const float LarguraJogador = 250;
         const float LarguraStatus = 150;
         const float LarguraAtivo = 170;
+        const float LarguraFicha = 150;
         const string SemJogador = "";
 
         CadastroPersonagens cadastro;
         CadastroJogadores jogadores;
+        PainelFicha painelFicha;
 
         TMP_InputField campoCodinome;
         TMP_InputField campoNome;
@@ -174,6 +176,7 @@ namespace TorreDeControle.UI
             Coluna(fila, "JOGADOR", LarguraJogador);
             Coluna(fila, "STATUS", LarguraStatus);
             Coluna(fila, string.Empty, LarguraAtivo);
+            Coluna(fila, string.Empty, LarguraFicha);
         }
 
         static void Coluna(Transform pai, string texto, float largura)
@@ -205,7 +208,7 @@ namespace TorreDeControle.UI
             campoNome.onSubmit.AddListener(_ => Adicionar());
             Estilo.ListaSuspensa(filaNovo, LarguraArquetipo, OpcoesArquetipo(), arquetipoNovo, id => arquetipoNovo = id);
             Estilo.ListaSuspensa(filaNovo, LarguraJogador, OpcoesJogador(jogadorNovo), jogadorNovo, id => jogadorNovo = id);
-            Estilo.BotaoPrincipal(filaNovo, "Criar", LarguraStatus + LarguraAtivo + 14, Adicionar);
+            Estilo.BotaoPrincipal(filaNovo, "Criar", LarguraStatus + LarguraAtivo + LarguraFicha + 28, Adicionar);
         }
 
         void Redesenhar()
@@ -271,6 +274,16 @@ namespace TorreDeControle.UI
                 Estilo.BotaoContorno(linha, "Ativa", LarguraAtivo, Estilo.Dourado, () => AlternarAtivo(p));
             else
                 Estilo.BotaoContorno(linha, "Inativa", LarguraAtivo, Estilo.TextoApagado, () => AlternarAtivo(p));
+
+            Estilo.BotaoPrincipal(linha, "Ficha", LarguraFicha, () => AbrirFicha(p));
+        }
+
+        void AbrirFicha(Personagem p)
+        {
+            if (painelFicha == null)
+                painelFicha = PainelFicha.Criar(transform.parent);
+            // Ao fechar a ficha, a lista volta atualizada (status, nomes e arquétipo podem ter mudado).
+            painelFicha.Abrir(p, cadastro, jogadores, Redesenhar);
         }
 
         static string TextoStatus(StatusCriacao status) => status switch

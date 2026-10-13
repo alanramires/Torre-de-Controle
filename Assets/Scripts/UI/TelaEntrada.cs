@@ -1,5 +1,6 @@
 using TorreDeControle.Core.Jogadores;
 using TorreDeControle.Core.Personagens;
+using TorreDeControle.Core.Regras;
 using TorreDeControle.Infra;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,7 +27,7 @@ namespace TorreDeControle.UI
             Debug.Log($"[Torre] Dados em: {armazenamento.Pasta}");
 
             jogadores = CadastroJogadores.Carregar(armazenamento);
-            personagens = CadastroPersonagens.Carregar(armazenamento);
+            personagens = CadastroPersonagens.Carregar(armazenamento, RegrasArquetipos.Carregar(new FonteDeRegrasResources()));
 
             Ligar(botaoJogadores, nameof(botaoJogadores), AbrirJogadores);
             Ligar(botaoPersonagens, nameof(botaoPersonagens), AbrirPersonagens);

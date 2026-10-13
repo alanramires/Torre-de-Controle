@@ -26,6 +26,8 @@ namespace TorreDeControle.UI
         public static readonly Color TextoSuave = new Color(0.68f, 0.74f, 0.86f);
         public static readonly Color TextoApagado = new Color(0.55f, 0.58f, 0.66f);
         public static readonly Color Erro = new Color(1f, 0.5f, 0.45f);
+        /// <summary>O azul do valor inicial na ficha impressa.</summary>
+        public static readonly Color Azul = new Color(0.36f, 0.62f, 0.95f);
 
         // ---------- estrutura ----------
 
@@ -320,6 +322,53 @@ namespace TorreDeControle.UI
             layout.minWidth = 0;
             layout.preferredWidth = 0;
             layout.flexibleWidth = peso;
+        }
+
+        /// <summary>
+        /// Pergunta modal por cima de tudo: mensagem + [cancelar] [confirmar]. Esc não existe ainda;
+        /// clicar fora cancela.
+        /// </summary>
+        public static void Confirmar(Transform qualquer, string mensagem, string textoSim, UnityAction aoConfirmar,
+            UnityAction aoCancelar = null)
+        {
+            var raiz = (RectTransform)qualquer.GetComponentInParent<Canvas>().rootCanvas.transform;
+            var veu = Rect("Confirmar", raiz);
+            Esticar(veu);
+            veu.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 0.6f);
+            var fora = veu.gameObject.AddComponent<Button>();
+            fora.transition = Selectable.Transition.None;
+            void Cancelar()
+            {
+                Object.Destroy(veu.gameObject);
+                aoCancelar?.Invoke();
+            }
+            fora.onClick.AddListener(Cancelar);
+
+            var caixa = Rect("Caixa", veu);
+            caixa.anchorMin = caixa.anchorMax = new Vector2(0.5f, 0.5f);
+            caixa.sizeDelta = new Vector2(820, 320);
+            Moldura(caixa.gameObject, CaixaOpcoes, Dourado);
+            var coluna = caixa.gameObject.AddComponent<VerticalLayoutGroup>();
+            coluna.padding = new RectOffset(40, 40, 36, 32);
+            coluna.spacing = 24;
+            coluna.childControlWidth = true;
+            coluna.childControlHeight = true;
+            coluna.childForceExpandHeight = false;
+
+            var texto = Rotulo(caixa, mensagem, 28, Texto);
+            texto.textWrappingMode = TextWrappingModes.Normal;
+            texto.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+
+            var botoes = Fila(caixa, 60);
+            botoes.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleRight;
+            var vao = Rect("Vao", botoes);
+            vao.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            BotaoContorno(botoes, "Cancelar", 220, TextoSuave, Cancelar);
+            BotaoPrincipal(botoes, textoSim, 260, () =>
+            {
+                Object.Destroy(veu.gameObject);
+                aoConfirmar();
+            });
         }
 
         public static RectTransform ListaRolavel(Transform pai, float espaco = 10)

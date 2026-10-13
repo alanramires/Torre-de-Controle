@@ -12,7 +12,7 @@ namespace TorreDeControle.Tests
         public void Preparar()
         {
             armazenamento = new ArmazenamentoEmMemoria();
-            cadastro = CadastroPersonagens.Carregar(armazenamento);
+            cadastro = CadastroPersonagens.Carregar(armazenamento, RegrasDeTeste.Arquetipos());
         }
 
         [Test]
@@ -73,7 +73,7 @@ namespace TorreDeControle.Tests
             StringAssert.Contains("\"status\": \"novo\"", json);
             StringAssert.Contains("\"controle\": \"jogador\"", json);
 
-            var p = CadastroPersonagens.Carregar(armazenamento).Buscar(id);
+            var p = CadastroPersonagens.Carregar(armazenamento, RegrasDeTeste.Arquetipos()).Buscar(id);
             Assert.That(p.Identidade.Codinome, Is.EqualTo("Raposa Prateada"));
             Assert.That(p.Identidade.Jogador, Is.EqualTo("j1"));
             Assert.That(p.Ativo, Is.False);
