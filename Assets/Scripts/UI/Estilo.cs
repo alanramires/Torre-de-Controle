@@ -329,6 +329,13 @@ namespace TorreDeControle.UI
         /// clicar fora cancela.
         /// </summary>
         public static void Confirmar(Transform qualquer, string mensagem, string textoSim, UnityAction aoConfirmar,
+            UnityAction aoCancelar = null) =>
+            Perguntar(qualquer, mensagem, new[] { (textoSim, aoConfirmar) }, aoCancelar);
+
+        /// <summary>
+        /// Como <see cref="Confirmar"/>, com várias respostas: [cancelar] [opção]... (a última é a principal).
+        /// </summary>
+        public static void Perguntar(Transform qualquer, string mensagem, (string texto, UnityAction acao)[] opcoes,
             UnityAction aoCancelar = null)
         {
             var raiz = (RectTransform)qualquer.GetComponentInParent<Canvas>().rootCanvas.transform;
@@ -346,7 +353,7 @@ namespace TorreDeControle.UI
 
             var caixa = Rect("Caixa", veu);
             caixa.anchorMin = caixa.anchorMax = new Vector2(0.5f, 0.5f);
-            caixa.sizeDelta = new Vector2(820, 320);
+            caixa.sizeDelta = new Vector2(opcoes.Length > 1 ? 1000 : 820, 320);
             Moldura(caixa.gameObject, CaixaOpcoes, Dourado);
             var coluna = caixa.gameObject.AddComponent<VerticalLayoutGroup>();
             coluna.padding = new RectOffset(40, 40, 36, 32);
@@ -364,11 +371,72 @@ namespace TorreDeControle.UI
             var vao = Rect("Vao", botoes);
             vao.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
             BotaoContorno(botoes, "Cancelar", 220, TextoSuave, Cancelar);
-            BotaoPrincipal(botoes, textoSim, 260, () =>
+            for (var k = 0; k < opcoes.Length; k++)
             {
-                Object.Destroy(veu.gameObject);
-                aoConfirmar();
-            });
+                var acao = opcoes[k].acao;
+                UnityAction clicar = () =>
+                {
+                    Object.Destroy(veu.gameObject);
+                    acao();
+                };
+                if (k == opcoes.Length - 1)
+                    BotaoPrincipal(botoes, opcoes[k].texto, 300, clicar);
+                else
+                    BotaoContorno(botoes, opcoes[k].texto, 300, Dourado, clicar);
+            }
+        }
+
+        /// <summary>
+        /// Escolha modal numa lista vertical: um botão por opção (a primeira em destaque) e Cancelar.
+        /// Opção <c>apagada</c> sai em tom pálido (ex.: arquivo, só consulta). Clicar fora cancela.
+        /// </summary>
+        public static void Escolher(Transform qualquer, string titulo, (string texto, UnityAction acao, bool apagada)[] opcoes)
+        {
+            var raiz = (RectTransform)qualquer.GetComponentInParent<Canvas>().rootCanvas.transform;
+            var veu = Rect("Escolher", raiz);
+            Esticar(veu);
+            veu.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 0.6f);
+            var fora = veu.gameObject.AddComponent<Button>();
+            fora.transition = Selectable.Transition.None;
+            fora.onClick.AddListener(() => Object.Destroy(veu.gameObject));
+
+            var caixa = Rect("Caixa", veu);
+            caixa.anchorMin = caixa.anchorMax = new Vector2(0.5f, 0.5f);
+            Moldura(caixa.gameObject, CaixaOpcoes, Dourado);
+            var coluna = caixa.gameObject.AddComponent<VerticalLayoutGroup>();
+            coluna.padding = new RectOffset(40, 40, 32, 32);
+            coluna.spacing = 12;
+            coluna.childControlWidth = true;
+            coluna.childControlHeight = true;
+            coluna.childForceExpandHeight = false;
+            var ajuste = caixa.gameObject.AddComponent<ContentSizeFitter>();
+            ajuste.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            caixa.sizeDelta = new Vector2(760, 0);
+
+            var t = Rotulo(caixa, titulo, 28, Dourado, FontStyles.Bold);
+            t.textWrappingMode = TextWrappingModes.Normal;
+            t.gameObject.AddComponent<LayoutElement>().minHeight = 40;
+
+            for (var k = 0; k < opcoes.Length; k++)
+            {
+                var acao = opcoes[k].acao;
+                UnityAction clicar = () =>
+                {
+                    Object.Destroy(veu.gameObject);
+                    acao();
+                };
+                var b = opcoes[k].apagada ? BotaoContorno(caixa, opcoes[k].texto, 0, TextoApagado, clicar)
+                    : k == 0 ? BotaoPrincipal(caixa, opcoes[k].texto, 0, clicar)
+                    : BotaoContorno(caixa, opcoes[k].texto, 0, Dourado, clicar);
+                var le = b.GetComponent<LayoutElement>();
+                le.minHeight = 58;
+                le.preferredHeight = 58;
+            }
+
+            var vao = Rect("Vao", caixa);
+            vao.gameObject.AddComponent<LayoutElement>().minHeight = 4;
+            var cancelar = BotaoContorno(caixa, "Cancelar", 0, TextoSuave, () => Object.Destroy(veu.gameObject));
+            cancelar.GetComponent<LayoutElement>().preferredHeight = 52;
         }
 
         public const float LarguraAlca = 34;
@@ -442,7 +510,7 @@ namespace TorreDeControle.UI
         }
 
         /// <summary>
-        /// Põe o botão "•••" no fim de uma caixa de uma linha: abre uma mini-tela com área de texto grande.
+        /// Põe o botão "•••" no fim da caixa (no canto de cima, se for de várias linhas): abre uma mini-tela com área de texto grande.
         /// Salvar escreve no campo e dispara o onDeselect dele (que é quem grava), como se tivesse saído do campo.
         /// </summary>
         public static void ComExpandir(TMP_InputField campo, string titulo)
@@ -454,10 +522,18 @@ namespace TorreDeControle.UI
             area.offsetMax = new Vector2(-58, area.offsetMax.y);
 
             var rect = Rect("Expandir", campo.transform);
-            rect.anchorMin = new Vector2(1, 0);
-            rect.anchorMax = new Vector2(1, 1);
-            rect.pivot = new Vector2(1, 0.5f);
-            rect.sizeDelta = new Vector2(52, 0);
+            if (campo.multiLine)
+            {
+                rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(1, 1);
+                rect.sizeDelta = new Vector2(52, 44);
+            }
+            else
+            {
+                rect.anchorMin = new Vector2(1, 0);
+                rect.anchorMax = new Vector2(1, 1);
+                rect.pivot = new Vector2(1, 0.5f);
+                rect.sizeDelta = new Vector2(52, 0);
+            }
             rect.anchoredPosition = Vector2.zero;
             var fundo = rect.gameObject.AddComponent<Image>();
             fundo.color = new Color(1, 1, 1, 0);

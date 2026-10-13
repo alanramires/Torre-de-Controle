@@ -48,12 +48,22 @@ namespace TorreDeControle.Core.Personagens
                 p.TextosDeJogo ??= new Dictionary<string, string>();
                 p.ItensDeJogo ??= new Dictionary<string, List<ItemDeJogo>>();
                 p.ObsMovimentos ??= new Dictionary<string, string>();
+                if (p.Vilao != null)
+                {
+                    p.Vilao.Movimentos ??= new List<string>();
+                    p.Vilao.Condicoes ??= new List<string>();
+                }
             }
             return new CadastroPersonagens(armazenamento, regras, lista);
         }
 
-        /// <summary>Ativas primeiro; cada bloco na ordem que o mestre arrastou.</summary>
-        public IReadOnlyList<Personagem> Listar() => Ordenacao.Ordenar(personagens, p => p.NomeExibicao);
+        /// <summary>Laboratório (fora de sala): ativas primeiro; cada bloco na ordem que o mestre arrastou.</summary>
+        public IReadOnlyList<Personagem> Listar() => Ordenacao.Ordenar(DoLaboratorio, p => p.NomeExibicao);
+
+        IEnumerable<Personagem> DoLaboratorio => personagens.Where(p => p.Sala == null);
+
+        /// <summary>As cópias que estão (ou estiveram, se inativas) na sala.</summary>
+        public IReadOnlyList<Personagem> DaSala(string sala) => personagens.Where(p => p.Sala == sala).ToList();
 
         /// <summary>Leva a personagem para a posição <paramref name="indice"/> do bloco dela (ativas ou inativas).</summary>
         public Resultado Mover(string id, int indice)
@@ -61,7 +71,11 @@ namespace TorreDeControle.Core.Personagens
             var personagem = Buscar(id);
             if (personagem == null)
                 return Resultado.Falha("Personagem não encontrada.");
-            Ordenacao.Mover(personagens, personagem, indice, p => p.NomeExibicao);
+            // Na sala, heróis e NPCs são listas separadas.
+            var lista = personagem.Sala == null
+                ? DoLaboratorio
+                : personagens.Where(p => p.Sala == personagem.Sala && p.Controle == personagem.Controle);
+            Ordenacao.Mover(lista, personagem, indice, p => p.NomeExibicao);
             Gravar();
             return Resultado.Sucesso();
         }
@@ -198,17 +212,99 @@ namespace TorreDeControle.Core.Personagens
             if (avisos.Count > 0)
                 return Resultado.Falha("Ainda há pendências: " + string.Join(" ", avisos));
 
-            p.Foto = new FotoCriacao
+            // Monta a foto inteira ANTES de pô-la na personagem: com p.Foto preenchida, as leituras
+            // (MovimentosNaFicha etc.) passam a ler da foto, e ela ainda estaria vazia.
+            var foto = new FotoCriacao
             {
                 AprovadaEm = DateTime.Now.ToString("s"),
                 Arquetipo = p.Identidade.Arquetipo,
                 Rotulos = new Dictionary<string, int>(RotulosAtuais(p)),
                 Habilidades = HabilidadesAtuais(p).ToList(),
             };
-            CongelarModulos(p, p.Foto);
+            CongelarModulos(p, foto);
+            p.Foto = foto;
             p.Status = StatusCriacao.Criado;
             Gravar();
             return Resultado.Sucesso();
+        }
+
+        /// <summary>
+        /// Provisório, enquanto a ficha ainda está sendo construída: devolve uma ficha criada para "novo"
+        /// (descarta a foto da criação) para refazer a criação. Ficha em carreira não volta.
+        /// </summary>
+        public Resultado ReabrirCriacao(string id)
+        {
+            var p = Buscar(id);
+            if (p == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            if (p.Status != StatusCriacao.Criado)
+                return Resultado.Falha("Só uma ficha criada (fora de sala) volta para novo.");
+
+            p.Foto = null;
+            p.Status = StatusCriacao.Novo;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        // ---------- sala: a cópia (instância) ----------
+
+        /// <summary>
+        /// Cria a cópia de uma personagem do laboratório para jogar na sala (a original fica intacta).
+        /// Só ficha criada (foto congelada) entra. Sem <paramref name="comJogo"/>, a cópia nasce só da
+        /// criação: o que o laboratório marcou de jogo (potencial, avanços, trilhas...) fica para trás.
+        /// </summary>
+        public Personagem CopiarParaSala(string origemId, string sala, string jogador, bool comJogo, out Resultado resultado)
+        {
+            var origem = Buscar(origemId);
+            if (origem == null || origem.Sala != null)
+            {
+                resultado = Resultado.Falha("Só personagem do laboratório vai para a sala.");
+                return null;
+            }
+            if (origem.Status != StatusCriacao.Criado)
+            {
+                resultado = Resultado.Falha("Conclua a criação no laboratório antes de pôr na sala.");
+                return null;
+            }
+
+            // Em modo teste, copia a real (o que está no disco), não o que o teste mexeu.
+            var json = emTeste.TryGetValue(origemId, out var real) ? real : JsonConvert.SerializeObject(origem);
+            var copia = JsonConvert.DeserializeObject<Personagem>(json);
+            copia.Id = Guid.NewGuid().ToString("N");
+            copia.Origem = origem.Id;
+            copia.Sala = sala;
+            copia.Status = StatusCriacao.EmCarreira;
+            copia.Ativo = true;
+            copia.Ordem = Ordenacao.Fim(DaSala(sala));
+            copia.Identidade.Jogador = jogador;
+            if (!comJogo)
+            {
+                copia.Potencial = 0;
+                copia.AvancosMarcados = new List<string>();
+                copia.Contadores = new Dictionary<string, int>();
+                copia.EscolhasDeJogo = new Dictionary<string, List<string>>();
+                copia.TextosDeJogo = new Dictionary<string, string>();
+                copia.ItensDeJogo = new Dictionary<string, List<ItemDeJogo>>();
+                copia.Cumpridos = new Dictionary<string, string>();
+            }
+            personagens.Add(copia);
+            Gravar();
+            resultado = Resultado.Sucesso();
+            return copia;
+        }
+
+        /// <summary>As cópias (instâncias nas salas) feitas desta personagem; ativas primeiro.</summary>
+        public IReadOnlyList<Personagem> CopiasDe(string origemId) =>
+            personagens.Where(p => p.Origem == origemId && p.Sala != null).OrderByDescending(p => p.Ativo).ToList();
+
+        /// <summary>O jogador da cópia acompanha o do slot (quem decide é a sala).</summary>
+        public void VincularJogador(string id, string jogador)
+        {
+            var p = Buscar(id);
+            if (p == null || p.Identidade.Jogador == jogador)
+                return;
+            p.Identidade.Jogador = jogador;
+            Gravar();
         }
 
         public Resultado DefinirAtivo(string id, bool ativo)

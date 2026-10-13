@@ -4,6 +4,7 @@ using TMPro;
 using TorreDeControle.Core;
 using TorreDeControle.Core.Jogadores;
 using TorreDeControle.Core.Personagens;
+using TorreDeControle.Core.Salas;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,6 +25,7 @@ namespace TorreDeControle.UI
 
         CadastroPersonagens cadastro;
         CadastroJogadores jogadores;
+        CadastroSalas salas;
         PainelFicha painelFicha;
 
         TMP_InputField campoCodinome;
@@ -46,10 +48,12 @@ namespace TorreDeControle.UI
             return painel;
         }
 
-        public void Abrir(CadastroPersonagens cadastroPersonagens, CadastroJogadores cadastroJogadores)
+        public void Abrir(CadastroPersonagens cadastroPersonagens, CadastroJogadores cadastroJogadores,
+            CadastroSalas cadastroSalas)
         {
             cadastro = cadastroPersonagens;
             jogadores = cadastroJogadores;
+            salas = cadastroSalas;
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
             Mostrar(null);
@@ -277,17 +281,71 @@ namespace TorreDeControle.UI
             Estilo.ListaSuspensa(linha, LarguraJogador, OpcoesJogador(i.Jogador), i.Jogador ?? SemJogador,
                 id => Alterar(p, p.Identidade.Nome, p.Identidade.Codinome, p.Identidade.Arquetipo, id));
 
-            var status = Estilo.Rotulo(linha, TextoStatus(p.Status), 22, Estilo.Dourado, FontStyles.Bold);
-            status.alignment = TextAlignmentOptions.Center;
-            status.characterSpacing = 3;
-            status.gameObject.AddComponent<LayoutElement>().preferredWidth = LarguraStatus;
+            if (p.Status == StatusCriacao.Criado)
+            {
+                // Provisório, enquanto a ficha está em construção: clicar volta para "novo".
+                Estilo.BotaoContorno(linha, TextoStatus(p.Status), LarguraStatus, Estilo.Dourado, () => Reabrir(p));
+            }
+            else
+            {
+                var status = Estilo.Rotulo(linha, TextoStatus(p.Status), 22, Estilo.Dourado, FontStyles.Bold);
+                status.alignment = TextAlignmentOptions.Center;
+                status.characterSpacing = 3;
+                status.gameObject.AddComponent<LayoutElement>().preferredWidth = LarguraStatus;
+            }
 
             if (p.Ativo)
                 Estilo.BotaoContorno(linha, "Ativa", LarguraAtivo, Estilo.Dourado, () => AlternarAtivo(p));
             else
                 Estilo.BotaoContorno(linha, "Inativa", LarguraAtivo, Estilo.TextoApagado, () => AlternarAtivo(p));
 
-            Estilo.BotaoPrincipal(linha, "Ficha", LarguraFicha, () => AbrirFicha(p));
+            Estilo.BotaoPrincipal(linha, "Ficha", LarguraFicha, () => EscolherFicha(p));
+        }
+
+        /// <summary>
+        /// Com cópias em salas, pergunta qual ficha abrir: as instâncias nas vagas, a original (laboratório)
+        /// e, por último e em tom pálido, as tiradas das vagas (arquivo da sala, para consulta).
+        /// Sem cópias, abre direto.
+        /// </summary>
+        void EscolherFicha(Personagem p)
+        {
+            var copias = cadastro.CopiasDe(p.Id);
+            if (copias.Count == 0)
+            {
+                AbrirFicha(p);
+                return;
+            }
+            var opcoes = new List<(string, UnityEngine.Events.UnityAction, bool)>();
+            foreach (var c in copias.Where(c => c.Ativo))
+                opcoes.Add((Instancia(c, null), () => AbrirFicha(c), false));
+            opcoes.Add((p.NomeExibicao, () => AbrirFicha(p), false));
+            foreach (var c in copias.Where(c => !c.Ativo))
+                opcoes.Add((Instancia(c, "vaga liberada"), () => AbrirFicha(c), true));
+            Estilo.Escolher(transform, $"Qual ficha de {p.NomeExibicao}?", opcoes.ToArray());
+        }
+
+        /// <summary>"Titânia (Nova Aeternia)", com o que mais houver a dizer da sala ou da vaga.</summary>
+        string Instancia(Personagem copia, string nota)
+        {
+            var sala = salas?.Buscar(copia.Sala);
+            var onde = sala?.Nome ?? "sala";
+            if (sala != null && !sala.Ativo)
+                onde += " · sala inativa";
+            if (nota != null)
+                onde += " · " + nota;
+            return $"{copia.NomeExibicao} ({onde})";
+        }
+
+        void Reabrir(Personagem p)
+        {
+            Estilo.Confirmar(transform,
+                "Voltar a ficha para \"novo\"? A foto da criação é descartada e a criação fica editável de novo.",
+                "Voltar para novo",
+                () =>
+                {
+                    cadastro.ReabrirCriacao(p.Id);
+                    Redesenhar();
+                });
         }
 
         void AbrirFicha(Personagem p)

@@ -1,6 +1,7 @@
 using TorreDeControle.Core.Jogadores;
 using TorreDeControle.Core.Personagens;
 using TorreDeControle.Core.Regras;
+using TorreDeControle.Core.Salas;
 using TorreDeControle.Infra;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,11 +16,14 @@ namespace TorreDeControle.UI
     {
         [SerializeField] Button botaoJogadores;
         [SerializeField] Button botaoPersonagens;
+        [SerializeField] Button botaoSalas;
 
         CadastroJogadores jogadores;
         CadastroPersonagens personagens;
         PainelJogadores painelJogadores;
         PainelPersonagens painelPersonagens;
+        CadastroSalas salas;
+        PainelSalas painelSalas;
 
         void Awake()
         {
@@ -30,7 +34,10 @@ namespace TorreDeControle.UI
             personagens = CadastroPersonagens.Carregar(armazenamento, RegrasArquetipos.Carregar(new FonteDeRegrasResources()));
 
             Ligar(botaoJogadores, nameof(botaoJogadores), AbrirJogadores);
+            salas = CadastroSalas.Carregar(armazenamento, personagens);
+
             Ligar(botaoPersonagens, nameof(botaoPersonagens), AbrirPersonagens);
+            Ligar(botaoSalas, nameof(botaoSalas), AbrirSalas);
         }
 
         static void Ligar(Button botao, string campo, UnityEngine.Events.UnityAction acao)
@@ -52,7 +59,14 @@ namespace TorreDeControle.UI
         {
             if (painelPersonagens == null)
                 painelPersonagens = PainelPersonagens.Criar(transform);
-            painelPersonagens.Abrir(personagens, jogadores);
+            painelPersonagens.Abrir(personagens, jogadores, salas);
+        }
+
+        void AbrirSalas()
+        {
+            if (painelSalas == null)
+                painelSalas = PainelSalas.Criar(transform);
+            painelSalas.Abrir(salas, personagens, jogadores);
         }
     }
 }

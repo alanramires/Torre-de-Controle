@@ -197,7 +197,14 @@ estado atual = foto da criação + eventos aplicados em ordem
 ### Na sala
 
 - Slots: pôr jogador, pôr personagem (do laboratório ou nova), trocar jogador
+  - Feito (2026-10-13): sala com 1–12 slots (diminuir só tira vazios do fim); um slot por jogador;
+    só ficha **criada** entra, uma vez por sala (em outra sala pode); pôr pergunta "só a criação" ou
+    "criação + jogo"; slot sem jogador herda o da personagem; o jogador da cópia segue o slot (na
+    ficha fica travado); **tirar** inativa a cópia (fica no arquivo da sala) e mantém o jogador.
 - NPCs da sala: criar, trazer do laboratório, promover a vilão
+  - Feito (2026-10-13): criar direto na sala (nome, maturidade, papel); ficha simples do livro (aparência
+    marcante, modo de agir, motivação, notas); papel Vilão abre a ficha de vilão (geração, movimentos,
+    1–5 condições) e voltar o papel a guarda. Trazer do laboratório: ainda não.
 - Gestão das personagens: Rótulos, condições, potencial, Influência, Equipe, avanços
 - Rolar dados (o mestre rola por todos)
 - Rodada: abrir, registrar, fechar e exportar a colheita em BBCode

@@ -168,6 +168,12 @@ namespace TorreDeControle.Core.Personagens
         [JsonProperty("cumpridos")] public Dictionary<string, string> Cumpridos { get; set; } = new Dictionary<string, string>();
         /// <summary>De onde foi copiada (laboratório → sala); null no laboratório.</summary>
         [JsonProperty("origem")] public string Origem { get; set; }
+        /// <summary>Sala onde a cópia joga; null = laboratório.</summary>
+        [JsonProperty("sala")] public string Sala { get; set; }
+        /// <summary>Perfil PNJ (controle do mestre); null em herói.</summary>
+        [JsonProperty("pnj")] public PerfilPnj Pnj { get; set; }
+        /// <summary>Ficha de vilão; nasce ao virar vilão e fica guardada se o papel mudar.</summary>
+        [JsonProperty("vilao")] public FichaVilao Vilao { get; set; }
 
         /// <summary>Codinome se houver, senão o nome civil.</summary>
         [JsonIgnore]
