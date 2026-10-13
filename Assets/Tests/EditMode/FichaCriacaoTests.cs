@@ -78,14 +78,26 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
-        public void Aprovar_sem_bonus_pede_aceite_do_aviso()
+        public void Com_pendencia_nao_aprova()
         {
             var p = Nova("bruta");
-            Assert.That(cadastro.Aprovar(p.Id, aceitarAvisos: false).Ok, Is.False);
+            var resultado = cadastro.Aprovar(p.Id);
+            Assert.That(resultado.Ok, Is.False);
+            StringAssert.Contains("Falta escolher o +1 livre.", resultado.Erro);
             Assert.That(p.Status, Is.EqualTo(StatusCriacao.Novo));
+            Assert.That(p.Foto, Is.Null);
+        }
 
-            Assert.That(cadastro.Aprovar(p.Id, aceitarAvisos: true).Ok, Is.True);
-            Assert.That(p.Foto.AvisosAceitos, Has.Member("Falta escolher o +1 livre."));
+        [Test]
+        public void Observacao_nao_trava_aprovar()
+        {
+            var p = Nova("amaldicoada");
+            cadastro.EscolherBonusLivre(p.Id, Rotulos.Mundano);
+            cadastro.AlternarHabilidade(p.Id, "telecinese");
+            for (var k = 0; k < 5; k++)
+                cadastro.ResponderHistorico(p.Id, k, "resposta " + k);
+            Assert.That(cadastro.Observacoes(p), Has.Some.Contains("1 de até 3"));
+            Assert.That(cadastro.Aprovar(p.Id).Ok, Is.True);
         }
 
         [Test]
@@ -96,7 +108,7 @@ namespace TorreDeControle.Tests
             cadastro.AlternarHabilidade(p.Id, "feiticaria");
             for (var k = 0; k < 5; k++)
                 cadastro.ResponderHistorico(p.Id, k, "resposta " + k);
-            Assert.That(cadastro.Aprovar(p.Id, aceitarAvisos: false).Ok, Is.True);
+            Assert.That(cadastro.Aprovar(p.Id).Ok, Is.True);
             Assert.That(p.Foto.Habilidades.Single().Nome, Is.EqualTo("Feitiçaria"));
 
             Assert.That(p.Status, Is.EqualTo(StatusCriacao.Criado));

@@ -88,8 +88,6 @@ namespace TorreDeControle.Core.Personagens
         [JsonProperty("arquetipo")] public string Arquetipo { get; set; }
         [JsonProperty("rotulos")] public Dictionary<string, int> Rotulos { get; set; } = new Dictionary<string, int>();
         [JsonProperty("habilidades")] public List<Habilidade> Habilidades { get; set; } = new List<Habilidade>();
-        /// <summary>Avisos da validação que o mestre aceitou ao aprovar (a decisão é dele, fica registrada).</summary>
-        [JsonProperty("avisos_aceitos")] public List<string> AvisosAceitos { get; set; } = new List<string>();
     }
 
     /// <summary>

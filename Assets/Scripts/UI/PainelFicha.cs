@@ -79,7 +79,8 @@ namespace TorreDeControle.UI
             var cartao = Estilo.Rect("Cartao", veu);
             cartao.anchorMin = cartao.anchorMax = new Vector2(0.5f, 0.5f);
             cartao.sizeDelta = new Vector2(1680, 940);
-            Estilo.Moldura(cartao.gameObject, Estilo.Cartao, Estilo.Borda);
+            // Opaco: a ficha abre por cima da lista de personagens, que não deve vazar.
+            Estilo.Moldura(cartao.gameObject, new Color(Estilo.Cartao.r, Estilo.Cartao.g, Estilo.Cartao.b, 1f), Estilo.Borda);
 
             var coluna = cartao.gameObject.AddComponent<VerticalLayoutGroup>();
             coluna.padding = new RectOffset(56, 56, 34, 30);
@@ -209,27 +210,36 @@ namespace TorreDeControle.UI
             }
             else
             {
-                mensagem.text = "Tudo certo para aprovar.";
+                mensagem.text = "Tudo certo para concluir a criação.";
                 mensagem.color = Estilo.Dourado;
             }
 
-            Estilo.BotaoPrincipal(rodape, "Aprovar", 260, () => Aprovar(erros, avisos));
+            // Observações: válidas, só lembram (não entram na confirmação de aprovar).
+            var observacoes = cadastro.Observacoes(p);
+            if (observacoes.Count > 0)
+            {
+                var cor = ColorUtility.ToHtmlStringRGB(Estilo.TextoApagado);
+                mensagem.text += $"   <color=#{cor}><i>Observação: {string.Join("  ", observacoes)}</i></color>";
+            }
+
+            // Com pendência não aprova: o botão aparece apagado, sem clique.
+            if (erros.Count == 0 && avisos.Count == 0)
+                Estilo.BotaoPrincipal(rodape, "Concluir criação", 320, Aprovar);
+            else
+                Estilo.BotaoContorno(rodape, "Concluir criação", 320, Estilo.TextoApagado, () => { }).interactable = false;
         }
 
-        void Aprovar(IReadOnlyList<string> erros, IReadOnlyList<string> avisos)
+        /// <summary>
+        /// Só chega aqui sem pendências (o botão fica apagado). No laboratório é "concluir criação":
+        /// a aprovação do mestre de verdade é pôr a personagem num slot de sala. Congela: pede confirmação.
+        /// </summary>
+        void Aprovar()
         {
-            if (erros.Count > 0)
-                return;
-            if (avisos.Count == 0)
-            {
-                Concluir(cadastro.Aprovar(p.Id, aceitarAvisos: false));
-                return;
-            }
             Estilo.Confirmar(transform,
-                "Aprovar mesmo assim? A foto da criação será congelada com estas pendências:\n• " +
-                string.Join("\n• ", avisos),
-                "Aprovar",
-                () => Concluir(cadastro.Aprovar(p.Id, aceitarAvisos: true)));
+                "Concluir a criação? A foto da criação será congelada: Rótulos, habilidades e arquétipo " +
+                "passam a mudar só pelas regras do jogo (ou por ajuste do mestre, com motivo).",
+                "Concluir",
+                () => Concluir(cadastro.Aprovar(p.Id)));
         }
 
         void Concluir(Resultado resultado)
@@ -386,8 +396,10 @@ namespace TorreDeControle.UI
                         foreach (var poder in linha.Poderes)
                         {
                             var id = poder.Id;
+                            // No legado, o que não foi negado é poder que a personagem TEM: dourado.
+                            // Completas as negações, os que ficaram travam como marca (não cinza).
                             var estado = e.Negadas.Contains(id) ? EstadoChip.Negada
-                                : e.Negadas.Count >= regra.Negar ? EstadoChip.Bloqueada : EstadoChip.Livre;
+                                : e.Negadas.Count >= regra.Negar ? EstadoChip.Fixa : EstadoChip.Escolhida;
                             Chip(gradeLinha, poder.Nome, estado, () => Aplicar(cadastro.AlternarNegada(p.Id, id)));
                         }
                         break;
@@ -459,7 +471,7 @@ namespace TorreDeControle.UI
         {
             var grade = Estilo.Rect("Grade", conteudo);
             var g = grade.gameObject.AddComponent<GridLayoutGroup>();
-            g.cellSize = new Vector2(360, 46);
+            g.cellSize = new Vector2(335, 46); // 4 colunas cabem com a barra de rolagem
             g.spacing = new Vector2(10, 10);
             g.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             g.constraintCount = 4;

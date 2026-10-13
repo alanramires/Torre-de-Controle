@@ -168,7 +168,12 @@ namespace TorreDeControle.Core.Personagens
         }
 
         /// <summary>Novo → criado: congela a foto da criação. Com avisos, só se o mestre aceitar.</summary>
-        public Resultado Aprovar(string id, bool aceitarAvisos)
+        /// <summary>
+        /// Novo → criado: congela a foto da criação. Só sem pendências (decidido em 2026-10-13:
+        /// ficha incompleta congelada só gera conserto). Depois de aprovada, o mestre ainda corrige
+        /// por ajuste manual com motivo. Observações não travam.
+        /// </summary>
+        public Resultado Aprovar(string id)
         {
             var p = Buscar(id);
             if (p == null)
@@ -179,8 +184,8 @@ namespace TorreDeControle.Core.Personagens
             var (erros, avisos) = Validar(p);
             if (erros.Count > 0)
                 return Resultado.Falha(string.Join(" ", erros));
-            if (avisos.Count > 0 && !aceitarAvisos)
-                return Resultado.Falha("Há pendências: " + string.Join(" ", avisos));
+            if (avisos.Count > 0)
+                return Resultado.Falha("Ainda há pendências: " + string.Join(" ", avisos));
 
             p.Foto = new FotoCriacao
             {
@@ -188,7 +193,6 @@ namespace TorreDeControle.Core.Personagens
                 Arquetipo = p.Identidade.Arquetipo,
                 Rotulos = new Dictionary<string, int>(RotulosAtuais(p)),
                 Habilidades = HabilidadesAtuais(p).ToList(),
-                AvisosAceitos = new List<string>(avisos),
             };
             p.Status = StatusCriacao.Criado;
             Gravar();

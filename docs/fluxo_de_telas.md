@@ -111,8 +111,9 @@ novo  ──(aprovação)──▶  criado  ──▶  em carreira (= entrou num
   **trocar reseta a ficha de criação** (Rótulos, movimentos e extras recomeçam do novo arquétipo;
   a Identidade fica). Se já houver escolhas feitas, a Torre pede confirmação antes.
   Depois de aprovada, erro de criação se conserta com ajuste manual ou evento de correção, com motivo.
-- **aprovação**: a validação da Torre aponta o que fere a regra; o mestre decide.
-  Fora da sala, a validação faz o papel de mestre temporário.
+- **concluir criação** (laboratório): só sem pendências (decidido em 2026-10-13); observações não travam.
+  Não é um fluxo de aprovação: a Torre é só do mestre, e a aprovação do mestre de verdade é **pôr a
+  personagem num slot de sala**. Erro depois de concluída se conserta com ajuste manual, com motivo.
 - **criado**: foto da criação congelada.
 - **em carreira**: copiada para um slot de sala. Formar a equipe e dar a Influência inicial são
   preparação da campanha, não o que define a carreira.

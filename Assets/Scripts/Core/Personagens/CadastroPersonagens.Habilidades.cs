@@ -178,6 +178,25 @@ namespace TorreDeControle.Core.Personagens
 
         // ---------- validação ----------
 
+        /// <summary>
+        /// Coisas válidas que vale lembrar (não são pendência e não pedem confirmação para aprovar).
+        /// Ex.: "escolha até 3" com 2 escolhidas.
+        /// </summary>
+        public IReadOnlyList<string> Observacoes(Personagem p)
+        {
+            var notas = new List<string>();
+            if (p.Status != StatusCriacao.Novo)
+                return notas;
+            var regra = RegraDeHabilidades(p);
+            var escolhidas = p.Criacao.Habilidades.Escolhidas.Count;
+            if (regra.Tipo == Regra.Lista && regra.EscolherAte.HasValue && escolhidas > 0 && escolhidas < regra.EscolherAte)
+            {
+                var resta = regra.EscolherAte.Value - escolhidas;
+                notas.Add($"Habilidades: {escolhidas} de até {regra.EscolherAte} (ainda pode escolher mais {resta}).");
+            }
+            return notas;
+        }
+
         void ValidarHabilidades(Personagem p, List<string> avisos)
         {
             var regra = RegraDeHabilidades(p);
