@@ -56,10 +56,12 @@ namespace TorreDeControle.UI
             return painel;
         }
 
+        /// <param name="nomeDaSala">Nome da campanha, quando a ficha é a instância de uma sala.</param>
         public void Abrir(Personagem personagem, CadastroPersonagens cadastroPersonagens,
-            CadastroJogadores cadastroJogadores, Action aoFecharFicha)
+            CadastroJogadores cadastroJogadores, Action aoFecharFicha, string nomeDaSala = null)
         {
             p = personagem;
+            campanha = nomeDaSala;
             cadastro = cadastroPersonagens;
             jogadores = cadastroJogadores;
             aoFechar = aoFecharFicha;
@@ -141,11 +143,20 @@ namespace TorreDeControle.UI
             MontarRodape();
         }
 
+        /// <summary>Nome da sala, se a ficha aberta é a instância de uma; null no laboratório.</summary>
+        string campanha;
+
         void Cabecalho()
         {
             BotaoModoTeste();
             var i = p.Identidade;
             titulo.text = p.NomeExibicao.ToUpperInvariant();
+            // Instância de sala: a campanha ao lado do nome. Laboratório: só o nome.
+            if (p.Sala != null && !string.IsNullOrEmpty(campanha))
+            {
+                var onde = p.Ativo ? campanha : campanha + " · vaga liberada";
+                titulo.text += $"   <size=60%><color=#{ColorUtility.ToHtmlStringRGB(Estilo.TextoSuave)}>(Campanha: {onde})</color></size>";
+            }
             var partes = new List<string>();
             if (!string.IsNullOrWhiteSpace(i.Codinome) && !string.IsNullOrWhiteSpace(i.Nome))
                 partes.Add(i.Nome);

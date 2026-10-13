@@ -159,7 +159,7 @@ namespace TorreDeControle.UI
         {
             if (painelFicha == null)
                 painelFicha = PainelFicha.Criar(transform.parent);
-            painelFicha.Abrir(p, personagens, jogadores, Redesenhar);
+            painelFicha.Abrir(p, personagens, jogadores, Redesenhar, sala.Nome);
         }
 
         // ---------- montagem ----------

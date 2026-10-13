@@ -353,7 +353,7 @@ namespace TorreDeControle.UI
             if (painelFicha == null)
                 painelFicha = PainelFicha.Criar(transform.parent);
             // Ao fechar a ficha, a lista volta atualizada (status, nomes e arquétipo podem ter mudado).
-            painelFicha.Abrir(p, cadastro, jogadores, Redesenhar);
+            painelFicha.Abrir(p, cadastro, jogadores, Redesenhar, p.Sala == null ? null : salas?.Buscar(p.Sala)?.Nome);
         }
 
         static string TextoStatus(StatusCriacao status) => status switch
