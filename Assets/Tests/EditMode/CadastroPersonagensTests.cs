@@ -58,7 +58,7 @@ namespace TorreDeControle.Tests
             var p = cadastro.Listar()[0];
             Assert.That(cadastro.AlterarIdentidade(p.Id, "Max", "", "nova", null).Ok, Is.True);
 
-            p.Status = StatusCriacao.Criado;
+            p.Status = StatusCriacao.EmAprovacao;
             Assert.That(cadastro.AlterarIdentidade(p.Id, "Max", "", "farol", null).Ok, Is.False);
             Assert.That(cadastro.AlterarIdentidade(p.Id, "Max Silva", "", "nova", "j1").Ok, Is.True);
         }

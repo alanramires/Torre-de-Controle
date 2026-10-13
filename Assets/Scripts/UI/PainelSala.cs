@@ -76,6 +76,10 @@ namespace TorreDeControle.UI
             Redesenhar();
         }
 
+        /// <summary>O painel de controle do mestre (rodadas, potencial, condições, Rótulos, log). Em construção.</summary>
+        void AreaDoMestre() =>
+            mensagem.text = "Área do mestre: em construção (rodadas, potencial, condições, Rótulos e o log da campanha).";
+
         void Fechar()
         {
             gameObject.SetActive(false);
@@ -111,7 +115,7 @@ namespace TorreDeControle.UI
                 .Select(s => personagens.Buscar(s.Personagem)?.Origem)
                 .Where(o => o != null));
             return personagens.Listar()
-                .Where(p => p.Ativo && p.Controle == Controle.Jogador && p.Status == StatusCriacao.Criado && !naSala.Contains(p.Id))
+                .Where(p => p.Ativo && p.Controle == Controle.Jogador && p.Status == StatusCriacao.EmAprovacao && !naSala.Contains(p.Id))
                 .ToList();
         }
 
@@ -190,6 +194,7 @@ namespace TorreDeControle.UI
             titulo = Estilo.Rotulo(titulos, string.Empty, 44, Estilo.Dourado, FontStyles.Bold);
             titulo.characterSpacing = 6;
             contagem = Estilo.Rotulo(titulos, string.Empty, 24, Estilo.TextoSuave);
+            Estilo.BotaoPrincipal(cabecalho, "Área do mestre", 300, AreaDoMestre);
             Estilo.BotaoContorno(cabecalho, "Voltar", 190, Estilo.TextoSuave, Fechar);
 
             var divisoria = Estilo.Rect("Divisoria", cartao);
@@ -427,7 +432,16 @@ namespace TorreDeControle.UI
             var p = slot.Personagem != null ? personagens.Buscar(slot.Personagem) : null;
             if (p != null)
             {
-                var nome = Estilo.Rotulo(linha, Descrever(p), 26, Estilo.Texto, FontStyles.Bold);
+                var situacao = p.Status switch
+                {
+                    StatusCriacao.EmAprovacao => "em aprovação",
+                    StatusCriacao.Novo => "em revisão (novo)",
+                    _ => null,
+                };
+                var texto = situacao == null
+                    ? Descrever(p)
+                    : $"{Descrever(p)}  <size=80%><color=#{ColorUtility.ToHtmlStringRGB(Estilo.Dourado)}>· {situacao}</color></size>";
+                var nome = Estilo.Rotulo(linha, texto, 26, Estilo.Texto, FontStyles.Bold);
                 Estilo.ColunaElastica(nome);
                 Estilo.BotaoContorno(linha, "Tirar", LarguraBotao, Estilo.TextoSuave, () => Tirar(indice, p));
                 Estilo.BotaoPrincipal(linha, "Ficha", LarguraBotao, () => AbrirFicha(p));

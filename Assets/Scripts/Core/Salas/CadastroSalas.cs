@@ -179,7 +179,7 @@ namespace TorreDeControle.Core.Salas
         }
 
         /// <summary>
-        /// Esvazia a personagem do slot. A cópia não se exclui: fica inativa na sala, com o histórico.
+        /// Esvazia a personagem do slot. A cópia não se exclui: fica aposentada na sala, com o histórico.
         /// O jogador continua no slot.
         /// </summary>
         public Resultado TirarPersonagem(string salaId, int indice)
@@ -190,7 +190,8 @@ namespace TorreDeControle.Core.Salas
             if (slot.Personagem == null)
                 return Resultado.Sucesso();
 
-            personagens.DefinirAtivo(slot.Personagem, false);
+            // Saiu do jogo: aposentada (fica no arquivo da sala, só consulta).
+            personagens.Aposentar(slot.Personagem);
             slot.Personagem = null;
             Gravar();
             return Resultado.Sucesso();

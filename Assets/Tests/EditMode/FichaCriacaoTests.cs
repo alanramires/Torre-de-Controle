@@ -185,14 +185,14 @@ namespace TorreDeControle.Tests
             Assert.That(p.Foto.Habilidades.Single().Nome, Is.EqualTo("Feitiçaria"));
             Assert.That(p.Foto.ExtrasEscolhas["nova/chamas|faiscas"], Has.Count.EqualTo(4));
 
-            Assert.That(p.Status, Is.EqualTo(StatusCriacao.Criado));
+            Assert.That(p.Status, Is.EqualTo(StatusCriacao.EmAprovacao));
             Assert.That(p.Foto.Rotulos[Rotulos.Superior], Is.EqualTo(1));
             Assert.That(cadastro.EscolherBonusLivre(p.Id, Rotulos.Perigoso).Ok, Is.False);
             Assert.That(cadastro.AlterarIdentidade(p.Id, "Teste", "", "farol", null).Ok, Is.False);
 
             var recarregada = CadastroPersonagens.Carregar(armazenamento, RegrasDeTeste.Arquetipos()).Buscar(p.Id);
             Assert.That(recarregada.Foto.Rotulos[Rotulos.Superior], Is.EqualTo(1));
-            Assert.That(recarregada.Status, Is.EqualTo(StatusCriacao.Criado));
+            Assert.That(recarregada.Status, Is.EqualTo(StatusCriacao.EmAprovacao));
         }
     
 
@@ -359,7 +359,7 @@ namespace TorreDeControle.Tests
         Personagem Concluida(string arquetipo)
         {
             var p = Nova(arquetipo);
-            p.Status = StatusCriacao.Criado; // atalho: o teste é do Crescimento, não da criação
+            p.Status = StatusCriacao.EmAprovacao; // atalho: o teste é do Crescimento, não da criação
             p.Potencial = 70;                // potencial de sobra: 14 avanços
             return p;
         }
@@ -369,7 +369,7 @@ namespace TorreDeControle.Tests
         {
             var p = Nova("farol");
             Assert.That(cadastro.AjustarPotencial(p.Id, 1).Ok, Is.False, "potencial é do jogo");
-            p.Status = StatusCriacao.Criado;
+            p.Status = StatusCriacao.EmAprovacao;
 
             for (var k = 0; k < 4; k++)
                 cadastro.AjustarPotencial(p.Id, 1);
@@ -407,7 +407,7 @@ namespace TorreDeControle.Tests
             Assert.That(cadastro.AlternarCumprido(p.Id, "farol/impulsos", "salvar-a-vida-de-um-colega").Ok, Is.False);
 
             CompletarModulos(p);
-            p.Status = StatusCriacao.Criado; // atalho: o teste é do jogo
+            p.Status = StatusCriacao.EmAprovacao; // atalho: o teste é do jogo
             p.Foto = new FotoCriacao { ExtrasEscolhas = p.Criacao.ExtrasEscolhas };
             Assert.That(cadastro.AlternarCumprido(p.Id, "farol/impulsos", "terminar-com-alguem").Ok, Is.False);
             Assert.That(cadastro.EscolherBeneficio(p.Id, "farol/impulsos", "salvar-a-vida-de-um-colega", "potencial").Ok, Is.False);
@@ -427,7 +427,7 @@ namespace TorreDeControle.Tests
         {
             var p = Nova("amaldicoada");
             CompletarModulos(p); // pega "visoes-sombrias" como sinal inicial
-            p.Status = StatusCriacao.Criado;
+            p.Status = StatusCriacao.EmAprovacao;
             p.Foto = new FotoCriacao { ExtrasEscolhas = p.Criacao.ExtrasEscolhas };
             return p;
         }

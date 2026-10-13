@@ -5,8 +5,8 @@ namespace TorreDeControle.UI
 {
     /// <summary>
     /// Retratos dos arquétipos (a arte quadrada de cada classe), achados pelo nome que o
-    /// arquetipos.json dá em "retrato". As texturas vêm da TelaEntrada (lista ligada no Inspector):
-    /// assim os arquivos ficam onde estão, em img/classes de personagens.
+    /// arquetipos.json dá em "retrato". Carrega de Resources/Retratos quando não há
+    /// textura registrada pela TelaEntrada, sem depender do Inspector.
     /// </summary>
     public static class Retratos
     {
@@ -22,8 +22,14 @@ namespace TorreDeControle.UI
                     porNome[t.name] = t;
         }
 
-        /// <summary>A textura com esse nome, ou null (sem nome, ou não ligada no Inspector).</summary>
-        public static Texture2D Buscar(string nome) =>
-            !string.IsNullOrEmpty(nome) && porNome.TryGetValue(nome, out var t) ? t : null;
+        /// <summary>A textura registrada ou carregada de Resources pelo nome.</summary>
+        public static Texture2D Buscar(string nome)
+        {
+            if (string.IsNullOrEmpty(nome)) return null;
+            if (porNome.TryGetValue(nome, out var pronta) && pronta != null) return pronta;
+            var textura = Resources.Load<Texture2D>("Retratos/" + nome);
+            if (textura != null) porNome[nome] = textura;
+            return textura;
+        }
     }
 }

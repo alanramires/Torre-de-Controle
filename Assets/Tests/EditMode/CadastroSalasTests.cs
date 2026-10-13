@@ -68,8 +68,8 @@ namespace TorreDeControle.Tests
             Assert.That(copia.Id, Is.Not.EqualTo(original.Id));
             Assert.That(copia.Origem, Is.EqualTo(original.Id));
             Assert.That(copia.Sala, Is.EqualTo(sala.Id));
-            Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmCarreira));
-            Assert.That(original.Status, Is.EqualTo(StatusCriacao.Criado));
+            Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmAprovacao)); // o mestre aprova na campanha
+            Assert.That(original.Status, Is.EqualTo(StatusCriacao.EmAprovacao));
             // O slot vazio herdou o jogador da personagem.
             Assert.That(sala.Slots[0].Jogador, Is.EqualTo("j1"));
             Assert.That(copia.Identidade.Jogador, Is.EqualTo("j1"));
@@ -138,6 +138,7 @@ namespace TorreDeControle.Tests
             Assert.That(salas.TirarPersonagem(sala.Id, 0).Ok, Is.True);
             Assert.That(sala.Slots[0].Personagem, Is.Null);
             Assert.That(personagens.Buscar(copia).Ativo, Is.False);
+            Assert.That(personagens.Buscar(copia).Status, Is.EqualTo(StatusCriacao.Aposentado));
             // Liberou: a mesma personagem pode voltar (nova cópia).
             Assert.That(salas.PorPersonagem(sala.Id, 0, original.Id, false).Ok, Is.True);
         }
@@ -171,8 +172,10 @@ namespace TorreDeControle.Tests
             Assert.That(copia.Potencial, Is.EqualTo(3)); // o jogo marcado fica
 
             Assert.That(personagens.Aprovar(copia.Id).Ok, Is.True);
+            Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmAprovacao));
+            Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.True);
             Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmCarreira));
-            Assert.That(original.Status, Is.EqualTo(StatusCriacao.Criado));
+            Assert.That(original.Status, Is.EqualTo(StatusCriacao.EmAprovacao));
         }
 
         [Test]
@@ -184,6 +187,18 @@ namespace TorreDeControle.Tests
             var copia = sala.Slots[0].Personagem;
             salas.TirarPersonagem(sala.Id, 0);
             Assert.That(personagens.ReabrirCriacao(copia).Ok, Is.False);
+        }
+
+        [Test]
+        public void Aprovar_para_a_campanha_so_na_sala_e_em_aprovacao()
+        {
+            var sala = NovaSala();
+            var original = FichaPronta.Criada(personagens, "Estrela");
+            Assert.That(personagens.AprovarParaCampanha(original.Id).Ok, Is.False); // laboratório
+            salas.PorPersonagem(sala.Id, 0, original.Id, false);
+            var copia = personagens.Buscar(sala.Slots[0].Personagem);
+            Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.True);
+            Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.False); // já em carreira
         }
 
         [Test]

@@ -286,7 +286,8 @@ namespace TorreDeControle.Core.Personagens
         }
 
         /// <summary>Recursos de jogo (ex.: chamas) aparecem na ficha só em sala (em carreira) ou no modo teste.</summary>
-        public bool MostraRecursosDeJogo(Personagem p) => p.Status == StatusCriacao.EmCarreira || EmTeste(p.Id);
+        public bool MostraRecursosDeJogo(Personagem p) =>
+            p.Status == StatusCriacao.EmCarreira || p.Status == StatusCriacao.Aposentado || EmTeste(p.Id);
 
         /// <summary>
         /// Operações de jogo valem depois de concluir a criação, ou a qualquer hora no modo teste

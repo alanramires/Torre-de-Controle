@@ -17,7 +17,7 @@ namespace TorreDeControle.UI
         [SerializeField] Button botaoJogadores;
         [SerializeField] Button botaoPersonagens;
         [SerializeField] Button botaoSalas;
-        [Tooltip("Os retratos quadrados dos arquétipos (img/classes de personagens/*_retrato). " +
+        [Tooltip("Retratos opcionais; sem eles, carrega automaticamente de Resources/Retratos. " +
                  "A Torre acha cada um pelo nome dado em arquetipos.json.")]
         [SerializeField] Texture2D[] retratos;
 
@@ -39,8 +39,6 @@ namespace TorreDeControle.UI
             Ligar(botaoJogadores, nameof(botaoJogadores), AbrirJogadores);
             salas = CadastroSalas.Carregar(armazenamento, personagens);
             Retratos.Registrar(retratos);
-            if (retratos == null || retratos.Length == 0)
-                Debug.LogWarning("[Torre] TelaEntrada sem os retratos dos arquétipos ligados no Inspector.");
 
             Ligar(botaoPersonagens, nameof(botaoPersonagens), AbrirPersonagens);
             Ligar(botaoSalas, nameof(botaoSalas), AbrirSalas);

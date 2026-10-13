@@ -18,7 +18,7 @@ namespace TorreDeControle.UI
     {
         const float LarguraArquetipo = 250;
         const float LarguraJogador = 250;
-        const float LarguraStatus = 150;
+        const float LarguraStatus = 200;
         const float LarguraAtivo = 170;
         const float LarguraFicha = 150;
         const float LarguraFavorito = 36;
@@ -289,7 +289,7 @@ namespace TorreDeControle.UI
             Estilo.ListaSuspensa(linha, LarguraJogador, OpcoesJogador(i.Jogador), i.Jogador ?? SemJogador,
                 id => Alterar(p, p.Identidade.Nome, p.Identidade.Codinome, p.Identidade.Arquetipo, id));
 
-            if (p.Status == StatusCriacao.Criado && cadastro.MotivoParaNaoReabrir(p) == null)
+            if (p.Status == StatusCriacao.EmAprovacao && cadastro.MotivoParaNaoReabrir(p) == null)
             {
                 // Provisório, enquanto a ficha está em construção: clicar volta para "novo".
                 Estilo.BotaoContorno(linha, TextoStatus(p.Status), LarguraStatus, Estilo.Dourado, () => Reabrir(p));
@@ -403,7 +403,8 @@ namespace TorreDeControle.UI
         static string TextoStatus(StatusCriacao status) => status switch
         {
             StatusCriacao.Novo => "NOVO",
-            StatusCriacao.Criado => "CRIADO",
+            StatusCriacao.EmAprovacao => "EM APROVAÇÃO",
+            StatusCriacao.Aposentado => "APOSENTADO",
             _ => "EM CARREIRA",
         };
     }

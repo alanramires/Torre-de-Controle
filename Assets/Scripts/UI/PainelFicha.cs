@@ -111,6 +111,11 @@ namespace TorreDeControle.UI
             miolo.offsetMax = new Vector2(-2, -2);
             retrato = miolo.gameObject.AddComponent<RawImage>();
             retrato.raycastTarget = false;
+            proporcaoRetrato = miolo.gameObject.AddComponent<AspectRatioFitter>();
+            proporcaoRetrato.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            fotoRetrato = molduraRetrato.gameObject.AddComponent<FotoDaWeb>();
+            avisoRetrato = Estilo.Rotulo(molduraRetrato, string.Empty, 12, Estilo.TextoSuave);
+            avisoRetrato.gameObject.SetActive(false);
             var titulos = Estilo.Rect("Titulos", cabecalho);
             Estilo.ColunaElastica(titulos);
             var pilha = titulos.gameObject.AddComponent<VerticalLayoutGroup>();
@@ -165,6 +170,9 @@ namespace TorreDeControle.UI
         string campanha;
         bool pelaSala;
         RawImage retrato;
+        AspectRatioFitter proporcaoRetrato;
+        FotoDaWeb fotoRetrato;
+        TextMeshProUGUI avisoRetrato;
 
         /// <summary>A arte quadrada do arquétipo da personagem (null se não houver).</summary>
         Texture2D RetratoDoArquetipo => Retratos.Buscar(cadastro.RegraDoArquetipo(p)?.Retrato);
@@ -180,8 +188,11 @@ namespace TorreDeControle.UI
         {
             var i = p.Identidade;
             var arte = RetratoDoArquetipo;
-            retrato.texture = arte;
-            retrato.transform.parent.gameObject.SetActive(arte != null);
+            var temFotoHeroica = !string.IsNullOrWhiteSpace(i.FotoHeroica);
+            retrato.transform.parent.gameObject.SetActive(temFotoHeroica || arte != null);
+            if (temFotoHeroica || arte != null)
+                fotoRetrato.Mostrar(i.FotoHeroica, retrato, proporcaoRetrato, avisoRetrato,
+                    temFotoHeroica ? null : arte);
             titulo.text = p.NomeExibicao.ToUpperInvariant();
             // Instância de sala: a campanha ao lado do nome. Laboratório: só o nome.
             if (p.Sala != null && !string.IsNullOrEmpty(campanha))
@@ -198,7 +209,8 @@ namespace TorreDeControle.UI
             status.text = p.Status switch
             {
                 StatusCriacao.Novo => "NOVO",
-                StatusCriacao.Criado => "CRIADO",
+                StatusCriacao.EmAprovacao => "EM APROVAÇÃO",
+                StatusCriacao.Aposentado => "APOSENTADO",
                 _ => "EM CARREIRA",
             };
             var podeReabrir = cadastro.MotivoParaNaoReabrir(p) == null && (p.Sala == null || pelaSala);
@@ -308,6 +320,14 @@ namespace TorreDeControle.UI
 
         void MensagemDoRodape(TextMeshProUGUI mensagem)
         {
+            // Instância em aprovação, aberta pela sala: completa o que é da equipe e o mestre aprova.
+            if (p.Sala != null && p.Status == StatusCriacao.EmAprovacao && pelaSala)
+            {
+                mensagem.text = "Em aprovação na campanha: complete o que é da equipe e aprove para entrar em carreira.";
+                mensagem.color = Estilo.Dourado;
+                Estilo.BotaoPrincipal(rodape, "Aprovar para a campanha", 360, AprovarParaCampanha);
+                return;
+            }
             if (p.Status != StatusCriacao.Novo)
             {
                 var data = DateTime.TryParse(p.Foto?.AprovadaEm, out var d) ? d.ToString("dd/MM/yyyy HH:mm") : "?";
@@ -354,10 +374,19 @@ namespace TorreDeControle.UI
         void Aprovar()
         {
             Estilo.Confirmar(transform,
-                "Concluir a criação? A foto da criação será congelada: Rótulos, habilidades e arquétipo " +
-                "passam a mudar só pelas regras do jogo (ou por ajuste do mestre, com motivo).",
+                "Concluir a criação? A foto da criação será congelada (Rótulos, habilidades e arquétipo) e a " +
+                "ficha fica \"em aprovação\": o mestre a leva para a campanha, onde se completa o que é da equipe.",
                 "Concluir",
                 () => Concluir(cadastro.Aprovar(p.Id)));
+        }
+
+        void AprovarParaCampanha()
+        {
+            Estilo.Confirmar(transform,
+                $"Aprovar {p.NomeExibicao} para a campanha {campanha}? Ela passa a \"em carreira\": joga na mesa, " +
+                "e o que muda vem do painel do mestre.",
+                "Aprovar",
+                () => Concluir(cadastro.AprovarParaCampanha(p.Id)));
         }
 
         void Concluir(Resultado resultado)
@@ -453,7 +482,10 @@ namespace TorreDeControle.UI
                 // Link trocado volta a "aguardando": refaz a aba para o quadro mostrar. Sem mudança,
                 // não refaz (o Tab precisa achar vivo o próximo campo).
                 if (antes != (p.Identidade.FotoHeroica, p.Identidade.FotoCivil))
+                {
+                    Cabecalho();
                     MontarConteudo(manterRolagem: true);
+                }
             }
             heroica = Foto(topo, "FotoHeroica", "FOTO DE HERÓI", i.FotoHeroica, i.FotoHeroicaAprovacao, true, Gravar,
                 padrao: RetratoDoArquetipo);
@@ -521,7 +553,7 @@ namespace TorreDeControle.UI
             texto.rectTransform.offsetMin = new Vector2(10, 10);
             texto.rectTransform.offsetMax = new Vector2(-10, -10);
             if (temLink)
-                quadro.gameObject.AddComponent<FotoDaWeb>().Mostrar(link, imagem, proporcao, texto);
+                quadro.gameObject.AddComponent<FotoDaWeb>().Mostrar(link, imagem, proporcao, texto, padrao);
             else if (usaPadrao)
             {
                 imagem.texture = padrao;

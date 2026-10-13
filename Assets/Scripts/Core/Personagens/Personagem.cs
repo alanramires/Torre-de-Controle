@@ -16,9 +16,13 @@ namespace TorreDeControle.Core.Personagens
     [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
     public enum Papel { Heroi, Vilao, Neutro }
 
-    /// <summary>Ciclo de criação da ficha de herói: novo → criado (foto congelada) → em carreira (entrou numa sala).</summary>
+    /// <summary>
+    /// Ciclo da ficha de herói: novo (montando no laboratório) → em aprovação (concluída, foto congelada;
+    /// na sala, completa o que é da equipe) → em carreira (o mestre aprovou na campanha) → aposentado
+    /// (saiu do jogo ou encerrou a carreira).
+    /// </summary>
     [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
-    public enum StatusCriacao { Novo, Criado, EmCarreira }
+    public enum StatusCriacao { Novo, EmAprovacao, EmCarreira, Aposentado }
 
     /// <summary>
     /// O mestre olhou a foto (link)? Avalia na instância da sala, vendo a imagem. Trocar o link volta
@@ -164,6 +168,12 @@ namespace TorreDeControle.Core.Personagens
         /// pendentes = potencial / 5 − avanços marcados. Quem dá potencial é o mestre (painel, no jogo).
         /// </summary>
         [JsonProperty("potencial")] public int Potencial { get; set; }
+        /// <summary>Condições marcadas no jogo (ids, na ordem da ficha). Quem marca é a mesa.</summary>
+        [JsonProperty("condicoes")] public List<string> CondicoesMarcadas { get; set; } = new List<string>();
+        /// <summary>
+        /// Rótulos depois das mudanças de jogo; null enquanto nada mudou (valem os da foto da criação).
+        /// </summary>
+        [JsonProperty("rotulos_jogo")] public Dictionary<string, int> RotulosJogo { get; set; }
 
         // ---------- estado de jogo dos extras (o mestre mexe; a ficha mostra) ----------
 

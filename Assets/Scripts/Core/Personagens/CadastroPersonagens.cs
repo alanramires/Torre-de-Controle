@@ -48,6 +48,7 @@ namespace TorreDeControle.Core.Personagens
                 p.TextosDeJogo ??= new Dictionary<string, string>();
                 p.ItensDeJogo ??= new Dictionary<string, List<ItemDeJogo>>();
                 p.ObsMovimentos ??= new Dictionary<string, string>();
+                p.CondicoesMarcadas ??= new List<string>();
                 if (p.Vilao != null)
                 {
                     p.Vilao.Movimentos ??= new List<string>();
@@ -154,11 +155,14 @@ namespace TorreDeControle.Core.Personagens
             return regra != null && regra.Rotulos.TryGetValue(rotulo, out var v) ? v : 0;
         }
 
-        /// <summary>Rótulos de agora: a foto, se aprovada; senão, arquétipo + o +1 livre do rascunho.</summary>
+        /// <summary>
+        /// Rótulos de agora: no jogo, os mudados pela mesa (ou os da foto, se nada mudou); em criação,
+        /// arquétipo + o +1 livre do rascunho.
+        /// </summary>
         public IReadOnlyDictionary<string, int> RotulosAtuais(Personagem p)
         {
             if (p.Foto != null)
-                return p.Foto.Rotulos;
+                return p.RotulosJogo ?? p.Foto.Rotulos;
 
             var atuais = new Dictionary<string, int>();
             foreach (var r in Rotulos.Todos)
@@ -240,8 +244,9 @@ namespace TorreDeControle.Core.Personagens
             };
             CongelarModulos(p, foto);
             p.Foto = foto;
-            // A instância de uma sala, reaberta e concluída de novo, volta a jogar na vaga.
-            p.Status = p.Sala != null ? StatusCriacao.EmCarreira : StatusCriacao.Criado;
+            // Concluir leva a "em aprovação" (também a instância reaberta na sala): quem põe em carreira
+            // é o mestre, na campanha (AprovarParaCampanha).
+            p.Status = StatusCriacao.EmAprovacao;
             Gravar();
             return Resultado.Sucesso();
         }
@@ -253,8 +258,8 @@ namespace TorreDeControle.Core.Personagens
                 return "NPC não tem ciclo de criação.";
             if (p.Sala == null)
             {
-                if (p.Status != StatusCriacao.Criado)
-                    return "Só ficha criada volta para novo.";
+                if (p.Status != StatusCriacao.EmAprovacao)
+                    return "Só ficha concluída (em aprovação) volta para novo.";
                 var emVaga = CopiasDe(p.Id).Where(c => c.Ativo).ToList();
                 return emVaga.Count > 0
                     ? "Tem instância numa vaga: corrija a instância, pela sala."
@@ -262,7 +267,9 @@ namespace TorreDeControle.Core.Personagens
             }
             if (!p.Ativo)
                 return "Ficha do arquivo da sala (vaga liberada): só consulta.";
-            return p.Status == StatusCriacao.EmCarreira ? null : "Só ficha em carreira volta para novo.";
+            return p.Status == StatusCriacao.EmAprovacao || p.Status == StatusCriacao.EmCarreira
+                ? null
+                : "Só ficha em aprovação ou em carreira volta para novo.";
         }
 
         /// <summary>
@@ -280,6 +287,8 @@ namespace TorreDeControle.Core.Personagens
                 return Resultado.Falha(motivo);
 
             p.Foto = null;
+            // Refazer a criação refaz os Rótulos: os de jogo voltam a partir da nova foto.
+            p.RotulosJogo = null;
             p.Status = StatusCriacao.Novo;
             Gravar();
             return Resultado.Sucesso();
@@ -300,7 +309,7 @@ namespace TorreDeControle.Core.Personagens
                 resultado = Resultado.Falha("Só personagem do laboratório vai para a sala.");
                 return null;
             }
-            if (origem.Status != StatusCriacao.Criado)
+            if (origem.Status != StatusCriacao.EmAprovacao)
             {
                 resultado = Resultado.Falha("Conclua a criação no laboratório antes de pôr na sala.");
                 return null;
@@ -312,7 +321,8 @@ namespace TorreDeControle.Core.Personagens
             copia.Id = Guid.NewGuid().ToString("N");
             copia.Origem = origem.Id;
             copia.Sala = sala;
-            copia.Status = StatusCriacao.EmCarreira;
+            // Na campanha ela ainda completa o que é da equipe; o mestre aprova depois.
+            copia.Status = StatusCriacao.EmAprovacao;
             copia.Ativo = true;
             copia.Ordem = Ordenacao.Fim(DaSala(sala));
             copia.Identidade.Jogador = jogador;
@@ -330,6 +340,38 @@ namespace TorreDeControle.Core.Personagens
             Gravar();
             resultado = Resultado.Sucesso();
             return copia;
+        }
+
+        /// <summary>
+        /// O mestre aprova a instância na campanha: em aprovação → em carreira. A partir daqui ela joga
+        /// (a mesa só manda comando para quem está em carreira).
+        /// </summary>
+        public Resultado AprovarParaCampanha(string id)
+        {
+            var p = Buscar(id);
+            if (p == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            if (p.Sala == null)
+                return Resultado.Falha("A aprovação é na campanha: ponha a personagem numa vaga.");
+            if (!p.Ativo)
+                return Resultado.Falha("Ficha do arquivo da sala: só consulta.");
+            if (p.Status != StatusCriacao.EmAprovacao)
+                return Resultado.Falha("Só ficha em aprovação se aprova.");
+            p.Status = StatusCriacao.EmCarreira;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>Saiu do jogo (tirada da vaga) ou encerrou a carreira: aposentada, só consulta.</summary>
+        public void Aposentar(string id)
+        {
+            var p = Buscar(id);
+            if (p == null)
+                return;
+            p.Status = StatusCriacao.Aposentado;
+            p.Ativo = false;
+            p.Ordem = Ordenacao.Fim(personagens);
+            Gravar();
         }
 
         /// <summary>As cópias (instâncias nas salas) feitas desta personagem; ativas primeiro.</summary>

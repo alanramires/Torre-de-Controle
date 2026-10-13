@@ -23,14 +23,25 @@ namespace TorreDeControle.UI
         AspectRatioFitter proporcao;
         TextMeshProUGUI aviso;
         string link;
+        Texture2D padrao;
 
-        public void Mostrar(string url, RawImage alvo, AspectRatioFitter ajuste, TextMeshProUGUI texto)
+        public void Mostrar(string url, RawImage alvo, AspectRatioFitter ajuste, TextMeshProUGUI texto,
+            Texture2D alternativa = null)
         {
+            StopAllCoroutines();
+            padrao = alternativa;
             link = url;
             imagem = alvo;
             proporcao = ajuste;
             aviso = texto;
             imagem.enabled = false;
+            if (padrao != null)
+                Aplicar(padrao);
+            if (string.IsNullOrWhiteSpace(link))
+            {
+                if (padrao == null) Falhou();
+                return;
+            }
 
             if (baixadas.TryGetValue(link, out var pronta))
             {
@@ -42,7 +53,7 @@ namespace TorreDeControle.UI
                 Falhou();
                 return;
             }
-            aviso.text = "carregando...";
+            aviso.text = padrao == null ? "carregando..." : string.Empty;
             StartCoroutine(Baixar());
         }
 
@@ -92,7 +103,12 @@ namespace TorreDeControle.UI
             aviso.text = string.Empty;
         }
 
-        void Falhou() =>
-            aviso.text = "não deu para mostrar\n<size=80%>(não veio uma imagem .jpg ou .png)\nabrir o link</size>";
+        void Falhou()
+        {
+            if (padrao != null)
+                Aplicar(padrao);
+            else
+                aviso.text = "não deu para mostrar\n<size=80%>(não veio uma imagem .jpg ou .png)\nabrir o link</size>";
+        }
     }
 }
