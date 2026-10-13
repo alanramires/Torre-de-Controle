@@ -43,6 +43,9 @@ namespace TorreDeControle.Core.Personagens
                 p.Criacao.ExtrasTextos ??= new Dictionary<string, string>();
                 p.AvancosMarcados ??= new List<string>();
                 p.Cumpridos ??= new Dictionary<string, string>();
+                p.Contadores ??= new Dictionary<string, int>();
+                p.EscolhasDeJogo ??= new Dictionary<string, List<string>>();
+                p.TextosDeJogo ??= new Dictionary<string, string>();
             }
             return new CadastroPersonagens(armazenamento, regras, lista);
         }
@@ -300,8 +303,48 @@ namespace TorreDeControle.Core.Personagens
 
         void Gravar()
         {
-            var arquivo = new Arquivo { Versao = VersaoArquivo, Personagens = personagens };
+            // Personagem em modo teste grava a foto real, não o que o teste mexeu.
+            var gravar = personagens
+                .Select(p => emTeste.TryGetValue(p.Id, out var real) ? JsonConvert.DeserializeObject<Personagem>(real) : p)
+                .ToList();
+            var arquivo = new Arquivo { Versao = VersaoArquivo, Personagens = gravar };
             armazenamento.Gravar(Chave, JsonConvert.SerializeObject(arquivo, Formatting.Indented));
+        }
+
+        // ---------- modo teste (playground do mestre, para validar a ficha) ----------
+
+        /// <summary>Id → a personagem real (JSON) guardada ao ligar o modo teste.</summary>
+        readonly Dictionary<string, string> emTeste = new Dictionary<string, string>();
+
+        static readonly JsonSerializerSettings Restaurar =
+            new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
+
+        public bool EmTeste(string id) => emTeste.ContainsKey(id);
+
+        /// <summary>
+        /// Liga o modo teste: guarda a personagem real. Daqui até desligar, tudo o que mudar fica só na
+        /// memória (o disco continua com a real), e desligar desfaz tudo. Serve para validar a ficha
+        /// antes de existirem as fontes de verdade (painel do mestre, eventos com motivo).
+        /// </summary>
+        public Resultado LigarTeste(string id)
+        {
+            var p = Buscar(id);
+            if (p == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            if (!emTeste.ContainsKey(id))
+                emTeste[id] = JsonConvert.SerializeObject(p);
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>Desliga o modo teste: a personagem volta exatamente ao que era (mesmo objeto).</summary>
+        public Resultado DesligarTeste(string id)
+        {
+            var p = Buscar(id);
+            if (p == null || !emTeste.TryGetValue(id, out var real))
+                return Resultado.Sucesso();
+            JsonConvert.PopulateObject(real, p, Restaurar);
+            emTeste.Remove(id);
+            return Resultado.Sucesso();
         }
 
         sealed class Arquivo

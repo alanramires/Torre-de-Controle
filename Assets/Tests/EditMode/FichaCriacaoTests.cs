@@ -379,6 +379,102 @@ namespace TorreDeControle.Tests
             Assert.That(cadastro.BeneficioEscolhido(p, "farol/impulsos", "salvar-a-vida-de-um-colega"), Is.EqualTo("potencial"));
         }
 
+        // ---------- jogo dos extras (Amaldiçoada) ----------
+
+        const string Perdicao = "amaldicoada/perdicao";
+        const string Sinais = "amaldicoada/sinais";
+        const string Santuario = "amaldicoada/santuario";
+
+        Personagem AmaldicoadaEmJogo()
+        {
+            var p = Nova("amaldicoada");
+            CompletarModulos(p); // pega "visoes-sombrias" como sinal inicial
+            p.Status = StatusCriacao.Criado;
+            p.Foto = new FotoCriacao { ExtrasEscolhas = p.Criacao.ExtrasEscolhas };
+            return p;
+        }
+
+        [Test]
+        public void Final_nao_se_escolhe_na_criacao()
+        {
+            var p = Nova("amaldicoada");
+            Assert.That(cadastro.AlternarOpcaoDeExtra(p.Id, Sinais, "sinais", "sua-perdicao-chega").Ok, Is.False);
+        }
+
+        [Test]
+        public void Trilha_da_perdicao_rende_um_sinal_a_cada_cinco()
+        {
+            var p = AmaldicoadaEmJogo();
+            Assert.That(cadastro.TomadasAoTodo(p, Sinais, "sinais"), Has.Count.EqualTo(1));
+            Assert.That(cadastro.AlternarEscolhaNoJogo(p.Id, Sinais, "sinais", "portal").Ok, Is.False);
+
+            cadastro.AjustarContador(p.Id, Perdicao, "trilha", 5);
+            Assert.That(cadastro.EscolhasPendentesNoJogo(p, Sinais, "sinais"), Is.EqualTo(1));
+            Assert.That(cadastro.AlternarEscolhaNoJogo(p.Id, Sinais, "sinais", "visoes-sombrias").Ok, Is.False, "já veio da criação");
+            Assert.That(cadastro.AlternarEscolhaNoJogo(p.Id, Sinais, "sinais", "portal").Ok, Is.True);
+            Assert.That(cadastro.AjustarContador(p.Id, Perdicao, "trilha", -1).Ok, Is.False, "ponto que virou sinal");
+        }
+
+        [Test]
+        public void Perdicao_chega_so_com_os_cinco_ou_pelo_avanco()
+        {
+            var p = AmaldicoadaEmJogo();
+            cadastro.AjustarContador(p.Id, Perdicao, "trilha", 30);
+            Assert.That(cadastro.AlternarEscolhaNoJogo(p.Id, Sinais, "sinais", "sua-perdicao-chega").Ok, Is.False);
+            foreach (var s in new[] { "poderes-infinitos", "portal", "brilho-intenso", "fortalecida" })
+                cadastro.AlternarEscolhaNoJogo(p.Id, Sinais, "sinais", s);
+            Assert.That(cadastro.AlternarEscolhaNoJogo(p.Id, Sinais, "sinais", "sua-perdicao-chega").Ok, Is.True);
+
+            var q = AmaldicoadaEmJogo();
+            cadastro.AjustarContador(q.Id, Perdicao, "trilha", 5);
+            q.Potencial = 70;
+            for (var k = 0; k < 5; k++)
+                cadastro.AlternarAvanco(q.Id, CadastroPersonagens.Cima, k);
+            cadastro.AlternarAvanco(q.Id, CadastroPersonagens.Baixo, 1); // "Enfrente sua perdição nos seus termos"
+            Assert.That(cadastro.AlternarEscolhaNoJogo(q.Id, Sinais, "sinais", "sua-perdicao-chega").Ok, Is.True);
+        }
+
+        [Test]
+        public void Santuario_o_mestre_seleciona_preenche_e_conclui()
+        {
+            var p = AmaldicoadaEmJogo();
+            cadastro.DefinirTextoDeJogo(p.Id, Santuario, "uso", "pedido", "Achar a Lady Faust");
+            Assert.That(cadastro.AlternarCondicaoConcluida(p.Id, Santuario, "uso", "ajuda").Ok, Is.False);
+            cadastro.AlternarCondicao(p.Id, Santuario, "uso", "ajuda");
+            cadastro.DefinirTextoDeJogo(p.Id, Santuario, "uso", "ajuda", "Vespa");
+            cadastro.AlternarCondicaoConcluida(p.Id, Santuario, "uso", "ajuda");
+            Assert.That(cadastro.CondicaoConcluida(p, Santuario, "uso", "ajuda"), Is.True);
+            Assert.That(cadastro.TextoDeJogo(p, Santuario, "uso", "pedido"), Is.EqualTo("Achar a Lady Faust"));
+
+            cadastro.AlternarCondicao(p.Id, Santuario, "uso", "ajuda"); // tira: apaga conclusão e lacuna
+            Assert.That(cadastro.CondicaoConcluida(p, Santuario, "uso", "ajuda"), Is.False);
+            Assert.That(cadastro.TextoDeJogo(p, Santuario, "uso", "ajuda"), Is.Empty);
+        }
+
+        [Test]
+        public void Modo_teste_nao_grava_e_desligar_desfaz()
+        {
+            var p = Concluida("farol");
+            p.Potencial = 0;
+            cadastro.AjustarPotencial(p.Id, 2); // real: 2
+
+            cadastro.LigarTeste(p.Id);
+            cadastro.AjustarPotencial(p.Id, 10);
+            cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Cima, 0);
+            Assert.That(p.Potencial, Is.EqualTo(12));
+
+            // O disco continua com a personagem real enquanto o teste está ligado.
+            var doDisco = CadastroPersonagens.Carregar(armazenamento, RegrasDeTeste.Arquetipos()).Buscar(p.Id);
+            Assert.That(doDisco.Potencial, Is.EqualTo(2));
+            Assert.That(doDisco.AvancosMarcados, Is.Empty);
+
+            cadastro.DesligarTeste(p.Id);
+            Assert.That(cadastro.EmTeste(p.Id), Is.False);
+            Assert.That(p.Potencial, Is.EqualTo(2));
+            Assert.That(p.AvancosMarcados, Is.Empty);
+            Assert.That(cadastro.Buscar(p.Id), Is.SameAs(p));
+        }
+
         [Test]
         public void Todo_arquetipo_tem_oito_em_cima_e_seis_embaixo()
         {

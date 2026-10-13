@@ -39,6 +39,13 @@ namespace TorreDeControle.Core.Personagens
             });
         }
 
+        /// <summary>Leva o potencial a um valor exato (digitado no playground), com as mesmas regras.</summary>
+        public Resultado DefinirPotencial(string id, int valor)
+        {
+            var p = Buscar(id);
+            return p == null ? Resultado.Falha("Personagem não encontrada.") : AjustarPotencial(id, valor - p.Potencial);
+        }
+
         /// <summary>
         /// PROVISÓRIO, até o painel do mestre: soma ou tira potencial. Não deixa tirar o potencial que
         /// já virou avanço marcado.
@@ -48,7 +55,7 @@ namespace TorreDeControle.Core.Personagens
             var p = Buscar(id);
             if (p == null)
                 return Resultado.Falha("Personagem não encontrada.");
-            if (p.Status == StatusCriacao.Novo)
+            if (!LiberadoNoJogo(p))
                 return Resultado.Falha("Potencial é do jogo, depois de concluir a criação.");
             var novo = p.Potencial + delta;
             if (novo < 0)
@@ -113,7 +120,7 @@ namespace TorreDeControle.Core.Personagens
             erro = Resultado.Sucesso();
             if (p == null)
                 erro = Resultado.Falha("Personagem não encontrada.");
-            else if (p.Status == StatusCriacao.Novo)
+            else if (!LiberadoNoJogo(p))
                 erro = Resultado.Falha("Cumprir é durante o jogo, depois de concluir a criação.");
             else
             {
@@ -130,7 +137,7 @@ namespace TorreDeControle.Core.Personagens
             var p = Buscar(id);
             if (p == null)
                 return Resultado.Falha("Personagem não encontrada.");
-            if (p.Status == StatusCriacao.Novo)
+            if (!LiberadoNoJogo(p))
                 return Resultado.Falha("Avanços vêm depois de concluir a criação.");
 
             var avancos = AvancosDoArquetipo(p);

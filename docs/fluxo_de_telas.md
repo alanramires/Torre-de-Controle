@@ -94,7 +94,17 @@ MÓDULOS      extras do arquétipo (Impulsos, Perdição, Chamas, Máscara…) e
 
 - **Núcleo sobrevive à troca de arquétipo** (como multiclasse): Rótulos, condições, **potencial**
   (decidido em 2026-10-13: fica no Núcleo) e Influência continuam iguais.
-- **Abas do fichário**: Identidade · Histórico · Núcleo · Crescimento · Módulos (Ajuda no fim).
+- **Abas do fichário**: Identidade · Histórico · Núcleo · Crescimento · Módulos · **Variáveis** (Ajuda no fim).
+  **Variáveis é só do mestre**: o que pertence à ficha mas o jogador não vê (potencial atingido, usado e
+  atual, avanços ganhos/pegos/pendentes, "N de 14" e faixa da carreira, status). O jogador vê só as
+  caixinhas do potencial e o aviso de avanço pendente (no fim, a estrela bronze/prata/ouro).
+  Até o painel de controle existir, Variáveis é também o **playground do mestre**: potencial, trilhas
+  (perdição), impulsos cumpridos e condições (uso do santuário) se mexem lá; as outras abas mostram.
+- **Modo teste** (interruptor no cabeçalho da ficha): serve para **validar a ficha** antes de existirem as
+  fontes de verdade. Ligado, o playground aparece e tudo pode ser mexido; o disco continua com a
+  personagem real. Desligado (ou ao fechar a ficha), tudo o que foi testado é desfeito. Motivo: no jogo,
+  potencial, Rótulos etc. virão de fontes com origem e motivo (painel do mestre, eventos), não de
+  edição direta na ficha.
   Histórico é uma aba da seção Identidade (separada só porque a aba ficou grande): as 5 perguntas
   da ficha e a equipe ("quando a equipe se reuniu" e relacionamentos), que fora de sala aparece
   desativada, só para ler. A regra de Influência inicial aparece no Núcleo, também desativada.

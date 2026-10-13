@@ -134,6 +134,15 @@ namespace TorreDeControle.Core.Personagens
         /// pendentes = potencial / 5 − avanços marcados. Quem dá potencial é o mestre (painel, no jogo).
         /// </summary>
         [JsonProperty("potencial")] public int Potencial { get; set; }
+
+        // ---------- estado de jogo dos extras (o mestre mexe; a ficha mostra) ----------
+
+        /// <summary>Contadores corridos, por "extra|campo" (ex.: trilha da perdição).</summary>
+        [JsonProperty("contadores")] public Dictionary<string, int> Contadores { get; set; } = new Dictionary<string, int>();
+        /// <summary>Escolhas feitas no jogo, por "extra|campo" (ex.: sinais além do inicial, condições do santuário).</summary>
+        [JsonProperty("escolhas_de_jogo")] public Dictionary<string, List<string>> EscolhasDeJogo { get; set; } = new Dictionary<string, List<string>>();
+        /// <summary>Textos do jogo, por "extra|campo|sub" (ex.: o pedido ao santuário, a lacuna de uma condição).</summary>
+        [JsonProperty("textos_de_jogo")] public Dictionary<string, string> TextosDeJogo { get; set; } = new Dictionary<string, string>();
         /// <summary>
         /// No jogo (protótipo): escolhas de extra cumpridas, por "extra|opcao", com o benefício escolhido
         /// (vazio enquanto não escolheu). Ex.: impulsos do Farol. Só a marca, sem efeito ainda.

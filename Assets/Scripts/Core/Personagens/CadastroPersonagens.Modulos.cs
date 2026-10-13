@@ -105,6 +105,8 @@ namespace TorreDeControle.Core.Personagens
                 case Campo.Lista:
                     if (c.Opcoes.All(o => o.Id != opcao))
                         return Resultado.Falha("Opção desconhecida.");
+                    if (opcao == c.Final)
+                        return Resultado.Falha("Essa não se escolhe na criação.");
                     if (atuais.Remove(opcao))
                     {
                         p.Criacao.ExtrasTextos.Remove(ChaveExtra(extra, campo, opcao));

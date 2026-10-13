@@ -112,6 +112,20 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("na_sala")] public bool NaSala { get; set; }
             /// <summary>Lista: cada opção escolhida pede um texto (ex.: como o bicho ajuda em cada movimento).</summary>
             [JsonProperty("descrever")] public bool Descrever { get; set; }
+
+            // ---------- campos de jogo (o mestre mexe; a ficha mostra) ----------
+
+            public const string Condicoes = "condicoes";
+
+            /// <summary>Trilha: a cada 5 pontos, uma escolha a mais no campo "extra|campo" indicado.</summary>
+            [JsonProperty("rende")] public string Rende { get; set; }
+            /// <summary>Lista que ganha escolhas durante o jogo, além das da criação (ex.: sinais da perdição).</summary>
+            [JsonProperty("cresce_no_jogo")] public bool CresceNoJogo { get; set; }
+            /// <summary>Opção final: só libera com todas as outras tomadas, ou pelo avanço indicado.</summary>
+            [JsonProperty("final")] public string Final { get; set; }
+            [JsonProperty("final_libera_com_avanco")] public string FinalLiberaComAvanco { get; set; }
+            /// <summary>Campo preenchido no jogo, não na criação (ex.: uso do santuário).</summary>
+            [JsonProperty("no_jogo")] public bool NoJogo { get; set; }
             [JsonProperty("nota")] public string Nota { get; set; }
 
             [JsonIgnore] public int MaximoEscolhas => Escolher ?? EscolherAte ?? 0;
@@ -151,6 +165,10 @@ namespace TorreDeControle.Core.Regras
         {
             [JsonProperty("id")] public string Id { get; set; }
             [JsonProperty("nome")] public string Nome { get; set; }
+            /// <summary>Regra em uma frase, quando a opção tem efeito (ex.: papéis do Coração da Bruta).</summary>
+            [JsonProperty("regra")] public string Regra { get; set; }
+            /// <summary>O texto tem uma lacuna ("___") que se preenche (ex.: condições do santuário).</summary>
+            [JsonProperty("lacuna")] public bool Lacuna { get; set; }
         }
 
         public sealed class LinhaDePoderes

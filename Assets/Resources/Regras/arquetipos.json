@@ -137,42 +137,57 @@
               "id": "trilha",
               "tipo": "trilha",
               "rotulo": "Trilha da perdição",
-              "tamanho": 5
+              "tamanho": 5,
+              "rende": "amaldicoada/sinais|sinais",
+              "nota": "a cada 5, um sinal da perdição novo"
             }
           ]
         },
         {
           "id": "amaldicoada/sinais",
           "nome": "Sinais da perdição",
-          "nota": "com os cinco, a próxima trilha cheia é 'sua perdição chega'",
+          "nota": "começa com 1; a cada 5 na trilha, mais um; com os 5, só resta a perdição chegar",
           "campos": [
             {
-              "id": "inicial",
+              "id": "sinais",
               "tipo": "lista",
-              "rotulo": "O sinal que você já tem",
+              "rotulo": "Sinais da perdição",
+              "escolher": 1,
+              "cresce_no_jogo": true,
+              "final": "sua-perdicao-chega",
+              "final_libera_com_avanco": "enfrentar-perdicao",
               "opcoes": [
                 {
                   "id": "visoes-sombrias",
-                  "nome": "Visões sombrias"
+                  "nome": "Visões sombrias",
+                  "regra": "Marque a trilha da perdição para ter uma visão da situação; depois pergunte uma coisa ao MJ, que responde com honestidade."
                 },
                 {
                   "id": "poderes-infinitos",
-                  "nome": "Poderes infinitos"
+                  "nome": "Poderes infinitos",
+                  "regra": "Marque a trilha da perdição para usar, uma vez, uma habilidade de qualquer arquétipo."
                 },
                 {
                   "id": "portal",
-                  "nome": "Portal"
+                  "nome": "Portal",
+                  "regra": "Marque a trilha da perdição para aparecer numa cena com quem quiser."
                 },
                 {
                   "id": "brilho-intenso",
-                  "nome": "Brilho intenso"
+                  "nome": "Brilho intenso",
+                  "regra": "Marque a trilha da perdição para ignorar uma das condições do MJ ao usar o santuário."
                 },
                 {
                   "id": "fortalecida",
-                  "nome": "Fortalecida"
+                  "nome": "Fortalecida",
+                  "regra": "Marque a trilha da perdição para usar um movimento adulto uma vez."
+                },
+                {
+                  "id": "sua-perdicao-chega",
+                  "nome": "Sua perdição chega",
+                  "regra": "Enfrente-a e pereça. Só com os cinco sinais tomados, ou pelo avanço que libera o confronto."
                 }
-              ],
-              "escolher": 1
+              ]
             }
           ]
         },
@@ -268,6 +283,43 @@
                 }
               ],
               "escolher": 2
+            },
+            {
+              "id": "uso",
+              "tipo": "condicoes",
+              "rotulo": "Uso do santuário",
+              "no_jogo": true,
+              "nota": "diga o que quer resolver; o MJ marca de uma a quatro condições",
+              "opcoes": [
+                {
+                  "id": "primeiro",
+                  "nome": "Primeiro, você precisa ___",
+                  "lacuna": true
+                },
+                {
+                  "id": "ajuda",
+                  "nome": "Vai precisar da ajuda de ___",
+                  "lacuna": true
+                },
+                {
+                  "id": "perigo",
+                  "nome": "Você e a equipe vão correr perigo de ___",
+                  "lacuna": true
+                },
+                {
+                  "id": "menor",
+                  "nome": "O melhor que dá é uma versão menor, instável e limitada"
+                },
+                {
+                  "id": "trilha",
+                  "nome": "Marque uma casa na trilha da perdição"
+                },
+                {
+                  "id": "obter",
+                  "nome": "Vai ter que obter ___",
+                  "lacuna": true
+                }
+              ]
             }
           ]
         }
@@ -421,27 +473,33 @@
         "opcoes": [
           {
             "id": "casca-grossa-pele-fina",
-            "nome": "Casca grossa, pele fina"
+            "nome": "Casca grossa, pele fina",
+            "regra": "Enquanto estiver Irritada, +1 constante para liberar seus poderes."
           },
           {
             "id": "pra-que-essa-cabeca",
-            "nome": "Pra que essa cabeça?"
+            "nome": "Pra que essa cabeça?",
+            "regra": "Ao provocar com ameaças óbvias e demonstração de força, role + Perigoso no lugar de + Superior."
           },
           {
             "id": "soco-em-todo-mundo",
-            "nome": "Soco em todo mundo"
+            "nome": "Soco em todo mundo",
+            "regra": "Ao se jogar numa briga sem pensar duas vezes, pode subir Perigoso e baixar outro Rótulo."
           },
           {
             "id": "la-quando-importa",
-            "nome": "Lá quando importa"
+            "nome": "Lá quando importa",
+            "regra": "Ao defender alguém, num acerto pode guardar 1 em vez de escolher; gaste depois para chegar à cena quando essa pessoa estiver em perigo."
           },
           {
             "id": "numa-loja-de-loucas",
-            "nome": "Numa loja de louças"
+            "nome": "Numa loja de louças",
+            "regra": "Ao enfrentar diretamente a ameaça, pode causar estrago sério no ambiente para escolher mais uma opção, até numa falha."
           },
           {
             "id": "fisica-que-fisica",
-            "nome": "Física? Que física?"
+            "nome": "Física? Que física?",
+            "regra": "Ao liberar seus poderes para atravessar uma barreira intransponível, role + Perigoso no lugar de + Aberração."
           }
         ]
       },
@@ -475,19 +533,23 @@
               "opcoes": [
                 {
                   "id": "defensora",
-                  "nome": "Defensora"
+                  "nome": "Defensora",
+                  "regra": "Ao saltar para defender seu amor ou rival numa luta, role + Perigoso no lugar de + Salvador."
                 },
                 {
                   "id": "amiga",
-                  "nome": "Amiga"
+                  "nome": "Amiga",
+                  "regra": "Ao confortar ou apoiar seu amor ou rival, marque potencial num acerto; quando eles confortarem você e acertarem, marque também."
                 },
                 {
                   "id": "ouvinte",
-                  "nome": "Ouvinte"
+                  "nome": "Ouvinte",
+                  "regra": "Ao perfurar a máscara do seu amor ou rival, pode deixar que façam uma pergunta a você para fazer mais uma a eles, até numa falha."
                 },
                 {
                   "id": "incentivadora",
-                  "nome": "Incentivadora"
+                  "nome": "Incentivadora",
+                  "regra": "Ao provocar seu amor ou rival a agir sem pensar, role + Perigoso."
                 }
               ],
               "escolher": 1
@@ -655,27 +717,33 @@
         "opcoes": [
           {
             "id": "do-contra",
-            "nome": "Do contra"
+            "nome": "Do contra",
+            "regra": "Quando tentarem perfurar sua máscara, confortar/apoiar ou provocar você, pode interferir: role + Superior. Acerto: -2 na rolagem deles; 10+: também ganha Influência sobre eles ou remove uma condição. Falha: eles tiram 10+ de qualquer jeito e você marca a condição que escolherem."
           },
           {
             "id": "nao-ligo-pro-que-voce-pensa",
-            "nome": "Não ligo pro que você pensa!"
+            "nome": "Não ligo pro que você pensa!",
+            "regra": "Ao rejeitar Influência, +2 na rolagem."
           },
           {
             "id": "equipe-que-equipe",
-            "nome": "Equipe? Que equipe?"
+            "nome": "Equipe? Que equipe?",
+            "regra": "Ao usar Equipe de forma egoísta, remova uma condição ou marque potencial. Na primeira vez da sessão em que usar Equipe para ajudar um colega, +1 adiante."
           },
           {
             "id": "mente-criminosa",
-            "nome": "Mente criminosa"
+            "nome": "Mente criminosa",
+            "regra": "Ao avaliar a situação, sempre pode fazer uma destas, até numa falha: o que aqui é útil ou valioso para mim? / como irritar ou provocar ___? / qual o melhor jeito de entrar ou passar?"
           },
           {
             "id": "encrenqueiro",
-            "nome": "Encrenqueiro"
+            "nome": "Encrenqueiro",
+            "regra": "Ao ajudar um colega com ações destrutivas, criminosas ou que quebram regras, dê +2 em vez de +1 ao gastar um ponto de Equipe."
           },
           {
             "id": "ta-prestando-atencao",
-            "nome": "Tá prestando atenção?"
+            "nome": "Tá prestando atenção?",
+            "regra": "Ao enganar, distrair ou iludir alguém, role + Superior. Acerto: caem, pelo menos por um momento; 10+ escolha três, 7-9 escolha duas (oportunidade; expõe uma fraqueza; confunde por um tempo; evita mais enrosco). Falha: você se enrola e marca uma condição."
           }
         ]
       },
@@ -2808,5 +2876,6 @@
   "_visual_historico": "'visual': grupos de tags de aparência (só inspiração; a aparência é texto livre). 'historico': as perguntas de histórico da ficha (guia; o histórico é texto livre). Traduzidos por nós a partir da ficha em inglês.",
   "_equipe": "'equipe': a pergunta 'quando a equipe se reuniu' e as 2 frases de relacionamento ('___' é o colega). Respondidas na sala, com a equipe. 'influencia.texto': a regra de Influência inicial em uma frase. Traduzido por nós a partir da ficha em inglês.",
   "_avancos": "'avancos': a lista de avanços da ficha. 'cima' (8) e 'baixo' (tardios, liberam com 5 de cima). Cada item só se marca uma vez; itens repetidos (ex.: dois 'movimento de outro arquétipo') são casas diferentes. 'id' é a operação (ver avancos.json). Traduzido por nós a partir da ficha em inglês.",
-  "_modulos": "'movimentos': deck do arquétipo (escolher N além dos obrigatórios). 'extras': cada um com 'campos' por tipo: lista (escolher/escolher_ate), texto, textos (vagas, mínimo), rotulo (um dos ids em 'rotulos'), trilha (só exibe). 'na_sala': preenchido com a equipe. Nomes traduzidos por nós a partir da ficha em inglês; 'Eu sou o monstro' segue a errata do acervo. Movimentos podem ter 'campos' (subseção que abre quando o movimento está na ficha) e 'regra' (a regra em uma frase). Campo lista com 'descrever': cada escolhida pede um texto. Extra com 'cumpre_campo' e 'ao_cumprir': no jogo, cada escolha daquele campo pode ser marcada como cumprida, com um benefício da lista."
+  "_modulos": "'movimentos': deck do arquétipo (escolher N além dos obrigatórios). 'extras': cada um com 'campos' por tipo: lista (escolher/escolher_ate), texto, textos (vagas, mínimo), rotulo (um dos ids em 'rotulos'), trilha (só exibe). 'na_sala': preenchido com a equipe. Nomes traduzidos por nós a partir da ficha em inglês; 'Eu sou o monstro' segue a errata do acervo. Movimentos podem ter 'campos' (subseção que abre quando o movimento está na ficha) e 'regra' (a regra em uma frase). Campo lista com 'descrever': cada escolhida pede um texto. Extra com 'cumpre_campo' e 'ao_cumprir': no jogo, cada escolha daquele campo pode ser marcada como cumprida, com um benefício da lista. Opções de lista também podem ter 'regra' (ex.: os papéis do Coração da Bruta).",
+  "_jogo": "Campos de jogo (o mestre mexe; a ficha mostra): 'trilha' com 'rende' (a cada 5 pontos, uma escolha a mais no campo indicado); lista com 'cresce_no_jogo' (escolhas além da criação, uma por ponto rendido) e 'final' (opção que só libera com todas as outras tomadas ou pelo avanço 'final_libera_com_avanco'); 'condicoes' com 'no_jogo' (o mestre seleciona e conclui; 'lacuna' pede texto)."
 }
