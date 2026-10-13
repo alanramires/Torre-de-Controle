@@ -1,5 +1,8 @@
 # Proposta: Torre de Controle online (adendo ao HANDOFF - Unity)
 
+> **Escopo atual (2026-10-13): só o mestre.** A parte online abaixo é futura; ver `docs/fluxo_de_telas.md`.
+> Continuam valendo: as decisões de arquitetura 1, 2 e 4 e a seção de direitos.
+
 > Complementa o `CLAUDE.md` / `HANDOFF - Unity.md` já lido. Copie para a raiz do projeto
 > (`proposta.md`) e acrescente ao `CLAUDE.md` do projeto a linha:
 > "Ler também `proposta.md`: a visão online muda decisões do handoff."

@@ -3,9 +3,11 @@
 > Nasceu do `handoff.md` escrito em 2026-10-13 na sessão de trabalho no acervo.
 > Repositório: `github.com/alanramires/Torre-de-Controle` (**público**: nada de material não livre aqui).
 >
-> **Ler também `docs/proposta.md`: a visão online muda decisões deste arquivo** (deixa de ser só do mestre;
-> `IArmazenamento`, event sourcing com autor, permissões no motor, nada de `System.IO` fora do armazenamento local,
-> direitos e campo `licenca`). Contas, salas, modelo × instância de personagem e telas: `docs/fluxo_de_telas.md`.
+> **Escopo: a Torre é do mestre** (2026-10-13). Sem contas nem tela de jogador; jogador é um registro
+> (ativo/inativo) que o mestre mantém. Telas e entidades: `docs/fluxo_de_telas.md`.
+> `docs/proposta.md` guarda a visão online e os direitos: a parte online é **futura**
+> (`docs/implementacao_futura.md`); as decisões de arquitetura de lá continuam valendo porque são boas
+> de qualquer jeito (`IArmazenamento`, log de eventos com autor, nada de `System.IO` fora do armazenamento).
 
 ## O que é
 
@@ -15,7 +17,7 @@ Uma **mesa digital de controle** para o MJ de *Masks: A Nova Geração* (PbtA), 
 O Alan mestra no fórum novaerarpg.com e no WhatsApp, em formato assíncrono ("modo literário"). A dor principal
 é o **controle**: ninguém registra progresso de ficha, o mestre perde horas formatando, poderes de outro arquétipo
 quebram o layout, há discussões sobre PvP e o mestre não sabe quando usar os movimentos do MJ.
-Na fase 1 só o mestre usa, local; nas fases 2 e 3 vira sala online (ver `docs/proposta.md`). Responda em português.
+Só o mestre usa. Responda em português.
 
 ## O acervo é referência; tudo é criado aqui
 

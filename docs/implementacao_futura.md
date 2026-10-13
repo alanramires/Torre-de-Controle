@@ -1,23 +1,25 @@
 # Implementação futura
 
-Ideias aprovadas pelo Alan, mas **fora do MVP**. Não implementar sem ele pedir; o desenho atual não
-deve impedi-las.
+Ideias registradas, mas **fora do escopo atual**: a Torre é a ferramenta do mestre. Não implementar
+sem o Alan pedir.
+
+## Parte online (fases 2 e 3 da `docs/proposta.md`)
+
+Contas, login, sala com jogadores reais vendo a própria ficha, anotações do jogador, pedido para
+jogar e aprovação pelo mestre, rolagem pelo próprio jogador, publicação no Unity Play.
+Se um dia vier: autenticação atrás de uma interface (`IAutenticacao`), central simulada com senha
+`1` para testar, nada de guardar senha por conta própria.
 
 ## Co-mestre
 
-Uma sala pode ter mais de um mestre: o criador convida outra conta para mestrar junto.
-*Para não bloquear:* papel na sala é uma lista de membros com papel, não um campo `mestre` único.
+Uma sala com mais de um mestre.
 
-## Mais de uma instância por jogador na mesma sala
+## Mais de uma personagem por jogador na mesma sala
 
-Um jogador pode controlar mais de uma personagem na sala, por exemplo jogando pelo amigo que sumiu.
-*Para não bloquear:* a instância aponta para o jogador; a sala não supõe "um jogador = uma instância".
+Ex.: jogar pelo amigo que sumiu. (Com jogador inativo isso já se resolve em parte.)
 
 ## Trazer personagem de outra campanha
 
-O jogador pede para levar uma instância evoluída da campanha X para a sala Y ("o veterano"),
-e o mestre da sala Y aprova. Se ficar complicado, alternativa mais simples: salvar a instância como
-modelo novo no repositório da conta.
-*Para não bloquear:* a instância guarda de qual modelo nasceu e é serializável sozinha, sem depender da sala.
+Levar uma personagem evoluída da campanha X para a sala Y ("o veterano").
 
 (Registrado em 2026-10-13.)
