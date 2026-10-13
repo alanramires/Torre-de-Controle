@@ -1,0 +1,118 @@
+{
+  "versao": 1,
+  "_sobre": "Regras de criação dos dez arquétipos. Fonte: fichas em inglês (Masks-ENG-Arquetipos.pdf, no acervo), conferidas com o livro PT-BR. Os Rótulos iniciais foram lidos pela cor (o valor inicial vem impresso em azul) e todos somam +2. Texto próprio; nomes dos movimentos e extras ficam no catálogo de cartas.",
+
+  "criacao_comum": {
+    "bonus_livre": { "valor": 1, "onde": "um Rótulo à escolha", "respeita_maximo": 3 },
+    "soma_rotulos_iniciais": 2,
+    "relacionamentos": 2,
+    "comecam_zerados": ["condicoes", "potencial", "avancos"],
+    "hora_da_verdade": "bloqueada",
+    "ordem": ["identidade", "habilidades", "rotulos", "movimentos", "extras", "historico", "apresentacao", "quando_a_equipe_se_reuniu", "relacionamentos", "influencia"],
+    "origem": "livro p.41-53"
+  },
+
+  "arquetipos": [
+    {
+      "id": "amaldicoada", "nome": "Amaldiçoada", "nome_en": "The Doomed",
+      "rotulos": { "perigoso": 1, "aberracao": 1, "salvador": 1, "superior": -1, "mundano": 0 },
+      "habilidades": { "escolher_ate": 3, "de": 6, "nota": "ligadas à perdição" },
+      "movimentos": { "escolher": 0, "nota": "não escolhe movimentos de arquétipo na criação: os extras fazem esse papel" },
+      "influencia": { "regra": "fixo", "quantidade": 2 },
+      "extras": [
+        { "id": "amaldicoada/nemesis", "nome": "Nêmesis", "criacao": "nomear o nêmesis", "fim_de_sessao": "avançou contra o nêmesis? sim: marca potencial; não: marca a trilha da perdição" },
+        { "id": "amaldicoada/perdicao", "nome": "Perdição", "criacao": "escolher 2 de 6 gatilhos que aproximam a perdição", "trilha": 5 },
+        { "id": "amaldicoada/sinais", "nome": "Sinais da perdição", "criacao": "começa com 1 dos 5 sinais" },
+        { "id": "amaldicoada/santuario", "nome": "Santuário", "criacao": "3 características e 2 desvantagens" }
+      ]
+    },
+    {
+      "id": "bruta", "nome": "Bruta", "nome_en": "The Bull",
+      "rotulos": { "perigoso": 2, "aberracao": 1, "salvador": -1, "superior": 1, "mundano": -1 },
+      "habilidades": { "fixas": ["superresistente", "muito forte", "luta como ninguém"], "nota": "descrever como cada uma se manifesta" },
+      "movimentos": { "escolher": 2 },
+      "influencia": { "regra": "amor_e_rival", "nota": "dá Influência ao amor e ao rival, a mais ninguém" },
+      "extras": [
+        { "id": "bruta/coracao", "nome": "Coração da Bruta", "criacao": "nomear amor e rival; escolher 1 de 4 papéis", "papeis": ["defensora", "amiga", "ouvinte", "incentivadora"] }
+      ]
+    },
+    {
+      "id": "delinquente", "nome": "Delinquente", "nome_en": "The Delinquent",
+      "rotulos": { "perigoso": 0, "aberracao": 0, "salvador": -1, "superior": 2, "mundano": 1 },
+      "habilidades": { "escolher": 2, "nota": "poderes bagunçados, enganosos ou frustrantes" },
+      "movimentos": { "escolher": 3 },
+      "influencia": { "regra": "fixo", "quantidade": 3 },
+      "extras": []
+    },
+    {
+      "id": "discipula", "nome": "Discípula", "nome_en": "The Protégé",
+      "rotulos": { "perigoso": -1, "aberracao": 0, "salvador": 1, "superior": 2, "mundano": 0 },
+      "habilidades": { "regra": "mentora", "nota": "1 compartilhada com a mentora, 1 só sua, 1 só da mentora" },
+      "movimentos": { "escolher": 3 },
+      "influencia": { "regra": "comportamento", "opcoes": [ { "id": "brincalhona", "quantidade": 2 }, { "id": "profissional", "quantidade": 0 } ] },
+      "extras": [
+        { "id": "discipula/mentora", "nome": "Mentora", "criacao": "nomear; escolher o Rótulo que ela incorpora e o que ela nega" },
+        { "id": "discipula/recursos", "nome": "Recursos da mentora", "criacao": "até 3" }
+      ]
+    },
+    {
+      "id": "farol", "nome": "Farol", "nome_en": "The Beacon",
+      "rotulos": { "perigoso": -1, "aberracao": -1, "salvador": 2, "superior": 0, "mundano": 2 },
+      "habilidades": { "escolher": 2, "de": 6, "nota": "poderes discretos ou perícias com equipamento" },
+      "movimentos": { "escolher": 2 },
+      "influencia": { "regra": "fixo", "quantidade": 3 },
+      "extras": [
+        { "id": "farol/impulsos", "nome": "Impulsos", "criacao": "marcar 4 de 20", "ao_cumprir": "marca potencial, remove condição ou ganha Influência sobre alguém envolvido", "fim": "todos cumpridos: muda de arquétipo, aposenta ou vira modelo" }
+      ]
+    },
+    {
+      "id": "forasteira", "nome": "Forasteira", "nome_en": "The Outsider",
+      "rotulos": { "perigoso": -1, "aberracao": 1, "salvador": 0, "superior": 2, "mundano": 0 },
+      "habilidades": { "fixas": ["voa", "resistente"], "escolher": 2, "de": 6 },
+      "movimentos": { "escolher": 3 },
+      "influencia": { "regra": "comportamento", "opcoes": [ { "id": "arrogante", "quantidade": 0 }, { "id": "alegre", "quantidade": "todos" } ] },
+      "extras": []
+    },
+    {
+      "id": "janus", "nome": "Janus", "nome_en": "The Janus",
+      "rotulos": { "perigoso": 0, "aberracao": -1, "salvador": 0, "superior": 0, "mundano": 3 },
+      "habilidades": { "fixas": ["físico aprimorado"], "escolher": 2, "de": 6, "nota": "aparência não muda; dá para esconder os poderes" },
+      "movimentos": { "obrigatorios": ["janus/a-mascara"], "escolher": 2, "nota": "A Máscara + 2 à escolha" },
+      "influencia": { "regra": "fixo", "quantidade": 2 },
+      "extras": [
+        { "id": "janus/mascara", "nome": "A Máscara", "criacao": "escolher o Rótulo da máscara: aberração, perigoso, salvador ou superior" },
+        { "id": "janus/identidade-secreta", "nome": "Identidade secreta", "criacao": "3 obrigações (emprego, escola, casa, vida social)" }
+      ],
+      "_nota": "Mundano começa em +3: o +1 livre não pode ir para ele."
+    },
+    {
+      "id": "legado", "nome": "Legado", "nome_en": "The Legacy",
+      "rotulos": { "perigoso": -1, "aberracao": 0, "salvador": 2, "superior": 0, "mundano": 1 },
+      "habilidades": { "regra": "linha", "nota": "escolher 1 de 5 linhas de poder e 2 poderes dela que NÃO tem (fica com os outros 3)" },
+      "movimentos": { "escolher": 2 },
+      "influencia": { "regra": "todos" },
+      "extras": [
+        { "id": "legado/membros", "nome": "Legado", "criacao": "nomear pelo menos 2 membros: ativo, aposentado, próximo da linhagem, maior inimigo" }
+      ]
+    },
+    {
+      "id": "nova", "nome": "Nova", "nome_en": "The Nova",
+      "rotulos": { "perigoso": 1, "aberracao": 2, "salvador": 0, "superior": 0, "mundano": -1 },
+      "habilidades": { "escolher": 1, "de": 6, "nota": "a base ampla do controle sobre o mundo" },
+      "movimentos": { "escolher": 0, "nota": "não escolhe movimentos de arquétipo na criação: as faíscas fazem esse papel" },
+      "influencia": { "regra": "comportamento", "opcoes": [ { "id": "fachada_feliz", "quantidade": 3 }, { "id": "cara_fechada", "quantidade": 1 } ] },
+      "extras": [
+        { "id": "nova/chamas", "nome": "Chamas e faíscas", "criacao": "escolher 4 de 10 faíscas", "chamas": "carregar: rola + condições marcadas; perde tudo no fim da cena" }
+      ]
+    },
+    {
+      "id": "transformado", "nome": "Transformado", "nome_en": "The Transformed",
+      "rotulos": { "perigoso": 1, "aberracao": 3, "salvador": 0, "superior": -1, "mundano": -1 },
+      "habilidades": { "escolher": 2, "de": 6, "nota": "e descrever como a deixam grotesca" },
+      "movimentos": { "escolher": 3 },
+      "influencia": { "regra": "fixo", "quantidade": 1 },
+      "extras": [],
+      "_nota": "Aberração começa em +3: o +1 livre não pode ir para ela."
+    }
+  ]
+}

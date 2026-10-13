@@ -18,6 +18,7 @@ As regras que o motor usa, **escritas por nós** em formato de dados. O motor l�
 | `influencia.json` | modelo binário, segunda Influência, +1 passivo, dizer quem você é, aproveitar, rejeitar, formas de perder |
 | `equipe_e_sessao.json` | ajudar, egoísta, entrar em batalha, o tempo passa, início e fim de sessão |
 | `avancos.json` | operações de avanço, tardios (depois de 5), personagem nova no meio da campanha |
+| `arquetipos.json` | regras de criação dos 10 arquétipos: Rótulos iniciais (somam +2), +1 livre, habilidades, quantos movimentos, Influência inicial, extras e o que cada um pede na criação |
 | `pvp.json` | fluxo em fila, defender como única interrupção, variantes contra PJ |
 
 Ainda não estão aqui: movimentos e extras de cada arquétipo, movimentos de equipe por arquétipo,
@@ -65,5 +66,7 @@ Quem rola é `rolou`; o outro lado é `alvo`. Opções sem efeito mecânico exis
 1. **Nunca colar texto do livro.** Resumir com palavras próprias, curtas.
 2. Toda regra nova leva `origem`.
 3. Erro achado na regra → corrigir aqui e registrar em `_correcao` no item, para não voltar.
-4. Dúvida → consultar o texto do livro no acervo
+4. **Fonte preferida: as fichas em inglês** (`Livros/Masks-ENG-Arquetipos.pdf`); a tradução PT-BR complica
+   algumas partes. Valores desenhados (Rótulos iniciais) se leem pela cor do texto no PDF, não no texto extraído.
+5. Dúvida → consultar o texto do livro no acervo
    (`D:/Acervo do RPG/2025/2025/Alan - Masks/Livros/MASKS (Regras Oficiais) - texto.txt`), não os resumos.
