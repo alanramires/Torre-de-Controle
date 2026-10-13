@@ -482,7 +482,9 @@ namespace TorreDeControle.Tests
             cadastro.AlternarOpcaoDeExtra(p.Id, nave, "fraquezas", "suscetivel");
             cadastro.AlternarOpcaoDeExtra(p.Id, nave, "fraquezas", "desarmada");
             Assert.That(cadastro.Validar(p).avisos, Has.Some.Contains("Suscetível a ___"));
-            Assert.That(cadastro.DefinirTextoDeExtra(p.Id, nave, "fraquezas", "desarmada", "x").Ok, Is.False, "sem lacuna");
+            // Toda escolhida aceita descrição opcional; só a de lacuna é cobrada.
+            Assert.That(cadastro.DefinirTextoDeExtra(p.Id, nave, "fraquezas", "desarmada", "só lasers de pintura").Ok, Is.True);
+            Assert.That(cadastro.DefinirTextoDeExtra(p.Id, nave, "fraquezas", "lenta", "x").Ok, Is.False, "não escolhida");
             cadastro.DefinirTextoDeExtra(p.Id, nave, "fraquezas", "suscetivel", "sal");
             Assert.That(cadastro.Validar(p).avisos, Has.None.Contains("Nave"));
         }
@@ -518,6 +520,19 @@ namespace TorreDeControle.Tests
             cadastro.AjustarCarga(p.Id, tec, "dispositivos", d.Id, -1);
             Assert.That(d.Cargas, Is.EqualTo(0));
             Assert.That(cadastro.AjustarCarga(p.Id, tec, "dispositivos", d.Id, -1).Ok, Is.False);
+        }
+
+        [Test]
+        public void Observacao_de_movimento_e_livre_e_some_ao_desmarcar()
+        {
+            var p = Nova("forasteira");
+            Assert.That(cadastro.AnotarMovimento(p.Id, "o-melhor-deles", "x").Ok, Is.False, "fora da ficha");
+            cadastro.AlternarMovimento(p.Id, "o-melhor-deles");
+            cadastro.AnotarMovimento(p.Id, "o-melhor-deles", "uso com a Raposa");
+            Assert.That(cadastro.ObsDoMovimento(p, "o-melhor-deles"), Is.EqualTo("uso com a Raposa"));
+            Assert.That(cadastro.Validar(p).avisos, Has.None.Contains("O melhor deles"));
+            cadastro.AlternarMovimento(p.Id, "o-melhor-deles");
+            Assert.That(cadastro.ObsDoMovimento(p, "o-melhor-deles"), Is.Empty);
         }
 
         [Test]

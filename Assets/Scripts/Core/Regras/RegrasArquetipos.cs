@@ -110,6 +110,9 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("tamanho")] public int Tamanho { get; set; }
             /// <summary>Preenchido na sala, com a equipe (ex.: amor e rival da Bruta).</summary>
             [JsonProperty("na_sala")] public bool NaSala { get; set; }
+            /// <summary>Lista: cada escolhida ganha um texto opcional (ex.: forças e fraquezas da nave).</summary>
+            [JsonProperty("descrever_opcional")] public bool DescreverOpcional { get; set; }
+
             /// <summary>Texto que não entra nas pendências (ex.: descrição livre da nave).</summary>
             [JsonProperty("opcional")] public bool Opcional { get; set; }
             /// <summary>Texto de várias linhas.</summary>

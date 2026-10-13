@@ -66,8 +66,9 @@ namespace TorreDeControle.Core.Personagens
             var escolhidos = p.Criacao.Movimentos;
             if (escolhidos.Remove(movimento))
             {
-                // Desmarcou: a subseção do movimento some, e o que estava nela também.
+                // Desmarcou: a subseção do movimento some, e o que estava nela também (e a observação).
                 Apagar(p, ExtraDoMovimento(movimento));
+                p.ObsMovimentos.Remove(movimento);
             }
             else
             {
@@ -75,6 +76,28 @@ namespace TorreDeControle.Core.Personagens
                     return Resultado.Falha($"Este arquétipo escolhe {regra.Escolher} movimentos.");
                 escolhidos.Add(movimento);
             }
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        public string ObsDoMovimento(Personagem p, string movimento) =>
+            p.ObsMovimentos.TryGetValue(movimento, out var v) ? v : string.Empty;
+
+        /// <summary>Observação do jogador sobre um movimento da ficha (qualquer status; vazio apaga).</summary>
+        public Resultado AnotarMovimento(string id, string movimento, string texto)
+        {
+            var p = Buscar(id);
+            if (p == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            if (!MovimentosNaFicha(p).Contains(movimento))
+                return Resultado.Falha("Esse movimento não está na ficha.");
+            var limpo = (texto ?? string.Empty).Trim();
+            if (ObsDoMovimento(p, movimento) == limpo)
+                return Resultado.Sucesso();
+            if (limpo.Length == 0)
+                p.ObsMovimentos.Remove(movimento);
+            else
+                p.ObsMovimentos[movimento] = limpo;
             Gravar();
             return Resultado.Sucesso();
         }
@@ -134,7 +157,7 @@ namespace TorreDeControle.Core.Personagens
             var c = BuscarCampo(p, extra, campo);
             // Lista com descrição: todas as escolhidas (descrever) ou só as que têm lacuna ("Suscetível a ___").
             var descricaoDeLista = c != null && c.Tipo == Campo.Lista &&
-                                   (c.Descrever || c.Opcoes.Any(o => o.Id == vaga && o.Lacuna));
+                                   (c.Descrever || c.DescreverOpcional || c.Opcoes.Any(o => o.Id == vaga && o.Lacuna));
             if (c == null || (c.Tipo != Campo.Texto && c.Tipo != Campo.Textos && !descricaoDeLista))
                 return Resultado.Falha("Campo de texto desconhecido.");
             if (c.NaSala)

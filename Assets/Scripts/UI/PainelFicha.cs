@@ -375,6 +375,25 @@ namespace TorreDeControle.UI
                 }
             }
 
+            // Observação livre do jogador em cada movimento da ficha (anotação: editável sempre).
+            if (naFicha.Count > 0)
+            {
+                Subtitulo("Observações sobre os movimentos (opcional)");
+                foreach (var o in mov.Opcoes.Where(o => naFicha.Contains(o.Id)))
+                {
+                    var id = o.Id;
+                    var fila = FilaRotulada(o.Nome);
+                    fila.GetComponentInChildren<TextMeshProUGUI>().textWrappingMode = TextWrappingModes.Normal;
+                    var obs = Estilo.CampoTexto(fila, "observação (opcional)");
+                    obs.text = cadastro.ObsDoMovimento(p, id);
+                    Estilo.ColunaElastica(obs);
+                    // Grava sem redesenhar (o Tab precisa achar o próximo campo vivo).
+                    obs.onSubmit.AddListener(t => cadastro.AnotarMovimento(p.Id, id, t));
+                    obs.onDeselect.AddListener(t => cadastro.AnotarMovimento(p.Id, id, t));
+                    Estilo.ComExpandir(obs, $"{o.Nome}: observação");
+                }
+            }
+
             // Movimentos que abrem subseção (ex.: o equipamento, o bicho do "Vamos, Sortudo!").
             foreach (var m in cadastro.MovimentosComSubsecao(p))
             {
@@ -518,13 +537,15 @@ namespace TorreDeControle.UI
                     }
 
                     // Lista que pede descrição: cada escolhida ganha o seu campo (ex.: como o bicho ajuda).
-                    // Texto por escolhida: todas (descrever) ou só as com lacuna ("Suscetível a ___").
-                    foreach (var o in c.Opcoes.Where(o => escolhidas.Contains(o.Id) && (c.Descrever || o.Lacuna)))
+                    // Texto por escolhida: todas (descrever / descrever_opcional) ou só as com lacuna.
+                    foreach (var o in c.Opcoes.Where(o => escolhidas.Contains(o.Id) && (c.Descrever || c.DescreverOpcional || o.Lacuna)))
                     {
                         var fila = FilaRotulada(o.Nome);
                         fila.GetComponentInChildren<TextMeshProUGUI>().textWrappingMode = TextWrappingModes.Normal;
-                        var campo = CampoTextoDeExtra(extra, c, o.Id, emCriacao, fila,
-                            o.Lacuna && !c.Descrever ? "complete o ___" : c.Nota ?? "descreva");
+                        var dica = o.Lacuna ? "complete o ___"
+                            : c.Descrever ? c.Nota ?? "descreva"
+                            : "descrição (opcional)";
+                        var campo = CampoTextoDeExtra(extra, c, o.Id, emCriacao, fila, dica, tituloExpandir: o.Nome);
                         Estilo.ColunaElastica(campo);
                     }
                     break;
@@ -706,7 +727,7 @@ namespace TorreDeControle.UI
             o.Lacuna && !string.IsNullOrEmpty(preenchido) ? o.Nome.Replace("___", preenchido) : o.Nome;
 
         TMP_InputField CampoTextoDeExtra(string extra, Core.Regras.RegrasArquetipos.CampoExtra c, string vaga,
-            bool emCriacao, Transform pai = null, string dica = null)
+            bool emCriacao, Transform pai = null, string dica = null, string tituloExpandir = null)
         {
             var alvo = pai != null ? pai : conteudo;
             var marcador = c.NaSala ? "na sala" : dica ?? c.Titulo.ToLowerInvariant();
@@ -726,6 +747,8 @@ namespace TorreDeControle.UI
             }
             campo.onDeselect.AddListener(t => { cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, vaga, t); MontarRodape(); });
             campo.onSubmit.AddListener(t => { cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, vaga, t); MontarRodape(); });
+            if (!c.VariasLinhas || pai != null)
+                Estilo.ComExpandir(campo, tituloExpandir ?? c.Titulo);
             return campo;
         }
 
@@ -1313,6 +1336,7 @@ namespace TorreDeControle.UI
                 // Não redesenha: o Tab precisa achar o próximo campo vivo. Só o rodapé muda.
                 campo.onSubmit.AddListener(t => { cadastro.DescreverHabilidade(p.Id, hid, t); MontarRodape(); });
                 campo.onDeselect.AddListener(t => { cadastro.DescreverHabilidade(p.Id, hid, t); MontarRodape(); });
+                Estilo.ComExpandir(campo, $"{h.Nome}: como se manifesta");
             }
         }
 

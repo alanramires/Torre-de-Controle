@@ -1736,7 +1736,8 @@
                     "id": "telepatica",
                     "nome": "Telepática"
                   }
-                ]
+                ],
+                "descrever_opcional": true
               },
               {
                 "id": "fraquezas",
@@ -1769,7 +1770,8 @@
                     "id": "conserto",
                     "nome": "Difícil de consertar"
                   }
-                ]
+                ],
+                "descrever_opcional": true
               },
               {
                 "id": "descricao",
@@ -3036,6 +3038,6 @@
   "_visual_historico": "'visual': grupos de tags de aparência (só inspiração; a aparência é texto livre). 'historico': as perguntas de histórico da ficha (guia; o histórico é texto livre). Traduzidos por nós a partir da ficha em inglês.",
   "_equipe": "'equipe': a pergunta 'quando a equipe se reuniu' e as 2 frases de relacionamento ('___' é o colega). Respondidas na sala, com a equipe. 'influencia.texto': a regra de Influência inicial em uma frase. Traduzido por nós a partir da ficha em inglês.",
   "_avancos": "'avancos': a lista de avanços da ficha. 'cima' (8) e 'baixo' (tardios, liberam com 5 de cima). Cada item só se marca uma vez; itens repetidos (ex.: dois 'movimento de outro arquétipo') são casas diferentes. 'id' é a operação (ver avancos.json). Traduzido por nós a partir da ficha em inglês.",
-  "_modulos": "'movimentos': deck do arquétipo (escolher N além dos obrigatórios). 'extras': cada um com 'campos' por tipo: lista (escolher/escolher_ate), texto, textos (vagas, mínimo), rotulo (um dos ids em 'rotulos'), trilha (só exibe). 'na_sala': preenchido com a equipe. Nomes traduzidos por nós a partir da ficha em inglês; 'Eu sou o monstro' segue a errata do acervo. Movimentos podem ter 'campos' (subseção que abre quando o movimento está na ficha) e 'regra' (a regra em uma frase). Campo lista com 'descrever': cada escolhida pede um texto. Extra com 'cumpre_campo' e 'ao_cumprir': no jogo, cada escolha daquele campo pode ser marcada como cumprida, com um benefício da lista. Opções de lista também podem ter 'regra' (ex.: os papéis do Coração da Bruta). Campo de texto com 'opcional' não entra nas pendências; com 'varias_linhas', vira área de texto.",
+  "_modulos": "'movimentos': deck do arquétipo (escolher N além dos obrigatórios). 'extras': cada um com 'campos' por tipo: lista (escolher/escolher_ate), texto, textos (vagas, mínimo), rotulo (um dos ids em 'rotulos'), trilha (só exibe). 'na_sala': preenchido com a equipe. Nomes traduzidos por nós a partir da ficha em inglês; 'Eu sou o monstro' segue a errata do acervo. Movimentos podem ter 'campos' (subseção que abre quando o movimento está na ficha) e 'regra' (a regra em uma frase). Campo lista com 'descrever': cada escolhida pede um texto. Extra com 'cumpre_campo' e 'ao_cumprir': no jogo, cada escolha daquele campo pode ser marcada como cumprida, com um benefício da lista. Opções de lista também podem ter 'regra' (ex.: os papéis do Coração da Bruta). Campo de texto com 'opcional' não entra nas pendências; com 'varias_linhas', vira área de texto. Lista com 'descrever_opcional': cada escolhida ganha um texto opcional (as de lacuna continuam obrigatórias).",
   "_jogo": "Campos de jogo (o mestre mexe; a ficha mostra): 'trilha' com 'rende' (a cada 5 pontos, uma escolha a mais no campo indicado); lista com 'cresce_no_jogo' (escolhas além da criação, uma por ponto rendido) e 'final' (opção que só libera com todas as outras tomadas ou pelo avanço 'final_libera_com_avanco'); 'condicoes' com 'no_jogo' (o mestre seleciona e conclui; 'lacuna' pede texto). 'reserva': recurso de jogo que sobe e desce (ex.: chamas do Nova); com 'zera_fim_de_cena', volta a zero no fim da cena. Aparece na ficha só em sala (em carreira) ou no modo teste. 'registro': lançamentos (opção + texto da lacuna) feitos no jogo; com 'consome', cada lançamento gasta 1 da reserva indicada. 'itens': objetos criados no jogo, cada um com nome e cargas. Numa lista de criação, opção com 'lacuna' pede o texto quando escolhida."
 }

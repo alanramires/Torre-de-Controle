@@ -441,6 +441,81 @@ namespace TorreDeControle.UI
             return campo;
         }
 
+        /// <summary>
+        /// Põe o botão "•••" no fim de uma caixa de uma linha: abre uma mini-tela com área de texto grande.
+        /// Salvar escreve no campo e dispara o onDeselect dele (que é quem grava), como se tivesse saído do campo.
+        /// </summary>
+        public static void ComExpandir(TMP_InputField campo, string titulo)
+        {
+            if (!campo.interactable)
+                return;
+            // Abre espaço à direita do texto para o botão.
+            var area = campo.textViewport;
+            area.offsetMax = new Vector2(-58, area.offsetMax.y);
+
+            var rect = Rect("Expandir", campo.transform);
+            rect.anchorMin = new Vector2(1, 0);
+            rect.anchorMax = new Vector2(1, 1);
+            rect.pivot = new Vector2(1, 0.5f);
+            rect.sizeDelta = new Vector2(52, 0);
+            rect.anchoredPosition = Vector2.zero;
+            var fundo = rect.gameObject.AddComponent<Image>();
+            fundo.color = new Color(1, 1, 1, 0);
+            var botao = rect.gameObject.AddComponent<Button>();
+            botao.targetGraphic = fundo;
+            var cores = botao.colors;
+            cores.highlightedColor = new Color(1, 1, 1, 0.12f);
+            botao.colors = cores;
+            var pontos = Rotulo(rect, "•••", 22, Dourado, FontStyles.Bold);
+            pontos.alignment = TextAlignmentOptions.Center;
+            Esticar(pontos.rectTransform);
+            botao.onClick.AddListener(() => EditorDeTexto(campo.transform, titulo, campo.text, novo =>
+            {
+                campo.text = novo;
+                campo.onDeselect.Invoke(novo);
+            }));
+        }
+
+        /// <summary>Mini-tela modal com uma área de texto grande: Cancelar ou Salvar.</summary>
+        public static void EditorDeTexto(Transform qualquer, string titulo, string texto, System.Action<string> aoSalvar)
+        {
+            var raiz = (RectTransform)qualquer.GetComponentInParent<Canvas>().rootCanvas.transform;
+            var veu = Rect("EditorDeTexto", raiz);
+            Esticar(veu);
+            veu.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 0.65f);
+            veu.gameObject.AddComponent<NavegacaoTab>();
+
+            var caixa = Rect("Caixa", veu);
+            caixa.anchorMin = caixa.anchorMax = new Vector2(0.5f, 0.5f);
+            caixa.sizeDelta = new Vector2(1100, 620);
+            Moldura(caixa.gameObject, CaixaOpcoes, Dourado);
+            var coluna = caixa.gameObject.AddComponent<VerticalLayoutGroup>();
+            coluna.padding = new RectOffset(36, 36, 28, 28);
+            coluna.spacing = 16;
+            coluna.childControlWidth = true;
+            coluna.childControlHeight = true;
+            coluna.childForceExpandHeight = false;
+
+            var t = Rotulo(caixa, titulo, 26, Dourado, FontStyles.Bold);
+            t.gameObject.AddComponent<LayoutElement>().minHeight = 36;
+
+            var area = AreaTexto(caixa, "escreva à vontade", 420);
+            area.GetComponent<LayoutElement>().flexibleHeight = 1;
+            area.text = texto;
+            area.ActivateInputField();
+
+            var botoes = Fila(caixa, 60);
+            var vao = Rect("Vao", botoes);
+            vao.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            BotaoContorno(botoes, "Cancelar", 220, TextoSuave, () => Object.Destroy(veu.gameObject));
+            BotaoPrincipal(botoes, "Salvar", 220, () =>
+            {
+                var novo = area.text;
+                Object.Destroy(veu.gameObject);
+                aoSalvar(novo);
+            });
+        }
+
         /// <summary>Selo "? dicas da ficha": com o mouse em cima, mostra o texto num balão.</summary>
         public static void SeloDica(Transform pai, string rotulo, string conteudo)
         {
