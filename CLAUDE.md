@@ -2,6 +2,10 @@
 
 > Nasceu do `handoff.md` escrito em 2026-10-13 na sessão de trabalho no acervo.
 > Repositório: `github.com/alanramires/Torre-de-Controle` (**público**: nada de material não livre aqui).
+>
+> **Ler também `docs/proposta.md`: a visão online muda decisões deste arquivo** (deixa de ser só do mestre;
+> `IArmazenamento`, event sourcing com autor, permissões no motor, nada de `System.IO` fora do armazenamento local,
+> direitos e campo `licenca`). Contas, salas, modelo × instância de personagem e telas: `docs/fluxo_de_telas.md`.
 
 ## O que é
 
@@ -11,11 +15,18 @@ Uma **mesa digital de controle** para o MJ de *Masks: A Nova Geração* (PbtA), 
 O Alan mestra no fórum novaerarpg.com e no WhatsApp, em formato assíncrono ("modo literário"). A dor principal
 é o **controle**: ninguém registra progresso de ficha, o mestre perde horas formatando, poderes de outro arquétipo
 quebram o layout, há discussões sobre PvP e o mestre não sabe quando usar os movimentos do MJ.
-Só o mestre usa, local, na máquina dele. Responda em português.
+Na fase 1 só o mestre usa, local; nas fases 2 e 3 vira sala online (ver `docs/proposta.md`). Responda em português.
 
-## Onde estão os dados (fonte da verdade; NÃO copiar para cá)
+## O acervo é referência; tudo é criado aqui
 
 Acervo: `D:/Acervo do RPG/2025/2025/Alan - Masks/`. Leia o `CLAUDE.md` de lá: regras, erros conhecidos, gerador de cartas.
+
+**O acervo é só referência** (decisão do Alan, 2026-10-13). Cartas, catálogo, arte, ícones e fontes são
+**criados no Unity**, com texto próprio. Nada do acervo é copiado para cá nem lido pelo build: ele serve para
+consultar regras, ver como as cartas ficaram no papel e conferir o modelo de dados.
+Isso também resolve os direitos por construção (ver `docs/proposta.md`).
+
+O que está lá, para consulta:
 
 - `Cards/catalogo.json`: 166 cartas (id, titulo, tipo, origem, arquivo PNG, modulo). Gerado por `Cards/gerador/catalogo.py`.
   Tipos: basico (12, PvE) · pvp (9) · arquetipo (48) · equipe (10) · extra (35, módulos de arquétipo) · adulto (5) · referencia · mj · personalizado.
@@ -29,7 +40,8 @@ Acervo: `D:/Acervo do RPG/2025/2025/Alan - Masks/`. Leia o `CLAUDE.md` de lá: r
 - `Livros/MASKS (Regras Oficiais).pdf`: livro em PT-BR. Texto original CC BY 4.0 (creditar Magpie Games / Brendan Conway);
   a tradução PT-BR e a arte do livro não são livres. Uso pessoal sem problema.
 
-O caminho do acervo deve ser **configurável** (ex.: `config.json` ou ScriptableObject), nunca hardcoded espalhado.
+**As fichas também nascem aqui**, criadas pela própria Torre. A Torre nunca lê o acervo em tempo de execução:
+o caminho acima é só para consulta quando houver dúvida. As fichas JSON da partida simulada servem de modelo do schema.
 
 ## Modelo do jogo (decidido)
 
@@ -50,17 +62,18 @@ O caminho do acervo deve ser **configurável** (ex.: `config.json` ou Scriptable
 1. **Motor de regras em C# puro** (sem MonoBehaviour), testável com testes de EditMode. Recebe **comandos**
    (`RolarMovimento`, `MarcarCondicao`, `MudarRotulos`, `GastarEquipe`, `ComprarCarta`…) e gera **eventos** num log.
    O log dá desfazer e alimenta a colheita.
-2. **Persistência**: lê e grava os JSONs do acervo. Cada JSON tem `"versao"`; migrações explícitas quando o schema mudar.
-3. **Tela = a mesa**: fichas em volta, pilha de Equipe com tokens no centro, mão de cartas por jogador (PNGs do catálogo).
+2. **Persistência**: pelo `IArmazenamento` (fase 1: JSON local da própria Torre; fase 2: nuvem). Cada JSON tem `"versao"`.
+3. **Tela = a mesa**: fichas em volta, pilha de Equipe com tokens no centro, mão de cartas por jogador (cartas digitais desenhadas pela Unity, com help).
 4. **Exportar post**: gera em BBCode a "Mecânica da rodada" (colheita) para colar no fórum.
 
 ## MVP
 
-- Tela de entrada → escolher a pasta da partida.
+- Tela de entrada → criar ou abrir uma partida.
 - Mesa com N fichas: Rótulos, condições, potencial e Influência, clicáveis.
 - Pilha de Equipe no centro.
-- Mão de cartas por jogador, a partir do catálogo.
-- Rolador 2d6 + Rótulo que aplica condições e limites e registra no log.
+- Criar personagem (ficha nasce na Torre).
+- Mão de cartas por jogador, a partir do catálogo da Torre.
+- Rolador 2d6 + Rótulo que aplica condições e limites e registra no log. **Só o mestre rola no MVP** (jogador rolar fica previsto no motor, desligado).
 - Exportar o log da rodada como texto para o fórum.
 
 ## Estilo herdado do The Map Room
@@ -81,11 +94,13 @@ O caminho do acervo deve ser **configurável** (ex.: `config.json` ou Scriptable
 - **Versionamento `vX.Y.Z`** (X arquitetura · Y mudança localizada · Z ponto de salvamento), com
   `docs/relatorio_vX.Y.Z.md` explicando o porquê, linha no `CHANGELOG.md`, um commit por frente de trabalho,
   tag anotada e push do commit e da tag.
-- Diferença consciente: o Map Room dispensa migração de save (nada publicado). Aqui os JSONs são do acervo
-  e evoluem com a partida simulada, então `"versao"` + migração explícita continua valendo.
+- Igual ao Map Room: nada publicado ainda, então **sem shims de migração** — se o formato estiver errado,
+  muda o formato. O campo `"versao"` existe para quando houver dados de jogadores na nuvem (fase 2);
+  a partir daí, migração explícita.
 
 ## Pendências e contexto
 
 - Em aberto: cartas PvP no verso das básicas; campos `verso` e `modo` (modificador|substituto|novo) + `modifica` no catálogo.
 - O schema de ficha ainda vai mudar com a partida simulada: não congelar cedo.
-- A partida simulada e o treino de MJ continuam no workspace do acervo, não aqui.
+- A partida simulada e o treino de MJ continuam no workspace do acervo, não aqui. Para testar a Torre com eles,
+  recria-se as personagens dentro da Torre.
