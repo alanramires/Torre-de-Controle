@@ -74,34 +74,202 @@
       },
       "movimentos": {
         "escolher": 0,
+        "obrigatorios": [],
+        "opcoes": [],
         "nota": "não escolhe movimentos de arquétipo na criação: os extras fazem esse papel"
       },
       "influencia": {
         "regra": "fixo",
-        "quantidade": 2
+        "quantidade": 2,
+        "texto": "Essas pessoas importam para o que você precisa fazer: dê Influência a 2 colegas."
       },
       "extras": [
         {
           "id": "amaldicoada/nemesis",
           "nome": "Nêmesis",
-          "criacao": "nomear o nêmesis",
-          "fim_de_sessao": "avançou contra o nêmesis? sim: marca potencial; não: marca a trilha da perdição"
+          "nota": "no fim da sessão: avançou contra ele? sim, potencial; não, marca a perdição",
+          "campos": [
+            {
+              "id": "nome",
+              "tipo": "texto",
+              "rotulo": "Quem é o seu nêmesis"
+            }
+          ]
         },
         {
           "id": "amaldicoada/perdicao",
           "nome": "Perdição",
-          "criacao": "escolher 2 de 6 gatilhos que aproximam a perdição",
-          "trilha": 5
+          "nota": "trilha cheia: limpa e pega um sinal da perdição",
+          "campos": [
+            {
+              "id": "gatilhos",
+              "tipo": "lista",
+              "rotulo": "O que aproxima sua perdição",
+              "opcoes": [
+                {
+                  "id": "exagerar-nos-poderes",
+                  "nome": "Exagerar nos poderes"
+                },
+                {
+                  "id": "ferir-inocentes",
+                  "nome": "Ferir inocentes"
+                },
+                {
+                  "id": "enfrentar-o-perigo-sozinha",
+                  "nome": "Enfrentar o perigo sozinha"
+                },
+                {
+                  "id": "assustar-quem-voce-ama",
+                  "nome": "Assustar quem você ama"
+                },
+                {
+                  "id": "ter-piedade",
+                  "nome": "Ter piedade"
+                },
+                {
+                  "id": "falar-abertamente-sobre-ela",
+                  "nome": "Falar abertamente sobre ela"
+                }
+              ],
+              "escolher": 2
+            },
+            {
+              "id": "trilha",
+              "tipo": "trilha",
+              "rotulo": "Trilha da perdição",
+              "tamanho": 5
+            }
+          ]
         },
         {
           "id": "amaldicoada/sinais",
           "nome": "Sinais da perdição",
-          "criacao": "começa com 1 dos 5 sinais"
+          "nota": "com os cinco, a próxima trilha cheia é 'sua perdição chega'",
+          "campos": [
+            {
+              "id": "inicial",
+              "tipo": "lista",
+              "rotulo": "O sinal que você já tem",
+              "opcoes": [
+                {
+                  "id": "visoes-sombrias",
+                  "nome": "Visões sombrias"
+                },
+                {
+                  "id": "poderes-infinitos",
+                  "nome": "Poderes infinitos"
+                },
+                {
+                  "id": "portal",
+                  "nome": "Portal"
+                },
+                {
+                  "id": "brilho-intenso",
+                  "nome": "Brilho intenso"
+                },
+                {
+                  "id": "fortalecida",
+                  "nome": "Fortalecida"
+                }
+              ],
+              "escolher": 1
+            }
+          ]
         },
         {
           "id": "amaldicoada/santuario",
           "nome": "Santuário",
-          "criacao": "3 características e 2 desvantagens"
+          "nota": "para usar os recursos, o MJ diz de uma a quatro condições",
+          "campos": [
+            {
+              "id": "caracteristicas",
+              "tipo": "lista",
+              "rotulo": "Características",
+              "opcoes": [
+                {
+                  "id": "ajudante-ou-assistente",
+                  "nome": "Ajudante ou assistente"
+                },
+                {
+                  "id": "trancas-e-armadilhas",
+                  "nome": "Trancas e armadilhas"
+                },
+                {
+                  "id": "biblioteca-de-tomos-valiosos",
+                  "nome": "Biblioteca de tomos valiosos"
+                },
+                {
+                  "id": "reliquias-antigas",
+                  "nome": "Relíquias antigas"
+                },
+                {
+                  "id": "teleportal",
+                  "nome": "Teleportal"
+                },
+                {
+                  "id": "sistema-de-contencao",
+                  "nome": "Sistema de contenção"
+                },
+                {
+                  "id": "computador-poderoso",
+                  "nome": "Computador poderoso"
+                },
+                {
+                  "id": "ferramentas-uteis",
+                  "nome": "Ferramentas úteis"
+                },
+                {
+                  "id": "espaco-de-meditacao",
+                  "nome": "Espaço de meditação"
+                },
+                {
+                  "id": "bateria-de-energia",
+                  "nome": "Bateria de energia"
+                },
+                {
+                  "id": "ampliador-de-poder",
+                  "nome": "Ampliador de poder"
+                },
+                {
+                  "id": "equipamento-medico",
+                  "nome": "Equipamento médico"
+                },
+                {
+                  "id": "arte-musica-e-comida",
+                  "nome": "Arte, música e comida"
+                }
+              ],
+              "escolher": 3
+            },
+            {
+              "id": "desvantagens",
+              "tipo": "lista",
+              "rotulo": "Desvantagens",
+              "opcoes": [
+                {
+                  "id": "dificil-de-acessar",
+                  "nome": "Difícil de acessar"
+                },
+                {
+                  "id": "atrai-atencao-perigosa",
+                  "nome": "Atrai atenção perigosa"
+                },
+                {
+                  "id": "muita-gente-sabe-onde-fica",
+                  "nome": "Muita gente sabe onde fica"
+                },
+                {
+                  "id": "facil-de-danificar-ou-sabotar",
+                  "nome": "Fácil de danificar ou sabotar"
+                },
+                {
+                  "id": "ligado-a-sua-perdicao",
+                  "nome": "Ligado à sua perdição"
+                }
+              ],
+              "escolher": 2
+            }
+          ]
         }
       ],
       "visual": [
@@ -146,7 +314,76 @@
         "Por que você enfrenta seu nêmesis?",
         "Quem, fora da equipe, é essencial para derrotar seu nêmesis?",
         "Por que a equipe importa para você?"
-      ]
+      ],
+      "equipe": {
+        "pergunta": "Pagamos caro pela vitória. Qual foi o preço?",
+        "relacionamentos": [
+          "Você contou a ___ tudo sobre sua perdição e o perigo que corre.",
+          "Você adoraria beijar ___ antes que sua perdição chegue."
+        ]
+      },
+      "avancos": {
+        "cima": [
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "perder-influencia",
+            "texto": "Alguém perde para sempre a Influência sobre você; +1 em um Rótulo"
+          },
+          {
+            "id": "reorganizar",
+            "texto": "Reorganize seus Rótulos como quiser e +1 em um Rótulo"
+          },
+          {
+            "id": "desbloquear-hora",
+            "texto": "Desbloqueie sua Hora da Verdade"
+          },
+          {
+            "id": "apagar-sinal",
+            "texto": "Apague um sinal da perdição; você perde esse movimento por enquanto"
+          },
+          {
+            "id": "chamas-do-nova",
+            "texto": "Ganhe chamas e três faíscas (do Nova)"
+          }
+        ],
+        "baixo": [
+          {
+            "id": "redesbloquear-hora",
+            "texto": "Desbloqueie de novo a Hora da Verdade, depois de usá-la"
+          },
+          {
+            "id": "enfrentar-perdicao",
+            "texto": "Enfrente sua perdição nos seus termos; se sobreviver, mude de arquétipo"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "trancar",
+            "texto": "Tranque um Rótulo e +1 num Rótulo à escolha"
+          },
+          {
+            "id": "modelo-ate-o-fim",
+            "texto": "Torne-se um modelo para a cidade pelo tempo que lhe resta"
+          }
+        ]
+      }
     },
     {
       "id": "bruta",
@@ -179,22 +416,82 @@
         "nota": "feita para ser uma arma; descreva como cada uma se manifesta"
       },
       "movimentos": {
-        "escolher": 2
+        "escolher": 2,
+        "obrigatorios": [],
+        "opcoes": [
+          {
+            "id": "casca-grossa-pele-fina",
+            "nome": "Casca grossa, pele fina"
+          },
+          {
+            "id": "pra-que-essa-cabeca",
+            "nome": "Pra que essa cabeça?"
+          },
+          {
+            "id": "soco-em-todo-mundo",
+            "nome": "Soco em todo mundo"
+          },
+          {
+            "id": "la-quando-importa",
+            "nome": "Lá quando importa"
+          },
+          {
+            "id": "numa-loja-de-loucas",
+            "nome": "Numa loja de louças"
+          },
+          {
+            "id": "fisica-que-fisica",
+            "nome": "Física? Que física?"
+          }
+        ]
       },
       "influencia": {
         "regra": "amor_e_rival",
-        "nota": "dá Influência ao amor e ao rival, a mais ninguém"
+        "nota": "dá Influência ao amor e ao rival, a mais ninguém",
+        "texto": "Você escolhe a dedo quem deixa entrar: dê Influência ao seu amor e ao seu rival, e a mais ninguém."
       },
       "extras": [
         {
           "id": "bruta/coracao",
           "nome": "Coração da Bruta",
-          "criacao": "nomear amor e rival; escolher 1 de 4 papéis",
-          "papeis": [
-            "defensora",
-            "amiga",
-            "ouvinte",
-            "incentivadora"
+          "nota": "sempre um amor e um rival; +1 constante para impressionar o amor ou frustrar o rival",
+          "campos": [
+            {
+              "id": "amor",
+              "tipo": "texto",
+              "rotulo": "Amor",
+              "na_sala": true
+            },
+            {
+              "id": "rival",
+              "tipo": "texto",
+              "rotulo": "Rival",
+              "na_sala": true
+            },
+            {
+              "id": "papel",
+              "tipo": "lista",
+              "rotulo": "Papel que você cumpre para eles",
+              "opcoes": [
+                {
+                  "id": "defensora",
+                  "nome": "Defensora"
+                },
+                {
+                  "id": "amiga",
+                  "nome": "Amiga"
+                },
+                {
+                  "id": "ouvinte",
+                  "nome": "Ouvinte"
+                },
+                {
+                  "id": "incentivadora",
+                  "nome": "Incentivadora"
+                }
+              ],
+              "escolher": 1
+            }
           ]
         }
       ],
@@ -239,7 +536,76 @@
         "Quem, fora da equipe, tenta cuidar de você agora?",
         "Por que você tenta ser herói?",
         "Por que a equipe importa para você?"
-      ]
+      ],
+      "equipe": {
+        "pergunta": "Derrotamos um inimigo perigoso. Quem ou o que era?",
+        "relacionamentos": [
+          "___ é seu amor. Você se abriu com essa pessoa sobre as piores partes do seu passado.",
+          "___ é seu rival. Tentou controlar você num momento crucial."
+        ]
+      },
+      "avancos": {
+        "cima": [
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "perder-influencia",
+            "texto": "Alguém perde para sempre a Influência sobre você; +1 em um Rótulo"
+          },
+          {
+            "id": "reorganizar",
+            "texto": "Reorganize seus Rótulos como quiser e +1 em um Rótulo"
+          },
+          {
+            "id": "desbloquear-hora",
+            "texto": "Desbloqueie sua Hora da Verdade"
+          },
+          {
+            "id": "mais-papeis-coracao",
+            "texto": "Escolha mais dois papéis para o Coração da Bruta"
+          }
+        ],
+        "baixo": [
+          {
+            "id": "redesbloquear-hora",
+            "texto": "Desbloqueie de novo a Hora da Verdade, depois de usá-la"
+          },
+          {
+            "id": "mudar-arquetipo",
+            "texto": "Mude de arquétipo"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "trancar",
+            "texto": "Tranque um Rótulo e +1 num Rótulo à escolha"
+          },
+          {
+            "id": "aposentar",
+            "texto": "Aposente-se ou torne-se um modelo para a cidade"
+          }
+        ]
+      }
     },
     {
       "id": "delinquente",
@@ -284,11 +650,39 @@
         "nota": "poderes bagunçados, enganosos ou frustrantes"
       },
       "movimentos": {
-        "escolher": 3
+        "escolher": 3,
+        "obrigatorios": [],
+        "opcoes": [
+          {
+            "id": "do-contra",
+            "nome": "Do contra"
+          },
+          {
+            "id": "nao-ligo-pro-que-voce-pensa",
+            "nome": "Não ligo pro que você pensa!"
+          },
+          {
+            "id": "equipe-que-equipe",
+            "nome": "Equipe? Que equipe?"
+          },
+          {
+            "id": "mente-criminosa",
+            "nome": "Mente criminosa"
+          },
+          {
+            "id": "encrenqueiro",
+            "nome": "Encrenqueiro"
+          },
+          {
+            "id": "ta-prestando-atencao",
+            "nome": "Tá prestando atenção?"
+          }
+        ]
       },
       "influencia": {
         "regra": "fixo",
-        "quantidade": 3
+        "quantidade": 3,
+        "texto": "Você se importa bem mais do que deixa transparecer: dê Influência a 3 colegas."
       },
       "extras": [],
       "visual": [
@@ -333,7 +727,76 @@
         "Quem, fora da equipe, pensa melhor de você do que você mesmo?",
         "Por que você tenta ser herói?",
         "Por que a equipe importa para você?"
-      ]
+      ],
+      "equipe": {
+        "pergunta": "Quebramos regras importantes para vencer a luta. Que regras? De quem eram?",
+        "relacionamentos": [
+          "Você vive tentando impressionar ___ com suas palhaçadas.",
+          "Você e ___ fizeram juntos uma façanha incrível (e ilegal)."
+        ]
+      },
+      "avancos": {
+        "cima": [
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "perder-influencia",
+            "texto": "Alguém perde para sempre a Influência sobre você; +1 em um Rótulo"
+          },
+          {
+            "id": "reorganizar",
+            "texto": "Reorganize seus Rótulos como quiser e +1 em um Rótulo"
+          },
+          {
+            "id": "desbloquear-hora",
+            "texto": "Desbloqueie sua Hora da Verdade"
+          },
+          {
+            "id": "rotulos-mais",
+            "texto": "+1 em dois Rótulos quaisquer"
+          }
+        ],
+        "baixo": [
+          {
+            "id": "redesbloquear-hora",
+            "texto": "Desbloqueie de novo a Hora da Verdade, depois de usá-la"
+          },
+          {
+            "id": "mudar-arquetipo",
+            "texto": "Mude de arquétipo"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "trancar",
+            "texto": "Tranque um Rótulo e +1 num Rótulo à escolha"
+          },
+          {
+            "id": "aposentar",
+            "texto": "Aposente-se ou torne-se um modelo para a cidade"
+          }
+        ]
+      }
     },
     {
       "id": "discipula",
@@ -415,7 +878,34 @@
         "nota": "uma habilidade que vocês dividem, uma só sua e uma só da mentora (as três diferentes)"
       },
       "movimentos": {
-        "escolher": 3
+        "escolher": 3,
+        "obrigatorios": [],
+        "opcoes": [
+          {
+            "id": "andei-lendo-os-arquivos",
+            "nome": "Andei lendo os arquivos"
+          },
+          {
+            "id": "capita",
+            "nome": "Capitã"
+          },
+          {
+            "id": "desabafo",
+            "nome": "Desabafo"
+          },
+          {
+            "id": "conversa-ao-pe-do-fogo",
+            "nome": "Conversa ao pé do fogo"
+          },
+          {
+            "id": "atencao-ao-redor",
+            "nome": "Atenção ao redor"
+          },
+          {
+            "id": "tradicao-heroica",
+            "nome": "Tradição heroica"
+          }
+        ]
       },
       "influencia": {
         "regra": "comportamento",
@@ -428,18 +918,111 @@
             "id": "profissional",
             "quantidade": 0
           }
-        ]
+        ],
+        "texto": "Escolha o comportamento: brincalhona (dê Influência a 2 colegas) ou profissional (a nenhum)."
       },
       "extras": [
         {
           "id": "discipula/mentora",
           "nome": "Mentora",
-          "criacao": "nomear; escolher o Rótulo que ela incorpora e o que ela nega"
+          "nota": "quem treinou você e talvez prenda você a um caminho só",
+          "campos": [
+            {
+              "id": "nome",
+              "tipo": "texto",
+              "rotulo": "Quem é a mentora"
+            },
+            {
+              "id": "incorpora",
+              "tipo": "rotulo",
+              "rotulo": "Rótulo que ela incorpora",
+              "rotulos": [
+                "perigoso",
+                "aberracao",
+                "salvador",
+                "superior",
+                "mundano"
+              ]
+            },
+            {
+              "id": "nega",
+              "tipo": "rotulo",
+              "rotulo": "Rótulo que ela nega",
+              "rotulos": [
+                "perigoso",
+                "aberracao",
+                "salvador",
+                "superior",
+                "mundano"
+              ]
+            }
+          ]
         },
         {
           "id": "discipula/recursos",
           "nome": "Recursos da mentora",
-          "criacao": "até 3"
+          "campos": [
+            {
+              "id": "recursos",
+              "tipo": "lista",
+              "rotulo": "Até 3 recursos para você e a equipe",
+              "opcoes": [
+                {
+                  "id": "base-secreta",
+                  "nome": "Base secreta"
+                },
+                {
+                  "id": "veiculo",
+                  "nome": "Veículo"
+                },
+                {
+                  "id": "supercomputador",
+                  "nome": "Supercomputador"
+                },
+                {
+                  "id": "comunicadores",
+                  "nome": "Comunicadores"
+                },
+                {
+                  "id": "equipamento-de-vigilancia",
+                  "nome": "Equipamento de vigilância"
+                },
+                {
+                  "id": "identidades-falsas",
+                  "nome": "Identidades falsas"
+                },
+                {
+                  "id": "distintivos-de-autoridade",
+                  "nome": "Distintivos de autoridade"
+                },
+                {
+                  "id": "laboratorio-quimico",
+                  "nome": "Laboratório químico"
+                },
+                {
+                  "id": "laboratorio-medico",
+                  "nome": "Laboratório médico"
+                },
+                {
+                  "id": "teleportal",
+                  "nome": "Teleportal"
+                },
+                {
+                  "id": "arma-de-ultimo-recurso",
+                  "nome": "Arma de último recurso"
+                },
+                {
+                  "id": "sistemas-de-seguranca",
+                  "nome": "Sistemas de segurança"
+                },
+                {
+                  "id": "robos-simples",
+                  "nome": "Robôs simples"
+                }
+              ],
+              "escolher_ate": 3
+            }
+          ]
         }
       ],
       "visual": [
@@ -483,7 +1066,76 @@
         "Por que ela aceitou treinar você?",
         "Quem mais, fora da equipe, sabe do seu treinamento?",
         "Por que a equipe importa para você?"
-      ]
+      ],
+      "equipe": {
+        "pergunta": "Continuamos juntos depois que tudo acabou. Por quê? Como mantivemos contato?",
+        "relacionamentos": [
+          "Você e ___ já tinham atuado juntos algumas vezes antes de o resto se reunir.",
+          "Sua mentora é cautelosa: pediu que você ficasse de olho em ___."
+        ]
+      },
+      "avancos": {
+        "cima": [
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "perder-influencia",
+            "texto": "Alguém perde para sempre a Influência sobre você; +1 em um Rótulo"
+          },
+          {
+            "id": "reorganizar",
+            "texto": "Reorganize seus Rótulos como quiser e +1 em um Rótulo"
+          },
+          {
+            "id": "desbloquear-hora",
+            "texto": "Desbloqueie sua Hora da Verdade"
+          },
+          {
+            "id": "rotulo-da-mentora",
+            "texto": "+2 no Rótulo que sua mentora incorpora ou nega"
+          },
+          {
+            "id": "mais-recursos",
+            "texto": "Escolha até mais quatro recursos da mentora"
+          }
+        ],
+        "baixo": [
+          {
+            "id": "redesbloquear-hora",
+            "texto": "Desbloqueie de novo a Hora da Verdade, depois de usá-la"
+          },
+          {
+            "id": "mudar-arquetipo",
+            "texto": "Mude de arquétipo"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "trancar",
+            "texto": "Tranque um Rótulo e +1 num Rótulo à escolha"
+          },
+          {
+            "id": "aposentar",
+            "texto": "Aposente-se ou torne-se um modelo para a cidade"
+          }
+        ]
+      }
     },
     {
       "id": "farol",
@@ -528,19 +1180,135 @@
         "nota": "poderes discretos, ou perícias com o equipamento necessário"
       },
       "movimentos": {
-        "escolher": 2
+        "escolher": 2,
+        "obrigatorios": [],
+        "opcoes": [
+          {
+            "id": "na-espreita",
+            "nome": "Na espreita"
+          },
+          {
+            "id": "sem-poderes-e-quase-sem-treino",
+            "nome": "Sem poderes e quase sem treino"
+          },
+          {
+            "id": "nao-vou-te-decepcionar",
+            "nome": "Não vou te decepcionar"
+          },
+          {
+            "id": "quase-um-super-heroi",
+            "nome": "Quase um super-herói"
+          },
+          {
+            "id": "vamos-sortudo",
+            "nome": "Vamos, Sortudo!"
+          },
+          {
+            "id": "chupa-domiciano",
+            "nome": "Chupa, Domiciano!"
+          }
+        ]
       },
       "influencia": {
         "regra": "fixo",
-        "quantidade": 3
+        "quantidade": 3,
+        "texto": "Você está empolgadíssimo de estar aqui: dê Influência sobre você a 3 colegas."
       },
       "extras": [
         {
           "id": "farol/impulsos",
           "nome": "Impulsos",
-          "criacao": "marcar 4 de 20",
-          "ao_cumprir": "marca potencial, remove condição ou ganha Influência sobre alguém envolvido",
-          "fim": "todos cumpridos: muda de arquétipo, aposenta ou vira modelo"
+          "nota": "cumprir um marcado: potencial, remove condição ou Influência sobre alguém envolvido",
+          "campos": [
+            {
+              "id": "marcados",
+              "tipo": "lista",
+              "rotulo": "Marque 4 impulsos",
+              "opcoes": [
+                {
+                  "id": "liderar-a-equipe-com-sucesso-numa-luta",
+                  "nome": "Liderar a equipe com sucesso numa luta"
+                },
+                {
+                  "id": "beijar-alguem-perigoso",
+                  "nome": "Beijar alguém perigoso"
+                },
+                {
+                  "id": "socar-alguem-que-provavelmente-nao-devia",
+                  "nome": "Socar alguém que provavelmente não devia"
+                },
+                {
+                  "id": "ajudar-um-colega-quando-ele-mais-precisa",
+                  "nome": "Ajudar um colega quando ele mais precisa"
+                },
+                {
+                  "id": "derrubar-uma-ameaca-sozinho",
+                  "nome": "Derrubar uma ameaça sozinho"
+                },
+                {
+                  "id": "superar-um-heroi-adulto",
+                  "nome": "Superar um herói adulto"
+                },
+                {
+                  "id": "fazer-uma-acrobacia-ridicula",
+                  "nome": "Fazer uma acrobacia ridícula"
+                },
+                {
+                  "id": "salvar-a-vida-de-um-colega",
+                  "nome": "Salvar a vida de um colega"
+                },
+                {
+                  "id": "encher-a-cara-ou-ficar-chapado-com-um-colega",
+                  "nome": "Encher a cara ou ficar chapado com um colega"
+                },
+                {
+                  "id": "pilotar-um-veiculo-fantastico",
+                  "nome": "Pilotar um veículo fantástico"
+                },
+                {
+                  "id": "ganhar-um-uniforme-novo",
+                  "nome": "Ganhar um uniforme novo"
+                },
+                {
+                  "id": "ganhar-um-nome-de-heroi-novo",
+                  "nome": "Ganhar um nome de herói novo"
+                },
+                {
+                  "id": "conquistar-o-respeito-de-um-heroi-que-voce-admira",
+                  "nome": "Conquistar o respeito de um herói que você admira"
+                },
+                {
+                  "id": "ficar-com-um-colega",
+                  "nome": "Ficar com um colega"
+                },
+                {
+                  "id": "nocautear-um-colega",
+                  "nome": "Nocautear um colega"
+                },
+                {
+                  "id": "terminar-com-alguem",
+                  "nome": "Terminar com alguém"
+                },
+                {
+                  "id": "acabar-com-uma-briga-so-conversando",
+                  "nome": "Acabar com uma briga só conversando"
+                },
+                {
+                  "id": "dizer-a-alguem-o-que-sente-de-verdade",
+                  "nome": "Dizer a alguém o que sente de verdade"
+                },
+                {
+                  "id": "viajar-para-um-lugar-ou-epoca-incrivel",
+                  "nome": "Viajar para um lugar (ou época) incrível"
+                },
+                {
+                  "id": "rejeitar-alguem-que-diz-que-voce-nao-devia-estar-aqui",
+                  "nome": "Rejeitar alguém que diz que você não devia estar aqui"
+                }
+              ],
+              "escolher": 4
+            }
+          ]
         }
       ],
       "visual": [
@@ -584,7 +1352,76 @@
         "Quem, fora da equipe, acha que você não deveria ser super-herói?",
         "Por que você tenta ser herói?",
         "Por que a equipe importa para você?"
-      ]
+      ],
+      "equipe": {
+        "pergunta": "Encontramos sinais de que aquele incidente era só o começo de algo maior. Que sinais?",
+        "relacionamentos": [
+          "___ é incrível, e você aproveita toda chance de andar com essa pessoa.",
+          "Você precisa se provar para ___ antes de se sentir um herói de verdade."
+        ]
+      },
+      "avancos": {
+        "cima": [
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "perder-influencia",
+            "texto": "Alguém perde para sempre a Influência sobre você; +1 em um Rótulo"
+          },
+          {
+            "id": "reorganizar",
+            "texto": "Reorganize seus Rótulos como quiser e +1 em um Rótulo"
+          },
+          {
+            "id": "desbloquear-hora",
+            "texto": "Desbloqueie sua Hora da Verdade"
+          }
+        ],
+        "baixo": [
+          {
+            "id": "redesbloquear-hora",
+            "texto": "Desbloqueie de novo a Hora da Verdade, depois de usá-la"
+          },
+          {
+            "id": "mudar-arquetipo",
+            "texto": "Mude de arquétipo"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "trancar",
+            "texto": "Tranque um Rótulo e +1 num Rótulo à escolha"
+          },
+          {
+            "id": "aposentar",
+            "texto": "Aposente-se ou torne-se um modelo para a cidade"
+          }
+        ]
+      }
     },
     {
       "id": "forasteira",
@@ -639,7 +1476,34 @@
         "nota": "voa e é bem resistente; escolha mais duas"
       },
       "movimentos": {
-        "escolher": 3
+        "escolher": 3,
+        "obrigatorios": [],
+        "opcoes": [
+          {
+            "id": "entre-dois-mundos",
+            "nome": "Entre dois mundos"
+          },
+          {
+            "id": "tecnologia-alienigena",
+            "nome": "Tecnologia alienígena"
+          },
+          {
+            "id": "costumes-alienigenas",
+            "nome": "Costumes alienígenas"
+          },
+          {
+            "id": "nave-a-kirby",
+            "nome": "Nave à Kirby"
+          },
+          {
+            "id": "o-melhor-deles",
+            "nome": "O melhor deles"
+          },
+          {
+            "id": "nao-tao-diferentes-assim",
+            "nome": "Não tão diferentes assim"
+          }
+        ]
       },
       "influencia": {
         "regra": "comportamento",
@@ -652,7 +1516,8 @@
             "id": "alegre",
             "quantidade": "todos"
           }
-        ]
+        ],
+        "texto": "Escolha o comportamento: arrogante (não dê Influência a ninguém) ou alegre (dê Influência a todos)."
       },
       "extras": [],
       "visual": [
@@ -695,7 +1560,76 @@
         "Por que quer ficar aqui (pelo menos por enquanto)?",
         "Por que seu povo quer que você volte?",
         "Por que a equipe importa para você?"
-      ]
+      ],
+      "equipe": {
+        "pergunta": "No começo não confiávamos uns nos outros, mas isso mudou. Como? Por quê?",
+        "relacionamentos": [
+          "Você vem aprendendo sobre a Terra passando tempo com ___.",
+          "Você tem uma queda por ___, mas guarda segredo."
+        ]
+      },
+      "avancos": {
+        "cima": [
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "perder-influencia",
+            "texto": "Alguém perde para sempre a Influência sobre você; +1 em um Rótulo"
+          },
+          {
+            "id": "reorganizar",
+            "texto": "Reorganize seus Rótulos como quiser e +1 em um Rótulo"
+          },
+          {
+            "id": "desbloquear-hora",
+            "texto": "Desbloqueie sua Hora da Verdade"
+          },
+          {
+            "id": "habilidades-de-qualquer",
+            "texto": "Escolha duas novas habilidades de qualquer arquétipo"
+          },
+          {
+            "id": "vida-humana",
+            "texto": "Você adota uma vida humana: ganhe Identidade Secreta e A Máscara (da Janus)"
+          }
+        ],
+        "baixo": [
+          {
+            "id": "redesbloquear-hora",
+            "texto": "Desbloqueie de novo a Hora da Verdade, depois de usá-la"
+          },
+          {
+            "id": "mudar-arquetipo",
+            "texto": "Mude de arquétipo"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "trancar",
+            "texto": "Tranque um Rótulo e +1 num Rótulo à escolha"
+          },
+          {
+            "id": "aposentar",
+            "texto": "Aposente-se ou torne-se um modelo para a cidade"
+          }
+        ]
+      }
     },
     {
       "id": "janus",
@@ -754,26 +1688,172 @@
         "nota": "físico aprimorado já vem marcado; a aparência não muda e os poderes podem ficar escondidos"
       },
       "movimentos": {
-        "obrigatorios": [
-          "janus/a-mascara"
-        ],
         "escolher": 2,
+        "obrigatorios": [
+          "a-mascara"
+        ],
+        "opcoes": [
+          {
+            "id": "a-mascara",
+            "nome": "A Máscara"
+          },
+          {
+            "id": "agora-e-serio",
+            "nome": "Agora é sério"
+          },
+          {
+            "id": "eu-sou-o-que-voce-ve",
+            "nome": "Eu sou o que você vê"
+          },
+          {
+            "id": "discreta",
+            "nome": "Discreta"
+          },
+          {
+            "id": "vou-te-salvar",
+            "nome": "Vou te salvar!"
+          },
+          {
+            "id": "teia-perigosa",
+            "nome": "Teia perigosa"
+          }
+        ],
         "nota": "A Máscara + 2 à escolha"
       },
       "influencia": {
         "regra": "fixo",
-        "quantidade": 2
+        "quantidade": 2,
+        "texto": "Você admira os colegas, que parecem saber ser super-heróis: dê Influência a 2 deles."
       },
       "extras": [
         {
           "id": "janus/mascara",
           "nome": "A Máscara",
-          "criacao": "escolher o Rótulo da máscara: aberração, perigoso, salvador ou superior"
+          "nota": "uma vez por sessão, troque o Mundano com o Rótulo da máscara",
+          "campos": [
+            {
+              "id": "rotulo",
+              "tipo": "rotulo",
+              "rotulo": "Rótulo que você encarna de máscara",
+              "rotulos": [
+                "aberracao",
+                "perigoso",
+                "salvador",
+                "superior"
+              ]
+            }
+          ]
         },
         {
           "id": "janus/identidade-secreta",
           "nome": "Identidade secreta",
-          "criacao": "3 obrigações (emprego, escola, casa, vida social)"
+          "nota": "quando o tempo passa, role + Mundano para ver como vão as obrigações",
+          "campos": [
+            {
+              "id": "obrigacoes",
+              "tipo": "lista",
+              "rotulo": "3 obrigações",
+              "opcoes": [
+                {
+                  "id": "emprego-barista",
+                  "nome": "Emprego: barista"
+                },
+                {
+                  "id": "emprego-estagio",
+                  "nome": "Emprego: estágio"
+                },
+                {
+                  "id": "emprego-recepcao",
+                  "nome": "Emprego: recepção"
+                },
+                {
+                  "id": "emprego-vendas",
+                  "nome": "Emprego: vendas"
+                },
+                {
+                  "id": "emprego-entregas",
+                  "nome": "Emprego: entregas"
+                },
+                {
+                  "id": "emprego-fast-food",
+                  "nome": "Emprego: fast-food"
+                },
+                {
+                  "id": "emprego-baba",
+                  "nome": "Emprego: babá"
+                },
+                {
+                  "id": "emprego-lava-loucas",
+                  "nome": "Emprego: lava-louças"
+                },
+                {
+                  "id": "emprego-suporte-tecnico",
+                  "nome": "Emprego: suporte técnico"
+                },
+                {
+                  "id": "emprego-garcom",
+                  "nome": "Emprego: garçom"
+                },
+                {
+                  "id": "escola-estudos",
+                  "nome": "Escola: estudos"
+                },
+                {
+                  "id": "escola-time-esportivo",
+                  "nome": "Escola: time esportivo"
+                },
+                {
+                  "id": "escola-clube-de-xadrez",
+                  "nome": "Escola: clube de xadrez"
+                },
+                {
+                  "id": "escola-clube-de-fotografia",
+                  "nome": "Escola: clube de fotografia"
+                },
+                {
+                  "id": "escola-gremio-estudantil",
+                  "nome": "Escola: grêmio estudantil"
+                },
+                {
+                  "id": "casa-cuidar-de-alguem",
+                  "nome": "Casa: cuidar de alguém"
+                },
+                {
+                  "id": "casa-tarefas-domesticas",
+                  "nome": "Casa: tarefas domésticas"
+                },
+                {
+                  "id": "casa-pagar-as-contas",
+                  "nome": "Casa: pagar as contas"
+                },
+                {
+                  "id": "casa-criar-um-irmao",
+                  "nome": "Casa: criar um irmão"
+                },
+                {
+                  "id": "social-namoro",
+                  "nome": "Social: namoro"
+                },
+                {
+                  "id": "social-melhor-amigo",
+                  "nome": "Social: melhor amigo"
+                },
+                {
+                  "id": "social-popularidade",
+                  "nome": "Social: popularidade"
+                },
+                {
+                  "id": "social-parente-proximo",
+                  "nome": "Social: parente próximo"
+                },
+                {
+                  "id": "social-tecnico-ou-professor",
+                  "nome": "Social: técnico ou professor"
+                }
+              ],
+              "escolher": 3
+            }
+          ]
         }
       ],
       "_nota": "Mundano começa em +3: o +1 livre não pode ir para ele.",
@@ -820,7 +1900,76 @@
         "Quem, fora da equipe, sabe das suas duas identidades?",
         "Quem pensa o pior da sua identidade mascarada?",
         "Por que a equipe importa para você?"
-      ]
+      ],
+      "equipe": {
+        "pergunta": "Salvamos a vida de alguém importante, para a cidade ou para nós. Quem? Por que essa pessoa importa?",
+        "relacionamentos": [
+          "___ conheceu você primeiro na vida civil.",
+          "Você se recusou a contar sua identidade secreta a ___ quando perguntou."
+        ]
+      },
+      "avancos": {
+        "cima": [
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "perder-influencia",
+            "texto": "Alguém perde para sempre a Influência sobre você; +1 em um Rótulo"
+          },
+          {
+            "id": "trocar-rotulo-mascara",
+            "texto": "Troque o Rótulo da máscara; +1 no novo Rótulo da máscara"
+          },
+          {
+            "id": "desbloquear-hora",
+            "texto": "Desbloqueie sua Hora da Verdade"
+          },
+          {
+            "id": "impulsos-do-farol",
+            "texto": "Ganhe Impulsos (do Farol)"
+          }
+        ],
+        "baixo": [
+          {
+            "id": "redesbloquear-hora",
+            "texto": "Desbloqueie de novo a Hora da Verdade, depois de usá-la"
+          },
+          {
+            "id": "mudar-arquetipo",
+            "texto": "Mude de arquétipo"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "trancar",
+            "texto": "Tranque um Rótulo e +1 num Rótulo à escolha"
+          },
+          {
+            "id": "aposentar",
+            "texto": "Aposente-se ou torne-se um modelo para a cidade"
+          }
+        ]
+      }
     },
     {
       "id": "legado",
@@ -971,16 +2120,70 @@
         "nota": "escolha a linha do legado e negue 2 poderes dela: você fica com os outros 3"
       },
       "movimentos": {
-        "escolher": 2
+        "escolher": 2,
+        "obrigatorios": [],
+        "opcoes": [
+          {
+            "id": "lute-o-bom-combate",
+            "nome": "Lute o bom combate"
+          },
+          {
+            "id": "eu-sei-o-que-sou",
+            "nome": "Eu sei o que sou"
+          },
+          {
+            "id": "palavras-do-passado",
+            "nome": "Palavras do passado"
+          },
+          {
+            "id": "o-legado-importa",
+            "nome": "O legado importa"
+          },
+          {
+            "id": "nunca-desista-nunca-se-renda",
+            "nome": "Nunca desista, nunca se renda"
+          },
+          {
+            "id": "simbolo-de-autoridade",
+            "nome": "Símbolo de autoridade"
+          }
+        ]
       },
       "influencia": {
-        "regra": "todos"
+        "regra": "todos",
+        "texto": "Você faz parte da equipe, para o bem e para o mal, e se importa com o que pensam: dê Influência a todos os colegas."
       },
       "extras": [
         {
           "id": "legado/membros",
           "nome": "Legado",
-          "criacao": "nomear pelo menos 2 membros: ativo, aposentado, próximo da linhagem, maior inimigo"
+          "nota": "quando o tempo passa, role + Salvador para ver como o legado reage",
+          "campos": [
+            {
+              "id": "membros",
+              "tipo": "textos",
+              "rotulo": "Membros do legado (pelo menos 2)",
+              "vagas": [
+                {
+                  "id": "ainda-ativo-e-em-destaque",
+                  "nome": "Ainda ativo e em destaque"
+                },
+                {
+                  "id": "aposentado-e-critico",
+                  "nome": "Aposentado e crítico"
+                },
+                {
+                  "id": "proximo-da-linhagem",
+                  "nome": "Próximo da linhagem"
+                },
+                {
+                  "id": "maior-inimigo-ainda-a-solta",
+                  "nome": "Maior inimigo, ainda à solta"
+                }
+              ],
+              "minimo": 2
+            }
+          ]
         }
       ],
       "visual": [
@@ -1024,7 +2227,76 @@
         "Como o público vê o legado?",
         "Como o legado se liga aos seus motivos para ser herói?",
         "Por que a equipe importa para você?"
-      ]
+      ],
+      "equipe": {
+        "pergunta": "No fim das contas, fomos bem e impressionamos um herói consagrado. Quem?",
+        "relacionamentos": [
+          "Uma vez você foi pego com ___ fazendo algo que envergonha o seu legado.",
+          "Você confia em ___ e contou a essa pessoa um segredo importante do legado."
+        ]
+      },
+      "avancos": {
+        "cima": [
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "perder-influencia",
+            "texto": "Alguém perde para sempre a Influência sobre você; +1 em um Rótulo"
+          },
+          {
+            "id": "reorganizar",
+            "texto": "Reorganize seus Rótulos como quiser e +1 em um Rótulo"
+          },
+          {
+            "id": "desbloquear-hora",
+            "texto": "Desbloqueie sua Hora da Verdade"
+          },
+          {
+            "id": "santuario-da-amaldicoada",
+            "texto": "Ganhe um Santuário (da Amaldiçoada)"
+          },
+          {
+            "id": "poderes-restantes",
+            "texto": "Desbloqueie os dois poderes restantes da sua linha"
+          }
+        ],
+        "baixo": [
+          {
+            "id": "redesbloquear-hora",
+            "texto": "Desbloqueie de novo a Hora da Verdade, depois de usá-la"
+          },
+          {
+            "id": "mudar-arquetipo",
+            "texto": "Mude de arquétipo"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "trancar",
+            "texto": "Tranque um Rótulo e +1 num Rótulo à escolha"
+          },
+          {
+            "id": "aposentar",
+            "texto": "Aposente-se ou torne-se um modelo para a cidade"
+          }
+        ]
+      }
     },
     {
       "id": "nova",
@@ -1070,6 +2342,8 @@
       },
       "movimentos": {
         "escolher": 0,
+        "obrigatorios": [],
+        "opcoes": [],
         "nota": "não escolhe movimentos de arquétipo na criação: as faíscas fazem esse papel"
       },
       "influencia": {
@@ -1083,14 +2357,64 @@
             "id": "cara_fechada",
             "quantidade": 1
           }
-        ]
+        ],
+        "texto": "Escolha o comportamento: fachada feliz (dê Influência a 3 colegas) ou cara fechada (a 1 colega)."
       },
       "extras": [
         {
           "id": "nova/chamas",
           "nome": "Chamas e faíscas",
-          "criacao": "escolher 4 de 10 faíscas",
-          "chamas": "carregar: rola + condições marcadas; perde tudo no fim da cena"
+          "nota": "carregar: role + condições marcadas; as chamas somem no fim da cena",
+          "campos": [
+            {
+              "id": "faiscas",
+              "tipo": "lista",
+              "rotulo": "Escolha 4 faíscas",
+              "opcoes": [
+                {
+                  "id": "tempestade-de-realidade",
+                  "nome": "Tempestade de realidade"
+                },
+                {
+                  "id": "escudo",
+                  "nome": "Escudo"
+                },
+                {
+                  "id": "construtos",
+                  "nome": "Construtos"
+                },
+                {
+                  "id": "fosso",
+                  "nome": "Fosso"
+                },
+                {
+                  "id": "adoracao",
+                  "nome": "Adoração"
+                },
+                {
+                  "id": "movimento",
+                  "nome": "Movimento"
+                },
+                {
+                  "id": "impulso",
+                  "nome": "Impulso"
+                },
+                {
+                  "id": "sobrecarga",
+                  "nome": "Sobrecarga"
+                },
+                {
+                  "id": "consciencia-elemental",
+                  "nome": "Consciência elemental"
+                },
+                {
+                  "id": "arrebatar",
+                  "nome": "Arrebatar"
+                }
+              ],
+              "escolher": 4
+            }
+          ]
         }
       ],
       "visual": [
@@ -1135,7 +2459,76 @@
         "Quem, fora da equipe, ajuda você a controlá-los?",
         "Por que você continua usando seus poderes?",
         "Por que a equipe importa para você?"
-      ]
+      ],
+      "equipe": {
+        "pergunta": "Destruímos tudo em volta na luta. Onde foi? O que destruímos?",
+        "relacionamentos": [
+          "Você passa muito tempo com ___ para extravasar.",
+          "Você já machucou ___ quando perdeu o controle dos poderes."
+        ]
+      },
+      "avancos": {
+        "cima": [
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "perder-influencia",
+            "texto": "Alguém perde para sempre a Influência sobre você; +1 em um Rótulo"
+          },
+          {
+            "id": "reorganizar",
+            "texto": "Reorganize seus Rótulos como quiser e +1 em um Rótulo"
+          },
+          {
+            "id": "desbloquear-hora",
+            "texto": "Desbloqueie sua Hora da Verdade"
+          },
+          {
+            "id": "mais-faiscas",
+            "texto": "Desbloqueie três novas faíscas"
+          },
+          {
+            "id": "mais-faiscas",
+            "texto": "Desbloqueie três novas faíscas"
+          },
+          {
+            "id": "coracao-da-bruta",
+            "texto": "Ganhe o Coração da Bruta (da Bruta)"
+          }
+        ],
+        "baixo": [
+          {
+            "id": "redesbloquear-hora",
+            "texto": "Desbloqueie de novo a Hora da Verdade, depois de usá-la"
+          },
+          {
+            "id": "mudar-arquetipo",
+            "texto": "Mude de arquétipo"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "trancar",
+            "texto": "Tranque um Rótulo e +1 num Rótulo à escolha"
+          },
+          {
+            "id": "aposentar",
+            "texto": "Aposente-se ou torne-se um modelo para a cidade"
+          }
+        ]
+      }
     },
     {
       "id": "transformado",
@@ -1187,11 +2580,39 @@
         ]
       },
       "movimentos": {
-        "escolher": 3
+        "escolher": 3,
+        "obrigatorios": [],
+        "opcoes": [
+          {
+            "id": "eu-nao-sou-meu-corpo",
+            "nome": "Eu não sou meu corpo"
+          },
+          {
+            "id": "nao-humano-o-bastante",
+            "nome": "Não humano o bastante"
+          },
+          {
+            "id": "imparavel",
+            "nome": "Imparável"
+          },
+          {
+            "id": "vou-atras-de-voce",
+            "nome": "Vou atrás de você"
+          },
+          {
+            "id": "quem-me-dera-ser",
+            "nome": "Quem me dera ser"
+          },
+          {
+            "id": "eu-sou-o-monstro",
+            "nome": "Eu sou o monstro"
+          }
+        ]
       },
       "influencia": {
         "regra": "fixo",
-        "quantidade": 1
+        "quantidade": 1,
+        "texto": "Você tenta não ligar para o que pensam, mas não consegue isolar todo mundo: dê Influência a 1 colega."
       },
       "extras": [],
       "_nota": "Aberração começa em +3: o +1 livre não pode ir para ela.",
@@ -1238,9 +2659,81 @@
         "Quem, fora da equipe, ajuda você a entender seu novo corpo?",
         "Por que você não se esconde de vez?",
         "Por que a equipe importa para você?"
-      ]
+      ],
+      "equipe": {
+        "pergunta": "Chamamos atenção e raiva de muita gente na luta. Uma pessoa importante, em especial, agora nos odeia e teme. Quem?",
+        "relacionamentos": [
+          "___ consolou você quando estava no fundo do poço.",
+          "___ conhecia você antes da mudança."
+        ]
+      },
+      "avancos": {
+        "cima": [
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-proprio",
+            "texto": "Pegue outro movimento do seu arquétipo"
+          },
+          {
+            "id": "movimento-outro",
+            "texto": "Pegue um movimento de outro arquétipo"
+          },
+          {
+            "id": "perdicao-da-amaldicoada",
+            "texto": "Ganhe perdição, trilha e sinais da perdição (da Amaldiçoada)"
+          },
+          {
+            "id": "perder-influencia",
+            "texto": "Alguém perde para sempre a Influência sobre você; +1 em um Rótulo"
+          },
+          {
+            "id": "reorganizar",
+            "texto": "Reorganize seus Rótulos como quiser e +1 em um Rótulo"
+          },
+          {
+            "id": "desbloquear-hora",
+            "texto": "Desbloqueie sua Hora da Verdade"
+          },
+          {
+            "id": "mutar",
+            "texto": "Mute mais e revele duas novas habilidades (de qualquer arquétipo)"
+          }
+        ],
+        "baixo": [
+          {
+            "id": "redesbloquear-hora",
+            "texto": "Desbloqueie de novo a Hora da Verdade, depois de usá-la"
+          },
+          {
+            "id": "mudar-arquetipo",
+            "texto": "Mude de arquétipo"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "movimento-adulto",
+            "texto": "Pegue um movimento adulto"
+          },
+          {
+            "id": "trancar",
+            "texto": "Tranque um Rótulo e +1 num Rótulo à escolha"
+          },
+          {
+            "id": "aposentar",
+            "texto": "Aposente-se ou torne-se um modelo para a cidade"
+          }
+        ]
+      }
     }
   ],
   "_habilidades": "Tipos: 'lista' (escolher N, ou escolher_ate N, das opções; 'fixas' vêm dadas), 'fixas' (só as dadas), 'linha' (escolhe uma linha e nega N poderes dela), 'mentora' (uma opção por vaga, todas diferentes). 'descrever': 'cada' = toda habilidade pede descrição; 'escolhidas' = as escolhidas pedem. Nomes traduzidos por nós a partir da ficha em inglês.",
-  "_visual_historico": "'visual': grupos de tags de aparência (só inspiração; a aparência é texto livre). 'historico': as perguntas de histórico da ficha (guia; o histórico é texto livre). Traduzidos por nós a partir da ficha em inglês."
+  "_visual_historico": "'visual': grupos de tags de aparência (só inspiração; a aparência é texto livre). 'historico': as perguntas de histórico da ficha (guia; o histórico é texto livre). Traduzidos por nós a partir da ficha em inglês.",
+  "_equipe": "'equipe': a pergunta 'quando a equipe se reuniu' e as 2 frases de relacionamento ('___' é o colega). Respondidas na sala, com a equipe. 'influencia.texto': a regra de Influência inicial em uma frase. Traduzido por nós a partir da ficha em inglês.",
+  "_avancos": "'avancos': a lista de avanços da ficha. 'cima' (8) e 'baixo' (tardios, liberam com 5 de cima). Cada item só se marca uma vez; itens repetidos (ex.: dois 'movimento de outro arquétipo') são casas diferentes. 'id' é a operação (ver avancos.json). Traduzido por nós a partir da ficha em inglês.",
+  "_modulos": "'movimentos': deck do arquétipo (escolher N além dos obrigatórios). 'extras': cada um com 'campos' por tipo: lista (escolher/escolher_ate), texto, textos (vagas, mínimo), rotulo (um dos ids em 'rotulos'), trilha (só exibe). 'na_sala': preenchido com a equipe. Nomes traduzidos por nós a partir da ficha em inglês; 'Eu sou o monstro' segue a errata do acervo."
 }

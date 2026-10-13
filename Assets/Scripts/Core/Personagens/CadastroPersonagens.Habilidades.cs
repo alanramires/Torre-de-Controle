@@ -194,6 +194,7 @@ namespace TorreDeControle.Core.Personagens
                 var resta = regra.EscolherAte.Value - escolhidas;
                 notas.Add($"Habilidades: {escolhidas} de até {regra.EscolherAte} (ainda pode escolher mais {resta}).");
             }
+            ObservarModulos(p, notas);
             return notas;
         }
 

@@ -17,11 +17,12 @@ namespace TorreDeControle.UI
     /// </summary>
     public sealed class PainelFicha : MonoBehaviour
     {
-        enum Aba { Identidade, Nucleo, Crescimento, Modulos }
+        enum Aba { Identidade, Historico, Nucleo, Crescimento, Modulos }
 
         static readonly (Aba aba, string nome)[] Abas =
         {
             (Aba.Identidade, "Identidade"),
+            (Aba.Historico, "Histórico"),
             (Aba.Nucleo, "Núcleo"),
             (Aba.Crescimento, "Crescimento"),
             (Aba.Modulos, "Módulos"),
@@ -177,9 +178,10 @@ namespace TorreDeControle.UI
             switch (abaAtual)
             {
                 case Aba.Identidade: AbaIdentidade(); break;
+                case Aba.Historico: AbaHistorico(); break;
                 case Aba.Nucleo: AbaNucleo(); break;
-                case Aba.Crescimento: EmConstrucao("Avanços marcados e cartas compradas (movimentos de outros arquétipos, adultos)."); break;
-                case Aba.Modulos: EmConstrucao("Extras do arquétipo (Impulsos, Perdição, Chamas, Máscara...) e os comprados por avanço."); break;
+                case Aba.Crescimento: AbaCrescimento(); break;
+                case Aba.Modulos: AbaModulos(); break;
             }
         }
 
@@ -314,10 +316,205 @@ namespace TorreDeControle.UI
             // Grava ao sair do campo (Enter aqui quebra linha). Sem redesenhar, por causa do Tab.
             aparencia.onDeselect.AddListener(_ => cadastro.AlterarTextos(p.Id, aparencia.text, resumo.text));
             resumo.onDeselect.AddListener(_ => cadastro.AlterarTextos(p.Id, aparencia.text, resumo.text));
+        }
+
+        // ---------- aba Módulos: o deck do arquétipo (movimentos) e os extras ----------
+
+        void AbaModulos()
+        {
+            var emCriacao = p.Status == StatusCriacao.Novo;
+            var mov = cadastro.MovimentosDoArquetipo(p);
+            var naFicha = cadastro.MovimentosNaFicha(p);
+
+            Secao("MOVIMENTOS DO ARQUÉTIPO", mov.Escolher == 0 && mov.Opcoes.Count == 0
+                ? "não escolhe movimentos na criação: os extras abaixo fazem esse papel"
+                : mov.Obrigatorios.Count > 0 ? "os marcados vêm com o arquétipo; escolha os outros" : null);
+            if (mov.Opcoes.Count > 0)
+            {
+                if (emCriacao)
+                    Contador($"escolha {mov.Escolher}", p.Criacao.Movimentos.Count, mov.Escolher);
+                var grade = Grade();
+                foreach (var o in mov.Opcoes)
+                {
+                    var id = o.Id;
+                    var estado = mov.Obrigatorios.Contains(id) ? EstadoChip.Fixa
+                        : !emCriacao ? (naFicha.Contains(id) ? EstadoChip.Fixa : EstadoChip.Bloqueada)
+                        : p.Criacao.Movimentos.Contains(id) ? EstadoChip.Escolhida
+                        : p.Criacao.Movimentos.Count >= mov.Escolher ? EstadoChip.Bloqueada : EstadoChip.Livre;
+                    Chip(grade, o.Nome, estado, () => Aplicar(cadastro.AlternarMovimento(p.Id, id)));
+                }
+            }
+
+            foreach (var extra in cadastro.ExtrasDoArquetipo(p))
+            {
+                var vao = Estilo.Rect("Vao", conteudo);
+                vao.gameObject.AddComponent<LayoutElement>().minHeight = 10;
+                Secao(extra.Nome.ToUpperInvariant(), extra.Nota);
+                foreach (var c in extra.Campos)
+                    CampoDeExtra(extra.Id, c, emCriacao);
+            }
+        }
+
+        void CampoDeExtra(string extra, Core.Regras.RegrasArquetipos.CampoExtra c, bool emCriacao)
+        {
+            switch (c.Tipo)
+            {
+                case Core.Regras.RegrasArquetipos.CampoExtra.Lista:
+                {
+                    var escolhidas = cadastro.Escolhas(p, extra, c.Id);
+                    var max = c.MaximoEscolhas;
+                    if (emCriacao)
+                        Contador(c.Titulo, escolhidas.Count, max);
+                    else
+                        Subtitulo(c.Titulo);
+                    var grade = Grade();
+                    foreach (var o in c.Opcoes)
+                    {
+                        var id = o.Id;
+                        var estado = !emCriacao ? (escolhidas.Contains(id) ? EstadoChip.Fixa : EstadoChip.Bloqueada)
+                            : escolhidas.Contains(id) ? EstadoChip.Escolhida
+                            : escolhidas.Count >= max ? EstadoChip.Bloqueada : EstadoChip.Livre;
+                        Chip(grade, o.Nome, estado, () => Aplicar(cadastro.AlternarOpcaoDeExtra(p.Id, extra, c.Id, id)));
+                    }
+                    break;
+                }
+                case Core.Regras.RegrasArquetipos.CampoExtra.Rotulo:
+                {
+                    var escolhido = cadastro.Escolhas(p, extra, c.Id).FirstOrDefault();
+                    Subtitulo(c.Titulo);
+                    var grade = Grade();
+                    foreach (var r in c.Rotulos)
+                    {
+                        var id = r;
+                        var estado = !emCriacao ? (escolhido == id ? EstadoChip.Fixa : EstadoChip.Bloqueada)
+                            : escolhido == id ? EstadoChip.Escolhida : EstadoChip.Livre;
+                        Chip(grade, Rotulos.Nome(r), estado, () => Aplicar(cadastro.AlternarOpcaoDeExtra(p.Id, extra, c.Id, id)));
+                    }
+                    break;
+                }
+                case Core.Regras.RegrasArquetipos.CampoExtra.Texto:
+                    Subtitulo(c.NaSala ? $"{c.Titulo} ({NotaDaSala})" : c.Titulo);
+                    CampoTextoDeExtra(extra, c, null, emCriacao);
+                    break;
+                case Core.Regras.RegrasArquetipos.CampoExtra.Textos:
+                    Subtitulo(c.Titulo);
+                    foreach (var vaga in c.Vagas)
+                    {
+                        var fila = FilaRotulada(vaga.Nome);
+                        fila.GetComponentInChildren<TextMeshProUGUI>().textWrappingMode = TextWrappingModes.Normal;
+                        var campo = CampoTextoDeExtra(extra, c, vaga.Id, emCriacao, fila);
+                        Estilo.ColunaElastica(campo);
+                    }
+                    break;
+                case Core.Regras.RegrasArquetipos.CampoExtra.Trilha:
+                    Subtitulo(c.Titulo);
+                    var trilha = Estilo.Fila(conteudo, 44, 10);
+                    for (var k = 0; k < c.Tamanho; k++)
+                        Selo(trilha, string.Empty, 56);
+                    break;
+            }
+        }
+
+        TMP_InputField CampoTextoDeExtra(string extra, Core.Regras.RegrasArquetipos.CampoExtra c, string vaga,
+            bool emCriacao, Transform pai = null)
+        {
+            var campo = Estilo.CampoTexto(pai != null ? pai : conteudo, c.NaSala ? "na sala" : c.Titulo.ToLowerInvariant());
+            campo.text = cadastro.TextoDoExtra(p, extra, c.Id, vaga);
+            if (pai == null)
+            {
+                var layout = campo.gameObject.AddComponent<LayoutElement>();
+                layout.minHeight = 50;
+                layout.preferredHeight = 50;
+            }
+            if (c.NaSala || !emCriacao)
+            {
+                CampoDaSala(campo);
+                return campo;
+            }
+            campo.onDeselect.AddListener(t => { cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, vaga, t); MontarRodape(); });
+            campo.onSubmit.AddListener(t => { cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, vaga, t); MontarRodape(); });
+            return campo;
+        }
+
+        void Subtitulo(string texto)
+        {
+            var t = Estilo.Rotulo(conteudo, texto, 20, Estilo.TextoSuave, FontStyles.Italic);
+            t.gameObject.AddComponent<LayoutElement>().minHeight = 30;
+        }
+
+        // ---------- aba Crescimento (protótipo): as casas de avanço, marcáveis ----------
+
+        enum EstadoAvanco { Marcado, Livre, Travado }
+
+        void AbaCrescimento()
+        {
+            var avancos = cadastro.AvancosDoArquetipo(p);
+            var emCriacao = p.Status == StatusCriacao.Novo;
+            var emCima = cadastro.MarcadosEmCima(p);
+            var baixoLiberado = cadastro.BaixoLiberado(p);
+
+            Secao("AVANÇOS", emCriacao
+                ? "liberam depois de concluir a criação"
+                : $"marque ao ganhar um avanço  ·  {emCima}/{avancos.Cima.Count} marcados");
+            for (var k = 0; k < avancos.Cima.Count; k++)
+                LinhaAvanco(CadastroPersonagens.Cima, k, avancos.Cima[k].Texto, emCriacao);
+
+            var vao = Estilo.Rect("Vao", conteudo);
+            vao.gameObject.AddComponent<LayoutElement>().minHeight = 10;
+            Secao("AVANÇOS TARDIOS", baixoLiberado
+                ? "liberados"
+                : $"liberam com {Core.Regras.RegrasArquetipos.ListaDeAvancos.ParaLiberarBaixo} marcados em cima");
+            for (var k = 0; k < avancos.Baixo.Count; k++)
+                LinhaAvanco(CadastroPersonagens.Baixo, k, avancos.Baixo[k].Texto, emCriacao || !baixoLiberado);
+
+            var nota = Estilo.Rotulo(conteudo,
+                "Protótipo: no jogo, os avanços são feitos pelo painel de controle do mestre; aqui é só a marca.", 20,
+                Estilo.TextoApagado, FontStyles.Italic);
+            nota.gameObject.AddComponent<LayoutElement>().minHeight = 34;
+        }
+
+        void LinhaAvanco(string lista, int indice, string texto, bool travadaPorRegra)
+        {
+            var marcado = cadastro.Marcado(p, lista, indice);
+            // Marcado aparece marcado mesmo se a lista travou (ex.: desmarcou um de cima).
+            var estado = marcado ? EstadoAvanco.Marcado : travadaPorRegra ? EstadoAvanco.Travado : EstadoAvanco.Livre;
+
+            var fila = Estilo.Fila(conteudo, 44, 14);
+            var fundo = fila.gameObject.AddComponent<Image>();
+            fundo.color = new Color(1, 1, 1, 0);
+            var botao = fila.gameObject.AddComponent<Button>();
+            botao.targetGraphic = fundo;
+            var cores = botao.colors;
+            cores.highlightedColor = new Color(1, 1, 1, 0.06f);
+            cores.disabledColor = new Color(1, 1, 1, 0);
+            botao.colors = cores;
+            botao.interactable = p.Status != StatusCriacao.Novo && estado != EstadoAvanco.Travado;
+            botao.onClick.AddListener(() => Aplicar(cadastro.AlternarAvanco(p.Id, lista, indice)));
+            if (botao.interactable)
+                fila.gameObject.AddComponent<Tabulavel>();
+
+            var caixa = Estilo.Rect("Caixa", fila);
+            caixa.gameObject.AddComponent<LayoutElement>().preferredWidth = 36;
+            var corCaixa = estado == EstadoAvanco.Marcado ? Estilo.Dourado : Estilo.Campo;
+            var bordaCaixa = estado == EstadoAvanco.Travado ? Estilo.BordaApagada : Estilo.Dourado;
+            Estilo.Moldura(caixa.gameObject, corCaixa, bordaCaixa).raycastTarget = false;
+
+            var corTexto = estado == EstadoAvanco.Marcado ? Estilo.Texto
+                : estado == EstadoAvanco.Livre ? Estilo.TextoSuave : Estilo.TextoApagado;
+            var t = Estilo.Rotulo(fila, texto, 22, corTexto,
+                estado == EstadoAvanco.Marcado ? FontStyles.Bold : FontStyles.Normal);
+            Estilo.ColunaElastica(t);
+        }
+
+        // ---------- aba Histórico: as perguntas da ficha e a equipe ----------
+
+        void AbaHistorico()
+        {
+            var regra = cadastro.RegraDoArquetipo(p);
+            if (regra == null)
+                return;
 
             // As perguntas de histórico da ficha, cada uma com a sua resposta (a validação cobra).
-            if (regra == null || regra.Historico.Count == 0)
-                return;
             SecaoComDica("PERGUNTAS DE HISTÓRICO", null, null);
             var respostas = p.Identidade.RespostasHistorico;
             for (var k = 0; k < regra.Historico.Count; k++)
@@ -329,6 +526,53 @@ namespace TorreDeControle.UI
                 var indice = k;
                 campo.onDeselect.AddListener(t => { cadastro.ResponderHistorico(p.Id, indice, t); MontarRodape(); });
             }
+
+            SecaoEquipe(regra);
+        }
+
+        // ---------- equipe: depende da sala; fora dela aparece desativada, só para ler ----------
+
+        const string NotaDaSala = "preenchido na sala, com a equipe";
+
+        void SecaoEquipe(Core.Regras.RegrasArquetipos.RegraArquetipo regra)
+        {
+            var vao = Estilo.Rect("Vao", conteudo);
+            vao.gameObject.AddComponent<LayoutElement>().minHeight = 12;
+            Secao("EQUIPE", NotaDaSala);
+
+            if (!string.IsNullOrEmpty(regra.Equipe.Pergunta))
+            {
+                var titulo = Estilo.Rotulo(conteudo, "Quando a equipe se reuniu pela primeira vez...", 22,
+                    Estilo.TextoApagado, FontStyles.Bold);
+                titulo.gameObject.AddComponent<LayoutElement>().minHeight = 30;
+                var pergunta = Estilo.Rotulo(conteudo, regra.Equipe.Pergunta, 22, Estilo.TextoApagado, FontStyles.Italic);
+                pergunta.textWrappingMode = TextWrappingModes.Normal;
+                CampoDaSala(Estilo.AreaTexto(conteudo, "resposta da equipe (na sala)", 64));
+            }
+
+            if (regra.Equipe.Relacionamentos.Count > 0)
+            {
+                var titulo = Estilo.Rotulo(conteudo, "Relacionamentos", 22, Estilo.TextoApagado, FontStyles.Bold);
+                titulo.gameObject.AddComponent<LayoutElement>().minHeight = 30;
+                foreach (var frase in regra.Equipe.Relacionamentos)
+                {
+                    var fila = Estilo.Fila(conteudo, 50, 12);
+                    var t = Estilo.Rotulo(fila, frase, 22, Estilo.TextoApagado, FontStyles.Italic);
+                    t.textWrappingMode = TextWrappingModes.Normal;
+                    Estilo.ColunaElastica(t);
+                    var colega = Estilo.CampoTexto(fila, "colega (na sala)");
+                    colega.gameObject.AddComponent<LayoutElement>().preferredWidth = 320;
+                    CampoDaSala(colega);
+                }
+            }
+        }
+
+        static void CampoDaSala(TMP_InputField campo)
+        {
+            campo.interactable = false; // também sai do Tab (NavegacaoTab só para em interativos)
+            var cores = campo.colors;
+            cores.disabledColor = new Color(1f, 1f, 1f, 0.45f);
+            campo.colors = cores;
         }
 
         static string Itens(IEnumerable<string> itens) =>
@@ -616,6 +860,14 @@ namespace TorreDeControle.UI
             var vao2 = Estilo.Rect("Vao", outros);
             vao2.gameObject.AddComponent<LayoutElement>().preferredWidth = 40;
             Selo(outros, "Hora da Verdade: bloqueada", 400);
+
+            // Influência é Núcleo (sobrevive à troca de arquétipo), mas a inicial se dá aos colegas: na sala.
+            var regra = cadastro.RegraDoArquetipo(p);
+            Secao("INFLUÊNCIA", NotaDaSala);
+            var texto = regra?.Influencia?.Texto ?? string.Empty;
+            var influencia = Estilo.Rotulo(conteudo, texto, 22, Estilo.TextoApagado, FontStyles.Italic);
+            influencia.textWrappingMode = TextWrappingModes.Normal;
+            influencia.gameObject.AddComponent<LayoutElement>().minHeight = 34;
         }
 
         void Secao(string nome, string legenda)

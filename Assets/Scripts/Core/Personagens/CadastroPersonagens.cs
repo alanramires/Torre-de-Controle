@@ -38,6 +38,10 @@ namespace TorreDeControle.Core.Personagens
             {
                 p.Criacao ??= new RascunhoCriacao();
                 p.Criacao.Habilidades ??= new EscolhasHabilidades();
+                p.Criacao.Movimentos ??= new List<string>();
+                p.Criacao.ExtrasEscolhas ??= new Dictionary<string, List<string>>();
+                p.Criacao.ExtrasTextos ??= new Dictionary<string, string>();
+                p.AvancosMarcados ??= new List<string>();
             }
             return new CadastroPersonagens(armazenamento, regras, lista);
         }
@@ -161,6 +165,7 @@ namespace TorreDeControle.Core.Personagens
             if (p.Criacao.BonusLivre == null)
                 avisos.Add("Falta escolher o +1 livre.");
             ValidarHabilidades(p, avisos);
+            ValidarModulos(p, avisos);
             var semResposta = PerguntasSemResposta(p);
             if (semResposta > 0)
                 avisos.Add($"Histórico: responda as perguntas da ficha (faltam {semResposta}).");
@@ -194,6 +199,7 @@ namespace TorreDeControle.Core.Personagens
                 Rotulos = new Dictionary<string, int>(RotulosAtuais(p)),
                 Habilidades = HabilidadesAtuais(p).ToList(),
             };
+            CongelarModulos(p, p.Foto);
             p.Status = StatusCriacao.Criado;
             Gravar();
             return Resultado.Sucesso();

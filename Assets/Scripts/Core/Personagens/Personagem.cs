@@ -48,7 +48,17 @@ namespace TorreDeControle.Core.Personagens
         [JsonProperty("bonus_livre")] public string BonusLivre { get; set; }
         [JsonProperty("habilidades")] public EscolhasHabilidades Habilidades { get; set; } = new EscolhasHabilidades();
 
-        [JsonIgnore] public bool TemEscolhas => BonusLivre != null || (Habilidades?.TemAlgo ?? false);
+        /// <summary>Módulos: movimentos escolhidos do deck do arquétipo (sem os obrigatórios, que vêm dados).</summary>
+        [JsonProperty("movimentos")] public List<string> Movimentos { get; set; } = new List<string>();
+        /// <summary>Módulos: escolhas dos extras (listas e rótulos), por "extra|campo".</summary>
+        [JsonProperty("extras_escolhas")] public Dictionary<string, List<string>> ExtrasEscolhas { get; set; } = new Dictionary<string, List<string>>();
+        /// <summary>Módulos: textos dos extras, por "extra|campo" ou "extra|campo|vaga".</summary>
+        [JsonProperty("extras_textos")] public Dictionary<string, string> ExtrasTextos { get; set; } = new Dictionary<string, string>();
+
+        [JsonIgnore]
+        public bool TemEscolhas =>
+            BonusLivre != null || (Habilidades?.TemAlgo ?? false) || Movimentos.Count > 0 ||
+            ExtrasEscolhas.Count > 0 || ExtrasTextos.Count > 0;
     }
 
     /// <summary>
@@ -88,6 +98,10 @@ namespace TorreDeControle.Core.Personagens
         [JsonProperty("arquetipo")] public string Arquetipo { get; set; }
         [JsonProperty("rotulos")] public Dictionary<string, int> Rotulos { get; set; } = new Dictionary<string, int>();
         [JsonProperty("habilidades")] public List<Habilidade> Habilidades { get; set; } = new List<Habilidade>();
+        /// <summary>Movimentos do deck ao concluir (obrigatórios + escolhidos).</summary>
+        [JsonProperty("movimentos")] public List<string> Movimentos { get; set; } = new List<string>();
+        [JsonProperty("extras_escolhas")] public Dictionary<string, List<string>> ExtrasEscolhas { get; set; } = new Dictionary<string, List<string>>();
+        [JsonProperty("extras_textos")] public Dictionary<string, string> ExtrasTextos { get; set; } = new Dictionary<string, string>();
     }
 
     /// <summary>
@@ -109,6 +123,12 @@ namespace TorreDeControle.Core.Personagens
         [JsonProperty("criacao")] public RascunhoCriacao Criacao { get; set; } = new RascunhoCriacao();
         /// <summary>Null até a aprovação.</summary>
         [JsonProperty("foto")] public FotoCriacao Foto { get; set; }
+        /// <summary>
+        /// Seção Crescimento (protótipo): casas de avanço marcadas, como "cima:3" ou "baixo:0"
+        /// (posição na lista do arquétipo; itens repetidos são casas diferentes). Ainda sem efeito
+        /// nas outras seções e sem evento: é só a marca.
+        /// </summary>
+        [JsonProperty("avancos_marcados")] public List<string> AvancosMarcados { get; set; } = new List<string>();
         /// <summary>De onde foi copiada (laboratório → sala); null no laboratório.</summary>
         [JsonProperty("origem")] public string Origem { get; set; }
 

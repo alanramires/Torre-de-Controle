@@ -96,6 +96,7 @@ namespace TorreDeControle.Tests
             cadastro.AlternarHabilidade(p.Id, "telecinese");
             for (var k = 0; k < 5; k++)
                 cadastro.ResponderHistorico(p.Id, k, "resposta " + k);
+            CompletarModulos(p);
             Assert.That(cadastro.Observacoes(p), Has.Some.Contains("1 de até 3"));
             Assert.That(cadastro.Aprovar(p.Id).Ok, Is.True);
         }
@@ -108,8 +109,10 @@ namespace TorreDeControle.Tests
             cadastro.AlternarHabilidade(p.Id, "feiticaria");
             for (var k = 0; k < 5; k++)
                 cadastro.ResponderHistorico(p.Id, k, "resposta " + k);
+            CompletarModulos(p);
             Assert.That(cadastro.Aprovar(p.Id).Ok, Is.True);
             Assert.That(p.Foto.Habilidades.Single().Nome, Is.EqualTo("Feitiçaria"));
+            Assert.That(p.Foto.ExtrasEscolhas["nova/chamas|faiscas"], Has.Count.EqualTo(4));
 
             Assert.That(p.Status, Is.EqualTo(StatusCriacao.Criado));
             Assert.That(p.Foto.Rotulos[Rotulos.Superior], Is.EqualTo(1));
@@ -200,6 +203,141 @@ namespace TorreDeControle.Tests
             Assert.That(p.Identidade.RespostasHistorico, Is.Empty);
             Assert.That(p.Identidade.Aparencia, Is.EqualTo("Alta, cheia de cicatrizes."));
             Assert.That(p.Identidade.Resumo, Is.EqualTo("Fugiu aos 15."));
+        }
+
+        /// <summary>Preenche movimentos e extras seguindo as regras do próprio JSON (o mínimo pedido).</summary>
+        void CompletarModulos(Personagem p)
+        {
+            var mov = cadastro.MovimentosDoArquetipo(p);
+            foreach (var o in mov.Opcoes.Where(o => !mov.Obrigatorios.Contains(o.Id)).Take(mov.Escolher))
+                cadastro.AlternarMovimento(p.Id, o.Id);
+            foreach (var extra in cadastro.ExtrasDoArquetipo(p))
+            foreach (var c in extra.Campos)
+            {
+                switch (c.Tipo)
+                {
+                    case "lista":
+                        foreach (var o in c.Opcoes.Take(c.Escolher ?? 1))
+                            cadastro.AlternarOpcaoDeExtra(p.Id, extra.Id, c.Id, o.Id);
+                        break;
+                    case "rotulo":
+                        cadastro.AlternarOpcaoDeExtra(p.Id, extra.Id, c.Id, c.Rotulos[0]);
+                        break;
+                    case "texto" when !c.NaSala:
+                        cadastro.DefinirTextoDeExtra(p.Id, extra.Id, c.Id, null, "texto");
+                        break;
+                    case "textos":
+                        foreach (var v in c.Vagas.Take(c.Minimo))
+                            cadastro.DefinirTextoDeExtra(p.Id, extra.Id, c.Id, v.Id, "nome");
+                        break;
+                }
+            }
+        }
+
+        // ---------- módulos ----------
+
+        [Test]
+        public void Movimentos_escolhe_o_numero_do_arquetipo_e_janus_ja_tem_a_mascara()
+        {
+            var p = Nova("janus");
+            Assert.That(cadastro.MovimentosNaFicha(p), Is.EqualTo(new[] { "a-mascara" }));
+            Assert.That(cadastro.AlternarMovimento(p.Id, "a-mascara").Ok, Is.False);
+            cadastro.AlternarMovimento(p.Id, "teia-perigosa");
+            Assert.That(cadastro.Validar(p).avisos, Has.Some.Contains("Movimentos: escolha 2 (faltam 1)"));
+            cadastro.AlternarMovimento(p.Id, "discreta");
+            Assert.That(cadastro.AlternarMovimento(p.Id, "vou-te-salvar").Ok, Is.False);
+            Assert.That(cadastro.MovimentosNaFicha(p), Has.Count.EqualTo(3));
+        }
+
+        [Test]
+        public void Amaldicoada_e_nova_nao_escolhem_movimentos()
+        {
+            Assert.That(cadastro.Validar(Nova("amaldicoada")).avisos, Has.None.Contains("Movimentos"));
+            Assert.That(cadastro.Validar(Nova("nova")).avisos, Has.None.Contains("Movimentos"));
+        }
+
+        [Test]
+        public void Extras_cobram_o_que_a_ficha_pede()
+        {
+            var p = Nova("farol");
+            Assert.That(cadastro.Validar(p).avisos, Has.Some.Contains("Impulsos"));
+            CompletarModulos(p);
+            Assert.That(cadastro.Validar(p).avisos, Has.None.Contains("Impulsos"));
+            Assert.That(cadastro.AlternarOpcaoDeExtra(p.Id, "farol/impulsos", "marcados", "terminar-com-alguem").Ok, Is.False);
+        }
+
+        [Test]
+        public void Rotulo_do_extra_escolhe_um_so_e_amor_da_bruta_e_da_sala()
+        {
+            var p = Nova("janus");
+            cadastro.AlternarOpcaoDeExtra(p.Id, "janus/mascara", "rotulo", "perigoso");
+            cadastro.AlternarOpcaoDeExtra(p.Id, "janus/mascara", "rotulo", "salvador");
+            Assert.That(cadastro.Escolhas(p, "janus/mascara", "rotulo"), Is.EqualTo(new[] { "salvador" }));
+
+            var bruta = Nova("bruta");
+            Assert.That(cadastro.DefinirTextoDeExtra(bruta.Id, "bruta/coracao", "amor", null, "Hyperwoman").Ok, Is.False);
+            Assert.That(cadastro.Validar(bruta).avisos, Has.None.Contains("Amor"));
+        }
+
+        [Test]
+        public void Legado_pede_pelo_menos_dois_membros()
+        {
+            var p = Nova("legado");
+            cadastro.DefinirTextoDeExtra(p.Id, "legado/membros", "membros", "aposentado-e-critico", "Shahin Attar");
+            Assert.That(cadastro.Validar(p).avisos, Has.Some.Contains("faltam 1"));
+            cadastro.DefinirTextoDeExtra(p.Id, "legado/membros", "membros", "maior-inimigo-ainda-a-solta", "Alma Demoníaca");
+            Assert.That(cadastro.Validar(p).avisos, Has.None.Contains("Legado:"));
+        }
+
+        // ---------- crescimento (protótipo) ----------
+
+        Personagem Concluida(string arquetipo)
+        {
+            var p = Nova(arquetipo);
+            p.Status = StatusCriacao.Criado; // atalho: o teste é do Crescimento, não da criação
+            return p;
+        }
+
+        [Test]
+        public void Todo_arquetipo_tem_oito_em_cima_e_seis_embaixo()
+        {
+            foreach (var a in Arquetipos.Todos)
+            {
+                var avancos = RegrasDeTeste.Arquetipos().Buscar(a.Id).Avancos;
+                Assert.That(avancos.Cima, Has.Count.EqualTo(8), a.Id);
+                Assert.That(avancos.Baixo, Has.Count.EqualTo(6), a.Id);
+            }
+        }
+
+        [Test]
+        public void Avanco_so_depois_de_concluir_a_criacao()
+        {
+            var p = Nova("farol");
+            Assert.That(cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Cima, 0).Ok, Is.False);
+        }
+
+        [Test]
+        public void Baixo_libera_com_cinco_em_cima_e_trava_o_desmarcar()
+        {
+            var p = Concluida("farol");
+            Assert.That(cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Baixo, 1).Ok, Is.False);
+            for (var k = 0; k < 5; k++)
+                cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Cima, k);
+            Assert.That(cadastro.BaixoLiberado(p), Is.True);
+            Assert.That(cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Baixo, 1).Ok, Is.True);
+
+            Assert.That(cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Cima, 0).Ok, Is.False);
+            cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Cima, 5);
+            Assert.That(cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Cima, 0).Ok, Is.True);
+        }
+
+        [Test]
+        public void Itens_repetidos_sao_casas_diferentes()
+        {
+            var p = Concluida("farol");
+            cadastro.AlternarAvanco(p.Id, CadastroPersonagens.Cima, 0);
+            Assert.That(cadastro.Marcado(p, CadastroPersonagens.Cima, 0), Is.True);
+            Assert.That(cadastro.Marcado(p, CadastroPersonagens.Cima, 1), Is.False);
         }
 
         [Test]

@@ -94,6 +94,16 @@ MÓDULOS      extras do arquétipo (Impulsos, Perdição, Chamas, Máscara…) e
 
 - **Núcleo sobrevive à troca de arquétipo** (como multiclasse): Rótulos, condições, **potencial**
   (decidido em 2026-10-13: fica no Núcleo) e Influência continuam iguais.
+- **Abas do fichário**: Identidade · Histórico · Núcleo · Crescimento · Módulos (Ajuda no fim).
+  Histórico é uma aba da seção Identidade (separada só porque a aba ficou grande): as 5 perguntas
+  da ficha e a equipe ("quando a equipe se reuniu" e relacionamentos), que fora de sala aparece
+  desativada, só para ler. A regra de Influência inicial aparece no Núcleo, também desativada.
+- **Módulos** = deck do arquétipo: movimentos (escolher N; obrigatórios já marcados, como A Máscara da
+  Janus; Amaldiçoada e Nova não escolhem) e extras, cada um com os campos que a ficha pede na criação
+  (listas, rótulo, textos, trilha). O modelo vem de `arquetipos.json`; tudo entra nas pendências e
+  congela na foto ao concluir. Amor e rival da Bruta: na sala.
+- **Crescimento** na ficha é só visualização/protótipo: no jogo, avanços e efeitos são feitos pelo
+  **painel de controle do mestre** durante a partida (a desenhar com o Alan).
 - **Perguntas de histórico ficam na Identidade** (decidido em 2026-10-13): a pergunta vem do arquétipo,
   mas a resposta é da personagem. Só em "novo" trocar de arquétipo apaga as respostas; depois de aprovada,
   elas ficam como passado, mesmo que ela troque de arquétipo por avanço.
