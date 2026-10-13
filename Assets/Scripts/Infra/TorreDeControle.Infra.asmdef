@@ -1,0 +1,16 @@
+{
+    "name": "TorreDeControle.Infra",
+    "rootNamespace": "TorreDeControle.Infra",
+    "references": [
+        "TorreDeControle.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
