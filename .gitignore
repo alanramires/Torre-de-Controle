@@ -108,3 +108,13 @@ InitTestScene*.unity*
 
 # Windows
 desktop.ini
+
+# Exemplos do TextMeshPro (importados só para consulta local)
+/Assets/TextMesh Pro/Examples & Extras/
+/Assets/TextMesh Pro/Examples & Extras.meta
+
+# Arquivos de trabalho do Photoshop
+*.psd
+*.psd.meta
+*.PSD
+*.PSD.meta
