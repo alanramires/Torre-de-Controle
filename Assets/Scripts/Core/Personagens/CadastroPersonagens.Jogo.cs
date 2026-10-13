@@ -48,11 +48,11 @@ namespace TorreDeControle.Core.Personagens
             if (!NoJogo(id, out var p, out var erro))
                 return erro;
             var c = BuscarCampo(p, extra, campo);
-            if (c == null || c.Tipo != Campo.Trilha)
-                return Resultado.Falha("Trilha desconhecida.");
+            if (c == null || (c.Tipo != Campo.Trilha && c.Tipo != Campo.Reserva))
+                return Resultado.Falha("Contador desconhecido.");
             var novo = Contador(p, extra, campo) + delta;
             if (novo < 0)
-                return Resultado.Falha("A trilha não fica negativa.");
+                return Resultado.Falha(c.Tipo == Campo.Reserva ? "Sem reserva para gastar." : "A trilha não fica negativa.");
             if (c.Rende != null)
             {
                 var partes = c.Rende.Split('|');
@@ -179,6 +179,114 @@ namespace TorreDeControle.Core.Personagens
             }
             return true;
         }
+
+        // ---------- registros e itens ----------
+
+        public IReadOnlyList<ItemDeJogo> ItensNoJogo(Personagem p, string extra, string campo) =>
+            p.ItensDeJogo.TryGetValue(ChaveExtra(extra, campo), out var v) ? v : new List<ItemDeJogo>();
+
+        List<ItemDeJogo> ListaDeItens(Personagem p, string extra, string campo)
+        {
+            var chave = ChaveExtra(extra, campo);
+            if (!p.ItensDeJogo.TryGetValue(chave, out var lista))
+                p.ItensDeJogo[chave] = lista = new List<ItemDeJogo>();
+            return lista;
+        }
+
+        /// <summary>Lança um uso no registro (ex.: gastar controle). Se o campo consome uma reserva, gasta 1.</summary>
+        public Resultado Lancar(string id, string extra, string campo, string opcao, string texto)
+        {
+            if (!NoJogo(id, out var p, out var erro))
+                return erro;
+            var c = BuscarCampo(p, extra, campo);
+            if (c == null || c.Tipo != Campo.Registro || c.Opcoes.All(o => o.Id != opcao))
+                return Resultado.Falha("Lançamento desconhecido.");
+            if (c.Consome != null)
+            {
+                var gasto = AjustarContador(id, extra, c.Consome, -1);
+                if (!gasto.Ok)
+                    return Resultado.Falha("Sem controle para gastar.");
+            }
+            ListaDeItens(p, extra, campo).Add(new ItemDeJogo
+            {
+                Id = System.Guid.NewGuid().ToString("N"), Opcao = opcao, Texto = (texto ?? string.Empty).Trim(),
+            });
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>Desfaz um lançamento (devolve a reserva que ele gastou).</summary>
+        public Resultado DesfazerLancamento(string id, string extra, string campo, string item)
+        {
+            if (!NoJogo(id, out var p, out var erro))
+                return erro;
+            var c = BuscarCampo(p, extra, campo);
+            var lista = ListaDeItens(p, extra, campo);
+            if (c == null || lista.RemoveAll(i => i.Id == item) == 0)
+                return Resultado.Falha("Lançamento não encontrado.");
+            if (c.Consome != null)
+                p.Contadores[ChaveExtra(extra, c.Consome)] = Contador(p, extra, c.Consome) + 1;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>Cria um objeto com cargas (ex.: um dispositivo alienígena).</summary>
+        public Resultado CriarItem(string id, string extra, string campo, string nome, int cargas)
+        {
+            if (!NoJogo(id, out var p, out var erro))
+                return erro;
+            var c = BuscarCampo(p, extra, campo);
+            if (c == null || c.Tipo != Campo.Itens)
+                return Resultado.Falha("Lista de objetos desconhecida.");
+            var limpo = (nome ?? string.Empty).Trim();
+            if (limpo.Length == 0)
+                return Resultado.Falha("Dê um nome ao objeto.");
+            if (cargas < 1)
+                return Resultado.Falha("Pelo menos 1 carga.");
+            ListaDeItens(p, extra, campo).Add(new ItemDeJogo { Id = System.Guid.NewGuid().ToString("N"), Texto = limpo, Cargas = cargas });
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>Gasta (delta −1) ou devolve (+1) uma carga do objeto.</summary>
+        public Resultado AjustarCarga(string id, string extra, string campo, string item, int delta)
+        {
+            if (!NoJogo(id, out var p, out var erro))
+                return erro;
+            var objeto = ListaDeItens(p, extra, campo).FirstOrDefault(i => i.Id == item);
+            if (objeto == null)
+                return Resultado.Falha("Objeto não encontrado.");
+            if (objeto.Cargas + delta < 0)
+                return Resultado.Falha("Sem carga: o objeto já apagou.");
+            objeto.Cargas += delta;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        public Resultado DescartarItem(string id, string extra, string campo, string item)
+        {
+            if (!NoJogo(id, out var p, out var erro))
+                return erro;
+            if (ListaDeItens(p, extra, campo).RemoveAll(i => i.Id == item) == 0)
+                return Resultado.Falha("Objeto não encontrado.");
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>Fim de cena: as reservas que somem no fim da cena voltam a zero (ex.: chamas do Nova).</summary>
+        public Resultado FimDeCena(string id)
+        {
+            if (!NoJogo(id, out var p, out var erro))
+                return erro;
+            foreach (var e in ExtrasDoArquetipo(p))
+            foreach (var c in e.Campos.Where(c => c.Tipo == Campo.Reserva && c.ZeraFimDeCena))
+                p.Contadores.Remove(ChaveExtra(e.Id, c.Id));
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>Recursos de jogo (ex.: chamas) aparecem na ficha só em sala (em carreira) ou no modo teste.</summary>
+        public bool MostraRecursosDeJogo(Personagem p) => p.Status == StatusCriacao.EmCarreira || EmTeste(p.Id);
 
         /// <summary>
         /// Operações de jogo valem depois de concluir a criação, ou a qualquer hora no modo teste

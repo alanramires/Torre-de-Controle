@@ -319,7 +319,8 @@
                   "nome": "Vai ter que obter ___",
                   "lacuna": true
                 }
-              ]
+              ],
+              "pedido": true
             }
           ]
         }
@@ -1622,27 +1623,172 @@
         "opcoes": [
           {
             "id": "entre-dois-mundos",
-            "nome": "Entre dois mundos"
+            "nome": "Entre dois mundos",
+            "regra": "Ao contatar seu povo, role + Superior. 10+: controle 3; 7-9: controle 2; falha: controle 1, mas seu povo faz uma exigência desconfortável. Gaste 1 a 1 em: tecnologia para usar uma habilidade de outro arquétipo uma vez; uma pergunta ao MJ sobre a situação; remover uma condição.",
+            "campos": [
+              {
+                "id": "controle",
+                "tipo": "reserva",
+                "rotulo": "Controle do contato",
+                "no_jogo": true,
+                "nota": "10+: 3; 7-9: 2; falha: 1 e uma exigência"
+              },
+              {
+                "id": "usos",
+                "tipo": "registro",
+                "rotulo": "Usos do controle",
+                "no_jogo": true,
+                "consome": "controle",
+                "nota": "cada uso gasta 1 de controle",
+                "opcoes": [
+                  {
+                    "id": "tecnologia",
+                    "nome": "Tecnologia: usar uma habilidade de outro arquétipo, uma vez",
+                    "lacuna": true
+                  },
+                  {
+                    "id": "pergunta",
+                    "nome": "Pergunta ao MJ sobre a situação",
+                    "lacuna": true
+                  },
+                  {
+                    "id": "condicao",
+                    "nome": "Remover uma condição (o conforto de falar com casa)"
+                  }
+                ]
+              },
+              {
+                "id": "exigencia",
+                "tipo": "condicoes",
+                "rotulo": "Exigência do seu povo",
+                "no_jogo": true,
+                "nota": "regra da casa: contate de novo só depois de pagar a exigência pendente (senão vira combo)",
+                "opcoes": [
+                  {
+                    "id": "exigencia",
+                    "nome": "Exigência desconfortável: ___",
+                    "lacuna": true
+                  }
+                ]
+              }
+            ]
           },
           {
             "id": "tecnologia-alienigena",
-            "nome": "Tecnologia alienígena"
+            "nome": "Tecnologia alienígena",
+            "regra": "Ao alterar um aparelho humano com tecnologia alienígena, role + Aberração. Acerto: cria um dispositivo que faz algo impossível uma vez e apaga. 10+: escolha funcionar excepcionalmente bem ou ter um uso a mais. Falha: funciona, mas com um efeito colateral que o MJ revela no uso.",
+            "campos": [
+              {
+                "id": "dispositivos",
+                "tipo": "itens",
+                "rotulo": "Dispositivos",
+                "no_jogo": true,
+                "nota": "1 carga (2 se o 10+ escolheu um uso a mais); vários ao mesmo tempo ou emprestar: decisão do mestre"
+              }
+            ]
           },
           {
             "id": "costumes-alienigenas",
-            "nome": "Costumes alienígenas"
+            "nome": "Costumes alienígenas",
+            "regra": "Ao desprezar ou minar abertamente um costume importante da Terra em favor de um do seu povo, suba Superior e baixe outro Rótulo."
           },
           {
             "id": "nave-a-kirby",
-            "nome": "Nave à Kirby"
+            "nome": "Nave Kirby",
+            "regra": "Você tem um veículo da sua terra. Pilotando a nave, pode usá-la para liberar seus poderes, enfrentar diretamente ou defender rolando + Superior.",
+            "campos": [
+              {
+                "id": "nave",
+                "tipo": "texto",
+                "rotulo": "Nome e visual"
+              },
+              {
+                "id": "forcas",
+                "tipo": "lista",
+                "rotulo": "2 forças",
+                "escolher": 2,
+                "opcoes": [
+                  {
+                    "id": "rapida",
+                    "nome": "Rápida e manobrável"
+                  },
+                  {
+                    "id": "camaleao",
+                    "nome": "Blindagem camaleão"
+                  },
+                  {
+                    "id": "armas",
+                    "nome": "Armas poderosas"
+                  },
+                  {
+                    "id": "regenera",
+                    "nome": "Regenera"
+                  },
+                  {
+                    "id": "dimensoes",
+                    "nome": "Troca de dimensão"
+                  },
+                  {
+                    "id": "tamanho",
+                    "nome": "Muda de tamanho"
+                  },
+                  {
+                    "id": "telepatica",
+                    "nome": "Telepática"
+                  }
+                ]
+              },
+              {
+                "id": "fraquezas",
+                "tipo": "lista",
+                "rotulo": "2 fraquezas",
+                "escolher": 2,
+                "opcoes": [
+                  {
+                    "id": "combustivel",
+                    "nome": "Combustível bizarro"
+                  },
+                  {
+                    "id": "suscetivel",
+                    "nome": "Suscetível a ___",
+                    "lacuna": true
+                  },
+                  {
+                    "id": "detectavel",
+                    "nome": "Fácil de detectar"
+                  },
+                  {
+                    "id": "lenta",
+                    "nome": "Lenta e desajeitada"
+                  },
+                  {
+                    "id": "desarmada",
+                    "nome": "Desarmada"
+                  },
+                  {
+                    "id": "conserto",
+                    "nome": "Difícil de consertar"
+                  }
+                ]
+              },
+              {
+                "id": "descricao",
+                "tipo": "texto",
+                "rotulo": "Descrição (livre)",
+                "opcional": true,
+                "varias_linhas": true
+              }
+            ]
           },
           {
             "id": "o-melhor-deles",
-            "nome": "O melhor deles"
+            "nome": "O melhor deles",
+            "regra": "Ao confortar ou apoiar alguém dizendo como ele representa o melhor da Terra, role + Aberração no lugar de + Mundano."
           },
           {
             "id": "nao-tao-diferentes-assim",
-            "nome": "Não tão diferentes assim"
+            "nome": "Não tão diferentes assim",
+            "regra": "Ao falar da sua terra, role + Aberração. 10+ escolha duas, 7-9 uma: confessar um defeito dela (+1 Equipe); enganar sobre ela (ganhe Influência sobre eles); descrever suas glórias (remova uma condição). Falha: revela mais do que queria; conte um segredo ou vulnerabilidade inédita."
           }
         ]
       },
@@ -1836,7 +1982,21 @@
         "opcoes": [
           {
             "id": "a-mascara",
-            "nome": "A Máscara"
+            "nome": "A Máscara",
+            "regra": "Você usa máscara e esconde a identidade real. Uma vez por sessão, afirme a identidade heroica ou a secreta para trocar o Mundano com o Rótulo da máscara. Ao revelar a identidade secreta a quem não sabia, marque potencial.",
+            "campos": [
+              {
+                "id": "rotulo",
+                "tipo": "rotulo",
+                "rotulo": "Rótulo que você encarna de máscara",
+                "rotulos": [
+                  "aberracao",
+                  "perigoso",
+                  "salvador",
+                  "superior"
+                ]
+              }
+            ]
           },
           {
             "id": "agora-e-serio",
@@ -1867,24 +2027,6 @@
         "texto": "Você admira os colegas, que parecem saber ser super-heróis: dê Influência a 2 deles."
       },
       "extras": [
-        {
-          "id": "janus/mascara",
-          "nome": "A Máscara",
-          "nota": "uma vez por sessão, troque o Mundano com o Rótulo da máscara",
-          "campos": [
-            {
-              "id": "rotulo",
-              "tipo": "rotulo",
-              "rotulo": "Rótulo que você encarna de máscara",
-              "rotulos": [
-                "aberracao",
-                "perigoso",
-                "salvador",
-                "superior"
-              ]
-            }
-          ]
-        },
         {
           "id": "janus/identidade-secreta",
           "nome": "Identidade secreta",
@@ -2505,7 +2647,7 @@
         {
           "id": "nova/chamas",
           "nome": "Chamas e faíscas",
-          "nota": "carregar: role + condições marcadas; as chamas somem no fim da cena",
+          "nota": "carregar os poderes: role + condições marcadas. 10+: 3 chamas; 7-9: 3 chamas e marque uma condição; falha: 2 chamas e marque três condições. As chamas somem no fim da cena.",
           "campos": [
             {
               "id": "faiscas",
@@ -2514,46 +2656,64 @@
               "opcoes": [
                 {
                   "id": "tempestade-de-realidade",
-                  "nome": "Tempestade de realidade"
+                  "nome": "Tempestade de realidade",
+                  "regra": "1 chama: enfrente diretamente com os poderes, rolando + Aberração no lugar de + Perigoso; causa estrago colateral, a menos que gaste mais 1."
                 },
                 {
                   "id": "escudo",
-                  "nome": "Escudo"
+                  "nome": "Escudo",
+                  "regra": "1 chama: defenda outra pessoa de uma ameaça imediata, rolando + Aberração no lugar de + Salvador."
                 },
                 {
                   "id": "construtos",
-                  "nome": "Construtos"
+                  "nome": "Construtos",
+                  "regra": "1 chama: crie qualquer objeto até o tamanho de uma pessoa; mais 1 para ele agir sozinho. Some no fim da cena."
                 },
                 {
                   "id": "fosso",
-                  "nome": "Fosso"
+                  "nome": "Fosso",
+                  "regra": "1 chama: crie uma barreira que segura as ameaças enquanto você prestar atenção nela; o MJ pode pedir mais 1 contra inimigos muito fortes."
                 },
                 {
                   "id": "adoracao",
-                  "nome": "Adoração"
+                  "nome": "Adoração",
+                  "regra": "1 chama: ao liberar seus poderes, deixe a plateia em silêncio, respeito e atenção."
                 },
                 {
                   "id": "movimento",
-                  "nome": "Movimento"
+                  "nome": "Movimento",
+                  "regra": "1 chama: vá a qualquer lugar da cena, passando por barreiras e amarras; mais 1 para ir a um lugar onde já esteve."
                 },
                 {
                   "id": "impulso",
-                  "nome": "Impulso"
+                  "nome": "Impulso",
+                  "regra": "1 chama: dê +1 na rolagem de um colega, como se tivesse gastado Equipe."
                 },
                 {
                   "id": "sobrecarga",
-                  "nome": "Sobrecarga"
+                  "nome": "Sobrecarga",
+                  "regra": "2 chamas: tire 10+ ao liberar seus poderes."
                 },
                 {
                   "id": "consciencia-elemental",
-                  "nome": "Consciência elemental"
+                  "nome": "Consciência elemental",
+                  "regra": "1 chama e marque uma condição: faça uma pergunta sobre o mundo ao redor; o MJ responde com honestidade."
                 },
                 {
                   "id": "arrebatar",
-                  "nome": "Arrebatar"
+                  "nome": "Arrebatar",
+                  "regra": "1 chama: tome com os poderes um objeto, até o tamanho de uma pessoa, de alguém à vista."
                 }
               ],
               "escolher": 4
+            },
+            {
+              "id": "chamas",
+              "tipo": "reserva",
+              "rotulo": "Chamas",
+              "no_jogo": true,
+              "zera_fim_de_cena": true,
+              "nota": "reserva da cena: gaste nas faíscas"
             }
           ]
         }
@@ -2876,6 +3036,6 @@
   "_visual_historico": "'visual': grupos de tags de aparência (só inspiração; a aparência é texto livre). 'historico': as perguntas de histórico da ficha (guia; o histórico é texto livre). Traduzidos por nós a partir da ficha em inglês.",
   "_equipe": "'equipe': a pergunta 'quando a equipe se reuniu' e as 2 frases de relacionamento ('___' é o colega). Respondidas na sala, com a equipe. 'influencia.texto': a regra de Influência inicial em uma frase. Traduzido por nós a partir da ficha em inglês.",
   "_avancos": "'avancos': a lista de avanços da ficha. 'cima' (8) e 'baixo' (tardios, liberam com 5 de cima). Cada item só se marca uma vez; itens repetidos (ex.: dois 'movimento de outro arquétipo') são casas diferentes. 'id' é a operação (ver avancos.json). Traduzido por nós a partir da ficha em inglês.",
-  "_modulos": "'movimentos': deck do arquétipo (escolher N além dos obrigatórios). 'extras': cada um com 'campos' por tipo: lista (escolher/escolher_ate), texto, textos (vagas, mínimo), rotulo (um dos ids em 'rotulos'), trilha (só exibe). 'na_sala': preenchido com a equipe. Nomes traduzidos por nós a partir da ficha em inglês; 'Eu sou o monstro' segue a errata do acervo. Movimentos podem ter 'campos' (subseção que abre quando o movimento está na ficha) e 'regra' (a regra em uma frase). Campo lista com 'descrever': cada escolhida pede um texto. Extra com 'cumpre_campo' e 'ao_cumprir': no jogo, cada escolha daquele campo pode ser marcada como cumprida, com um benefício da lista. Opções de lista também podem ter 'regra' (ex.: os papéis do Coração da Bruta).",
-  "_jogo": "Campos de jogo (o mestre mexe; a ficha mostra): 'trilha' com 'rende' (a cada 5 pontos, uma escolha a mais no campo indicado); lista com 'cresce_no_jogo' (escolhas além da criação, uma por ponto rendido) e 'final' (opção que só libera com todas as outras tomadas ou pelo avanço 'final_libera_com_avanco'); 'condicoes' com 'no_jogo' (o mestre seleciona e conclui; 'lacuna' pede texto)."
+  "_modulos": "'movimentos': deck do arquétipo (escolher N além dos obrigatórios). 'extras': cada um com 'campos' por tipo: lista (escolher/escolher_ate), texto, textos (vagas, mínimo), rotulo (um dos ids em 'rotulos'), trilha (só exibe). 'na_sala': preenchido com a equipe. Nomes traduzidos por nós a partir da ficha em inglês; 'Eu sou o monstro' segue a errata do acervo. Movimentos podem ter 'campos' (subseção que abre quando o movimento está na ficha) e 'regra' (a regra em uma frase). Campo lista com 'descrever': cada escolhida pede um texto. Extra com 'cumpre_campo' e 'ao_cumprir': no jogo, cada escolha daquele campo pode ser marcada como cumprida, com um benefício da lista. Opções de lista também podem ter 'regra' (ex.: os papéis do Coração da Bruta). Campo de texto com 'opcional' não entra nas pendências; com 'varias_linhas', vira área de texto.",
+  "_jogo": "Campos de jogo (o mestre mexe; a ficha mostra): 'trilha' com 'rende' (a cada 5 pontos, uma escolha a mais no campo indicado); lista com 'cresce_no_jogo' (escolhas além da criação, uma por ponto rendido) e 'final' (opção que só libera com todas as outras tomadas ou pelo avanço 'final_libera_com_avanco'); 'condicoes' com 'no_jogo' (o mestre seleciona e conclui; 'lacuna' pede texto). 'reserva': recurso de jogo que sobe e desce (ex.: chamas do Nova); com 'zera_fim_de_cena', volta a zero no fim da cena. Aparece na ficha só em sala (em carreira) ou no modo teste. 'registro': lançamentos (opção + texto da lacuna) feitos no jogo; com 'consome', cada lançamento gasta 1 da reserva indicada. 'itens': objetos criados no jogo, cada um com nome e cargas. Numa lista de criação, opção com 'lacuna' pede o texto quando escolhida."
 }

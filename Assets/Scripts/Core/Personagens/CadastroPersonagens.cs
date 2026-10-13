@@ -46,6 +46,7 @@ namespace TorreDeControle.Core.Personagens
                 p.Contadores ??= new Dictionary<string, int>();
                 p.EscolhasDeJogo ??= new Dictionary<string, List<string>>();
                 p.TextosDeJogo ??= new Dictionary<string, string>();
+                p.ItensDeJogo ??= new Dictionary<string, List<ItemDeJogo>>();
             }
             return new CadastroPersonagens(armazenamento, regras, lista);
         }

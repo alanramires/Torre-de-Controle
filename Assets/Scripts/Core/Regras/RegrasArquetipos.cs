@@ -110,12 +110,32 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("tamanho")] public int Tamanho { get; set; }
             /// <summary>Preenchido na sala, com a equipe (ex.: amor e rival da Bruta).</summary>
             [JsonProperty("na_sala")] public bool NaSala { get; set; }
+            /// <summary>Texto que não entra nas pendências (ex.: descrição livre da nave).</summary>
+            [JsonProperty("opcional")] public bool Opcional { get; set; }
+            /// <summary>Texto de várias linhas.</summary>
+            [JsonProperty("varias_linhas")] public bool VariasLinhas { get; set; }
+
             /// <summary>Lista: cada opção escolhida pede um texto (ex.: como o bicho ajuda em cada movimento).</summary>
             [JsonProperty("descrever")] public bool Descrever { get; set; }
 
             // ---------- campos de jogo (o mestre mexe; a ficha mostra) ----------
 
             public const string Condicoes = "condicoes";
+            /// <summary>Recurso de jogo que sobe e desce (ex.: chamas do Nova).</summary>
+            public const string Reserva = "reserva";
+
+            /// <summary>Lançamentos feitos no jogo (opção + texto), ex.: usos do controle da Forasteira.</summary>
+            public const string Registro = "registro";
+            /// <summary>Objetos criados no jogo, cada um com cargas (ex.: dispositivos alienígenas).</summary>
+            public const string Itens = "itens";
+
+            /// <summary>Registro: cada lançamento gasta 1 desta reserva (id de campo do mesmo extra).</summary>
+            [JsonProperty("consome")] public string Consome { get; set; }
+            /// <summary>Condições com um pedido em texto (ex.: o que se quer do santuário).</summary>
+            [JsonProperty("pedido")] public bool Pedido { get; set; }
+
+            /// <summary>Reserva que volta a zero no fim da cena.</summary>
+            [JsonProperty("zera_fim_de_cena")] public bool ZeraFimDeCena { get; set; }
 
             /// <summary>Trilha: a cada 5 pontos, uma escolha a mais no campo "extra|campo" indicado.</summary>
             [JsonProperty("rende")] public string Rende { get; set; }

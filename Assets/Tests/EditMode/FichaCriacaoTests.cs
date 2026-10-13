@@ -297,9 +297,9 @@ namespace TorreDeControle.Tests
         public void Rotulo_do_extra_escolhe_um_so_e_amor_da_bruta_e_da_sala()
         {
             var p = Nova("janus");
-            cadastro.AlternarOpcaoDeExtra(p.Id, "janus/mascara", "rotulo", "perigoso");
-            cadastro.AlternarOpcaoDeExtra(p.Id, "janus/mascara", "rotulo", "salvador");
-            Assert.That(cadastro.Escolhas(p, "janus/mascara", "rotulo"), Is.EqualTo(new[] { "salvador" }));
+            cadastro.AlternarOpcaoDeExtra(p.Id, "mov:a-mascara", "rotulo", "perigoso");
+            cadastro.AlternarOpcaoDeExtra(p.Id, "mov:a-mascara", "rotulo", "salvador");
+            Assert.That(cadastro.Escolhas(p, "mov:a-mascara", "rotulo"), Is.EqualTo(new[] { "salvador" }));
 
             var bruta = Nova("bruta");
             Assert.That(cadastro.DefinirTextoDeExtra(bruta.Id, "bruta/coracao", "amor", null, "Hyperwoman").Ok, Is.False);
@@ -449,6 +449,75 @@ namespace TorreDeControle.Tests
             cadastro.AlternarCondicao(p.Id, Santuario, "uso", "ajuda"); // tira: apaga conclusão e lacuna
             Assert.That(cadastro.CondicaoConcluida(p, Santuario, "uso", "ajuda"), Is.False);
             Assert.That(cadastro.TextoDeJogo(p, Santuario, "uso", "ajuda"), Is.Empty);
+        }
+
+        [Test]
+        public void Chamas_do_nova_sobem_descem_e_somem_no_fim_da_cena()
+        {
+            var p = Nova("nova");
+            Assert.That(cadastro.MostraRecursosDeJogo(p), Is.False);
+            cadastro.LigarTeste(p.Id);
+            Assert.That(cadastro.MostraRecursosDeJogo(p), Is.True);
+
+            cadastro.AjustarContador(p.Id, "nova/chamas", "chamas", 3); // carregou: 10+
+            cadastro.AjustarContador(p.Id, "nova/chamas", "chamas", -2); // Sobrecarga
+            Assert.That(cadastro.Contador(p, "nova/chamas", "chamas"), Is.EqualTo(1));
+            Assert.That(cadastro.AjustarContador(p.Id, "nova/chamas", "chamas", -2).Ok, Is.False);
+
+            cadastro.FimDeCena(p.Id);
+            Assert.That(cadastro.Contador(p, "nova/chamas", "chamas"), Is.EqualTo(0));
+        }
+
+        // ---------- Forasteira ----------
+
+        [Test]
+        public void Nave_a_kirby_e_uma_ficha_aberta_e_a_lacuna_e_cobrada()
+        {
+            var p = Nova("forasteira");
+            const string nave = "mov:nave-a-kirby";
+            cadastro.AlternarMovimento(p.Id, "nave-a-kirby");
+            cadastro.DefinirTextoDeExtra(p.Id, nave, "nave", null, "Estrela d'Alva, cristalina");
+            cadastro.AlternarOpcaoDeExtra(p.Id, nave, "forcas", "rapida");
+            cadastro.AlternarOpcaoDeExtra(p.Id, nave, "forcas", "telepatica");
+            cadastro.AlternarOpcaoDeExtra(p.Id, nave, "fraquezas", "suscetivel");
+            cadastro.AlternarOpcaoDeExtra(p.Id, nave, "fraquezas", "desarmada");
+            Assert.That(cadastro.Validar(p).avisos, Has.Some.Contains("Suscetível a ___"));
+            Assert.That(cadastro.DefinirTextoDeExtra(p.Id, nave, "fraquezas", "desarmada", "x").Ok, Is.False, "sem lacuna");
+            cadastro.DefinirTextoDeExtra(p.Id, nave, "fraquezas", "suscetivel", "sal");
+            Assert.That(cadastro.Validar(p).avisos, Has.None.Contains("Nave"));
+        }
+
+        [Test]
+        public void Entre_dois_mundos_cada_uso_gasta_controle_e_desfazer_devolve()
+        {
+            var p = Nova("forasteira");
+            const string mundos = "mov:entre-dois-mundos";
+            cadastro.AlternarMovimento(p.Id, "entre-dois-mundos");
+            Assert.That(cadastro.Validar(p).avisos, Has.None.Contains("Entre dois mundos"), "campos de jogo não cobram na criação");
+
+            cadastro.LigarTeste(p.Id);
+            Assert.That(cadastro.Lancar(p.Id, mundos, "usos", "pergunta", "quem mandou a sonda?").Ok, Is.False, "sem controle");
+            cadastro.AjustarContador(p.Id, mundos, "controle", 2); // 7-9
+            cadastro.Lancar(p.Id, mundos, "usos", "tecnologia", "Voo");
+            Assert.That(cadastro.Contador(p, mundos, "controle"), Is.EqualTo(1));
+            var uso = cadastro.ItensNoJogo(p, mundos, "usos").Single();
+            Assert.That(uso.Texto, Is.EqualTo("Voo"));
+            cadastro.DesfazerLancamento(p.Id, mundos, "usos", uso.Id);
+            Assert.That(cadastro.Contador(p, mundos, "controle"), Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Dispositivo_tem_cargas_e_apaga()
+        {
+            var p = Nova("forasteira");
+            const string tec = "mov:tecnologia-alienigena";
+            cadastro.AlternarMovimento(p.Id, "tecnologia-alienigena");
+            cadastro.LigarTeste(p.Id);
+            cadastro.CriarItem(p.Id, tec, "dispositivos", "Rádio que fala com mortos", 1);
+            var d = cadastro.ItensNoJogo(p, tec, "dispositivos").Single();
+            cadastro.AjustarCarga(p.Id, tec, "dispositivos", d.Id, -1);
+            Assert.That(d.Cargas, Is.EqualTo(0));
+            Assert.That(cadastro.AjustarCarga(p.Id, tec, "dispositivos", d.Id, -1).Ok, Is.False);
         }
 
         [Test]

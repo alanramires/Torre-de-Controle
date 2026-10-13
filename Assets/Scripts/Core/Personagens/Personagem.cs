@@ -79,6 +79,17 @@ namespace TorreDeControle.Core.Personagens
             Escolhidas.Count > 0 || Linha != null || Negadas.Count > 0 || Vagas.Count > 0 || Descricoes.Count > 0;
     }
 
+    /// <summary>
+    /// Um lançamento (registro: opção escolhida + texto) ou objeto (itens: nome em Texto + cargas) do jogo.
+    /// </summary>
+    public sealed class ItemDeJogo
+    {
+        [JsonProperty("id")] public string Id { get; set; }
+        [JsonProperty("opcao")] public string Opcao { get; set; }
+        [JsonProperty("texto")] public string Texto { get; set; } = string.Empty;
+        [JsonProperty("cargas")] public int Cargas { get; set; }
+    }
+
     /// <summary>Uma habilidade como fica na ficha: nome e como se manifesta.</summary>
     public sealed class Habilidade
     {
@@ -143,6 +154,8 @@ namespace TorreDeControle.Core.Personagens
         [JsonProperty("escolhas_de_jogo")] public Dictionary<string, List<string>> EscolhasDeJogo { get; set; } = new Dictionary<string, List<string>>();
         /// <summary>Textos do jogo, por "extra|campo|sub" (ex.: o pedido ao santuário, a lacuna de uma condição).</summary>
         [JsonProperty("textos_de_jogo")] public Dictionary<string, string> TextosDeJogo { get; set; } = new Dictionary<string, string>();
+        /// <summary>Lançamentos e objetos do jogo, por "extra|campo" (ex.: usos do controle, dispositivos).</summary>
+        [JsonProperty("itens_de_jogo")] public Dictionary<string, List<ItemDeJogo>> ItensDeJogo { get; set; } = new Dictionary<string, List<ItemDeJogo>>();
         /// <summary>
         /// No jogo (protótipo): escolhas de extra cumpridas, por "extra|opcao", com o benefício escolhido
         /// (vazio enquanto não escolheu). Ex.: impulsos do Farol. Só a marca, sem efeito ainda.

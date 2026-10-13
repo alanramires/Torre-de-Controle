@@ -132,7 +132,9 @@ namespace TorreDeControle.Core.Personagens
             if (!EmCriacao(id, out var p, out var erro))
                 return erro;
             var c = BuscarCampo(p, extra, campo);
-            var descricaoDeLista = c != null && c.Tipo == Campo.Lista && c.Descrever;
+            // Lista com descrição: todas as escolhidas (descrever) ou só as que têm lacuna ("Suscetível a ___").
+            var descricaoDeLista = c != null && c.Tipo == Campo.Lista &&
+                                   (c.Descrever || c.Opcoes.Any(o => o.Id == vaga && o.Lacuna));
             if (c == null || (c.Tipo != Campo.Texto && c.Tipo != Campo.Textos && !descricaoDeLista))
                 return Resultado.Falha("Campo de texto desconhecido.");
             if (c.NaSala)
@@ -192,6 +194,8 @@ namespace TorreDeControle.Core.Personagens
         {
             foreach (var c in campos)
             {
+                if (c.NoJogo)
+                    continue; // preenchido no jogo, não na criação
                 var escolhas = Escolhas(p, extra, c.Id);
                 switch (c.Tipo)
                 {
@@ -204,7 +208,7 @@ namespace TorreDeControle.Core.Personagens
                     case Campo.Rotulo when escolhas.Count == 0:
                         avisos.Add($"{nome}: {c.Titulo.ToLowerInvariant()}.");
                         break;
-                    case Campo.Texto when !c.NaSala && string.IsNullOrWhiteSpace(TextoDoExtra(p, extra, c.Id)):
+                    case Campo.Texto when !c.NaSala && !c.Opcional && string.IsNullOrWhiteSpace(TextoDoExtra(p, extra, c.Id)):
                         avisos.Add($"{nome}: {c.Titulo.ToLowerInvariant()}.");
                         break;
                     case Campo.Textos:
@@ -219,6 +223,12 @@ namespace TorreDeControle.Core.Personagens
                     var semTexto = escolhas.Count(o => string.IsNullOrWhiteSpace(TextoDoExtra(p, extra, c.Id, o)));
                     if (semTexto > 0)
                         avisos.Add($"{nome}: {c.Nota ?? "descreva cada escolhida"} (faltam {semTexto}).");
+                }
+                else if (c.Tipo == Campo.Lista)
+                {
+                    foreach (var o in c.Opcoes.Where(o => o.Lacuna && escolhas.Contains(o.Id)))
+                        if (string.IsNullOrWhiteSpace(TextoDoExtra(p, extra, c.Id, o.Id)))
+                            avisos.Add($"{nome}: complete \"{o.Nome}\".");
                 }
             }
         }
