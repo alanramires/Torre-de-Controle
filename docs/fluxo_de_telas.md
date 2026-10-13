@@ -103,7 +103,10 @@ MÓDULOS      extras do arquétipo (Impulsos, Perdição, Chamas, Máscara…) e
 novo  ──(aprovação)──▶  criado  ──▶  em carreira (= entrou numa sala)
 ```
 
-- **novo**: montando a ficha pelas regras do arquétipo.
+- **novo**: montando a ficha pelas regras do arquétipo. Pode trocar de arquétipo à vontade, mas
+  **trocar reseta a ficha de criação** (Rótulos, movimentos e extras recomeçam do novo arquétipo;
+  a Identidade fica). Se já houver escolhas feitas, a Torre pede confirmação antes.
+  Depois de aprovada, erro de criação se conserta com ajuste manual ou evento de correção, com motivo.
 - **aprovação**: a validação da Torre aponta o que fere a regra; o mestre decide.
   Fora da sala, a validação faz o papel de mestre temporário.
 - **criado**: foto da criação congelada.
