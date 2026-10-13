@@ -1,0 +1,38 @@
+{
+  "versao": 1,
+  "_sobre": "PJ contra PJ. Mistura regra do livro com adaptação da casa para o jogo assíncrono (fórum): cada item diz a origem.",
+
+  "fluxo": {
+    "declaracao": { "regra": "Os PJs envolvidos declaram as ações no mesmo turno de posts.", "origem": "casa" },
+    "resolucao": { "regra": "Em fila: um movimento por vez; o primeiro termina antes de o alvo responder com o próprio movimento.", "origem": "livro p.191 + casa (fila)" },
+    "interrupcao_unica": { "regra": "Só 'defender contra ameaça PJ' entra antes de o resultado valer. Nada mais interrompe.", "origem": "livro p.191" },
+    "sem_defesa": ["basico/confortar", "basico/perfurar-mascara"],
+    "ajuda": { "regra": "Qualquer colega pode gastar Equipe para ajudar qualquer lado, mesmo contra a vontade do ajudado.", "origem": "livro p.191" },
+    "falha": { "regra": "Marca potencial; o MJ pode virar o movimento contra quem falhou (ex.: o alvo ganha o efeito como se tivesse 10+).", "origem": "livro p.191" }
+  },
+
+  "variantes_pj": [
+    { "movimento": "basico/enfrentar", "catalogo": "pvp/pvp-01-enfrentar", "diferenca": [{ "op": "golpe_poderoso", "quem": "ambos" }], "nota": "trocar golpes entre PJs = os dois rolam golpe poderoso; 'resistir' livra quem escolheu", "origem": "livro p.57" },
+    { "movimento": "basico/defender", "catalogo": "pvp/pvp-02-defender",
+      "requisito": "o PJ agressor está fazendo um movimento e se mostra abertamente como ameaça iminente (ação perigosa e direta)",
+      "sucesso_base": [{ "op": "modificar_rolagem", "de": "agressor", "valor": -2, "momento": "antes_do_resultado_valer" }],
+      "parcial": [{ "op": "mj_escolhe", "opcoes": [
+        { "id": "custo", "texto": "Pagar um preço (em geral marcar condição)", "efeitos": [{ "op": "marcar_condicao", "quem": "rolou" }] },
+        { "id": "retribuicao", "texto": "O outro PJ age contra você sem interferência", "efeitos": [{ "op": "narrativo" }] },
+        { "id": "julgamento", "texto": "Quem assiste julga você (pode mudar seus Rótulos ou ganhar Influência)", "efeitos": [{ "op": "narrativo" }] }
+      ] }],
+      "nota": "se o -2 derrubar o agressor para falha, ele marca potencial e o MJ faz movimento pesado",
+      "origem": "livro p.63-64" },
+    { "movimento": "basico/provocar", "catalogo": "pvp/pvp-03-provocar",
+      "forte": [{ "op": "ambos", "lista": "opcoes" }],
+      "parcial": [{ "op": "escolher", "n": 1, "quem_escolhe": "rolou", "lista": "opcoes" }],
+      "opcoes": [
+        { "id": "morde", "texto": "Se ele fizer o que você quer: +1 na pilha de Equipe", "efeitos": [{ "op": "se_alvo_cumpre", "efeitos": [{ "op": "equipe", "delta": 1 }] }] },
+        { "id": "nao_morde", "texto": "Se não fizer: ele marca uma condição (ele escolhe)", "efeitos": [{ "op": "se_alvo_recusa", "efeitos": [{ "op": "marcar_condicao", "quem": "alvo", "escolhe": "alvo" }] }] }
+      ],
+      "nota": "o PJ alvo sempre decide se faz",
+      "origem": "livro p.69-70" },
+    { "movimento": "basico/confortar", "catalogo": "pvp/pvp-04-confortar", "diferenca": "igual ao básico; o PJ alvo sempre decide se se abre", "origem": "livro p.72" },
+    { "movimento": "basico/perfurar-mascara", "catalogo": "pvp/pvp-05-perfurar", "diferenca": "o jogador alvo responde com honestidade (fora do jogo, se for segredo)", "origem": "livro p.75 + casa (OFF)" }
+  ]
+}

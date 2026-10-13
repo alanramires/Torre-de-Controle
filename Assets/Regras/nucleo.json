@@ -1,0 +1,102 @@
+{
+  "versao": 1,
+  "_sobre": "Núcleo das regras: Rótulos, limites, condições, potencial. Texto próprio; 'origem' aponta a página do livro (PT-BR) ou 'casa' para regra da mesa do Alan.",
+
+  "rotulos": {
+    "ids": ["perigoso", "aberracao", "salvador", "superior", "mundano"],
+    "minimo": -2,
+    "maximo": 3,
+    "criacao": {
+      "base": "valores fixos do arquétipo",
+      "bonus_livre": { "valor": 1, "alvo": "um Rótulo à escolha", "respeita_maximo": true },
+      "origem": "livro p.46"
+    },
+    "mudanca": {
+      "padrao": "um sobe 1 e outro desce 1",
+      "estouro": {
+        "quando": "algum dos dois sairia de [minimo, maximo]",
+        "efeito": "nenhum Rótulo muda; marca 1 condição",
+        "quem_escolhe_condicao": "mj",
+        "origem": "livro p.46 e p.91"
+      },
+      "trancado": "Rótulo trancado ignora qualquer mudança (inclusive a parte 'sobe' ou 'desce' que o atingiria)",
+      "origem": "livro p.46"
+    }
+  },
+
+  "modificador": {
+    "minimo": -3,
+    "maximo": 4,
+    "_nota": "Limite do total somado aos dados (Rótulo + bônus + penalidades). Vale para toda rolagem.",
+    "origem": "livro p.66, p.77, p.89"
+  },
+
+  "rolagem": {
+    "dados": "2d6",
+    "faixas": [
+      { "id": "forte", "de": 10, "ate": null },
+      { "id": "parcial", "de": 7, "ate": 9 },
+      { "id": "falha", "de": null, "ate": 6 }
+    ],
+    "falha_padrao": {
+      "efeitos": [
+        { "op": "marcar_potencial", "quem": "rolou" },
+        { "op": "movimento_do_mj" }
+      ],
+      "_nota": "Toda falha marca potencial. Exceção de efeito (não de potencial): tomar um golpe poderoso.",
+      "origem": "livro p.92"
+    },
+    "ajuda_pos_rolagem": "Pontos de Equipe, aproveitar Influência e agir de forma egoísta entram DEPOIS dos dados e podem mudar a faixa (ver equipe.json e influencia.json)."
+  },
+
+  "condicoes": {
+    "ids": ["irritado", "assustado", "culpado", "desesperancoso", "inseguro"],
+    "penalidade": -2,
+    "tipo_penalidade": "constante enquanto marcada; acumulam",
+    "afeta": {
+      "irritado": ["basico/confortar", "basico/perfurar-mascara"],
+      "assustado": ["basico/enfrentar"],
+      "culpado": ["basico/provocar", "basico/avaliar"],
+      "desesperancoso": ["basico/liberar-poderes"],
+      "inseguro": ["basico/defender", "basico/rejeitar-influencia"]
+    },
+    "remover_no_fim_da_cena": {
+      "irritado": "descontou a raiva ferindo alguém ou quebrando algo que importa",
+      "assustado": "fugiu ou evitou algo difícil",
+      "culpado": "pagou um preço por quem sente que decepcionou",
+      "desesperancoso": "buscou um alívio fácil e imediato",
+      "inseguro": "agiu por impulso, sem consultar a equipe"
+    },
+    "regra_da_remocao": "A ação acontece na cena; a condição só sai no FIM da cena, e a penalidade vale até lá.",
+    "marcar": {
+      "quem_escolhe_padrao": "a própria personagem, salvo quando o efeito diz outra coisa",
+      "todas_marcadas": {
+        "efeito": { "op": "sair_de_cena", "quem": "personagem" },
+        "_nota": "Precisa marcar e não tem condição livre: sai de cena (desmaia, foge...)."
+      }
+    },
+    "origem": "livro p.89-90"
+  },
+
+  "potencial": {
+    "trilha": 5,
+    "ao_completar": "limpa a trilha e ganha 1 avanço (ver avancos.json)",
+    "fontes": ["falha em qualquer movimento", "efeitos de movimentos que mandam marcar"],
+    "origem": "livro p.92 e p.157"
+  },
+
+  "bonus": {
+    "adiante": "+N na próxima rolagem aplicável, depois some",
+    "constante": "+N em toda rolagem aplicável enquanto durar (o efeito diz até quando)",
+    "controle": "pontos temporários gastos 1 a 1 conforme o movimento",
+    "origem": "livro p.56"
+  },
+
+  "hora_da_verdade": {
+    "estado_inicial": "bloqueada",
+    "desbloqueio": "só por avanço",
+    "uso": "uma vez; depois volta a bloqueada e a personagem tranca um Rótulo para sempre",
+    "redesbloqueio": "avanço tardio próprio",
+    "origem": "livro p.49 e p.158"
+  }
+}

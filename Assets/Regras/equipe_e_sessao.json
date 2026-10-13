@@ -1,0 +1,72 @@
+{
+  "versao": 1,
+  "_sobre": "Pilha de Equipe (da mesa, compartilhada) e movimentos de início/fim de sessão.",
+
+  "equipe": {
+    "pilha": "uma por sala, compartilhada por todos os PJs",
+    "movimentos": [
+      {
+        "id": "equipe/ajudar",
+        "catalogo": "basico/pilha-equipe",
+        "gatilho": "Um colega capaz de ajudar na ficção gasta 1 ponto para dar +1 numa rolagem, depois dos dados.",
+        "momento": "pos_rolagem",
+        "custo": [{ "op": "equipe", "delta": -1 }],
+        "efeitos": [{ "op": "modificar_rolagem", "de": "ajudado", "valor": 1 }],
+        "limites": ["cada personagem gasta no máximo 1 ponto por rolagem", "vários colegas podem ajudar a mesma rolagem", "PNJ aliado pode ajudar, pago com ponto da pilha"],
+        "origem": "livro p.84-85"
+      },
+      {
+        "id": "equipe/egoista",
+        "catalogo": "basico/egoista",
+        "gatilho": "Agir ignorando ou insultando a equipe.",
+        "momento": "pode ser pos_rolagem",
+        "custo": [{ "op": "equipe", "delta": -1 }],
+        "efeitos": [{ "op": "mudar_rotulos", "quem": "rolou", "escolhe": "rolou" }, { "op": "narrativo", "texto": "Se depois da rolagem, a rolagem passa a usar o Rótulo novo." }],
+        "origem": "livro p.85-86"
+      },
+      {
+        "id": "equipe/entrar-em-batalha",
+        "gatilho": "A equipe junta parte para o confronto contra um inimigo perigoso.",
+        "requisito": "mais de um PJ",
+        "efeitos": [
+          { "op": "equipe", "delta": 2 },
+          { "op": "se", "condicao": "o líder tem Influência sobre todos os colegas presentes", "efeitos": [{ "op": "equipe", "delta": 1 }] },
+          { "op": "se", "condicao": "todos têm o mesmo objetivo na luta", "efeitos": [{ "op": "equipe", "delta": 1 }] },
+          { "op": "se", "condicao": "algum PJ não confia no líder ou na equipe", "efeitos": [{ "op": "equipe", "delta": -1, "evitavel_pelo_lider": true }] },
+          { "op": "se", "condicao": "equipe mal preparada ou desequilibrada (o MJ decide)", "efeitos": [{ "op": "equipe", "delta": -1, "evitavel_pelo_lider": true }] }
+        ],
+        "evitar_perda": "o líder pode marcar uma condição para não perder um ponto",
+        "origem": "livro p.86-87"
+      },
+      {
+        "id": "equipe/o-tempo-passa",
+        "gatilho": "Salto de tempo na história (o 'semanas depois' entre episódios).",
+        "efeitos": [{ "op": "equipe_definir", "valor": 1 }],
+        "origem": "livro p.88"
+      }
+    ],
+    "movimentos_de_arquetipo": {
+      "gatilhos": ["celebrar um triunfo com alguém", "compartilhar uma vulnerabilidade ou fraqueza com alguém"],
+      "efeitos": "por arquétipo (catálogo equipe/<arquetipo>)",
+      "origem": "livro p.88"
+    }
+  },
+
+  "sessao": {
+    "inicio": { "id": "sessao/inicio", "efeitos": [{ "op": "equipe", "delta": 1 }], "origem": "livro p.92" },
+    "fim": {
+      "id": "sessao/fim",
+      "quem": "cada PJ, um por vez",
+      "efeitos": [{ "op": "escolher", "n": 1, "quem_escolhe": "jogador", "opcoes": [
+        { "id": "aproximar", "texto": "Dizer quem fez você se sentir bem: essa pessoa ganha Influência sobre você; você remove uma condição ou marca potencial",
+          "efeitos": [
+            { "op": "ganhar_influencia", "dono": "escolhido", "sobre": "rolou", "restricao_mudanca_rotulos": "se já tinha Influência, a mudança de Rótulos não pode causar condição" },
+            { "op": "um_de", "efeitos": [{ "op": "remover_condicao", "quem": "rolou" }, { "op": "marcar_potencial", "quem": "rolou" }] }
+          ] },
+        { "id": "autoestima", "texto": "Explicar como você se vê: mude seus Rótulos", "efeitos": [{ "op": "mudar_rotulos", "quem": "rolou", "escolhe": "rolou" }] },
+        { "id": "afastar", "texto": "Explicar por que se sente de fora: tire a Influência de alguém sobre você", "efeitos": [{ "op": "perder_influencia", "dono": "escolhido", "sobre": "rolou" }] }
+      ] }],
+      "origem": "livro p.92-93"
+    }
+  }
+}

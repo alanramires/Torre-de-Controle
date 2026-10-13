@@ -1,0 +1,43 @@
+{
+  "versao": 1,
+  "_sobre": "Avanços como operações sobre a ficha. Cada arquétipo tem sua lista (ids abaixo); estes são os tipos de operação que as listas usam. Cada item de lista só pode ser marcado uma vez.",
+
+  "regras": {
+    "ganho": "1 avanço ao completar a trilha de potencial (5)",
+    "lista_principal_antes": "itens tardios só depois de 5 itens da lista principal",
+    "sem_permissao": "o jogador escolhe quando quiser; MJ e jogador acertam a justificativa na ficção",
+    "origem": "livro p.157-161"
+  },
+
+  "operacoes": [
+    { "id": "avanco/movimento-proprio", "efeitos": [{ "op": "comprar_carta", "de": "arquetipo_proprio" }], "nota": "movimento, não extra", "origem": "livro p.158" },
+    { "id": "avanco/movimento-outro", "efeitos": [{ "op": "comprar_carta", "de": "outro_arquetipo" }], "nota": "movimento, não extra", "origem": "livro p.158" },
+    { "id": "avanco/perder-influencia", "efeitos": [{ "op": "perder_influencia", "dono": "escolhido", "sobre": "personagem", "permanente": true }, { "op": "somar_rotulo", "valor": 1, "n": 1 }], "nota": "a pessoa nunca mais ganha Influência sobre você; o +1 não exige descer outro", "origem": "livro p.158" },
+    { "id": "avanco/reorganizar", "efeitos": [{ "op": "redistribuir_rotulos", "total": "conservado" }, { "op": "somar_rotulo", "valor": 1, "n": 1 }], "origem": "livro p.158" },
+    { "id": "avanco/desbloquear-hora", "efeitos": [{ "op": "hora_da_verdade", "estado": "desbloqueada" }], "origem": "livro p.158" },
+    { "id": "avanco/mais-elementos", "efeitos": [{ "op": "expandir_extra" }], "exemplos": ["+2 papéis do Coração da Bruta", "+3 faíscas", "até +4 recursos da mentora"], "origem": "livro p.158" },
+    { "id": "avanco/rotulos-mais", "efeitos": [{ "op": "somar_rotulo", "valor": 1, "n": 2 }], "variantes": ["+2 no Rótulo da mentora (Discípula)", "trocar Rótulo da Máscara e +1 nele (Janus)"], "origem": "livro p.159" },
+    { "id": "avanco/extra-de-outro", "efeitos": [{ "op": "comprar_modulo", "de": "outro_arquetipo" }], "exemplos": ["Impulsos (Farol)", "Coração da Bruta", "santuário (Amaldiçoada)", "Identidade secreta + Máscara (Janus)", "perdição (Amaldiçoada)"], "origem": "livro p.159" },
+    { "id": "avanco/habilidades", "efeitos": [{ "op": "ganhar_habilidades" }], "origem": "livro p.159" }
+  ],
+
+  "tardios": [
+    { "id": "avanco/redesbloquear-hora", "efeitos": [{ "op": "hora_da_verdade", "estado": "desbloqueada" }], "requisito": "já desbloqueou uma vez", "origem": "livro p.158" },
+    { "id": "avanco/mudar-arquetipo", "efeitos": [{ "op": "trocar_deck_de_classe" }],
+      "mantem": ["condições", "potencial marcado", "Influência", "Rótulos", "marcas abaixo da linha"],
+      "pula": ["quando a equipe se reuniu", "Influência inicial", "Relacionamentos"],
+      "decide_com_mj": "o que do arquétipo antigo fica (o interno fica, o externo que não cabe sai)",
+      "restricao": "arquétipo que nenhum outro jogador esteja usando",
+      "origem": "livro p.159-160" },
+    { "id": "avanco/movimento-adulto", "efeitos": [{ "op": "comprar_carta", "de": "adulto" }], "maximo_por_personagem": 2, "origem": "livro p.160" },
+    { "id": "avanco/trancar", "efeitos": [{ "op": "trancar_rotulo" }, { "op": "somar_rotulo", "valor": 1, "n": 1 }], "nota": "em qualquer ordem", "origem": "livro p.160" },
+    { "id": "avanco/aposentar", "efeitos": [{ "op": "aposentar", "opcoes": ["aposentado (fora do alcance do MJ)", "modelo para a cidade (vira PNJ)"] }], "origem": "livro p.161" }
+  ],
+
+  "personagem_nova_no_meio": {
+    "pula": ["quando a equipe se reuniu (pensar por que entra e por que confiam nela)", "Influência do arquétipo"],
+    "influencia": "dá Influência sobre si a pelo menos 2 PJs",
+    "relacionamentos": "normais; depois pergunta a cada PJ se se importa com sua opinião: sim = ganha Influência sobre ele; não = ele conta uma vez em que foi rude",
+    "origem": "livro p.161"
+  }
+}

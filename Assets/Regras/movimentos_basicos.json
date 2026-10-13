@@ -1,0 +1,149 @@
+{
+  "versao": 1,
+  "_sobre": "Movimentos básicos em formato de dados. Texto próprio e resumido; o motor usa 'rolagem' e 'efeitos', a tela usa 'gatilho' e 'texto'. Falha sem 'falha' explícita = rolagem.falha_padrao do nucleo.json.",
+
+  "movimentos": [
+    {
+      "id": "basico/enfrentar",
+      "nome": "Enfrentar diretamente a ameaça",
+      "gatilho": "Partir para a briga contra algo que é de fato perigoso para você.",
+      "rolagem": { "rotulo": "perigoso" },
+      "alvo": "pnj",
+      "sucesso_base": [{ "op": "narrativo", "texto": "Vocês trocam golpes: o MJ marca uma condição na ameaça e decide se você marca uma condição ou toma um golpe poderoso." }],
+      "forte": { "op": "escolher", "n": 2, "lista": "opcoes" },
+      "parcial": { "op": "escolher", "n": 1, "lista": "opcoes" },
+      "opcoes": [
+        { "id": "resistir", "texto": "Sair ileso da troca", "efeitos": [{ "op": "anular_retorno_da_troca" }] },
+        { "id": "tirar", "texto": "Arrancar algo do oponente (objeto, posição, equilíbrio)", "efeitos": [{ "op": "narrativo" }] },
+        { "id": "oportunidade", "texto": "Abrir uma chance para os aliados", "efeitos": [{ "op": "mj_decide", "entre": [[{ "op": "narrativo", "texto": "um aliado ganha a chance" }], [{ "op": "equipe", "delta": 1 }]] }] },
+        { "id": "impressionar", "texto": "Impressionar, surpreender ou assustar o oponente", "efeitos": [{ "op": "narrativo" }, { "op": "mj_pode", "efeitos": [{ "op": "marcar_condicao", "quem": "alvo", "escolhe": "mj" }] }] }
+      ],
+      "origem": "livro p.57-59"
+    },
+    {
+      "id": "basico/liberar-poderes",
+      "nome": "Liberar seus poderes",
+      "gatilho": "Forçar os poderes além do que você sabe que consegue para vencer um obstáculo, remodelar o ambiente ou ampliar os sentidos.",
+      "rolagem": { "rotulo": "aberracao" },
+      "forte": [{ "op": "narrativo", "texto": "Você consegue." }],
+      "parcial": [
+        { "op": "narrativo", "texto": "Você consegue, mas escolhe:" },
+        { "op": "escolher", "n": 1, "quem_escolhe": "rolou", "opcoes": [
+          { "id": "condicao", "texto": "Marcar uma condição (sua escolha)", "efeitos": [{ "op": "marcar_condicao", "quem": "rolou", "escolhe": "rolou" }] },
+          { "id": "instavel", "texto": "O MJ diz como o efeito fica instável ou temporário", "efeitos": [{ "op": "narrativo", "quem": "mj" }] }
+        ] }
+      ],
+      "_correcao": "No 7-9 é condição OU instável/temporário, à escolha de quem rola. A falha é só a padrão (potencial + movimento do MJ).",
+      "origem": "livro p.60-62"
+    },
+    {
+      "id": "basico/defender",
+      "nome": "Defender",
+      "gatilho": "Agir de improviso para proteger alguém ou algo de uma ameaça iminente.",
+      "rolagem": { "rotulo": "salvador" },
+      "alvo": "pnj",
+      "sucesso_base": [
+        { "op": "narrativo", "texto": "Quem você protege fica seguro." },
+        { "op": "escolher", "n": 1, "opcoes": [
+          { "id": "equipe", "texto": "+1 na pilha de Equipe", "efeitos": [{ "op": "equipe", "delta": 1 }] },
+          { "id": "influencia", "texto": "Ganhar Influência sobre quem você protegeu", "efeitos": [{ "op": "ganhar_influencia", "dono": "rolou", "sobre": "protegido" }] },
+          { "id": "condicao", "texto": "Remover uma condição sua", "efeitos": [{ "op": "remover_condicao", "quem": "rolou" }] }
+        ] }
+      ],
+      "parcial": [{ "op": "escolher", "n": 1, "quem_escolhe": "rolou", "opcoes": [
+        { "id": "expor", "texto": "Expor-se ao perigo (o MJ diz como)", "efeitos": [{ "op": "narrativo", "quem": "mj" }] },
+        { "id": "escalar", "texto": "Escalar a situação", "efeitos": [{ "op": "narrativo" }] }
+      ] }],
+      "_nota": "Não serve para se proteger de ameaça PNJ/ambiente. Contra PJ, ver pvp.json.",
+      "origem": "livro p.63-65"
+    },
+    {
+      "id": "basico/avaliar",
+      "nome": "Avaliar a situação",
+      "gatilho": "Parar para examinar o que está acontecendo em volta em busca de algo específico.",
+      "rolagem": { "rotulo": "superior" },
+      "forte": [{ "op": "perguntar", "n": 2, "lista": "perguntas" }],
+      "parcial": [{ "op": "perguntar", "n": 1, "lista": "perguntas" }],
+      "apos_perguntas": [{ "op": "bonus_enquanto", "valor": 1, "por": "resposta usada", "condicao": "enquanto agir conforme as respostas", "acumula": true }],
+      "perguntas": [
+        "O que aqui posso usar para ___?",
+        "Qual a maior ameaça aqui?",
+        "O que aqui corre mais perigo?",
+        "Quem aqui está mais vulnerável a mim?",
+        "Como encerrar isso rápido?"
+      ],
+      "_correcao": "Não é '+1 adiante': é +1 enquanto agir conforme as respostas, somando por resposta usada, sempre respeitando o teto de +4 do modificador.",
+      "origem": "livro p.66-67"
+    },
+    {
+      "id": "basico/provocar",
+      "nome": "Provocar",
+      "gatilho": "Mexer com alguém suscetível às suas palavras, dizendo fora da personagem o que você quer que ele faça.",
+      "rolagem": { "rotulo": "superior" },
+      "requisito": "alvo suscetível (ter Influência sobre ele basta)",
+      "alvo": "pnj",
+      "forte": [{ "op": "narrativo", "texto": "O alvo morde a isca e faz o que você quer." }],
+      "parcial": [{ "op": "escolher", "n": 1, "quem_escolhe": "mj", "opcoes": [
+        { "id": "morde", "texto": "Morde a isca mesmo assim", "efeitos": [{ "op": "narrativo" }] },
+        { "id": "tropeca", "texto": "Hesita: você ganha +1 adiante contra ele", "efeitos": [{ "op": "adiante", "valor": 1, "quem": "rolou", "contra": "alvo" }] },
+        { "id": "descuida", "texto": "Se descuida: você ganha uma abertura crítica", "efeitos": [{ "op": "narrativo" }] },
+        { "id": "exagera", "texto": "Exagera na reação: você ganha Influência sobre ele", "efeitos": [{ "op": "ganhar_influencia", "dono": "rolou", "sobre": "alvo" }] }
+      ] }],
+      "origem": "livro p.69-71"
+    },
+    {
+      "id": "basico/confortar",
+      "nome": "Confortar ou apoiar",
+      "gatilho": "Oferecer apoio emocional verdadeiro a alguém.",
+      "rolagem": { "rotulo": "mundano" },
+      "sucesso_base": [{ "op": "alvo_decide_se_abre", "se_abrir": [{ "op": "escolher", "n": 1, "quem_escolhe": "alvo", "opcoes": [
+        { "id": "potencial", "texto": "Marcar potencial", "efeitos": [{ "op": "marcar_potencial", "quem": "alvo" }] },
+        { "id": "condicao", "texto": "Remover uma condição", "efeitos": [{ "op": "remover_condicao", "quem": "alvo" }] },
+        { "id": "rotulos", "texto": "Mudar Rótulos (um sobe, um desce)", "efeitos": [{ "op": "mudar_rotulos", "quem": "alvo", "escolhe": "alvo" }] }
+      ] }] }],
+      "forte_extra": [{ "op": "so_se_abriu", "efeitos": [{ "op": "escolher", "n": 1, "quem_escolhe": "rolou", "opcoes": [
+        { "id": "equipe", "texto": "+1 na pilha de Equipe", "efeitos": [{ "op": "equipe", "delta": 1 }] },
+        { "id": "condicao", "texto": "Remover uma condição sua", "efeitos": [{ "op": "remover_condicao", "quem": "rolou" }] }
+      ] }] }],
+      "pnj": "PNJ com condição marcada que se abre remove condições; sem condição, o MJ decide.",
+      "_nota": "Se não se abrir, ninguém ganha nada. Quem conforta julga se houve abertura de verdade.",
+      "origem": "livro p.72-74"
+    },
+    {
+      "id": "basico/perfurar-mascara",
+      "nome": "Perfurar a máscara",
+      "gatilho": "Observar alguém para entender quem ele é de verdade.",
+      "rolagem": { "rotulo": "mundano" },
+      "forte": [{ "op": "perguntar", "n": 3, "lista": "perguntas" }],
+      "parcial": [{ "op": "perguntar", "n": 1, "lista": "perguntas" }],
+      "perguntas": [
+        "O que você planeja de verdade (a longo prazo)?",
+        "O que você quer que eu faça?",
+        "O que você vai fazer agora?",
+        "Como eu faria você ___?",
+        "Como eu ganharia Influência sobre você?"
+      ],
+      "_nota": "Respostas honestas. Cumprir a resposta da última pergunta dá a Influência na hora.",
+      "origem": "livro p.75"
+    },
+    {
+      "id": "basico/golpe-poderoso",
+      "nome": "Tomar um golpe poderoso",
+      "gatilho": "O MJ manda rolar quando você leva um golpe forte (físico ou emocional). Nunca é escolhido.",
+      "rolagem": { "base": "condicoes_marcadas" },
+      "forte": [{ "op": "escolher", "n": 1, "opcoes_ref": ["sair", "perder_controle", "duas_parcial"] }],
+      "parcial": [{ "op": "escolher", "n": 1, "opcoes_ref": ["atacar_verbal", "ceder", "aguentar"] }],
+      "falha": [{ "op": "marcar_potencial", "quem": "rolou" }, { "op": "narrativo", "texto": "Você se mantém firme e diz como." }],
+      "opcoes": [
+        { "id": "sair", "texto": "Sai da cena (foge, desmaia...); volta na seguinte com as condições", "efeitos": [{ "op": "sair_de_cena", "quem": "rolou" }] },
+        { "id": "perder_controle", "texto": "Perde o controle de si ou dos poderes; o MJ diz o que acontece", "efeitos": [{ "op": "narrativo", "quem": "mj" }] },
+        { "id": "duas_parcial", "texto": "Duas opções da lista de 7-9", "efeitos": [{ "op": "escolher", "n": 2, "opcoes_ref": ["atacar_verbal", "ceder", "aguentar"] }] },
+        { "id": "atacar_verbal", "texto": "Descontar num colega: provocá-lo a agir sem pensar ou aproveitar sua Influência para lhe infligir uma condição", "efeitos": [{ "op": "acionar", "um_de": ["basico/provocar", "influencia/aproveitar:condicao"] }] },
+        { "id": "ceder", "texto": "Ceder terreno: a oposição ganha uma abertura", "efeitos": [{ "op": "narrativo", "quem": "mj" }] },
+        { "id": "aguentar", "texto": "Aguentar a dor: marcar duas condições", "efeitos": [{ "op": "marcar_condicao", "quem": "rolou", "n": 2 }] }
+      ],
+      "_nota": "Aqui as faixas são invertidas: rolar alto é pior. Com zero condições rola +0. Teto de +4.",
+      "origem": "livro p.76-77"
+    }
+  ]
+}

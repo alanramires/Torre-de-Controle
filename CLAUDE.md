@@ -39,11 +39,22 @@ O que está lá, para consulta:
   pentagram0–5/filled = trilha da perdição; +/−, check etc.).
 - `Cards/Tokens/`: tokens (Equipe, potencial, adiante, constante, controle, chamas, condição, Influência).
 - `arte basica/Arquetipos 3/`: arte de cada arquétipo (296×433).
+- **Leituras do livro já feitas** (consultar antes de abrir o PDF): `resumos/MASKS - Resumo N (...).txt`
+  (UTF-8; 3 = arquétipos, 4 = movimentos, 6 = avanços, 7 = mestre do jogo, PNJs e vilões, 8 = sessão, 9 = arcos)
+  e `PARTIDA SIMULADA/06 REGRAS CARDS E TUTORIAL/Tutorial 01 - Como montar sua ficha.md` (criação de ficha).
+  São resumos do Alan, **podem estar incompletos ou errados**: servem para achar o assunto, não para decidir.
+- **Texto do livro**: `Livros/MASKS (Regras Oficiais) - texto.txt` (UTF-8). Fonte para conferir regra.
+  **Nunca copiar para este repositório** (tradução PT-BR da Circuito Camaleão, não é livre).
 - `Livros/MASKS (Regras Oficiais).pdf`: livro em PT-BR. Texto original CC BY 4.0 (creditar Magpie Games / Brendan Conway);
   a tradução PT-BR e a arte do livro não são livres. Uso pessoal sem problema.
 
 **As fichas também nascem aqui**, criadas pela própria Torre. A Torre nunca lê o acervo em tempo de execução:
 o caminho acima é só para consulta quando houver dúvida. As fichas JSON da partida simulada servem de modelo do schema.
+
+## Regras para o motor
+
+O motor **não lê o livro**: lê `Assets/Regras/*.json`, a especificação escrita por nós (ver `docs/regras.md`).
+Regra nova ou corrigida entra lá, com `origem`. Em dúvida, conferir no texto do livro no acervo.
 
 ## Modelo do jogo (decidido)
 

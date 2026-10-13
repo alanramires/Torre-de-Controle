@@ -1,0 +1,85 @@
+{
+  "versao": 1,
+  "_sobre": "Influência: relação binária 'dono tem Influência sobre alvo', entre quaisquer duas personagens (PJ ou PNJ).",
+
+  "modelo": {
+    "tipo": "binaria",
+    "direcao": "dono -> alvo",
+    "adultos": "PNJ adulto tem Influência sobre os PJs por padrão; PNJ jovem começa sem",
+    "dar_voluntariamente": "o alvo pode dar Influência sobre si a qualquer momento, se o outro ainda não tiver",
+    "remover": "só pelos caminhos listados em 'perder'; não dá para simplesmente decidir parar de se importar",
+    "origem": "livro p.79 e p.178"
+  },
+
+  "ganhar_de_novo": {
+    "sobre_pj": [{ "op": "mudar_rotulos", "quem": "alvo", "escolhe": "dono", "rejeitavel": false }],
+    "sobre_pnj": [{ "op": "adiante", "valor": 1, "quem": "dono", "contra": "alvo" }],
+    "pnj_sobre_pj": [{ "op": "mudar_rotulos", "quem": "alvo", "escolhe": "mj", "rejeitavel": false }],
+    "origem": "livro p.79 e p.178"
+  },
+
+  "bonus_passivo": {
+    "valor": 1,
+    "regra": "+1 em todo movimento contra ou em relação a quem você tem Influência (inclusive de arquétipo; avaliar se o foco é essa pessoa)",
+    "origem": "livro p.81"
+  },
+
+  "movimentos": [
+    {
+      "id": "influencia/dizer-quem-voce-e",
+      "catalogo": "basico/usar-influencia",
+      "gatilho": "Alguém com Influência sobre você diz quem você é ou como o mundo funciona, com intensidade suficiente.",
+      "sem_rolagem": true,
+      "efeitos": [
+        { "op": "mj_anuncia_mudanca", "texto": "O MJ diz qual Rótulo sobe e qual desce, seguindo o que foi dito." },
+        { "op": "alvo_escolhe", "opcoes": [
+          { "id": "aceitar", "efeitos": [{ "op": "mudar_rotulos", "quem": "alvo", "conforme": "anunciado" }] },
+          { "id": "rejeitar", "efeitos": [{ "op": "acionar", "movimento": "influencia/rejeitar" }] }
+        ] }
+      ],
+      "prioridade": "Se a fala de um PJ se encaixa em provocar ou confortar, esses movimentos têm prioridade.",
+      "origem": "livro p.80"
+    },
+    {
+      "id": "influencia/aproveitar",
+      "catalogo": "basico/usar-influencia",
+      "gatilho": "Usar ativamente a Influência que você tem sobre alguém para um efeito imediato.",
+      "custo": [{ "op": "perder_influencia", "dono": "rolou", "sobre": "alvo" }],
+      "efeitos": [{ "op": "escolher", "n": 1, "opcoes": [
+        { "id": "menos_dois", "texto": "-2 num movimento que o alvo acabou de rolar", "momento": "pos_rolagem", "efeitos": [{ "op": "modificar_rolagem", "de": "alvo", "valor": -2 }] },
+        { "id": "condicao", "texto": "Infligir uma condição no alvo (você escolhe qual)", "efeitos": [{ "op": "marcar_condicao", "quem": "alvo", "escolhe": "rolou" }] },
+        { "id": "mais_um", "texto": "+1 extra numa rolagem sua contra o alvo (soma com o +1 passivo)", "momento": "pos_rolagem", "efeitos": [{ "op": "modificar_rolagem", "de": "rolou", "valor": 1 }] }
+      ] }],
+      "origem": "livro p.81"
+    },
+    {
+      "id": "influencia/rejeitar",
+      "catalogo": "basico/rejeitar-influencia",
+      "gatilho": "Recusar as palavras de quem tem Influência sobre você (por conta própria ou em resposta a um movimento dele), agindo na ficção.",
+      "requisito": "o outro precisa ter Influência sobre você",
+      "rolagem": { "base": "zero", "bonus": [{ "se": "rolou tem Influência sobre quem fala", "valor": 1 }] },
+      "sucesso_base": [{ "op": "narrativo", "texto": "Os Rótulos não mudam como queriam; você se controla." }],
+      "forte": [{ "op": "escolher", "n": 2, "lista": "opcoes" }],
+      "parcial": [{ "op": "escolher", "n": 1, "lista": "opcoes" }],
+      "opcoes": [
+        { "id": "provar", "texto": "Remover uma condição ou marcar potencial, agindo já para provar que o outro está errado", "efeitos": [{ "op": "um_de", "efeitos": [{ "op": "remover_condicao", "quem": "rolou" }, { "op": "marcar_potencial", "quem": "rolou" }] }] },
+        { "id": "rotulos", "texto": "Mudar seus Rótulos como quiser (um sobe, um desce)", "efeitos": [{ "op": "mudar_rotulos", "quem": "rolou", "escolhe": "rolou" }] },
+        { "id": "cancelar", "texto": "Tirar a Influência dele sobre você e ganhar +1 adiante contra ele", "efeitos": [{ "op": "perder_influencia", "dono": "outro", "sobre": "rolou" }, { "op": "adiante", "valor": 1, "quem": "rolou", "contra": "outro" }] }
+      ],
+      "falha": [
+        { "op": "marcar_potencial", "quem": "rolou" },
+        { "op": "marcar_condicao", "quem": "rolou", "escolhe": "rolou" },
+        { "op": "mudar_rotulos", "quem": "rolou", "escolhe": "mj" }
+      ],
+      "_correcao": "Vale contra qualquer um com Influência (inclusive PJs), não só adultos. Rola sem Rótulo.",
+      "origem": "livro p.82-83"
+    }
+  ],
+
+  "perder": [
+    { "como": "aproveitar a Influência (quem usa perde)", "ref": "influencia/aproveitar" },
+    { "como": "rejeitar com a opção cancelar", "ref": "influencia/rejeitar" },
+    { "como": "fim de sessão: afastar-se da equipe", "ref": "sessao/fim:afastar" },
+    { "como": "avanço: alguém perde Influência para sempre", "ref": "avanco/perder-influencia" }
+  ]
+}
