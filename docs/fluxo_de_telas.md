@@ -1,109 +1,168 @@
-# Fluxo de telas
+# Fluxo de telas e modelo de personagem
 
-> Redesenhado em 2026-10-13. **A Torre é do mestre.** Não há contas, login nem tela de jogador:
-> jogador é um registro que o mestre mantém. A parte online da `docs/proposta.md` é futura
-> (ver `docs/implementacao_futura.md`).
+> Redesenhado em 2026-10-13; modelo de personagem revisto no mesmo dia (personagem única com perfis).
+> **A Torre é do mestre.** Não há contas, login nem tela de jogador: jogador é um registro que o
+> mestre mantém. A parte online da `docs/proposta.md` é futura (ver `docs/implementacao_futura.md`).
 
-## Entidades
+## Os quatro pilares
+
+| Módulo | Cuida de |
+|---|---|
+| **Gestão de Jogadores** | cadastro, edição, ativo/inativo |
+| **Gestão de Salas** | campanhas, slots, participantes, personagens da sala, rodadas, histórico |
+| **Gestão de NPCs** | personagens do mestre: comuns, mentores e aliados, antagonistas e vilões |
+| **Gestão de Personagens** | criação, arquétipo, Rótulos, condições, potencial, movimentos, avanços |
+
+O **motor de regras** atravessa os quatro: ele lê `Assets/Regras/*.json` e valida/aplica comandos
+em qualquer módulo.
+
+Gestão de NPCs e Gestão de Personagens são **duas portas para a mesma entidade**: a lista de NPCs
+mostra as personagens de controle do mestre, a de Personagens mostra as de jogador.
+
+## Jogador, sala e slot
 
 | Entidade | O que é |
 |---|---|
-| **Banco de jogadores** | todos os jogadores que o mestre já cadastrou (podem ser 20). Nome e status **ativo · inativo** |
-| **Banco de personagens** | fichas criadas **sem sala**, com ou sem jogador — é por aqui que tudo começa. Um jogador pode ter várias |
-| **Sala** | uma campanha: número de **slots** (ex.: 6), NPCs, pilha de Equipe, log |
+| **Jogador** | uma pessoa cadastrada. Nome e status **ativo · inativo** (inativo = sumiu, AFK, placeholder). Pode haver 20 |
+| **Sala** | uma campanha: número de **slots** (ex.: 6), personagens da sala, pilha de Equipe, rodadas, log |
 | **Slot** | lugar à mesa (ideia dos slots do `MatchController` do Map Room): **um jogador + uma personagem da sala** |
-| **NPC** | personagem do mestre, modelo leve: nome, descrição, motivação/objetivo simples ("quero encontrar meu pai") e Influência com os PJs |
 
-### Slot
+- Jogador e personagem são independentes. **A associação acontece no slot.**
+- Um jogador pode ter várias personagens no laboratório; **na sala, uma por jogador** (MVP).
+- Uma personagem pode existir sem jogador.
+- Jogador sumiu → troca o jogador do slot (ou marca inativo); a personagem continua no slot e o mestre
+  opera por ela. Isso **não** a transforma em NPC (ver "Controle" abaixo).
 
-A sala aceita N slots. Dos 20 jogadores do banco, só entram os que cabem nos slots.
-Cada slot recebe uma personagem por um de dois caminhos:
+## Personagem: uma entidade, três dimensões, fichas por perfil
 
-1. **Do banco**: escolhe uma personagem do banco de personagens.
-2. **Nova na sala**: cria a personagem já pertencendo à sala.
-
-Nos dois casos a personagem fica **associada ao jogador do slot**. Jogador sumiu → troca o jogador do slot
-(ou marca inativo); a personagem continua no slot.
-
-## Telas
-
-### Tela de entrada
-
-- Banco de jogadores: criar, editar, ativar/inativar
-- Banco de personagens: criar, editar, excluir (sem jogador)
-- Criar sala (com o número de slots)
-- Entrar na sala
-
-### Na sala
-
-- Slots: pôr jogador, pôr personagem (do banco ou nova), trocar jogador
-- Criar NPCs
-- Gestão das personagens: Rótulos, condições, potencial, Influência, Equipe, avanços
-- Rolar dados (o mestre rola por todos)
-- Exportar a colheita da rodada para o fórum
-
-## Personagem
+Herói, NPC, vilão, jovem e adulto **não são entidades diferentes**. Tudo é `Personagem`, com uma
+identidade que persiste enquanto o resto muda.
 
 ```text
 Personagem
-  id
-  nome
-  tipo        Herói | NPC
-  status      Herói: novo → criado → em carreira (= entrou numa sala)    NPC: não tem (é "npc")
-  jogador     nenhum | jogador X
-  sala        nenhuma | sala X
-  origem      nenhuma | id da personagem de onde foi copiada
-  foto da criação   (congelada ao passar de novo para criado)
-  eventos           (potencial, Influência, avanços… por cima da foto)
+  id, nome, aparência, descrição            ← identidade (nunca muda de entidade)
+  controle      jogador | mestre            ← PJ ou PNJ (quais regras de personagem valem)
+  maturidade    jovem | adulto
+  papel         heroi | vilao | neutro
+  origem        nenhuma | id de onde foi copiada (laboratório → sala)
+  sala          nenhuma | sala X
+  fichas        componentes por perfil (abaixo); os inativos ficam guardados
+  eventos       tudo o que mudou, com motivo
 ```
 
-- **novo**: em criação, seguindo as regras do livro (nível 1). Submete para aprovação.
-- **novo → criado**: a validação da Torre ajuda o mestre; **fora da sala a validação é o mestre temporário**.
-  Mesmo validador nos dois lugares, só muda quem dá a palavra final.
-- **criado**: foto congelada; daí em diante, eventos por cima (no laboratório, à vontade).
-- **NPC** não tem status nem validação de criação. Pelo livro (Resumo 7): nome, aparência marcante,
-  **uma palavra** para o modo de agir e **motivação com verbo no infinitivo** ("vingar minha irmã").
-  Subtipos: **adulto** (tem Influência sobre os PJs por padrão), **jovem** (começa sem) e **vilão**
-  (+ geração ouro/prata/bronze/moderna, 1–5 movimentos de vilão, 1–5 condições; sem condição para marcar = derrotado).
-  PNJ comum só marca condição se enfrentado diretamente. NPCs também vivem
-  no laboratório (tem jogador que cria NPCs para completar o background) e também podem ir para a sala.
-- **Influência** liga qualquer par: NPC → herói, herói → NPC, herói ↔ herói e NPC ↔ NPC.
-- A `sala` de uma personagem não muda: ir para a sala cria uma cópia com `sala: X` e `origem` apontando
-  para a original.
+As três dimensões são **independentes**:
+
+| Exemplo | controle | maturidade | papel |
+|---|---|---|---|
+| Herói da equipe | jogador | jovem | heroi |
+| Mentor | mestre | adulto | neutro |
+| Vilã adolescente | mestre | jovem | vilao |
+| Vilão clássico | mestre | adulto | vilao |
+| Ex-herói que virou modelo para a cidade | mestre | adulto | heroi |
+
+**NPC** é só o nome para `controle: mestre`. **Vilão** é papel narrativo, não idade nem controle.
+
+### Controle é regra, não quem está clicando
+
+`controle` diz **quais regras de personagem valem**: PJ (ficha de arquétipo, potencial, avanços,
+Influência dos adultos por padrão…) ou PNJ (só marca condição se enfrentado diretamente, age pela
+motivação…). Quem opera a personagem na Torre é sempre o mestre. Assumir o PJ de um jogador sumido
+**não** muda o controle.
+
+### Fichas por perfil (componentes)
+
+A personagem carrega um ou mais componentes. A tela mostra os campos dos componentes ativos.
+
+| Componente | Quando se aplica | Campos |
+|---|---|---|
+| **Perfil PNJ** | controle mestre | uma palavra para o modo de agir, motivação (verbo no infinitivo), traços marcantes |
+| **Ficha de herói** | controle jogador | arquétipo, Rótulos, condições, potencial, movimentos (cartas), módulos/extras, avanços, Hora da Verdade, status de criação |
+| **Ficha de vilão** | papel vilão | geração (ouro/prata/bronze/moderna), 1–5 movimentos de vilão, 1–5 condições |
+| **Influência** | sempre (núcleo) | quem tem Influência sobre quem; qualquer par de personagens |
+
+Mudar de perfil **não apaga** o componente antigo: ele fica inativo, com seus dados e histórico.
+O ex-herói que vira mentor ainda tem a ficha de herói guardada.
+
+### Ciclo de criação (ficha de herói)
+
+```text
+novo  ──(aprovação)──▶  criado  ──▶  em carreira (= entrou numa sala)
+```
+
+- **novo**: montando a ficha pelas regras do arquétipo.
+- **aprovação**: a validação da Torre aponta o que fere a regra; o mestre decide.
+  Fora da sala, a validação faz o papel de mestre temporário.
+- **criado**: foto da criação congelada.
+- **em carreira**: copiada para um slot de sala. Formar a equipe e dar a Influência inicial são
+  preparação da campanha, não o que define a carreira.
+
+PNJ não tem esse ciclo.
+
+### Transições: regulamentadas × do mestre
+
+Personagens mudam durante a campanha **sem recriar a ficha**:
+herói jovem → herói adulto → aposentado → mentor; herói → antagonista → vilão; PNJ → vilão.
+
+O motor separa dois tipos:
+
+| Tipo | O que é | Exemplos |
+|---|---|---|
+| **Regulamentada** | o livro prevê; o motor sabe o que fazer | avanço "aposentar-se ou virar modelo" (PJ vira PNJ adulto); avanço "mudar de arquétipo"; PNJ comum vira vilão (ganha ficha de vilão) |
+| **Do mestre** | decisão narrativa excepcional | herói vira vilão; PNJ vira PJ de um jogador; mudar maturidade sem avanço |
+
+Transição do mestre exige **motivo** e é registrada como "fora da regra" (mesmo mecanismo do ajuste manual).
+
+**MVP:** o modelo suporta tudo isso desde já, mas a tela só oferece **criar** heróis, PNJs e vilões e
+**promover PNJ a vilão**. As outras transições ficam para depois (ver `implementacao_futura.md`).
 
 ## Fora da sala é laboratório; dentro, o mestre é suserano
 
-(Decidido em 2026-10-13. Sim, Crusader Kings.)
+- **Fora da sala** as personagens (heróis e PNJs) são **experimentos**: cria quantas quiser, dá potencial,
+  faz multiclasse, testa avanços. Nada tem consequência.
+- **Pôr na sala cria uma cópia** (a instância do Arkham). A original fica no laboratório, intacta, e pode
+  virar cópia em outras salas. Ao copiar um herói, o mestre escolhe:
+  - **só a criação** (reset): a cópia nasce da foto da criação;
+  - **criação + upgrades**: os eventos do laboratório vêm junto, marcados como vindos do laboratório.
+- **Dentro da sala** o mestre controla tudo. O motor aplica as regras, mas aceita ajuste manual com
+  motivo (avisa "fora da regra", não proíbe).
 
-- **Fora da sala** as personagens são **experimentos**: cria quantas quiser, dá potencial, faz multiclasse,
-  testa avanços. Nada disso tem consequência.
-- **Toda personagem do banco tem a mesma estrutura em camadas**: id e **foto da criação** congelada,
-  mais a camada de **upgrades e avanços** do laboratório (eventos).
-- **Pôr no slot cria uma cópia** (a instância do Arkham). A personagem do banco não muda e pode virar
-  cópia em outras salas. Ao pôr no slot, o mestre escolhe:
-  - **só a criação** (um reset): a instância nasce da foto da criação, sem os upgrades;
-  - **criação + upgrades**: a instância nasce da foto e os eventos do laboratório entram no log dela
-    marcados como vindos do laboratório. Como continuam eventos, o mestre pode corrigir qualquer um.
-- **Dentro da sala** a cópia é **vassala**: só o mestre mexe nela. O motor aplica as regras, mas aceita
-  ajuste manual com motivo (avisa "fora da regra", não proíbe).
+A identidade que persiste é a **da personagem na campanha**: a cópia tem `origem` apontando para a do
+laboratório, e daí em diante tem histórico próprio.
 
-### Como a instância é guardada: camada sobre camada
+### Camada sobre camada
 
 ```text
-personagem (banco ou instância) = origem (id da criação)
-          + foto da criação   (estado aprovado, imutável)
-          + log de eventos    (cada mudança desde a foto, com autor e quando)
 estado atual = foto da criação + eventos aplicados em ordem
 ```
 
-A **foto da criação** é a mesma do banco (congelada lá); pôr no slot é a aprovação, e o que o mestre
-aprovou (só criação ou criação + upgrades) define com que eventos o log da instância começa.
-O log nunca é apagado: corrigir = acrescentar um evento de correção que anula ou ajusta um evento antigo,
-e o estado é recalculado. Todo evento pertence a uma rodada da sala (ver `escudo do mestre.md`).
-Histórico da ficha e colheita do post = ler os eventos.
-Se reaplicar tudo ficar lento um dia, guarda-se um cache do estado atual, mas a verdade é foto + log.
+- O log **nunca é apagado**. Corrigir = acrescentar um evento de correção que anula ou ajusta um evento
+  antigo; o estado é recalculado (e a Torre mostra o que mudou nos eventos seguintes).
+- Todo evento tem **motivo**, **autor**, **quando** e a **rodada** da sala.
+- Eventos de personagem: Rótulo, potencial, condição, Influência, avanço, **maturidade**, **papel**,
+  **controle**, ajuste manual, correção.
+- Histórico da ficha e colheita do post = ler os eventos.
+- PNJ criado direto (sem ciclo) tem como "foto" o estado em que foi criado.
+
+## Telas
+
+### Entrada
+
+- Jogadores: criar, editar, ativar/inativar
+- Personagens (laboratório): criar, editar, excluir heróis
+- NPCs (laboratório): criar, editar, excluir; promover a vilão
+- Salas: criar (com número de slots), entrar
+
+### Na sala
+
+- Slots: pôr jogador, pôr personagem (do laboratório ou nova), trocar jogador
+- NPCs da sala: criar, trazer do laboratório, promover a vilão
+- Gestão das personagens: Rótulos, condições, potencial, Influência, Equipe, avanços
+- Rolar dados (o mestre rola por todos)
+- Rodada: abrir, registrar, fechar e exportar a colheita em BBCode
 
 ## Em aberto
 
-1. **Validação de ficha** (regras de Rótulos iniciais por arquétipo): avisa no laboratório e na hora de
-   pôr no slot; quem decide é o mestre.
+1. **Validação de ficha** (Rótulos iniciais por arquétipo): avisa no laboratório e ao pôr na sala;
+   o mestre decide.
+2. **Herói adulto controlado por jogador**: o livro não prevê um PJ "virar adulto" (movimentos adultos
+   não mudam a maturidade). Fica como transição do mestre até haver regra da casa.

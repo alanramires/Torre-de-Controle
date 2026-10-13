@@ -18,6 +18,18 @@ Uma sala com mais de um mestre.
 
 Ex.: jogar pelo amigo que sumiu. (Com jogador inativo isso já se resolve em parte.)
 
+## Transformações de personagem (telas)
+
+O modelo já suporta (personagem única com `controle`, `maturidade`, `papel` e fichas por perfil; ver
+`fluxo_de_telas.md`), mas as telas do MVP só criam heróis, PNJs e vilões e promovem PNJ a vilão.
+Depois:
+
+- **Regulamentadas pelo livro**: aposentar-se / virar modelo para a cidade (PJ vira PNJ adulto,
+  ficha de herói fica guardada); mudar de arquétipo (troca o deck de classe, mantém o núcleo).
+- **Do mestre, com motivo**: herói → antagonista → vilão; PNJ → PJ de um jogador; mudar maturidade;
+  qualquer outra mudança de controle ou papel.
+- Linha do tempo da personagem mostrando as fases (jovem heroína → modelo → mentora).
+
 ## Trazer personagem de outra campanha
 
 Levar uma personagem evoluída da campanha X para a sala Y ("o veterano").

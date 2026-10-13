@@ -20,14 +20,18 @@ movimento do MJ usar.
 
 ## 2. O que existe na Torre
 
+Quatro pilares: **Gestão de Jogadores · Gestão de Salas · Gestão de NPCs · Gestão de Personagens**,
+com o motor de regras atravessando os quatro.
+
 | Coisa | O que é |
 |---|---|
 | **Jogador** | só um registro: nome + **ativo/inativo** (inativo = sumiu, AFK, placeholder) |
-| **Personagem** | a ficha. Tipo **Herói** ou **NPC** |
-| **Sala** | uma campanha, com **N slots** (ex.: 6), NPCs, pilha de Equipe e o log |
+| **Personagem** | **uma entidade só** para heróis, NPCs, vilões, mentores… (ver §4) |
+| **Sala** | uma campanha, com **N slots** (ex.: 6), NPCs, pilha de Equipe, rodadas e o log |
 | **Slot** | lugar à mesa: **um jogador + uma personagem da sala** |
 
-Dá para ter 20 jogadores cadastrados; na sala só entram os que cabem nos slots.
+Dá para ter 20 jogadores cadastrados; na sala só entram os que cabem nos slots, uma personagem por
+jogador (MVP). Personagem pode existir sem jogador.
 
 ## 3. Telas
 
@@ -44,7 +48,29 @@ Dá para ter 20 jogadores cadastrados; na sala só entram os que cabem nos slots
 - Rolar dados (o mestre rola por todos)
 - Exportar a colheita da rodada em BBCode para o fórum
 
-## 4. Personagem: laboratório e sala
+## 4. Personagem
+
+### Uma identidade, três dimensões
+
+Herói, NPC, vilão, jovem e adulto **não são entidades diferentes**. Toda personagem tem uma identidade
+que persiste e três dimensões independentes:
+
+| Dimensão | Valores |
+|---|---|
+| **Controle** | jogador (PJ) · mestre (PNJ) — diz quais regras valem, não quem clica |
+| **Maturidade** | jovem · adulto |
+| **Papel** | herói · vilão · neutro |
+
+Vilã adolescente, mentor adulto, ex-herói que virou modelo: todos válidos. NPC é só `controle: mestre`;
+vilão é papel narrativo. A ficha muda por **componentes** (ficha de herói, ficha de vilão, perfil PNJ),
+e componentes que deixam de valer ficam guardados com o histórico.
+
+A personagem **muda sem ser recriada** (herói → aposentado → mentor; herói → antagonista → vilão).
+O motor distingue transições **regulamentadas** (o livro prevê, como aposentar ou mudar de arquétipo)
+das **do mestre** (com motivo, "fora da regra"). No MVP a tela só cria heróis, PNJs e vilões e promove
+PNJ a vilão; o resto vem depois.
+
+### Laboratório e sala
 
 **Fora da sala é laboratório.** Cria-se à vontade, dá potencial, faz multiclasse, testa avanços.
 Nada tem consequência. Um jogador pode ter várias personagens; o mestre pode criar sem jogador.
@@ -69,7 +95,7 @@ novo  ──(aprovação)──▶  criado  ──▶  em carreira
   Formar a equipe e distribuir a Influência inicial são **preparação da campanha**, não o que define
   a carreira.
 
-NPC não tem ciclo: é sempre "npc".
+PNJ não tem esse ciclo.
 
 ### Como a ficha é guardada: camada sobre camada
 
@@ -102,13 +128,13 @@ Sala: Nova Aeternia · Rodada 07 (aberta)
 4 acontecimentos
 ```
 
-### NPC (pelo livro)
+### PNJ e vilão (pelo livro)
 
-Nome, aparência marcante, **uma palavra** para o modo de agir, **motivação com verbo no infinitivo**
-("vingar minha irmã"). Três tipos:
-- **adulto**: já tem Influência sobre os heróis;
-- **jovem**: começa sem;
-- **vilão**: + geração, 1–5 movimentos, 1–5 condições; sem condição para marcar = derrotado.
+PNJ: nome, aparência marcante, **uma palavra** para o modo de agir, **motivação com verbo no infinitivo**
+("vingar minha irmã"). Adulto já tem Influência sobre os heróis; jovem começa sem.
+Vilão (papel): + geração, 1–5 movimentos de vilão, 1–5 condições; sem condição para marcar = derrotado.
+
+Todo evento registra o motivo, inclusive mudanças de maturidade, papel e controle.
 
 NPCs também podem ser criados no laboratório (para completar background) e levados para a sala.
 **Influência** liga qualquer par: NPC↔herói, herói↔herói, NPC↔NPC.
@@ -142,7 +168,7 @@ O texto do livro fica no acervo, só para tirar dúvidas. **Nunca entra no proje
 ## 7. MVP
 
 1. Tela de entrada: jogadores, personagens, salas.
-2. Criar personagem com validação das regras do arquétipo.
+2. Criar heróis (com validação das regras do arquétipo), PNJs e vilões; promover PNJ a vilão.
 3. Sala com slots; pôr jogador e personagem.
 4. Mesa: fichas clicáveis (Rótulos, condições, potencial, Influência), pilha de Equipe no centro.
 5. Mão de cartas por personagem.

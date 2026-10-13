@@ -23,6 +23,22 @@ As regras que o motor usa, **escritas por nós** em formato de dados. O motor l�
 Ainda não estão aqui: movimentos e extras de cada arquétipo, movimentos de equipe por arquétipo,
 movimentos adultos, vilões, movimentos do MJ.
 
+## Regras por perfil de personagem
+
+Toda personagem é a mesma entidade (ver `fluxo_de_telas.md`); o motor escolhe as regras pelo perfil:
+
+| Perfil | Regras que valem |
+|---|---|
+| `controle: jogador` | ficha de herói: Rótulos, condições com penalidade, potencial, avanços, movimentos básicos e de arquétipo |
+| `controle: mestre` | PNJ: age pela motivação; só marca condição se enfrentado diretamente; confortar remove condições |
+| `maturidade: adulto` + `controle: mestre` | tem Influência sobre os PJs por padrão (livro p.178) |
+| `papel: vilao` | ficha de vilão: marca condição ao levar golpe e age por ela; sem condição livre = derrotado (livro p.194–197) |
+
+Um arquivo futuro `perfis.json` vai descrever isso em dados, junto com as **transições**:
+- **regulamentadas** (o livro prevê: aposentar/virar modelo, mudar de arquétipo, PNJ ganha ficha de vilão),
+  que o motor aplica sozinho;
+- **do mestre** (qualquer outra), que exigem motivo e entram no log como "fora da regra".
+
 ## Vocabulário de efeitos (`op`)
 
 Um efeito é `{ "op": ..., ... }`. Os principais:
