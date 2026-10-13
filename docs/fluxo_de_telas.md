@@ -42,6 +42,35 @@ Nos dois casos a personagem fica **associada ao jogador do slot**. Jogador sumiu
 - Rolar dados (o mestre rola por todos)
 - Exportar a colheita da rodada para o fórum
 
+## Personagem
+
+```text
+Personagem
+  id
+  nome
+  tipo        Herói | NPC
+  status      Herói: novo → criado → em carreira    NPC: não tem (é "npc")
+  jogador     nenhum | jogador X
+  sala        nenhuma | sala X
+  origem      nenhuma | id da personagem de onde foi copiada
+  foto da criação   (congelada ao passar de novo para criado)
+  eventos           (potencial, Influência, avanços… por cima da foto)
+```
+
+- **novo**: em criação, seguindo as regras do livro (nível 1). Submete para aprovação.
+- **novo → criado**: a validação da Torre ajuda o mestre; **fora da sala a validação é o mestre temporário**.
+  Mesmo validador nos dois lugares, só muda quem dá a palavra final.
+- **criado**: foto congelada; daí em diante, eventos por cima (no laboratório, à vontade).
+- **NPC** não tem status nem validação de criação. Pelo livro (Resumo 7): nome, aparência marcante,
+  **uma palavra** para o modo de agir e **motivação com verbo no infinitivo** ("vingar minha irmã").
+  Subtipos: **adulto** (tem Influência sobre os PJs por padrão), **jovem** (começa sem) e **vilão**
+  (+ geração ouro/prata/bronze/moderna, 1–5 movimentos de vilão, 1–5 condições; sem condição para marcar = derrotado).
+  PNJ comum só marca condição se enfrentado diretamente. NPCs também vivem
+  no laboratório (tem jogador que cria NPCs para completar o background) e também podem ir para a sala.
+- **Influência** liga qualquer par: NPC → herói, herói → NPC, herói ↔ herói e NPC ↔ NPC.
+- A `sala` de uma personagem não muda: ir para a sala cria uma cópia com `sala: X` e `origem` apontando
+  para a original.
+
 ## Fora da sala é laboratório; dentro, o mestre é suserano
 
 (Decidido em 2026-10-13. Sim, Crusader Kings.)
