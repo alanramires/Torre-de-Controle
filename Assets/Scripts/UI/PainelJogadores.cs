@@ -25,6 +25,7 @@ namespace TorreDeControle.UI
             Estilo.Esticar(veu);
             // O véu bloqueia cliques na tela de baixo.
             veu.gameObject.AddComponent<Image>().color = Estilo.Veu;
+            veu.gameObject.AddComponent<NavegacaoTab>();
             var painel = veu.gameObject.AddComponent<PainelJogadores>();
             painel.Montar(veu);
             return painel;
@@ -64,10 +65,10 @@ namespace TorreDeControle.UI
 
             var resultado = cadastro.Renomear(jogador.Id, campo.text);
             Mostrar(resultado);
+            // No sucesso não redesenha: o campo já mostra o nome, e redesenhar destruiria
+            // o campo para onde o Tab acabou de ir.
             if (!resultado.Ok)
                 campo.text = jogador.Nome;
-            else
-                Redesenhar();
         }
 
         void AlternarAtivo(Jogador jogador)
@@ -118,7 +119,7 @@ namespace TorreDeControle.UI
             // Novo jogador
             var novo = Estilo.Fila(cartao, 62);
             campoNovo = Estilo.CampoTexto(novo, "Nome do novo jogador e Enter");
-            campoNovo.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            Estilo.ColunaElastica(campoNovo);
             campoNovo.onSubmit.AddListener(Adicionar);
             Estilo.BotaoPrincipal(novo, "Adicionar", 230, () => Adicionar(campoNovo.text));
 
@@ -169,7 +170,7 @@ namespace TorreDeControle.UI
                     campo.textComponent.color = Estilo.TextoApagado;
                     campo.textComponent.fontStyle = FontStyles.Italic;
                 }
-                campo.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+                Estilo.ColunaElastica(campo);
                 campo.onSubmit.AddListener(_ => Renomear(jogador, campo));
                 campo.onDeselect.AddListener(_ => Renomear(jogador, campo));
 

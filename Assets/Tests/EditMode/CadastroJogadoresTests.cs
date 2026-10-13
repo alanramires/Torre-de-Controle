@@ -1,19 +1,10 @@
-using System.Collections.Generic;
 using NUnit.Framework;
-using TorreDeControle.Core.Armazenamento;
 using TorreDeControle.Core.Jogadores;
 
 namespace TorreDeControle.Tests
 {
     public class CadastroJogadoresTests
     {
-        sealed class ArmazenamentoEmMemoria : IArmazenamento
-        {
-            public readonly Dictionary<string, string> Dados = new Dictionary<string, string>();
-            public string Ler(string chave) => Dados.TryGetValue(chave, out var v) ? v : null;
-            public void Gravar(string chave, string conteudo) => Dados[chave] = conteudo;
-        }
-
         ArmazenamentoEmMemoria armazenamento;
         CadastroJogadores cadastro;
 

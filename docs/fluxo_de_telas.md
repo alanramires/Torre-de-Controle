@@ -83,6 +83,20 @@ A personagem carrega um ou mais componentes. A tela mostra os campos dos compone
 Mudar de perfil **não apaga** o componente antigo: ele fica inativo, com seus dados e histórico.
 O ex-herói que vira mentor ainda tem a ficha de herói guardada.
 
+### As quatro seções da ficha de herói
+
+```text
+IDENTIDADE   nome · codinome · jogador · arquétipo · aparência · habilidades · histórico
+NÚCLEO       Rótulos (e trancados) · condições · potencial · Influência · Hora da Verdade
+CRESCIMENTO  avanços marcados · cartas compradas (outros arquétipos, adultos)
+MÓDULOS      extras do arquétipo (Impulsos, Perdição, Chamas, Máscara…) e os comprados por avanço
+```
+
+- **Núcleo sobrevive à troca de arquétipo** (como multiclasse): Rótulos, condições, **potencial**
+  (decidido em 2026-10-13: fica no Núcleo) e Influência continuam iguais.
+- **Módulos nunca somem**: na troca de arquétipo, o mestre decide quais continuam; os outros são
+  **inativados** com tudo o que foi marcado, e podem voltar.
+
 ### Ciclo de criação (ficha de herói)
 
 ```text
