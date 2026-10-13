@@ -15,14 +15,22 @@ namespace TorreDeControle.UI
     /// <summary>
     /// Tab vai para a próxima caixinha <see cref="Tabulavel"/> do painel, Shift+Tab volta.
     /// A ordem é a da hierarquia: da esquerda para a direita, de cima para baixo.
-    /// Vai na raiz de cada painel.
+    /// Vai na raiz de cada painel. Com painéis empilhados (a ficha aberta sobre a lista), só o
+    /// último ligado responde: senão o de baixo também anda e rouba o foco para as caixinhas dele.
     /// </summary>
     public sealed class NavegacaoTab : MonoBehaviour
     {
+        static readonly List<NavegacaoTab> ligadas = new List<NavegacaoTab>();
         readonly List<Tabulavel> paradas = new List<Tabulavel>();
+
+        void OnEnable() => ligadas.Add(this);
+        void OnDisable() => ligadas.Remove(this);
 
         void Update()
         {
+            if (ligadas[ligadas.Count - 1] != this)
+                return;
+
             var teclado = Keyboard.current;
             if (teclado == null || !teclado.tabKey.wasPressedThisFrame)
                 return;

@@ -1351,6 +1351,7 @@
               "id": "marcados",
               "tipo": "lista",
               "rotulo": "Marque 4 impulsos",
+              "descrever_opcional": true,
               "opcoes": [
                 {
                   "id": "liderar-a-equipe-com-sucesso-numa-luta",

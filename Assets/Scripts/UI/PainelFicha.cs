@@ -315,8 +315,12 @@ namespace TorreDeControle.UI
             foreach (var j in jogadores.Listar())
                 if (j.Ativo || j.Id == i.Jogador)
                     opcoes.Add((j.Id, j.Ativo ? j.Nome : j.Nome + " (inativo)"));
+            // Na sala, quem decide o jogador é o slot.
             Estilo.ListaSuspensa(filaJogador, 420, opcoes, i.Jogador ?? string.Empty,
-                id => SalvarIdentidade(p.Identidade.Nome, p.Identidade.Codinome, p.Identidade.Arquetipo, id));
+                id => SalvarIdentidade(p.Identidade.Nome, p.Identidade.Codinome, p.Identidade.Arquetipo, id),
+                editavel: p.Sala == null);
+            if (p.Sala != null)
+                Nota(filaJogador, "Na sala, o jogador se troca na vaga.");
 
             var vao = Estilo.Rect("Vao", conteudo);
             vao.gameObject.AddComponent<LayoutElement>().minHeight = 12;
@@ -346,6 +350,8 @@ namespace TorreDeControle.UI
             // Grava ao sair do campo (Enter aqui quebra linha). Sem redesenhar, por causa do Tab.
             aparencia.onDeselect.AddListener(_ => cadastro.AlterarTextos(p.Id, aparencia.text, resumo.text));
             resumo.onDeselect.AddListener(_ => cadastro.AlterarTextos(p.Id, aparencia.text, resumo.text));
+            Estilo.ComExpandir(aparencia, "Aparência");
+            Estilo.ComExpandir(resumo, "Breve resumo");
         }
 
         // ---------- aba Módulos: o deck do arquétipo (movimentos) e os extras ----------
@@ -484,6 +490,27 @@ namespace TorreDeControle.UI
                     Estilo.Dourado, FontStyles.Italic);
                 rotuloBeneficio.gameObject.AddComponent<LayoutElement>().preferredWidth = 240;
             }
+
+            DescricoesDasEscolhidas(extra.Id, c, escolhidas, emCriacao);
+        }
+
+        /// <summary>
+        /// Lista que pede descrição: cada escolhida ganha o seu campo (ex.: como o bicho ajuda, qual herói
+        /// você admira). Texto por escolhida: todas (descrever / descrever_opcional) ou só as com lacuna.
+        /// </summary>
+        void DescricoesDasEscolhidas(string extra, Core.Regras.RegrasArquetipos.CampoExtra c,
+            IReadOnlyList<string> escolhidas, bool emCriacao)
+        {
+            foreach (var o in c.Opcoes.Where(o => escolhidas.Contains(o.Id) && (c.Descrever || c.DescreverOpcional || o.Lacuna)))
+            {
+                var fila = FilaRotulada(o.Nome);
+                fila.GetComponentInChildren<TextMeshProUGUI>().textWrappingMode = TextWrappingModes.Normal;
+                var dica = o.Lacuna ? "complete o ___"
+                    : c.Descrever ? c.Nota ?? "descreva"
+                    : "descrição (opcional)";
+                var campo = CampoTextoDeExtra(extra, c, o.Id, emCriacao, fila, dica, tituloExpandir: o.Nome);
+                Estilo.ColunaElastica(campo);
+            }
         }
 
         /// <summary>Caixinha de marcar (quadrado dourado quando marcada).</summary>
@@ -536,18 +563,7 @@ namespace TorreDeControle.UI
                         Chip(grade, nomeChip, estado, () => Aplicar(cadastro.AlternarOpcaoDeExtra(p.Id, extra, c.Id, id)), o.Regra);
                     }
 
-                    // Lista que pede descrição: cada escolhida ganha o seu campo (ex.: como o bicho ajuda).
-                    // Texto por escolhida: todas (descrever / descrever_opcional) ou só as com lacuna.
-                    foreach (var o in c.Opcoes.Where(o => escolhidas.Contains(o.Id) && (c.Descrever || c.DescreverOpcional || o.Lacuna)))
-                    {
-                        var fila = FilaRotulada(o.Nome);
-                        fila.GetComponentInChildren<TextMeshProUGUI>().textWrappingMode = TextWrappingModes.Normal;
-                        var dica = o.Lacuna ? "complete o ___"
-                            : c.Descrever ? c.Nota ?? "descreva"
-                            : "descrição (opcional)";
-                        var campo = CampoTextoDeExtra(extra, c, o.Id, emCriacao, fila, dica, tituloExpandir: o.Nome);
-                        Estilo.ColunaElastica(campo);
-                    }
+                    DescricoesDasEscolhidas(extra, c, escolhidas, emCriacao);
                     break;
                 }
                 case Core.Regras.RegrasArquetipos.CampoExtra.Rotulo:
@@ -747,8 +763,7 @@ namespace TorreDeControle.UI
             }
             campo.onDeselect.AddListener(t => { cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, vaga, t); MontarRodape(); });
             campo.onSubmit.AddListener(t => { cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, vaga, t); MontarRodape(); });
-            if (!c.VariasLinhas || pai != null)
-                Estilo.ComExpandir(campo, tituloExpandir ?? c.Titulo);
+            Estilo.ComExpandir(campo, tituloExpandir ?? c.Titulo);
             return campo;
         }
 
@@ -1169,6 +1184,7 @@ namespace TorreDeControle.UI
                 campo.text = k < respostas.Count ? respostas[k] : string.Empty;
                 var indice = k;
                 campo.onDeselect.AddListener(t => { cadastro.ResponderHistorico(p.Id, indice, t); MontarRodape(); });
+                Estilo.ComExpandir(campo, regra.Historico[k]);
             }
 
             SecaoEquipe(regra);

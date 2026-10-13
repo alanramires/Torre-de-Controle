@@ -102,6 +102,44 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Concluir_congela_os_movimentos_escolhidos_e_sobrevive_a_recarga()
+        {
+            var p = Nova("farol");
+            cadastro.EscolherBonusLivre(p.Id, Rotulos.Superior);
+            cadastro.AlternarHabilidade(p.Id, "espadas");
+            cadastro.AlternarHabilidade(p.Id, "arco-e-flechas-especiais");
+            for (var k = 0; k < cadastro.RegraDoArquetipo(p).Historico.Count; k++)
+                cadastro.ResponderHistorico(p.Id, k, "resposta " + k);
+            CompletarModulos(p);
+            var antes = cadastro.MovimentosNaFicha(p).ToList();
+            Assert.That(antes, Has.Count.GreaterThan(cadastro.MovimentosDoArquetipo(p).Obrigatorios.Count));
+
+            Assert.That(cadastro.Aprovar(p.Id).Ok, Is.True);
+            Assert.That(p.Foto.Movimentos, Is.EquivalentTo(antes));
+
+            var recarregado = CadastroPersonagens.Carregar(armazenamento, RegrasDeTeste.Arquetipos());
+            Assert.That(recarregado.MovimentosNaFicha(recarregado.Buscar(p.Id)), Is.EquivalentTo(antes));
+        }
+
+        [Test]
+        public void Reabrir_volta_a_criada_para_novo_e_descarta_a_foto()
+        {
+            var p = Nova("nova");
+            Assert.That(cadastro.ReabrirCriacao(p.Id).Ok, Is.False); // ainda novo
+            cadastro.EscolherBonusLivre(p.Id, Rotulos.Superior);
+            cadastro.AlternarHabilidade(p.Id, "feiticaria");
+            for (var k = 0; k < 5; k++)
+                cadastro.ResponderHistorico(p.Id, k, "resposta " + k);
+            CompletarModulos(p);
+            Assert.That(cadastro.Aprovar(p.Id).Ok, Is.True);
+
+            Assert.That(cadastro.ReabrirCriacao(p.Id).Ok, Is.True);
+            Assert.That(p.Status, Is.EqualTo(StatusCriacao.Novo));
+            Assert.That(p.Foto, Is.Null);
+            Assert.That(cadastro.EscolherBonusLivre(p.Id, Rotulos.Perigoso).Ok, Is.True);
+        }
+
+        [Test]
         public void Aprovar_congela_a_foto_e_trava_o_bonus_e_o_arquetipo()
         {
             var p = Nova("nova");
@@ -206,40 +244,7 @@ namespace TorreDeControle.Tests
         }
 
         /// <summary>Preenche movimentos e extras seguindo as regras do próprio JSON (o mínimo pedido).</summary>
-        void CompletarModulos(Personagem p)
-        {
-            var mov = cadastro.MovimentosDoArquetipo(p);
-            foreach (var o in mov.Opcoes.Where(o => !mov.Obrigatorios.Contains(o.Id)).Take(mov.Escolher))
-                cadastro.AlternarMovimento(p.Id, o.Id);
-            var secoes = cadastro.ExtrasDoArquetipo(p).Select(e => (e.Id, e.Campos))
-                .Concat(cadastro.MovimentosComSubsecao(p).Select(m => (CadastroPersonagens.ExtraDoMovimento(m.Id), m.Campos)))
-                .ToList();
-            foreach (var (extra, campos) in secoes)
-            foreach (var c in campos)
-            {
-                switch (c.Tipo)
-                {
-                    case "lista":
-                        foreach (var o in c.Opcoes.Take(c.Escolher ?? 1))
-                        {
-                            cadastro.AlternarOpcaoDeExtra(p.Id, extra, c.Id, o.Id);
-                            if (c.Descrever)
-                                cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, o.Id, "descrição");
-                        }
-                        break;
-                    case "rotulo":
-                        cadastro.AlternarOpcaoDeExtra(p.Id, extra, c.Id, c.Rotulos[0]);
-                        break;
-                    case "texto" when !c.NaSala:
-                        cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, null, "texto");
-                        break;
-                    case "textos":
-                        foreach (var v in c.Vagas.Take(c.Minimo))
-                            cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, v.Id, "nome");
-                        break;
-                }
-            }
-        }
+        void CompletarModulos(Personagem p) => FichaPronta.CompletarModulos(cadastro, p);
 
         [Test]
         public void Movimento_com_subsecao_cobra_e_desmarcar_apaga()
