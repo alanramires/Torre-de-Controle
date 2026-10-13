@@ -49,7 +49,7 @@ Personagem
   id
   nome
   tipo        Herói | NPC
-  status      Herói: novo → criado → em carreira    NPC: não tem (é "npc")
+  status      Herói: novo → criado → em carreira (= entrou numa sala)    NPC: não tem (é "npc")
   jogador     nenhum | jogador X
   sala        nenhuma | sala X
   origem      nenhuma | id da personagem de onde foi copiada
@@ -83,8 +83,9 @@ Personagem
   cópia em outras salas. Ao pôr no slot, o mestre escolhe:
   - **só a criação** (um reset): a instância nasce da foto da criação, sem os upgrades;
   - **criação + upgrades**: a instância nasce da foto e os eventos do laboratório entram no log dela
-    marcados como vindos do laboratório. Como continuam eventos, o mestre pode desfazer um a um.
-- **Dentro da sala** a cópia é **vassala**: só o mestre mexe nela, pelo motor de regras.
+    marcados como vindos do laboratório. Como continuam eventos, o mestre pode corrigir qualquer um.
+- **Dentro da sala** a cópia é **vassala**: só o mestre mexe nela. O motor aplica as regras, mas aceita
+  ajuste manual com motivo (avisa "fora da regra", não proíbe).
 
 ### Como a instância é guardada: camada sobre camada
 
@@ -97,7 +98,9 @@ estado atual = foto da criação + eventos aplicados em ordem
 
 A **foto da criação** é a mesma do banco (congelada lá); pôr no slot é a aprovação, e o que o mestre
 aprovou (só criação ou criação + upgrades) define com que eventos o log da instância começa.
-Desfazer = tirar o último evento. Histórico da ficha e colheita do post = ler os eventos.
+O log nunca é apagado: corrigir = acrescentar um evento de correção que anula ou ajusta um evento antigo,
+e o estado é recalculado. Todo evento pertence a uma rodada da sala (ver `escudo do mestre.md`).
+Histórico da ficha e colheita do post = ler os eventos.
 Se reaplicar tudo ficar lento um dia, guarda-se um cache do estado atual, mas a verdade é foto + log.
 
 ## Em aberto
