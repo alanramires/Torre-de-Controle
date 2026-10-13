@@ -437,6 +437,7 @@ namespace TorreDeControle.UI
             var layout = campo.GetComponent<LayoutElement>() ?? campo.gameObject.AddComponent<LayoutElement>();
             layout.minHeight = altura;
             layout.preferredHeight = altura;
+            campo.gameObject.AddComponent<RepassaRolagem>();
             return campo;
         }
 
@@ -456,6 +457,9 @@ namespace TorreDeControle.UI
         {
             var rect = Rect("Lista", pai);
             rect.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            // Fundo invisível que recebe o mouse: sem ele, a roda sobre títulos e vãos (que não são
+            // clicáveis) passa direto para o cartão e a lista não rola.
+            rect.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 0);
             var scroll = rect.gameObject.AddComponent<ScrollRect>();
             scroll.horizontal = false;
             scroll.scrollSensitivity = 30;
