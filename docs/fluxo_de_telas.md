@@ -48,20 +48,26 @@ Nos dois casos a personagem fica **associada ao jogador do slot**. Jogador sumiu
 
 - **Fora da sala** as personagens são **experimentos**: cria quantas quiser, dá potencial, faz multiclasse,
   testa avanços. Nada disso tem consequência.
+- **Toda personagem do banco tem a mesma estrutura em camadas**: id e **foto da criação** congelada,
+  mais a camada de **upgrades e avanços** do laboratório (eventos).
 - **Pôr no slot cria uma cópia** (a instância do Arkham). A personagem do banco não muda e pode virar
-  cópia em outras salas.
+  cópia em outras salas. Ao pôr no slot, o mestre escolhe:
+  - **só a criação** (um reset): a instância nasce da foto da criação, sem os upgrades;
+  - **criação + upgrades**: a instância nasce da foto e os eventos do laboratório entram no log dela
+    marcados como vindos do laboratório. Como continuam eventos, o mestre pode desfazer um a um.
 - **Dentro da sala** a cópia é **vassala**: só o mestre mexe nela, pelo motor de regras.
 
 ### Como a instância é guardada: camada sobre camada
 
 ```text
-instância = origem (id da personagem do banco)
+personagem (banco ou instância) = origem (id da criação)
           + foto da criação   (estado aprovado, imutável)
           + log de eventos    (cada mudança desde a foto, com autor e quando)
 estado atual = foto da criação + eventos aplicados em ordem
 ```
 
-A **foto** é tirada quando o mestre põe a personagem no slot: esse gesto é a aprovação.
+A **foto da criação** é a mesma do banco (congelada lá); pôr no slot é a aprovação, e o que o mestre
+aprovou (só criação ou criação + upgrades) define com que eventos o log da instância começa.
 Desfazer = tirar o último evento. Histórico da ficha e colheita do post = ler os eventos.
 Se reaplicar tudo ficar lento um dia, guarda-se um cache do estado atual, mas a verdade é foto + log.
 
