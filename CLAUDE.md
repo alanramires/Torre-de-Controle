@@ -53,7 +53,7 @@ o caminho acima é só para consulta quando houver dúvida. As fichas JSON da pa
 
 ## Regras para o motor
 
-O motor **não lê o livro**: lê `Assets/Regras/*.json`, a especificação escrita por nós (ver `docs/regras.md`).
+O motor **não lê o livro**: lê `Assets/Resources/Regras/*.json`, a especificação escrita por nós (ver `docs/regras.md`).
 Regra nova ou corrigida entra lá, com `origem`. Em dúvida, conferir no texto do livro no acervo.
 
 ## Modelo do jogo (decidido)

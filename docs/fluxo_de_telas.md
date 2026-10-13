@@ -13,7 +13,7 @@
 | **Gestão de NPCs** | personagens do mestre: comuns, mentores e aliados, antagonistas e vilões |
 | **Gestão de Personagens** | criação, arquétipo, Rótulos, condições, potencial, movimentos, avanços |
 
-O **motor de regras** atravessa os quatro: ele lê `Assets/Regras/*.json` e valida/aplica comandos
+O **motor de regras** atravessa os quatro: ele lê `Assets/Resources/Regras/*.json` e valida/aplica comandos
 em qualquer módulo.
 
 Gestão de NPCs e Gestão de Personagens são **duas portas para a mesma entidade**: a lista de NPCs

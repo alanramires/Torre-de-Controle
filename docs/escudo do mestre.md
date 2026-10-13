@@ -141,7 +141,7 @@ NPCs também podem ser criados no laboratório (para completar background) e lev
 
 ## 5. Regras: o motor lê a nossa especificação, não o livro
 
-`Assets/Regras/*.json` tem as regras **escritas por nós**, em dados, com a página de origem:
+`Assets/Resources/Regras/*.json` tem as regras **escritas por nós**, em dados, com a página de origem:
 
 - Rótulos de −2 a +3 (estourou → nada muda e marca condição); modificador de −3 a +4
 - Cada movimento básico: gatilho, Rótulo, 10+ / 7–9 / 6− e efeitos

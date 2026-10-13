@@ -1,4 +1,4 @@
-# Especificação de regras (`Assets/Regras/*.json`)
+# Especificação de regras (`Assets/Resources/Regras/*.json`)
 
 As regras que o motor usa, **escritas por nós** em formato de dados. O motor lê isto; não relê o livro.
 
