@@ -7,3 +7,4 @@ Versões `vX.Y.Z`: **X** mudança grande de arquitetura · **Y** mudança locali
 | Versão | Data | Título |
 |---|---|---|
 | [v0.0.1](docs/relatorio_v0.0.1.md) | 2026-10-13 | Escopo, Cadastro de Players e construção de Personagens (em andamento) |
+| [v0.0.2](docs/relatorio_v0.0.2.md) | 2026-10-13 | Salas, instâncias e o ciclo da ficha |
