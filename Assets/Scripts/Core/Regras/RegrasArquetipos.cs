@@ -114,6 +114,11 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("na_sala")] public bool NaSala { get; set; }
             /// <summary>Lista: cada escolhida ganha um texto opcional (ex.: forças e fraquezas da nave).</summary>
             [JsonProperty("descrever_opcional")] public bool DescreverOpcional { get; set; }
+            /// <summary>
+            /// Na sala, o valor é o colega do relacionamento deste número (não se digita de novo).
+            /// Ex.: Amor e Rival da Bruta = os dois relacionamentos dela.
+            /// </summary>
+            [JsonProperty("de_relacionamento")] public int? DeRelacionamento { get; set; }
 
             /// <summary>Texto que não entra nas pendências (ex.: descrição livre da nave).</summary>
             [JsonProperty("opcional")] public bool Opcional { get; set; }
@@ -180,9 +185,31 @@ namespace TorreDeControle.Core.Regras
 
         public sealed class RegraInfluencia
         {
+            public const string Fixo = "fixo";
+            public const string Todos = "todos";
+            public const string Comportamento = "comportamento";
+            public const string AmorERival = "amor_e_rival";
+
             [JsonProperty("regra")] public string Regra { get; set; }
             /// <summary>A regra de Influência inicial em uma frase, para a tela.</summary>
             [JsonProperty("texto")] public string Texto { get; set; }
+            /// <summary>Regra "fixo": a quantos colegas.</summary>
+            [JsonProperty("quantidade")] public int? QuantidadeNumero { get; set; }
+            /// <summary>Regra "comportamento": cada comportamento diz a quantos (um número ou "todos").</summary>
+            [JsonProperty("opcoes")] public List<OpcaoInfluencia> Opcoes { get; set; } = new List<OpcaoInfluencia>();
+        }
+
+        public sealed class OpcaoInfluencia
+        {
+            [JsonProperty("id")] public string Id { get; set; }
+            /// <summary>Número de colegas, ou "todos".</summary>
+            [JsonProperty("quantidade")] public object Quantidade { get; set; }
+
+            [JsonIgnore] public bool ParaTodos => Quantidade is string s && s == "todos";
+            [JsonIgnore] public int? QuantidadeNumero => ParaTodos ? (int?)null : System.Convert.ToInt32(Quantidade);
+            /// <summary>"fachada_feliz" → "Fachada feliz".</summary>
+            [JsonIgnore] public string Nome =>
+                string.IsNullOrEmpty(Id) ? Id : char.ToUpperInvariant(Id[0]) + Id.Substring(1).Replace('_', ' ');
         }
 
         /// <summary>Uma opção nomeada (habilidade, linha, vaga).</summary>

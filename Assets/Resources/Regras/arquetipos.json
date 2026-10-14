@@ -521,13 +521,15 @@
               "id": "amor",
               "tipo": "texto",
               "rotulo": "Amor",
-              "na_sala": true
+              "na_sala": true,
+                "de_relacionamento": 0
             },
             {
               "id": "rival",
               "tipo": "texto",
               "rotulo": "Rival",
-              "na_sala": true
+              "na_sala": true,
+                "de_relacionamento": 1
             },
             {
               "id": "papel",
