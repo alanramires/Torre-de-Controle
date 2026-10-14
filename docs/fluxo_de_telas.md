@@ -240,6 +240,22 @@ A ficha tem duas naturezas (decidido em 2026-10-13):
   no fim (ver `implementacao_futura.md`).
   Até o painel existir, há um "+1 provisório" no Núcleo.
 
+## Aprovação na campanha: em aprovação → em carreira (próximo passo, ditado pelo Alan em 2026-10-14)
+
+Cenário alvo, já de pé: uma sala com 5 personagens **em aprovação**. Para cada uma subir para
+**em carreira**, a sala cobra (o botão "Aprovar para a campanha" só libera sem pendências):
+
+1. **História do time**: a resposta de "quando a equipe se reuniu pela primeira vez" (pergunta do arquétipo).
+2. **Influências distribuídas**: a Influência inicial pela regra do arquétipo, entre os colegas da sala.
+   **O Alan ainda vai explicar como quer a Influência** — não implementar a regra antes disso
+   (o rascunho em `CadastroPersonagens.Equipe.cs` lê o JSON, mas não trava nada).
+3. **Relacionamentos selecionados**: o colega de cada frase de relacionamento, escolhido entre as
+   personagens das vagas.
+4. **NPCs que orbitam as personagens, criados pelos jogadores** (!): cada personagem traz NPCs ligados a
+   ela (família, amigos, rivais da vida civil...), criados na sala e associados a quem os trouxe.
+   Ideia do Alan, "essa parte vai ser legal": desenhar com ele (quantos, obrigatório ou não, o vínculo
+   NPC↔personagem, se entra Influência de NPC adulto).
+
 ## Em aberto
 
 1. **Validação de ficha** (Rótulos iniciais por arquétipo): avisa no laboratório e ao pôr na sala;

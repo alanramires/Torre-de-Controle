@@ -50,7 +50,7 @@ Levar uma personagem evoluída da campanha X para a sala Y ("o veterano").
 
 ## Corrigir ficha em carreira (erro que passou despercebido)
 
-Ficha em carreira não volta para aprovação nem para revisão (ciclo decidido em 2026-10-13). Um erro de
-criação descoberto tarde (às vezes muito tarde) se conserta por **ajuste do mestre**: um evento de
-correção com motivo, na área do mestre (talvez uma aba própria), que muda a ficha da instância sem
-apagar o histórico. Mitigar esse tipo de erro é para isso que a Torre existe.
+Feito em parte (2026-10-14): o mestre põe a instância **em revisão** pela aba Mestre, mesmo em carreira;
+ela fica na vaga, guarda o jogo, refaz a criação e volta a "em aprovação" para nova aprovação. Falta o
+**ajuste pontual com motivo** (um evento de correção na área do mestre, sem reabrir a criação inteira),
+para erros pequenos que não pedem refazer a ficha.

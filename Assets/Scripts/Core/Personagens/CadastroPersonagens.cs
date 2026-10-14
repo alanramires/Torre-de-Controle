@@ -35,29 +35,34 @@ namespace TorreDeControle.Core.Personagens
                 : JsonConvert.DeserializeObject<Arquivo>(texto) ?? new Arquivo();
             var lista = arquivo.Personagens ?? new List<Personagem>();
             foreach (var p in lista)
-            {
-                p.Criacao ??= new RascunhoCriacao();
-                p.Criacao.Habilidades ??= new EscolhasHabilidades();
-                p.Criacao.Movimentos ??= new List<string>();
-                p.Criacao.ExtrasEscolhas ??= new Dictionary<string, List<string>>();
-                p.Criacao.ExtrasTextos ??= new Dictionary<string, string>();
-                p.AvancosMarcados ??= new List<string>();
-                p.Cumpridos ??= new Dictionary<string, string>();
-                p.Contadores ??= new Dictionary<string, int>();
-                p.EscolhasDeJogo ??= new Dictionary<string, List<string>>();
-                p.TextosDeJogo ??= new Dictionary<string, string>();
-                p.ItensDeJogo ??= new Dictionary<string, List<ItemDeJogo>>();
-                p.ObsMovimentos ??= new Dictionary<string, string>();
-                p.CondicoesMarcadas ??= new List<string>();
-                p.Relacionamentos ??= new List<string>();
-                p.InfluenciaPara ??= new List<string>();
-                if (p.Vilao != null)
-                {
-                    p.Vilao.Movimentos ??= new List<string>();
-                    p.Vilao.Condicoes ??= new List<string>();
-                }
-            }
+                Normalizar(p);
             return new CadastroPersonagens(armazenamento, regras, lista);
+        }
+
+        /// <summary>Completa as coleções que um JSON antigo (ou de outra máquina) não trouxe.</summary>
+        static void Normalizar(Personagem p)
+        {
+            p.Identidade ??= new Identidade();
+            p.Criacao ??= new RascunhoCriacao();
+            p.Criacao.Habilidades ??= new EscolhasHabilidades();
+            p.Criacao.Movimentos ??= new List<string>();
+            p.Criacao.ExtrasEscolhas ??= new Dictionary<string, List<string>>();
+            p.Criacao.ExtrasTextos ??= new Dictionary<string, string>();
+            p.AvancosMarcados ??= new List<string>();
+            p.Cumpridos ??= new Dictionary<string, string>();
+            p.Contadores ??= new Dictionary<string, int>();
+            p.EscolhasDeJogo ??= new Dictionary<string, List<string>>();
+            p.TextosDeJogo ??= new Dictionary<string, string>();
+            p.ItensDeJogo ??= new Dictionary<string, List<ItemDeJogo>>();
+            p.ObsMovimentos ??= new Dictionary<string, string>();
+            p.CondicoesMarcadas ??= new List<string>();
+            p.Relacionamentos ??= new List<string>();
+            p.InfluenciaPara ??= new List<string>();
+            if (p.Vilao != null)
+            {
+                p.Vilao.Movimentos ??= new List<string>();
+                p.Vilao.Condicoes ??= new List<string>();
+            }
         }
 
         /// <summary>Laboratório (fora de sala): ativas primeiro; cada bloco na ordem que o mestre arrastou.</summary>
@@ -211,7 +216,7 @@ namespace TorreDeControle.Core.Personagens
             ValidarModulos(p, avisos);
             var semResposta = PerguntasSemResposta(p);
             if (semResposta > 0)
-                avisos.Add($"Histórico: responda as perguntas da ficha (faltam {semResposta}).");
+                avisos.Add($"História: responda as perguntas da ficha (faltam {semResposta}).");
             return (erros, avisos);
         }
 
@@ -269,14 +274,18 @@ namespace TorreDeControle.Core.Personagens
             }
             if (!p.Ativo)
                 return "Ficha do arquivo da sala (vaga liberada): só consulta.";
-            // Em carreira não volta (nem para aprovação, nem para revisão); aposentado também não.
-            return p.Status == StatusCriacao.EmAprovacao ? null : "Só ficha em aprovação vai para revisão.";
+            // Em aprovação ou em carreira (erro que passou despercebido): vai para revisão, pela aba Mestre,
+            // e continua na vaga. Aposentado não volta.
+            return p.Status == StatusCriacao.EmAprovacao || p.Status == StatusCriacao.EmCarreira
+                ? null
+                : "Só ficha em aprovação ou em carreira vai para revisão.";
         }
 
         /// <summary>
-        /// Devolve a ficha para "novo" (descarta a foto da criação) para refazer as escolhas.
-        /// No laboratório: a original, se não tiver instância numa vaga. Na sala: a instância, que
-        /// continua na vaga; concluída de novo, volta a "em carreira".
+        /// Devolve a ficha para a criação (descarta a foto) para refazer as escolhas.
+        /// No laboratório: a original volta a "novo", se não tiver instância numa vaga. Na sala: a
+        /// instância (em aprovação ou em carreira) vai para "em revisão", continua na vaga e guarda o jogo;
+        /// concluída de novo, volta a "em aprovação", e o mestre aprova outra vez.
         /// </summary>
         public Resultado ReabrirCriacao(string id)
         {
@@ -550,14 +559,26 @@ namespace TorreDeControle.Core.Personagens
             return null;
         }
 
+        /// <summary>
+        /// Grava (ou agenda, se o armazenamento junta gravações: cliques seguidos viram uma só, e o texto
+        /// só é gerado na hora de gravar).
+        /// </summary>
         void Gravar()
+        {
+            if (armazenamento is IGravacaoAdiada adiada)
+                adiada.Agendar(Chave, Serializar);
+            else
+                armazenamento.Gravar(Chave, Serializar());
+        }
+
+        string Serializar()
         {
             // Personagem em modo teste grava a foto real, não o que o teste mexeu.
             var gravar = personagens
                 .Select(p => emTeste.TryGetValue(p.Id, out var real) ? JsonConvert.DeserializeObject<Personagem>(real) : p)
                 .ToList();
             var arquivo = new Arquivo { Versao = VersaoArquivo, Personagens = gravar };
-            armazenamento.Gravar(Chave, JsonConvert.SerializeObject(arquivo, Formatting.Indented));
+            return JsonConvert.SerializeObject(arquivo, Formatting.Indented);
         }
 
         // ---------- modo teste (playground do mestre, para validar a ficha) ----------

@@ -154,6 +154,7 @@ namespace TorreDeControle.UI
             var titulo = Estilo.Rotulo(titulos, "PERSONAGENS", 44, Estilo.Dourado, FontStyles.Bold);
             titulo.characterSpacing = 6;
             contagem = Estilo.Rotulo(titulos, string.Empty, 24, Estilo.TextoSuave);
+            Estilo.BotaoContorno(cabecalho, "Importar", 220, Estilo.Dourado, Importar);
             Estilo.BotaoContorno(cabecalho, "Voltar", 190, Estilo.TextoSuave, Fechar);
 
             var divisoria = Estilo.Rect("Divisoria", cartao);
@@ -289,18 +290,11 @@ namespace TorreDeControle.UI
             Estilo.ListaSuspensa(linha, LarguraJogador, OpcoesJogador(i.Jogador), i.Jogador ?? SemJogador,
                 id => Alterar(p, p.Identidade.Nome, p.Identidade.Codinome, p.Identidade.Arquetipo, id));
 
-            if (p.Status == StatusCriacao.EmAprovacao && cadastro.MotivoParaNaoReabrir(p) == null)
-            {
-                // Provisório, enquanto a ficha está em construção: clicar volta para "novo".
-                Estilo.BotaoContorno(linha, TextoStatus(p.Status), LarguraStatus, Estilo.Dourado, () => Reabrir(p));
-            }
-            else
-            {
-                var status = Estilo.Rotulo(linha, TextoStatus(p.Status), 22, Estilo.Dourado, FontStyles.Bold);
-                status.alignment = TextAlignmentOptions.Center;
-                status.characterSpacing = 3;
-                status.gameObject.AddComponent<LayoutElement>().preferredWidth = LarguraStatus;
-            }
+            // Só mostra: voltar para novo / pôr em revisão é no status da ficha (depende de onde ela está).
+            var status = Estilo.Rotulo(linha, TextoStatus(p.Status), 22, Estilo.Dourado, FontStyles.Bold);
+            status.alignment = TextAlignmentOptions.Center;
+            status.characterSpacing = 3;
+            status.gameObject.AddComponent<LayoutElement>().preferredWidth = LarguraStatus;
 
             if (p.Ativo)
                 Estilo.BotaoContorno(linha, "Ativa", LarguraAtivo, Estilo.Dourado, () => AlternarAtivo(p));
@@ -380,16 +374,31 @@ namespace TorreDeControle.UI
             return $"{copia.NomeExibicao} ({onde})";
         }
 
-        void Reabrir(Personagem p)
+        /// <summary>
+        /// Importar uma personagem exportada (de outra Torre): um dos .json de dados/importar, ou o que
+        /// estiver na área de transferência. Entra no laboratório como personagem nova.
+        /// </summary>
+        void Importar()
         {
-            Estilo.Confirmar(transform,
-                "Voltar a ficha para \"novo\"? A foto da criação é descartada e a criação fica editável de novo.",
-                "Voltar para novo",
-                () =>
-                {
-                    cadastro.ReabrirCriacao(p.Id);
-                    Redesenhar();
-                });
+            if (Troca.Arquivos == null)
+                return;
+            var opcoes = new List<(string, UnityEngine.Events.UnityAction, bool)>();
+            foreach (var caminho in Troca.Arquivos.Importaveis())
+            {
+                var arquivo = caminho;
+                opcoes.Add((System.IO.Path.GetFileName(arquivo), () => ImportarTexto(Troca.Arquivos.Ler(arquivo)), false));
+            }
+            opcoes.Add(("Colar da área de transferência", () => ImportarTexto(GUIUtility.systemCopyBuffer), false));
+            opcoes.Add(("Abrir a pasta de importar", () =>
+                Application.OpenURL("file:///" + Troca.Arquivos.PastaImportar.Replace('\\', '/')), true));
+            Estilo.Escolher(transform, "Importar personagem", opcoes.ToArray());
+        }
+
+        void ImportarTexto(string json)
+        {
+            var resultado = cadastro.Importar(json, out _);
+            Mostrar(resultado);
+            Redesenhar();
         }
 
         void AbrirFicha(Personagem p)

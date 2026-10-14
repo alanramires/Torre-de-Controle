@@ -6,6 +6,7 @@ using TorreDeControle.Core;
 using TorreDeControle.Core.Jogadores;
 using TorreDeControle.Core.Personagens;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Regra = TorreDeControle.Core.Regras.RegrasArquetipos.RegraHabilidades;
 
@@ -22,11 +23,11 @@ namespace TorreDeControle.UI
         static readonly (Aba aba, string nome)[] Abas =
         {
             (Aba.Identidade, "Identidade"),
-            (Aba.Historico, "Histórico"),
             (Aba.Nucleo, "Núcleo"),
-            (Aba.Crescimento, "Crescimento"),
+            (Aba.Historico, "História"),
             (Aba.Modulos, "Módulos"),
-            (Aba.Variaveis, "Variáveis"),
+            (Aba.Crescimento, "Evolução"),
+            (Aba.Variaveis, "Mestre"),
         };
 
         Personagem p;
@@ -131,14 +132,7 @@ namespace TorreDeControle.UI
             status.alignment = TextAlignmentOptions.Center;
             status.characterSpacing = 4;
             status.gameObject.AddComponent<LayoutElement>().preferredWidth = 220;
-            // O status vira botão quando a ficha pode voltar para "novo" (ver Cabecalho). O alvo é o
-            // próprio texto: um objeto só aceita um gráfico, e o TMP já é um (um Image aqui vem nulo).
-            botaoStatus = status.gameObject.AddComponent<Button>();
-            botaoStatus.targetGraphic = status;
-            var cores = botaoStatus.colors;
-            cores.disabledColor = Color.white; // travado, o status mantém a cor
-            botaoStatus.colors = cores;
-            botaoStatus.onClick.AddListener(Reabrir);
+            // O status só mostra: voltar para novo / pôr em revisão é um botão na aba Mestre.
             Estilo.BotaoContorno(cabecalho, "Voltar", 190, Estilo.TextoSuave, Fechar);
 
             filaAbas = Estilo.Fila(cartao, 56, 8);
@@ -176,7 +170,6 @@ namespace TorreDeControle.UI
 
         /// <summary>A arte quadrada do arquétipo da personagem (null se não houver).</summary>
         Texture2D RetratoDoArquetipo => Retratos.Buscar(cadastro.RegraDoArquetipo(p)?.Retrato);
-        Button botaoStatus;
 
         /// <summary>
         /// Ficha do arquivo da sala (cópia tirada da vaga): só consulta. Nada se edita, sem modo teste
@@ -206,6 +199,9 @@ namespace TorreDeControle.UI
             partes.Add(Arquetipos.Nome(i.Arquetipo));
             partes.Add(jogadores.Buscar(i.Jogador)?.Nome ?? "sem jogador");
             subtitulo.text = string.Join(" · ", partes);
+            // Lembrete em qualquer aba: o interruptor fica na aba Mestre.
+            if (cadastro.EmTeste(p.Id))
+                subtitulo.text += $"  <color=#{ColorUtility.ToHtmlStringRGB(Estilo.Azul)}>· modo teste ligado</color>";
             status.text = p.Status switch
             {
                 StatusCriacao.Novo => "NOVO",
@@ -214,19 +210,21 @@ namespace TorreDeControle.UI
                 StatusCriacao.Aposentado => "APOSENTADO",
                 _ => "EM CARREIRA",
             };
-            var podeReabrir = cadastro.MotivoParaNaoReabrir(p) == null && (p.Sala == null || pelaSala);
-            botaoStatus.interactable = podeReabrir;
-            if (podeReabrir)
-                status.text = $"<u>{status.text}</u>";
         }
 
-        /// <summary>Clicar no status: volta a ficha para "novo" para refazer as escolhas da criação.</summary>
+        /// <summary>A instância só vai para revisão aberta de dentro da sala (pelo laboratório é consulta).</summary>
+        bool PodeReabrir => cadastro.MotivoParaNaoReabrir(p) == null && (p.Sala == null || pelaSala);
+
+        /// <summary>
+        /// Botão da aba Mestre: volta a ficha para "novo" (laboratório) ou põe a instância em revisão (sala).
+        /// </summary>
         void Reabrir()
         {
             var mensagem = p.Sala == null
                 ? "Voltar a ficha para \"novo\"? A foto da criação é descartada e a criação fica editável de novo."
-                : "Pôr esta instância em revisão? Ela continua na vaga; a foto da criação é descartada para " +
-                  "refazer as escolhas, e ao concluir volta a \"em aprovação\". A parte da equipe fica.";
+                : $"Pôr {p.NomeExibicao} em revisão? Ela continua na vaga e guarda o que foi marcado em jogo; a foto " +
+                  "da criação é descartada para refazer as escolhas. Ao concluir, volta a \"em aprovação\" e precisa " +
+                  "ser aprovada de novo para a campanha.";
             Estilo.Confirmar(transform, mensagem, p.Sala == null ? "Voltar para novo" : "Pôr em revisão", () =>
             {
                 var r = cadastro.ReabrirCriacao(p.Id);
@@ -305,18 +303,30 @@ namespace TorreDeControle.UI
             var mensagem = Estilo.Rotulo(rodape, string.Empty, 22, Estilo.TextoSuave);
             mensagem.textWrappingMode = TextWrappingModes.Normal;
             Estilo.ColunaElastica(mensagem);
+            Estilo.BotaoContorno(rodape, "Exportar", 220, Estilo.TextoSuave, Exportar);
+            if (!Consulta)
+                Estilo.BotaoContorno(rodape, "Importar", 220, Estilo.TextoSuave, Importar);
             if (Consulta)
             {
                 mensagem.text = "Arquivo da sala (vaga liberada): só consulta.";
                 mensagem.color = Estilo.TextoApagado;
                 return;
             }
-            // Modo teste antes do botão de concluir/aprovar, que fica à direita.
-            vagaTeste = Estilo.Rect("ModoTeste", rodape);
-            vagaTeste.gameObject.AddComponent<LayoutElement>().preferredWidth = 330;
-            BotaoModoTeste();
+            // O modo teste mora na aba Mestre (o rodapé fica para pendências e ações da ficha).
+            detalheDoRodape = null;
             MensagemDoRodape(mensagem);
+            // Uma linha só (cortada com reticências); o texto inteiro fica no balão, com o mouse em cima.
+            mensagem.textWrappingMode = TextWrappingModes.NoWrap;
+            mensagem.overflowMode = TextOverflowModes.Ellipsis;
+            if (!string.IsNullOrEmpty(mensagem.text))
+            {
+                mensagem.raycastTarget = true;
+                mensagem.gameObject.AddComponent<Dica>().Configurar(detalheDoRodape ?? mensagem.text);
+            }
         }
+
+        /// <summary>O texto inteiro do rodapé, para o balão (null = o próprio texto da linha).</summary>
+        string detalheDoRodape;
 
         void MensagemDoRodape(TextMeshProUGUI mensagem)
         {
@@ -344,7 +354,8 @@ namespace TorreDeControle.UI
             }
             else if (avisos.Count > 0)
             {
-                mensagem.text = "Pendências: " + string.Join("  ", avisos);
+                mensagem.text = $"{avisos.Count} pendência{(avisos.Count == 1 ? "" : "s")}: {avisos[0]}";
+                detalheDoRodape = "Pendências:" + Itens(avisos);
             }
             else
             {
@@ -358,6 +369,8 @@ namespace TorreDeControle.UI
             {
                 var cor = ColorUtility.ToHtmlStringRGB(Estilo.TextoApagado);
                 mensagem.text += $"   <color=#{cor}><i>Observação: {string.Join("  ", observacoes)}</i></color>";
+                detalheDoRodape = (detalheDoRodape ?? mensagem.text) +
+                                  System.Environment.NewLine + System.Environment.NewLine + "Observações:" + Itens(observacoes);
             }
 
             // Com pendência não aprova: o botão aparece apagado, sem clique.
@@ -378,6 +391,75 @@ namespace TorreDeControle.UI
                 "ficha fica \"em aprovação\": o mestre a leva para a campanha, onde se completa o que é da equipe.",
                 "Concluir",
                 () => Concluir(cadastro.Aprovar(p.Id)));
+        }
+
+        /// <summary>
+        /// Exporta a ficha em JSON para levar a outra máquina: grava em dados/exportacoes e copia o texto
+        /// para a área de transferência.
+        /// </summary>
+        void Exportar()
+        {
+            var json = cadastro.Exportar(p.Id);
+            if (json == null || Troca.Arquivos == null)
+                return;
+            string caminho;
+            try
+            {
+                caminho = Troca.Arquivos.Exportar(p.NomeExibicao, json);
+            }
+            catch (Exception e)
+            {
+                Aviso("Não deu para exportar: " + e.Message);
+                return;
+            }
+            GUIUtility.systemCopyBuffer = json;
+            Estilo.Confirmar(transform,
+                $"{p.NomeExibicao} exportada em\n<size=80%>{caminho}</size>\nO JSON também foi copiado (Ctrl+V para colar).",
+                "Abrir a pasta",
+                () => Application.OpenURL("file:///" + Troca.Arquivos.PastaExportacoes.Replace('\\', '/')));
+        }
+
+        /// <summary>
+        /// O caminho de volta do Exportar: atualiza esta ficha com um JSON (da área de transferência ou de
+        /// dados/importar). Confirma antes, e avisa se o JSON é de outra personagem.
+        /// </summary>
+        void Importar()
+        {
+            if (Troca.Arquivos == null)
+                return;
+            var opcoes = new List<(string, UnityEngine.Events.UnityAction, bool)>
+            {
+                ("Colar da área de transferência", () => ConfirmarImportar(GUIUtility.systemCopyBuffer), false),
+            };
+            foreach (var caminho in Troca.Arquivos.Importaveis())
+            {
+                var arquivo = caminho;
+                opcoes.Add((System.IO.Path.GetFileName(arquivo), () => ConfirmarImportar(Troca.Arquivos.Ler(arquivo)), false));
+            }
+            opcoes.Add(("Abrir a pasta de importar", () =>
+                Application.OpenURL("file:///" + Troca.Arquivos.PastaImportar.Replace('\\', '/')), true));
+            Estilo.Escolher(transform, $"Importar por cima de {p.NomeExibicao}", opcoes.ToArray());
+        }
+
+        void ConfirmarImportar(string json)
+        {
+            var id = cadastro.IdNaTroca(json);
+            if (id == null)
+            {
+                Aviso("Isso não é um JSON de personagem da Torre.");
+                return;
+            }
+            var mensagem = id == p.Id
+                ? $"Atualizar {p.NomeExibicao} com o JSON? A ficha é substituída pelo arquivo; ficam a sala, o jogador e o status daqui."
+                : $"Esse JSON é de OUTRA personagem. Substituir a ficha de {p.NomeExibicao} por ele mesmo assim? " +
+                  "Ficam a sala, o jogador, o status, a equipe e a Influência daqui.";
+            Estilo.Confirmar(transform, mensagem, "Importar", () =>
+            {
+                var r = cadastro.Reimportar(p.Id, json);
+                Atualizar();
+                if (!r.Ok)
+                    Aviso(r.Erro);
+            });
         }
 
         void AprovarParaCampanha()
@@ -452,7 +534,7 @@ namespace TorreDeControle.UI
 
             var vao = Estilo.Rect("Vao", conteudo);
             vao.gameObject.AddComponent<LayoutElement>().minHeight = 12;
-            SecaoHabilidades();
+            Refazivel(SecaoHabilidades);
 
             var vao2 = Estilo.Rect("Vao", conteudo);
             vao2.gameObject.AddComponent<LayoutElement>().minHeight = 12;
@@ -627,6 +709,13 @@ namespace TorreDeControle.UI
 
         void AbaModulos()
         {
+            // Dois blocos que se refazem sozinhos: clicar num movimento não refaz os extras, e vice-versa.
+            Refazivel(SecaoMovimentos);
+            Refazivel(SecaoExtras);
+        }
+
+        void SecaoMovimentos()
+        {
             var emCriacao = p.EmCriacao;
             var mov = cadastro.MovimentosDoArquetipo(p);
             var naFicha = cadastro.MovimentosNaFicha(p);
@@ -679,6 +768,11 @@ namespace TorreDeControle.UI
                     CampoDeExtra(CadastroPersonagens.ExtraDoMovimento(m.Id), c, emCriacao);
             }
 
+        }
+
+        void SecaoExtras()
+        {
+            var emCriacao = p.EmCriacao;
             foreach (var extra in cadastro.ExtrasDoArquetipo(p))
             {
                 var vao = Estilo.Rect("Vao", conteudo);
@@ -770,7 +864,12 @@ namespace TorreDeControle.UI
         void DescricoesDasEscolhidas(string extra, Core.Regras.RegrasArquetipos.CampoExtra c,
             IReadOnlyList<string> escolhidas, bool emCriacao)
         {
-            foreach (var o in c.Opcoes.Where(o => escolhidas.Contains(o.Id) && (c.Descrever || c.DescreverOpcional || o.Lacuna)))
+            // Na ordem em que foram marcadas (a mesma do JSON), não na ordem da lista: preencher de cima
+            // para baixo pensando na ordem da marcação trocava os textos de lugar.
+            var naOrdem = escolhidas
+                .Select(id => c.Opcoes.FirstOrDefault(o => o.Id == id))
+                .Where(o => o != null && (c.Descrever || c.DescreverOpcional || o.Lacuna));
+            foreach (var o in naOrdem)
             {
                 var fila = FilaRotulada(o.Nome);
                 fila.GetComponentInChildren<TextMeshProUGUI>().textWrappingMode = TextWrappingModes.Normal;
@@ -853,6 +952,10 @@ namespace TorreDeControle.UI
                     }
                     break;
                 }
+                case Core.Regras.RegrasArquetipos.CampoExtra.Texto when c.NoJogo:
+                    Subtitulo(c.Titulo);
+                    TextoDeJogo(extra, c);
+                    break;
                 case Core.Regras.RegrasArquetipos.CampoExtra.Texto:
                     Subtitulo(c.NaSala ? $"{c.Titulo} ({NotaDaSala})" : c.Titulo);
                     CampoTextoDeExtra(extra, c, null, emCriacao);
@@ -1030,10 +1133,32 @@ namespace TorreDeControle.UI
                 CampoDaSala(campo);
                 return campo;
             }
+            campo.onValueChanged.AddListener(t => cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, vaga, t));
             campo.onDeselect.AddListener(t => { cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, vaga, t); MontarRodape(); });
             campo.onSubmit.AddListener(t => { cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, vaga, t); MontarRodape(); });
             Estilo.ComExpandir(campo, tituloExpandir ?? c.Titulo);
             return campo;
+        }
+
+        /// <summary>
+        /// Texto preenchido no jogo (ex.: o equipamento do Farol). Na criação, apagado; no jogo, só leitura —
+        /// quem escreve é o painel do mestre. Até o painel existir, o modo teste deixa escrever.
+        /// </summary>
+        void TextoDeJogo(string extra, Core.Regras.RegrasArquetipos.CampoExtra c)
+        {
+            var valor = cadastro.TextoDeJogo(p, extra, c.Id, CadastroPersonagens.SubTexto);
+            var campo = Estilo.CampoTexto(conteudo, cadastro.LiberadoNoJogo(p) ? "nada ainda (o painel do mestre registra)" : "preenchido no jogo");
+            campo.text = valor;
+            var layout = campo.gameObject.AddComponent<LayoutElement>();
+            layout.minHeight = 50;
+            layout.preferredHeight = 50;
+            if (!cadastro.EmTeste(p.Id) || !cadastro.LiberadoNoJogo(p))
+            {
+                CampoDaSala(campo);
+                return;
+            }
+            campo.onDeselect.AddListener(t => cadastro.DefinirTextoDeJogo(p.Id, extra, c.Id, CadastroPersonagens.SubTexto, t));
+            campo.onSubmit.AddListener(t => cadastro.DefinirTextoDeJogo(p.Id, extra, c.Id, CadastroPersonagens.SubTexto, t));
         }
 
         void Subtitulo(string texto)
@@ -1046,6 +1171,30 @@ namespace TorreDeControle.UI
 
         void AbaVariaveis()
         {
+            // O interruptor do modo teste (playground do mestre), no topo da aba do mestre.
+            var filaTeste = Estilo.Fila(conteudo, 60);
+            vagaTeste = Estilo.Rect("ModoTeste", filaTeste);
+            vagaTeste.gameObject.AddComponent<LayoutElement>().preferredWidth = 330;
+            BotaoModoTeste();
+            var explica = Estilo.Rotulo(filaTeste,
+                "ligado, tudo o que mudar é só para testar a ficha: desligar desfaz", 20, Estilo.TextoSuave, FontStyles.Italic);
+            explica.textWrappingMode = TextWrappingModes.Normal;
+            Estilo.ColunaElastica(explica);
+
+            // Corrigir a criação: no laboratório volta a novo; na sala, vai para revisão (fica na vaga).
+            if (PodeReabrir)
+            {
+                var filaRevisao = Estilo.Fila(conteudo, 60);
+                Estilo.BotaoContorno(filaRevisao, p.Sala == null ? "Voltar para novo" : "Pôr em revisão", 330,
+                    Estilo.Dourado, Reabrir);
+                var notaRevisao = Estilo.Rotulo(filaRevisao, p.Sala == null
+                        ? "reabre a criação desta ficha do laboratório"
+                        : "corrige a criação sem tirar da vaga (ex.: um erro que passou despercebido)",
+                    20, Estilo.TextoSuave, FontStyles.Italic);
+                notaRevisao.textWrappingMode = TextWrappingModes.Normal;
+                Estilo.ColunaElastica(notaRevisao);
+            }
+
             Secao("VARIÁVEIS", "só do mestre: o jogador não vê esta aba");
 
             var porAvanco = CadastroPersonagens.PotencialPorAvanco;
@@ -1606,8 +1755,16 @@ namespace TorreDeControle.UI
 
                 if (!emCriacao)
                 {
+                    // Só leitura: uma linha (reticências); o texto inteiro no balão, com o mouse em cima.
                     var d = Estilo.Rotulo(fila, h.Descricao, 22, Estilo.TextoSuave, FontStyles.Italic);
+                    d.textWrappingMode = TextWrappingModes.NoWrap;
+                    d.overflowMode = TextOverflowModes.Ellipsis;
                     Estilo.ColunaElastica(d);
+                    if (!string.IsNullOrWhiteSpace(h.Descricao))
+                    {
+                        d.raycastTarget = true;
+                        d.gameObject.AddComponent<Dica>().Configurar(h.Nome + System.Environment.NewLine + h.Descricao);
+                    }
                     continue;
                 }
 
@@ -1619,18 +1776,69 @@ namespace TorreDeControle.UI
                 Estilo.ColunaElastica(campo);
                 var hid = h.Id;
                 // Não redesenha: o Tab precisa achar o próximo campo vivo. Só o rodapé muda.
+                // Grava a cada tecla (barato: o disco é adiado); só sair do campo dependia de o foco sair.
+                campo.onValueChanged.AddListener(t => cadastro.DescreverHabilidade(p.Id, hid, t));
                 campo.onSubmit.AddListener(t => { cadastro.DescreverHabilidade(p.Id, hid, t); MontarRodape(); });
                 campo.onDeselect.AddListener(t => { cadastro.DescreverHabilidade(p.Id, hid, t); MontarRodape(); });
                 Estilo.ComExpandir(campo, $"{h.Nome}: como se manifesta");
             }
         }
 
+        /// <summary>
+        /// Depois de um clique que mudou a ficha: refaz só o bloco onde o clique aconteceu (SecaoRefazivel),
+        /// ou a aba inteira se o clique não estava num bloco desses. O rodapé (pendências) sempre.
+        /// </summary>
         void Aplicar(Resultado resultado)
         {
-            MontarConteudo(manterRolagem: true);
+            var clicado = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
+            var secao = clicado != null ? clicado.GetComponentInParent<SecaoRefazivel>() : null;
+            if (secao != null && secao.transform.IsChildOf(conteudo))
+                secao.Refazer();
+            else
+                MontarConteudo(manterRolagem: true);
             MontarRodape();
             if (!resultado.Ok)
                 Aviso(resultado.Erro);
+        }
+
+        /// <summary>
+        /// Monta um bloco da aba que sabe se refazer sozinho (ver Aplicar). Enquanto monta, "conteudo"
+        /// aponta para o bloco: os ajudantes (Secao, Grade, Chip...) nem precisam saber.
+        /// </summary>
+        void Refazivel(Action montar)
+        {
+            var bloco = Estilo.Rect("Secao", conteudo);
+            var v = bloco.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.spacing = 8;
+            v.childControlWidth = true;
+            v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+
+            void Montar()
+            {
+                var fora = conteudo;
+                conteudo = bloco;
+                try
+                {
+                    montar();
+                }
+                finally
+                {
+                    conteudo = fora;
+                }
+            }
+
+            bloco.gameObject.AddComponent<SecaoRefazivel>().Refazer = () =>
+            {
+                for (var k = bloco.childCount - 1; k >= 0; k--)
+                {
+                    var filho = bloco.GetChild(k).gameObject;
+                    filho.SetActive(false); // sai do layout já, antes do Destroy (que espera o fim do quadro)
+                    Destroy(filho);
+                }
+                Montar();
+            };
+            Montar();
         }
 
         void Contador(string regra, int atual, int maximo)
@@ -1794,7 +2002,7 @@ namespace TorreDeControle.UI
             var pendentes = cadastro.AvancosPendentes(p);
             // O jogador vê as caixinhas e o aviso de avanço; os números ficam na aba Variáveis (do mestre).
             var textoPotencial = Estilo.Rotulo(outros,
-                pendentes > 0 ? "Avanço pendente: escolha na aba Crescimento" : "potencial até o próximo avanço",
+                pendentes > 0 ? "Avanço pendente: escolha na aba Evolução" : "potencial até o próximo avanço",
                 24, pendentes > 0 ? Estilo.Dourado : Estilo.TextoSuave, pendentes > 0 ? FontStyles.Bold : FontStyles.Normal);
             textoPotencial.gameObject.AddComponent<LayoutElement>().preferredWidth = 470;
             var vao2 = Estilo.Rect("Vao", outros);
@@ -1818,7 +2026,12 @@ namespace TorreDeControle.UI
             t.gameObject.AddComponent<LayoutElement>().preferredWidth = 520;
             if (legenda != null)
             {
+                // Uma linha (reticências) com o texto inteiro no balão: legenda longa não invade a linha de baixo.
                 var l = Estilo.Rotulo(fila, legenda, 20, Estilo.TextoSuave, FontStyles.Italic);
+                l.textWrappingMode = TextWrappingModes.NoWrap;
+                l.overflowMode = TextOverflowModes.Ellipsis;
+                l.raycastTarget = true;
+                l.gameObject.AddComponent<Dica>().Configurar(legenda);
                 Estilo.ColunaElastica(l);
             }
         }

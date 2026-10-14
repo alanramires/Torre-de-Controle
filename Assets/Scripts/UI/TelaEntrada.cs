@@ -28,10 +28,28 @@ namespace TorreDeControle.UI
         CadastroSalas salas;
         PainelSalas painelSalas;
 
+        ArmazenamentoAdiado armazenamento;
+
+        void Update() => armazenamento?.Pulsar();
+
+        // Nada fica sem gravar: ao perder o foco (ir digitar em outro lugar), sair do Play ou fechar.
+        void OnApplicationFocus(bool comFoco)
+        {
+            if (!comFoco)
+                armazenamento?.Descarregar();
+        }
+
+        void OnApplicationQuit() => armazenamento?.Descarregar();
+
+        void OnDestroy() => armazenamento?.Descarregar();
+
         void Awake()
         {
-            var armazenamento = new ArmazenamentoLocalJson(Application.persistentDataPath + "/dados");
-            Debug.Log($"[Torre] Dados em: {armazenamento.Pasta}");
+            var arquivos = new ArmazenamentoLocalJson(Application.persistentDataPath + "/dados");
+            Debug.Log($"[Torre] Dados em: {arquivos.Pasta}");
+            // Junta as gravações (cliques seguidos gravam uma vez); Update pulsa, sair descarrega.
+            armazenamento = new ArmazenamentoAdiado(arquivos);
+            Troca.Arquivos = new ArquivosDeTroca(arquivos.Pasta);
 
             jogadores = CadastroJogadores.Carregar(armazenamento);
             personagens = CadastroPersonagens.Carregar(armazenamento, RegrasArquetipos.Carregar(new FonteDeRegrasResources()));

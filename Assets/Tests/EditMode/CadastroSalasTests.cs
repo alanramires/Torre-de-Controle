@@ -177,14 +177,24 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
-        public void Em_carreira_nao_volta_para_revisao()
+        public void Em_carreira_vai_para_revisao_fica_na_vaga_e_guarda_o_jogo()
         {
             var sala = NovaSala();
             var original = FichaPronta.Criada(personagens, "Estrela");
             salas.PorPersonagem(sala.Id, 0, original.Id, false);
             var copia = personagens.Buscar(sala.Slots[0].Personagem);
             Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.True);
-            Assert.That(personagens.ReabrirCriacao(copia.Id).Ok, Is.False);
+            copia.Potencial = 4;
+
+            Assert.That(personagens.ReabrirCriacao(copia.Id).Ok, Is.True);
+            Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmRevisao));
+            Assert.That(sala.Slots[0].Personagem, Is.EqualTo(copia.Id));
+            Assert.That(copia.Potencial, Is.EqualTo(4));
+
+            // Concluída de novo: volta a em aprovação, e o mestre aprova outra vez.
+            Assert.That(personagens.Aprovar(copia.Id).Ok, Is.True);
+            Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmAprovacao));
+            Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.True);
             Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmCarreira));
         }
 

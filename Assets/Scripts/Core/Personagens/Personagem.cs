@@ -19,9 +19,9 @@ namespace TorreDeControle.Core.Personagens
     /// <summary>
     /// Ciclo da ficha de herói (decidido com o Alan, 2026-10-13):
     /// laboratório: novo ⇄ em aprovação;
-    /// sala: em aprovação ⇄ em revisão; em aprovação → em carreira → aposentado (sem volta).
-    /// Em revisão é a instância reaberta para corrigir a criação: fica na vaga e conclui de volta
-    /// para em aprovação.
+    /// sala: em aprovação → em carreira → aposentado; em aprovação e em carreira → em revisão (o mestre,
+    /// pela aba Mestre: erro que passou despercebido) → em aprovação. Aposentado não volta.
+    /// Em revisão é a instância reaberta para corrigir a criação: fica na vaga e guarda o jogo.
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
     public enum StatusCriacao { Novo, EmAprovacao, EmCarreira, Aposentado, EmRevisao }
