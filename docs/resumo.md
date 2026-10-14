@@ -1,6 +1,6 @@
 # Resumo — onde a Torre está
 
-> Handoff para a próxima conversa. Atualizado no fechamento da **v0.0.3** (2026-10-14).
+> Handoff para a próxima conversa. Atualizado no fechamento da **v0.0.4** (2026-10-14).
 > Se algo aqui contradiz o código, o código manda — e este arquivo precisa de poda.
 
 ## Leitura para retomar
@@ -16,9 +16,12 @@ novo é seu.
 
 ## Estado
 
-- **Versão:** v0.0.3 — *Ficha ágil, exportável e corrigível*. Relatório: `docs/relatorio_v0.0.3.md`.
-- **Onde o Alan chegou:** uma sala com 5 personagens **em aprovação**. O próximo passo é a **aprovação
-  na campanha** (ver "Onde eu parei").
+- **Versão:** v0.0.4 — *A equipe se forma na sala*. Relatório: `docs/relatorio_v0.0.4.md`.
+- **Onde o Alan chegou:** uma sala com 5 personagens **em aprovação**, com a **formação da equipe** e a
+  **Influência inicial** prontas. A trava de em carreira (`PendenciasParaCarreira`) cobra os dois; faltam
+  relacionamentos e os NPCs dos jogadores.
+- **Como o Alan trabalha esta fase:** ele **desenha cada tela** (rascunho colorido) e explica a regra.
+  Não adiantar conteúdo nem regra antes do desenho (ele já parou isso duas vezes).
 - **O caminho da ficha**, e cada ação depende de onde ela está (e de onde foi aberta: hierarquia):
 
   ```
@@ -41,11 +44,12 @@ novo é seu.
   `Assets/img/cards/regras`, com texto próprio e moldura desenhada por código,
   sem depender do acervo. Ainda não ligado ao menu de ajuda.
 
-- **Aprovação na campanha (próximo passo do Alan)** — para subir de em aprovação a em carreira, a sala
-  vai cobrar: história do time, Influências distribuídas, relacionamentos com os colegas e **NPCs que
-  orbitam as personagens, criados pelos jogadores**. Detalhado em `fluxo_de_telas.md` ("Aprovação na
-  campanha"). O Core da equipe é rascunho (`Core/Personagens/CadastroPersonagens.Equipe.cs`), sem tela e
-  sem travar `AprovarParaCampanha`. **Esperar o Alan explicar a Influência e desenhar os NPCs.**
+- **Aprovação na campanha** — feitos: **formação da equipe** (aba da sala, fila da sala) e **Influência**
+  (jogador marca na ficha, Núcleo; aba da sala = visão do mestre; `SeletorDeInfluencia`; por colega,
+  dada/perdida). Faltam **relacionamentos** (a Bruta liga amor e rival a eles) e os **NPCs que orbitam**
+  cada personagem, criados pelos jogadores. **Esperar o Alan desenhar.** Detalhes em `fluxo_de_telas.md`.
+- **Influência no jogo** — `DefinirEstadoDaInfluencia` (dar nova, perder, voltar; só em carreira) está no
+  Core, sem tela e sem evento no log: vai para o painel do mestre (a aba Influência da sala).
 - **Área do mestre** — o botão está na sala (`PainelSala.AreaDoMestre`, só avisa "em construção"). O
   Core está pronto em `Core/Mesa/Mesa.cs` (rodada, eventos, potencial, condições, Rótulos com estouro,
   corrigir). Falta a tela: cartões das personagens em carreira, comandos com motivo, log da rodada.
@@ -55,7 +59,7 @@ novo é seu.
   (`implementacao_futura.md`).
 - **Ajuste pontual com motivo** em ficha em carreira (sem reabrir a criação) e **resultado sem rolagem**
   (Sobrecarga 10+, Vou te salvar! 12+) para o rolador: anotados.
-- Testes: `Assets/Tests/EditMode/` — 91 passando no harness dotnet fora da Unity; rodar também no Test
+- Testes: `Assets/Tests/EditMode/` — 104 passando no harness dotnet fora da Unity; rodar também no Test
   Runner da Unity.
 
 ## Armadilhas
@@ -85,6 +89,10 @@ novo é seu.
 | "Textos trocados" nas descrições | caixas na ordem do JSON, jogador preenche na ordem que marcou | caixas na ordem da marcação |
 | Engasgo a cada clique | aba inteira refeita + arquivo gravado por clique | `SecaoRefazivel` + `ArmazenamentoAdiado` |
 | Recompilação de 6–16 s ao voltar à Unity | Auto Refresh com duas IAs editando | desligar Auto Refresh, Ctrl+R quando quiser |
+| Direção da Influência trocada | "dar a X" = X tem Influência sobre quem deu | quem **recebe** tem o poder; reversa = "ela exerce Influência sobre" |
+| Chips que deixam passar do limite | só o Core recusava, a tela deixava | travar os que sobram no limite (como as habilidades) |
+| Botão/coluna gigante | coluna fixa herda "esticável" de dentro | `LayoutElement`: `flexibleWidth = 0`, prioridade 2 |
+| `dotnet test` "sem resultado" | saída em inglês ("Passed!") | filtrar `Passed!|Failed!` também |
 | Texto de regra copiado | repo é **público** | texto próprio sempre; livro/acervo só como consulta |
 | Ícone de terceiros no repo | licença (ex.: Icons8) | fora do repositório (`.gitignore`) |
 
