@@ -1,6 +1,6 @@
 ﻿<Solution>
-  <Project Path="TorreDeControle.Core.csproj" />
   <Project Path="TorreDeControle.UI.csproj" />
+  <Project Path="TorreDeControle.Core.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="TorreDeControle.Infra.csproj" />
   <Project Path="TorreDeControle.Tests.EditMode.csproj" />
