@@ -37,7 +37,10 @@ namespace TorreDeControle.Core.Salas
                 : JsonConvert.DeserializeObject<Arquivo>(texto) ?? new Arquivo();
             var lista = arquivo.Salas ?? new List<Sala>();
             foreach (var s in lista)
+            {
                 s.Slots ??= new List<Slot>();
+                s.FormacaoEquipe ??= new List<EnvioDeEquipe>();
+            }
             return new CadastroSalas(armazenamento, personagens, lista);
         }
 
@@ -195,6 +198,76 @@ namespace TorreDeControle.Core.Salas
             slot.Personagem = null;
             Gravar();
             return Resultado.Sucesso();
+        }
+
+        // ---------- formação da equipe ----------
+
+        /// <summary>
+        /// Envia (ou reenvia) a resposta da personagem à pergunta de formação da equipe do arquétipo dela.
+        /// O primeiro envio entra no fim da fila; reenviar troca o texto e mantém a posição. A resposta
+        /// também vai para a ficha (EquipeResposta), para a aprovação na campanha cobrar.
+        /// </summary>
+        public Resultado EnviarFormacao(string salaId, string personagemId, string texto)
+        {
+            var sala = Buscar(salaId);
+            if (sala == null)
+                return Resultado.Falha("Sala não encontrada.");
+            if (sala.Slots.All(s => s.Personagem != personagemId))
+                return Resultado.Falha("Essa personagem não está numa vaga desta sala.");
+            var limpo = (texto ?? string.Empty).Trim();
+            if (limpo.Length == 0)
+                return Resultado.Falha("Escreva a resposta antes de enviar.");
+            var naFicha = personagens.ResponderEquipe(personagemId, limpo);
+            if (!naFicha.Ok)
+                return naFicha;
+
+            var envio = sala.FormacaoEquipe.FirstOrDefault(e => e.Personagem == personagemId);
+            if (envio == null)
+                sala.FormacaoEquipe.Add(new EnvioDeEquipe
+                {
+                    Personagem = personagemId, Texto = limpo, EnviadoEm = DateTime.Now.ToString("s"),
+                });
+            else if (envio.Texto != limpo)
+            {
+                envio.Anterior = envio.Texto;
+                envio.Texto = limpo;
+            }
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>
+        /// Desfaz o último envio da personagem (engano do mestre: respondeu pela personagem errada).
+        /// Se foi um reenvio, volta o texto anterior e a posição fica; se foi o primeiro envio, sai da fila
+        /// (quem vinha depois sobe). Um nível só.
+        /// </summary>
+        public Resultado DesfazerFormacao(string salaId, string personagemId)
+        {
+            var sala = Buscar(salaId);
+            if (sala == null)
+                return Resultado.Falha("Sala não encontrada.");
+            var envio = sala.FormacaoEquipe.FirstOrDefault(e => e.Personagem == personagemId);
+            if (envio == null)
+                return Resultado.Falha("Essa personagem não enviou nada.");
+            if (envio.Anterior != null)
+            {
+                envio.Texto = envio.Anterior;
+                envio.Anterior = null;
+            }
+            else
+                sala.FormacaoEquipe.Remove(envio);
+            var naFicha = personagens.ResponderEquipe(personagemId, sala.FormacaoEquipe.Contains(envio) ? envio.Texto : string.Empty);
+            if (!naFicha.Ok)
+                return naFicha;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>A posição (1, 2, ...) do envio da personagem, ou 0 se ainda não enviou.</summary>
+        public int PosicaoNaFormacao(Sala sala, string personagemId)
+        {
+            var k = sala.FormacaoEquipe.FindIndex(e => e.Personagem == personagemId);
+            return k + 1;
         }
 
         (Sala sala, Slot slot, string erro) Achar(string salaId, int indice)

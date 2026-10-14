@@ -222,6 +222,59 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Formacao_da_equipe_na_ordem_de_chegada_e_reenviar_mantem_a_posicao()
+        {
+            var sala = NovaSala();
+            var a = FichaPronta.Criada(personagens, "Estrela");
+            var b = FichaPronta.Criada(personagens, "Cometa");
+            salas.PorPersonagem(sala.Id, 0, a.Id, false);
+            salas.PorPersonagem(sala.Id, 1, b.Id, false);
+            var ia = sala.Slots[0].Personagem;
+            var ib = sala.Slots[1].Personagem;
+
+            Assert.That(salas.EnviarFormacao(sala.Id, ib, "  Cometa chegou primeiro.  ").Ok, Is.True);
+            Assert.That(salas.EnviarFormacao(sala.Id, ia, "Estrela respondeu depois.").Ok, Is.True);
+            Assert.That(sala.FormacaoEquipe.Select(e => e.Personagem), Is.EqualTo(new[] { ib, ia }));
+            Assert.That(personagens.Buscar(ib).EquipeResposta, Is.EqualTo("Cometa chegou primeiro."));
+
+            // Reenviar troca o texto e mantém a posição.
+            salas.EnviarFormacao(sala.Id, ib, "Cometa corrigiu.");
+            Assert.That(sala.FormacaoEquipe[0].Texto, Is.EqualTo("Cometa corrigiu."));
+            Assert.That(salas.PosicaoNaFormacao(sala, ib), Is.EqualTo(1));
+            Assert.That(salas.PosicaoNaFormacao(sala, ia), Is.EqualTo(2));
+
+            Assert.That(salas.EnviarFormacao(sala.Id, ia, "   ").Ok, Is.False);       // vazio
+            Assert.That(salas.EnviarFormacao(sala.Id, a.Id, "da original").Ok, Is.False); // fora das vagas
+        }
+
+        [Test]
+        public void Desfazer_envio_tira_da_fila_ou_volta_o_texto_anterior()
+        {
+            var sala = NovaSala();
+            var a = FichaPronta.Criada(personagens, "Estrela");
+            var b = FichaPronta.Criada(personagens, "Cometa");
+            salas.PorPersonagem(sala.Id, 0, a.Id, false);
+            salas.PorPersonagem(sala.Id, 1, b.Id, false);
+            var ia = sala.Slots[0].Personagem;
+            var ib = sala.Slots[1].Personagem;
+
+            salas.EnviarFormacao(sala.Id, ia, "Estrela, de verdade.");
+            // Engano: o mestre respondeu pela Cometa (primeiro envio dela) e reenviou por cima da Estrela.
+            salas.EnviarFormacao(sala.Id, ib, "era da Estrela");
+            salas.EnviarFormacao(sala.Id, ia, "texto errado");
+
+            Assert.That(salas.DesfazerFormacao(sala.Id, ib).Ok, Is.True);   // sai da fila
+            Assert.That(sala.FormacaoEquipe.Select(e => e.Personagem), Is.EqualTo(new[] { ia }));
+            Assert.That(personagens.Buscar(ib).EquipeResposta, Is.Empty);
+
+            Assert.That(salas.DesfazerFormacao(sala.Id, ia).Ok, Is.True);   // volta o texto anterior
+            Assert.That(sala.FormacaoEquipe.Single().Texto, Is.EqualTo("Estrela, de verdade."));
+            Assert.That(personagens.Buscar(ia).EquipeResposta, Is.EqualTo("Estrela, de verdade."));
+
+            Assert.That(salas.DesfazerFormacao(sala.Id, ib).Ok, Is.False);  // nada a desfazer
+        }
+
+        [Test]
         public void Salas_e_copias_sobrevivem_a_recarga()
         {
             var sala = NovaSala();

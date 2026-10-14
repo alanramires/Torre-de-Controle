@@ -353,8 +353,10 @@ namespace TorreDeControle.UI
 
             var caixa = Rect("Caixa", veu);
             caixa.anchorMin = caixa.anchorMax = new Vector2(0.5f, 0.5f);
-            caixa.sizeDelta = new Vector2(opcoes.Length > 1 ? 1000 : 820, 320);
+            caixa.sizeDelta = new Vector2(opcoes.Length > 1 ? 1000 : 820, 0);
             Moldura(caixa.gameObject, CaixaOpcoes, Dourado);
+            // A altura acompanha a mensagem (avisos longos não vazam da caixa).
+            caixa.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             var coluna = caixa.gameObject.AddComponent<VerticalLayoutGroup>();
             coluna.padding = new RectOffset(40, 40, 36, 32);
             coluna.spacing = 24;
@@ -553,6 +555,40 @@ namespace TorreDeControle.UI
         }
 
         /// <summary>Mini-tela modal com uma área de texto grande: Cancelar ou Salvar.</summary>
+        /// <summary>Mini-tela modal para ler um texto longo (rich text), só leitura, com rolagem e Fechar.</summary>
+        public static void LeitorDeTexto(Transform qualquer, string titulo, string textoRico)
+        {
+            var raiz = (RectTransform)qualquer.GetComponentInParent<Canvas>().rootCanvas.transform;
+            var veu = Rect("LeitorDeTexto", raiz);
+            Esticar(veu);
+            // Só o Fechar fecha: clicar no texto (para rolar, ler) não pode sumir com a tela.
+            veu.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 0.65f);
+
+            var caixa = Rect("Caixa", veu);
+            caixa.anchorMin = caixa.anchorMax = new Vector2(0.5f, 0.5f);
+            caixa.sizeDelta = new Vector2(1300, 860);
+            Moldura(caixa.gameObject, CaixaOpcoes, Dourado);
+            var coluna = caixa.gameObject.AddComponent<VerticalLayoutGroup>();
+            coluna.padding = new RectOffset(36, 36, 28, 28);
+            coluna.spacing = 16;
+            coluna.childControlWidth = true;
+            coluna.childControlHeight = true;
+            coluna.childForceExpandHeight = false;
+
+            var t = Rotulo(caixa, titulo, 26, Dourado, FontStyles.Bold);
+            t.characterSpacing = 4;
+            t.gameObject.AddComponent<LayoutElement>().minHeight = 36;
+
+            var lista = ListaRolavel(caixa, 8);
+            var corpo = Rotulo(lista, textoRico, 24, Texto);
+            corpo.textWrappingMode = TextWrappingModes.Normal;
+
+            var botoes = Fila(caixa, 60);
+            var vao = Rect("Vao", botoes);
+            vao.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            BotaoContorno(botoes, "Fechar", 220, TextoSuave, () => Object.Destroy(veu.gameObject));
+        }
+
         public static void EditorDeTexto(Transform qualquer, string titulo, string texto, System.Action<string> aoSalvar)
         {
             var raiz = (RectTransform)qualquer.GetComponentInParent<Canvas>().rootCanvas.transform;

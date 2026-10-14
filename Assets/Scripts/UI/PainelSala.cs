@@ -39,7 +39,7 @@ namespace TorreDeControle.UI
         /// <summary>Personagem do laboratório escolhida na lista de cada slot vazio (antes de "Adicionar").</summary>
         readonly Dictionary<int, string> escolhida = new Dictionary<int, string>();
 
-        enum Aba { Vagas, Npcs }
+        enum Aba { Vagas, Npcs, Equipe }
         Aba abaAtual = Aba.Vagas;
 
         TextMeshProUGUI titulo;
@@ -48,6 +48,8 @@ namespace TorreDeControle.UI
         RectTransform abas;
         RectTransform cabecalhoVagas;
         RectTransform lista;
+        GameObject rolagemDaLista;
+        RectTransform areaEquipe;
 
         public static PainelSala Criar(Transform pai)
         {
@@ -218,6 +220,17 @@ namespace TorreDeControle.UI
             mensagem.gameObject.AddComponent<LayoutElement>().minHeight = 28;
 
             lista = Estilo.ListaRolavel(cartao);
+            rolagemDaLista = lista.parent.parent.gameObject;
+
+            areaEquipe = Estilo.Rect("AreaEquipe", cartao);
+            areaEquipe.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            var h = areaEquipe.gameObject.AddComponent<HorizontalLayoutGroup>();
+            h.spacing = 16;
+            h.childControlWidth = true;
+            h.childControlHeight = true;
+            h.childForceExpandWidth = false;
+            h.childForceExpandHeight = true;
+            areaEquipe.gameObject.SetActive(false);
         }
 
         static void Coluna(Transform pai, string texto, float largura)
@@ -234,6 +247,8 @@ namespace TorreDeControle.UI
         {
             for (var i = lista.childCount - 1; i >= 0; i--)
                 Destroy(lista.GetChild(i).gameObject);
+            for (var i = areaEquipe.childCount - 1; i >= 0; i--)
+                Destroy(areaEquipe.GetChild(i).gameObject);
 
             titulo.text = sala.Nome.ToUpperInvariant();
             var comJogador = sala.Slots.Count(s => s.Jogador != null);
@@ -241,11 +256,21 @@ namespace TorreDeControle.UI
             contagem.text = $"{sala.Slots.Count} vagas · {comJogador} com jogador · {comPersonagem} com personagem" +
                             (sala.Ativo ? string.Empty : " · sala inativa");
 
+            if (abaAtual == Aba.Equipe && EmAprovacao().Count == 0)
+                abaAtual = Aba.Vagas; // a aba só existe com alguém em aprovação
             MontarAbas();
             cabecalhoVagas.gameObject.SetActive(abaAtual == Aba.Vagas);
+            // Formação da equipe tem área própria (fixa); as outras abas usam a lista rolável.
+            rolagemDaLista.SetActive(abaAtual != Aba.Equipe);
+            areaEquipe.gameObject.SetActive(abaAtual == Aba.Equipe);
             if (abaAtual == Aba.Npcs)
             {
                 SecaoNpcs();
+                return;
+            }
+            if (abaAtual == Aba.Equipe)
+            {
+                SecaoEquipe();
                 return;
             }
 
@@ -260,13 +285,19 @@ namespace TorreDeControle.UI
             for (var i = abas.childCount - 1; i >= 0; i--)
                 Destroy(abas.GetChild(i).gameObject);
             var npcs = personagens.NpcsDaSala(sala.Id).Count(p => p.Ativo);
-            foreach (var (aba, nome) in new[] { (Aba.Vagas, "Vagas"), (Aba.Npcs, $"NPCs · {npcs}") })
+            var lista = new List<(Aba, string)> { (Aba.Vagas, "Vagas"), (Aba.Npcs, $"NPCs · {npcs}") };
+            // Formação da equipe: aparece com ao menos uma personagem em aprovação nas vagas.
+            var emAprovacao = EmAprovacao().Count;
+            if (emAprovacao > 0)
+                lista.Add((Aba.Equipe, $"Formação da equipe · {emAprovacao}"));
+            foreach (var (aba, nome) in lista)
             {
                 var alvo = aba;
+                var largura = aba == Aba.Equipe ? 400 : 260;
                 if (aba == abaAtual)
-                    Estilo.BotaoPrincipal(abas, nome, 260, () => { });
+                    Estilo.BotaoPrincipal(abas, nome, largura, () => { });
                 else
-                    Estilo.BotaoContorno(abas, nome, 260, Estilo.Dourado, () =>
+                    Estilo.BotaoContorno(abas, nome, largura, Estilo.Dourado, () =>
                     {
                         abaAtual = alvo;
                         Mostrar(null);
@@ -274,6 +305,237 @@ namespace TorreDeControle.UI
                     });
             }
             Estilo.Rect("Vao", abas).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+        }
+
+        // ---------- formação da equipe (segunda etapa, na campanha) ----------
+
+        /// <summary>As personagens das vagas em aprovação, na ordem das vagas.</summary>
+        List<Personagem> EmAprovacao() =>
+            sala.Slots
+                .Where(s => s.Personagem != null)
+                .Select(s => personagens.Buscar(s.Personagem))
+                .Where(p => p != null && p.Ativo && p.Status == StatusCriacao.EmAprovacao)
+                .ToList();
+
+        /// <summary>Personagem selecionada na formação da equipe (a que vai responder).</summary>
+        string equipeSelecionada;
+
+        /// <summary>
+        /// Formação da equipe (desenho do Alan): à esquerda, as personagens em aprovação; em cima, a pergunta
+        /// do arquétipo da selecionada, a resposta e o enviar; embaixo, só leitura, as respostas na ordem em
+        /// que chegaram (quem envia primeiro dita a narrativa). Reenviar edita e mantém a posição.
+        /// </summary>
+        void SecaoEquipe()
+        {
+            var candidatas = EmAprovacao();
+            if (candidatas.All(c => c.Id != equipeSelecionada))
+                equipeSelecionada = (candidatas.FirstOrDefault(c => salas.PosicaoNaFormacao(sala, c.Id) == 0)
+                                     ?? candidatas.First()).Id;
+            var selecionada = candidatas.First(c => c.Id == equipeSelecionada);
+
+            var bloco = areaEquipe;
+
+            // Esquerda: quem está em aprovação (em qualquer ordem; o enviar decide a fila).
+            var coluna = Coluna(bloco, 340, 8);
+            foreach (var c in candidatas)
+            {
+                var alvo = c;
+                var posicao = salas.PosicaoNaFormacao(sala, c.Id);
+                var situacao = posicao > 0 ? $"enviou · {posicao}º" : "ainda não enviou";
+                var texto = $"{c.NomeExibicao}\n<size=65%>{situacao}</size>";
+                var botao = c.Id == equipeSelecionada
+                    ? Estilo.BotaoPrincipal(coluna, texto, 0, () => { })
+                    : Estilo.BotaoContorno(coluna, texto, 0, posicao > 0 ? Estilo.TextoSuave : Estilo.Dourado, () =>
+                    {
+                        equipeSelecionada = alvo.Id;
+                        Mostrar(null);
+                        Redesenhar();
+                    });
+                var le = botao.GetComponent<LayoutElement>();
+                le.minHeight = 64;
+                le.preferredHeight = 64;
+                var rotulo = botao.GetComponentInChildren<TextMeshProUGUI>();
+                rotulo.fontSize = 22;
+                rotulo.characterSpacing = 2;
+                rotulo.textWrappingMode = TextWrappingModes.NoWrap;
+                rotulo.overflowMode = TextOverflowModes.Ellipsis;
+                rotulo.rectTransform.offsetMin = new Vector2(10, 0);
+                rotulo.rectTransform.offsetMax = new Vector2(-10, 0);
+            }
+
+            // Direita: a pergunta e o enviar (em cima); a formação (embaixo).
+            var direita = Coluna(bloco, -1, 12);
+
+            var pergunta = Caixa(direita, Estilo.Azul);
+            var regra = personagens.RegraDoArquetipo(selecionada);
+            var titulo = Estilo.Rotulo(pergunta, $"{selecionada.NomeExibicao} — quando a equipe se reuniu pela primeira vez...",
+                22, Estilo.Azul, FontStyles.Bold);
+            titulo.textWrappingMode = TextWrappingModes.Normal;
+            var textoPergunta = Estilo.Rotulo(pergunta, regra?.Equipe.Pergunta ?? string.Empty, 22, Estilo.Texto, FontStyles.Italic);
+            textoPergunta.textWrappingMode = TextWrappingModes.Normal;
+            var fila = Estilo.Fila(pergunta, 110, 12);
+            var resposta = Estilo.AreaTexto(fila, "a resposta (reenviar edita e mantém a posição na fila)", 110);
+            resposta.text = sala.FormacaoEquipe.FirstOrDefault(e => e.Personagem == selecionada.Id)?.Texto
+                            ?? selecionada.EquipeResposta;
+            Estilo.ColunaElastica(resposta);
+            Estilo.ComExpandir(resposta, $"{selecionada.NomeExibicao}: formação da equipe");
+            // O nome no botão evita responder pela personagem errada.
+            var jaEnviou = salas.PosicaoNaFormacao(sala, selecionada.Id) > 0;
+            var botoes = Coluna(fila, 260, 8);
+            var enviar = Estilo.BotaoPrincipal(botoes, $"{(jaEnviou ? "Reenviar" : "Enviar")} como\n{selecionada.NomeExibicao}",
+                0, () =>
+                {
+                    var r = salas.EnviarFormacao(sala.Id, selecionada.Id, resposta.text);
+                    Mostrar(r);
+                    Redesenhar();
+                });
+            enviar.GetComponent<LayoutElement>().preferredHeight = jaEnviou ? 60 : 110;
+            if (jaEnviou)
+            {
+                var envio = sala.FormacaoEquipe.First(e => e.Personagem == selecionada.Id);
+                // Quem respondeu depois pode ter construído em cima: tirar este envio muda a ordem da história.
+                var depois = sala.FormacaoEquipe
+                    .Skip(sala.FormacaoEquipe.IndexOf(envio) + 1)
+                    .Select(e => personagens.Buscar(e.Personagem)?.NomeExibicao ?? "?")
+                    .ToList();
+                var aviso = depois.Count == 0
+                    ? string.Empty
+                    : $"\n\nAtenção: {depois.Count} resposta{(depois.Count == 1 ? " foi enviada" : "s foram enviadas")} depois " +
+                      $"desta e pode{(depois.Count == 1 ? "" : "m")} se apoiar nela ({string.Join(", ", depois)}). " +
+                      "Desfazer muda a ordem da história. Para só corrigir o texto, use Reenviar.";
+                var desfazer = Estilo.BotaoContorno(botoes, "Desfazer envio", 0, Estilo.TextoSuave, () =>
+                    Estilo.Confirmar(transform,
+                        envio.Anterior != null
+                            ? $"Desfazer o último reenvio de {selecionada.NomeExibicao}? Volta o texto anterior; a posição na fila fica."
+                            : $"Desfazer o envio de {selecionada.NomeExibicao}? Ele sai da formação, e quem vinha depois sobe uma posição." + aviso,
+                        "Desfazer",
+                        () =>
+                        {
+                            Mostrar(salas.DesfazerFormacao(sala.Id, selecionada.Id));
+                            Redesenhar();
+                        }));
+                desfazer.GetComponent<LayoutElement>().preferredHeight = 42;
+            }
+
+            // A formação da equipe: só leitura, na ordem de chegada.
+            var formacao = Caixa(direita, Estilo.Dourado);
+            formacao.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            var filaCabeca = Estilo.Fila(formacao, 34);
+            var cabeca = Estilo.Rotulo(filaCabeca, "FORMAÇÃO DA EQUIPE", 22, Estilo.Dourado, FontStyles.Bold);
+            cabeca.characterSpacing = 5;
+            Estilo.ColunaElastica(cabeca);
+            // ••• abre a formação inteira numa tela grande, só leitura.
+            if (sala.FormacaoEquipe.Count > 0)
+            {
+                var abrir = Estilo.BotaoContorno(filaCabeca, "•••", 70, Estilo.Dourado,
+                    () => Estilo.LeitorDeTexto(transform, $"FORMAÇÃO DA EQUIPE · {sala.Nome}", TextoDaFormacao()));
+                abrir.GetComponent<LayoutElement>().preferredHeight = 34;
+            }
+            var textoDaFormacao = Estilo.ListaRolavel(formacao, 10); // só aqui rola: o resto da aba fica parado
+            if (sala.FormacaoEquipe.Count == 0)
+            {
+                Estilo.Rotulo(textoDaFormacao, "Ninguém enviou ainda: quem enviar primeiro abre a história.", 22,
+                    Estilo.TextoApagado, FontStyles.Italic).textWrappingMode = TextWrappingModes.Normal;
+                RodapeDaFormacao(formacao);
+                return;
+            }
+            var suave = ColorUtility.ToHtmlStringRGB(Estilo.TextoSuave);
+            for (var k = 0; k < sala.FormacaoEquipe.Count; k++)
+            {
+                var envio = sala.FormacaoEquipe[k];
+                var quem = personagens.Buscar(envio.Personagem);
+                var jogador = quem?.Identidade.Jogador == null ? "sem jogador" : jogadores.Buscar(quem.Identidade.Jogador)?.Nome ?? "?";
+                var perguntaDele = quem == null ? null : personagens.RegraDoArquetipo(quem)?.Equipe.Pergunta;
+                // "1. a pergunta" (dourado), "(personagem, jogador)" pequeno, e a resposta num tom que cansa
+                // menos que o branco puro na leitura longa.
+                var dourado = ColorUtility.ToHtmlStringRGB(Estilo.Dourado);
+                var trecho = Estilo.Rotulo(textoDaFormacao,
+                    $"<b><color=#{dourado}>{k + 1}. <noparse>{perguntaDele ?? string.Empty}</noparse></color></b>\n" +
+                    $"<size=80%><color=#{suave}>({quem?.NomeExibicao ?? "?"}, {jogador})</color></size>\n" +
+                    $"<noparse>{envio.Texto}</noparse>", 22, Leitura);
+                trecho.textWrappingMode = TextWrappingModes.Normal;
+                if (k < sala.FormacaoEquipe.Count - 1)
+                {
+                    var traco = Estilo.Rect("Traco", textoDaFormacao);
+                    traco.gameObject.AddComponent<Image>().color =
+                        new Color(Estilo.Dourado.r, Estilo.Dourado.g, Estilo.Dourado.b, 0.35f);
+                    var lt = traco.gameObject.AddComponent<LayoutElement>();
+                    lt.minHeight = 2;
+                    lt.preferredHeight = 2;
+                }
+            }
+            RodapeDaFormacao(formacao);
+        }
+
+        /// <summary>A formação inteira num texto só (para o leitor do •••), no mesmo formato da caixa.</summary>
+        string TextoDaFormacao()
+        {
+            var dourado = ColorUtility.ToHtmlStringRGB(Estilo.Dourado);
+            var suave = ColorUtility.ToHtmlStringRGB(Estilo.TextoSuave);
+            var leitura = ColorUtility.ToHtmlStringRGB(Leitura);
+            var partes = new List<string>();
+            for (var k = 0; k < sala.FormacaoEquipe.Count; k++)
+            {
+                var envio = sala.FormacaoEquipe[k];
+                var quem = personagens.Buscar(envio.Personagem);
+                var jogador = quem?.Identidade.Jogador == null ? "sem jogador" : jogadores.Buscar(quem.Identidade.Jogador)?.Nome ?? "?";
+                var pergunta = quem == null ? null : personagens.RegraDoArquetipo(quem)?.Equipe.Pergunta;
+                partes.Add($"<b><color=#{dourado}>{k + 1}. <noparse>{pergunta ?? string.Empty}</noparse></color></b>\n" +
+                           $"<size=80%><color=#{suave}>({quem?.NomeExibicao ?? "?"}, {jogador})</color></size>\n" +
+                           $"<color=#{leitura}><noparse>{envio.Texto}</noparse></color>");
+            }
+            return string.Join("\n\n", partes);
+        }
+
+        /// <summary>A regra da fila, sempre à vista no pé da formação.</summary>
+        static void RodapeDaFormacao(Transform formacao)
+        {
+            var vao = Estilo.Rect("Vao", formacao);
+            vao.gameObject.AddComponent<LayoutElement>().minHeight = 6;
+            var regra = Estilo.Rotulo(formacao,
+                "Quem responde primeiro estabelece a verdade; os demais constroem sobre ela. " +
+                "Não se volta atrás para deixar a história mais conveniente.",
+                20, Estilo.TextoSuave, FontStyles.Italic);
+            regra.textWrappingMode = TextWrappingModes.Normal;
+        }
+
+        /// <summary>Cor do texto corrido da formação: mais suave que o branco, para leitura longa.</summary>
+        static readonly Color Leitura = new Color(0.80f, 0.83f, 0.90f);
+
+        static RectTransform Coluna(Transform pai, float largura, float espaco)
+        {
+            var coluna = Estilo.Rect("Coluna", pai);
+            var le = coluna.gameObject.AddComponent<LayoutElement>();
+            if (largura < 0)
+                le.flexibleWidth = 1;
+            else
+            {
+                // Largura fixa: sem isto a coluna herda "esticável" de dentro (o texto do botão) e rouba
+                // o espaço de quem está ao lado.
+                le.layoutPriority = 2;
+                le.minWidth = largura;
+                le.preferredWidth = largura;
+                le.flexibleWidth = 0;
+            }
+            var v = coluna.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.spacing = espaco;
+            v.childControlWidth = true;
+            v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+            return coluna;
+        }
+
+        static RectTransform Caixa(Transform pai, Color borda)
+        {
+            var caixa = Estilo.Rect("Caixa", pai);
+            Estilo.Moldura(caixa.gameObject, Estilo.Linha, borda);
+            var v = caixa.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.padding = new RectOffset(18, 18, 14, 16);
+            v.spacing = 10;
+            v.childControlWidth = true;
+            v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+            return caixa;
         }
 
         /// <summary>
