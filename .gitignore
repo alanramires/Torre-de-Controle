@@ -121,3 +121,6 @@ desktop.ini
 
 # Ícones do Icons8: licença gratuita não permite redistribuir soltos (repositório público)
 /Assets/img/icones/icons8-*
+
+# Prévias locais de geradores (ex.: tools/cards) — não versionar
+/tmp/

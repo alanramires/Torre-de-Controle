@@ -36,6 +36,11 @@ novo é seu.
 
 ## Onde eu parei
 
+- **Help básico (2026-10-14):** gerador próprio em `tools/cards/gerar_cartas.py`,
+  instruções em `tools/cards/README.md`. Gera os quatro panoramas `00-*` em
+  `Assets/img/cards/regras`, com texto próprio e moldura desenhada por código,
+  sem depender do acervo. Ainda não ligado ao menu de ajuda.
+
 - **Aprovação na campanha (próximo passo do Alan)** — para subir de em aprovação a em carreira, a sala
   vai cobrar: história do time, Influências distribuídas, relacionamentos com os colegas e **NPCs que
   orbitam as personagens, criados pelos jogadores**. Detalhado em `fluxo_de_telas.md` ("Aprovação na
