@@ -166,16 +166,26 @@ namespace TorreDeControle.Tests
             copia.Potencial = 3;
 
             Assert.That(personagens.ReabrirCriacao(copia.Id).Ok, Is.True);
-            Assert.That(copia.Status, Is.EqualTo(StatusCriacao.Novo));
+            Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmRevisao));
             Assert.That(copia.Foto, Is.Null);
             Assert.That(sala.Slots[0].Personagem, Is.EqualTo(copia.Id));
             Assert.That(copia.Potencial, Is.EqualTo(3)); // o jogo marcado fica
 
             Assert.That(personagens.Aprovar(copia.Id).Ok, Is.True);
             Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmAprovacao));
-            Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.True);
-            Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmCarreira));
             Assert.That(original.Status, Is.EqualTo(StatusCriacao.EmAprovacao));
+        }
+
+        [Test]
+        public void Em_carreira_nao_volta_para_revisao()
+        {
+            var sala = NovaSala();
+            var original = FichaPronta.Criada(personagens, "Estrela");
+            salas.PorPersonagem(sala.Id, 0, original.Id, false);
+            var copia = personagens.Buscar(sala.Slots[0].Personagem);
+            Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.True);
+            Assert.That(personagens.ReabrirCriacao(copia.Id).Ok, Is.False);
+            Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmCarreira));
         }
 
         [Test]

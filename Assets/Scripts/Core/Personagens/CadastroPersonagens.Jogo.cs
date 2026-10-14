@@ -293,7 +293,7 @@ namespace TorreDeControle.Core.Personagens
         /// Operações de jogo valem depois de concluir a criação, ou a qualquer hora no modo teste
         /// (o teste é desfeito ao desligar, então pode validar a ficha ainda em "novo").
         /// </summary>
-        public bool LiberadoNoJogo(Personagem p) => p.Status != StatusCriacao.Novo || EmTeste(p.Id);
+        public bool LiberadoNoJogo(Personagem p) => !p.EmCriacao || EmTeste(p.Id);
 
         /// <summary>Leva um contador a um valor exato (digitado no playground), respeitando as mesmas regras.</summary>
         public Resultado DefinirContador(string id, string extra, string campo, int valor)

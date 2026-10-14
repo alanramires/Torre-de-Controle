@@ -435,7 +435,7 @@ namespace TorreDeControle.UI
                 var situacao = p.Status switch
                 {
                     StatusCriacao.EmAprovacao => "em aprovação",
-                    StatusCriacao.Novo => "em revisão (novo)",
+                    StatusCriacao.EmRevisao => "em revisão",
                     _ => null,
                 };
                 var texto = situacao == null

@@ -17,12 +17,14 @@ namespace TorreDeControle.Core.Personagens
     public enum Papel { Heroi, Vilao, Neutro }
 
     /// <summary>
-    /// Ciclo da ficha de herói: novo (montando no laboratório) → em aprovação (concluída, foto congelada;
-    /// na sala, completa o que é da equipe) → em carreira (o mestre aprovou na campanha) → aposentado
-    /// (saiu do jogo ou encerrou a carreira).
+    /// Ciclo da ficha de herói (decidido com o Alan, 2026-10-13):
+    /// laboratório: novo ⇄ em aprovação;
+    /// sala: em aprovação ⇄ em revisão; em aprovação → em carreira → aposentado (sem volta).
+    /// Em revisão é a instância reaberta para corrigir a criação: fica na vaga e conclui de volta
+    /// para em aprovação.
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
-    public enum StatusCriacao { Novo, EmAprovacao, EmCarreira, Aposentado }
+    public enum StatusCriacao { Novo, EmAprovacao, EmCarreira, Aposentado, EmRevisao }
 
     /// <summary>
     /// O mestre olhou a foto (link)? Avalia na instância da sala, vendo a imagem. Trocar o link volta
@@ -194,10 +196,25 @@ namespace TorreDeControle.Core.Personagens
         [JsonProperty("origem")] public string Origem { get; set; }
         /// <summary>Sala onde a cópia joga; null = laboratório.</summary>
         [JsonProperty("sala")] public string Sala { get; set; }
+        // ---------- segunda etapa, na campanha (instância em aprovação) ----------
+
+        /// <summary>Resposta a "quando a equipe se reuniu pela primeira vez" (pergunta do arquétipo).</summary>
+        [JsonProperty("equipe_resposta")] public string EquipeResposta { get; set; } = string.Empty;
+        /// <summary>O colega (id) de cada relacionamento da ficha, na ordem das frases; null = não escolhido.</summary>
+        [JsonProperty("relacionamentos")] public List<string> Relacionamentos { get; set; } = new List<string>();
+        /// <summary>Comportamento escolhido, quando a regra de Influência é por comportamento.</summary>
+        [JsonProperty("influencia_comportamento")] public string InfluenciaComportamento { get; set; }
+        /// <summary>Colegas (ids) a quem deu Influência inicial, quando a regra deixa escolher.</summary>
+        [JsonProperty("influencia_para")] public List<string> InfluenciaPara { get; set; } = new List<string>();
+
         /// <summary>Perfil PNJ (controle do mestre); null em herói.</summary>
         [JsonProperty("pnj")] public PerfilPnj Pnj { get; set; }
         /// <summary>Ficha de vilão; nasce ao virar vilão e fica guardada se o papel mudar.</summary>
         [JsonProperty("vilao")] public FichaVilao Vilao { get; set; }
+
+        /// <summary>A criação está aberta (novo no laboratório, ou em revisão na sala).</summary>
+        [JsonIgnore]
+        public bool EmCriacao => Status == StatusCriacao.Novo || Status == StatusCriacao.EmRevisao;
 
         /// <summary>Codinome se houver, senão o nome civil.</summary>
         [JsonIgnore]

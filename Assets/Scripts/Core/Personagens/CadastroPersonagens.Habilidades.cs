@@ -185,7 +185,7 @@ namespace TorreDeControle.Core.Personagens
         public IReadOnlyList<string> Observacoes(Personagem p)
         {
             var notas = new List<string>();
-            if (p.Status != StatusCriacao.Novo)
+            if (!p.EmCriacao)
                 return notas;
             var regra = RegraDeHabilidades(p);
             var escolhidas = p.Criacao.Habilidades.Escolhidas.Count;
@@ -236,7 +236,7 @@ namespace TorreDeControle.Core.Personagens
         {
             p = Buscar(id);
             erro = p == null ? Resultado.Falha("Personagem não encontrada.")
-                : p.Status != StatusCriacao.Novo ? Resultado.Falha("A ficha já foi aprovada; isso é da criação.")
+                : !p.EmCriacao ? Resultado.Falha("A ficha já foi aprovada; isso é da criação.")
                 : Resultado.Sucesso();
             return erro.Ok;
         }

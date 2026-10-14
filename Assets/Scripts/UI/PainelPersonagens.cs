@@ -285,7 +285,7 @@ namespace TorreDeControle.UI
             // Arquétipo só se escolhe enquanto novo; depois, trocar é o avanço "mudar de arquétipo".
             Estilo.ListaSuspensa(linha, LarguraArquetipo, OpcoesArquetipo(), i.Arquetipo,
                 id => Alterar(p, p.Identidade.Nome, p.Identidade.Codinome, id, p.Identidade.Jogador),
-                editavel: p.Status == StatusCriacao.Novo);
+                editavel: p.EmCriacao);
             Estilo.ListaSuspensa(linha, LarguraJogador, OpcoesJogador(i.Jogador), i.Jogador ?? SemJogador,
                 id => Alterar(p, p.Identidade.Nome, p.Identidade.Codinome, p.Identidade.Arquetipo, id));
 
@@ -403,6 +403,7 @@ namespace TorreDeControle.UI
         static string TextoStatus(StatusCriacao status) => status switch
         {
             StatusCriacao.Novo => "NOVO",
+            StatusCriacao.EmRevisao => "EM REVISÃO",
             StatusCriacao.EmAprovacao => "EM APROVAÇÃO",
             StatusCriacao.Aposentado => "APOSENTADO",
             _ => "EM CARREIRA",

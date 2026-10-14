@@ -209,6 +209,7 @@ namespace TorreDeControle.UI
             status.text = p.Status switch
             {
                 StatusCriacao.Novo => "NOVO",
+                StatusCriacao.EmRevisao => "EM REVISÃO",
                 StatusCriacao.EmAprovacao => "EM APROVAÇÃO",
                 StatusCriacao.Aposentado => "APOSENTADO",
                 _ => "EM CARREIRA",
@@ -224,9 +225,9 @@ namespace TorreDeControle.UI
         {
             var mensagem = p.Sala == null
                 ? "Voltar a ficha para \"novo\"? A foto da criação é descartada e a criação fica editável de novo."
-                : "Voltar esta instância para \"novo\"? Ela continua na vaga; a foto da criação é descartada para " +
-                  "refazer as escolhas, e ao concluir de novo volta a \"em carreira\". O que foi marcado em jogo fica.";
-            Estilo.Confirmar(transform, mensagem, "Voltar para novo", () =>
+                : "Pôr esta instância em revisão? Ela continua na vaga; a foto da criação é descartada para " +
+                  "refazer as escolhas, e ao concluir volta a \"em aprovação\". A parte da equipe fica.";
+            Estilo.Confirmar(transform, mensagem, p.Sala == null ? "Voltar para novo" : "Pôr em revisão", () =>
             {
                 var r = cadastro.ReabrirCriacao(p.Id);
                 Atualizar();
@@ -310,12 +311,11 @@ namespace TorreDeControle.UI
                 mensagem.color = Estilo.TextoApagado;
                 return;
             }
-            MensagemDoRodape(mensagem);
-
-            // Interruptor do modo teste (playground do mestre), no fim do rodapé.
+            // Modo teste antes do botão de concluir/aprovar, que fica à direita.
             vagaTeste = Estilo.Rect("ModoTeste", rodape);
             vagaTeste.gameObject.AddComponent<LayoutElement>().preferredWidth = 330;
             BotaoModoTeste();
+            MensagemDoRodape(mensagem);
         }
 
         void MensagemDoRodape(TextMeshProUGUI mensagem)
@@ -328,7 +328,7 @@ namespace TorreDeControle.UI
                 Estilo.BotaoPrincipal(rodape, "Aprovar para a campanha", 360, AprovarParaCampanha);
                 return;
             }
-            if (p.Status != StatusCriacao.Novo)
+            if (!p.EmCriacao)
             {
                 var data = DateTime.TryParse(p.Foto?.AprovadaEm, out var d) ? d.ToString("dd/MM/yyyy HH:mm") : "?";
                 mensagem.text = $"Foto da criação congelada em {data}.";
@@ -432,9 +432,9 @@ namespace TorreDeControle.UI
             var filaArquetipo = FilaRotulada("ARQUÉTIPO", campos);
             var listaArquetipo = Estilo.ListaSuspensa(filaArquetipo, 420,
                 Arquetipos.Todos.Select(a => (a.Id, a.Nome)).ToList(), i.Arquetipo, TrocarArquetipo,
-                editavel: p.Status == StatusCriacao.Novo);
+                editavel: p.EmCriacao);
             // A nota vira balão com o mouse em cima (como as regras dos chips), para não apertar a linha.
-            listaArquetipo.gameObject.AddComponent<Dica>().Configurar(p.Status == StatusCriacao.Novo
+            listaArquetipo.gameObject.AddComponent<Dica>().Configurar(p.EmCriacao
                 ? "Trocar de arquétipo zera as escolhas de criação."
                 : "Depois de aprovada, trocar de arquétipo é um avanço.");
 
@@ -627,7 +627,7 @@ namespace TorreDeControle.UI
 
         void AbaModulos()
         {
-            var emCriacao = p.Status == StatusCriacao.Novo;
+            var emCriacao = p.EmCriacao;
             var mov = cadastro.MovimentosDoArquetipo(p);
             var naFicha = cadastro.MovimentosNaFicha(p);
 
@@ -1525,7 +1525,7 @@ namespace TorreDeControle.UI
         {
             var regra = cadastro.RegraDeHabilidades(p);
             var e = p.Criacao.Habilidades;
-            var emCriacao = p.Status == StatusCriacao.Novo;
+            var emCriacao = p.EmCriacao;
             Secao("HABILIDADES", regra.Nota);
 
             if (emCriacao)
@@ -1772,7 +1772,7 @@ namespace TorreDeControle.UI
 
         void AbaNucleo()
         {
-            Secao("RÓTULOS", p.Status == StatusCriacao.Novo
+            Secao("RÓTULOS", p.EmCriacao
                 ? "azul: valor do arquétipo  ·  dourado: com o +1 livre (máximo +3)"
                 : "foto da criação");
 
@@ -1830,7 +1830,7 @@ namespace TorreDeControle.UI
             nome.characterSpacing = 3;
             nome.gameObject.AddComponent<LayoutElement>().preferredWidth = 240;
 
-            var comBonus = p.Status == StatusCriacao.Novo && p.Criacao.BonusLivre == rotulo;
+            var comBonus = p.EmCriacao && p.Criacao.BonusLivre == rotulo;
             for (var v = Rotulos.Minimo; v <= Rotulos.Maximo; v++)
             {
                 var celula = Estilo.Rect("Valor", fila);
@@ -1848,7 +1848,7 @@ namespace TorreDeControle.UI
             var vao = Estilo.Rect("Vao", fila);
             vao.gameObject.AddComponent<LayoutElement>().preferredWidth = 24;
 
-            if (p.Status != StatusCriacao.Novo)
+            if (!p.EmCriacao)
                 return;
 
             // Um só +1 livre: escolhido, os outros apagam; clicar no dourado libera para escolher outro.

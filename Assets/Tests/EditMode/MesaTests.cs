@@ -111,8 +111,15 @@ namespace TorreDeControle.Tests
         {
             var original = personagens.Buscar(heroi.Origem);
             Assert.That(mesa.DarPotencial(original.Id, 1, null).Ok, Is.False); // laboratório
-            personagens.ReabrirCriacao(heroi.Id);
-            Assert.That(mesa.DarPotencial(heroi.Id, 1, null).Ok, Is.False); // em revisão
+
+            // Outra instância, ainda em aprovação (e depois em revisão): não joga.
+            var outra = FichaPronta.Criada(personagens, "Cometa");
+            salas.PorPersonagem(sala.Id, 1, outra.Id, false);
+            var emAprovacao = personagens.Buscar(sala.Slots[1].Personagem);
+            Assert.That(mesa.DarPotencial(emAprovacao.Id, 1, null).Ok, Is.False);
+            personagens.ReabrirCriacao(emAprovacao.Id);
+            Assert.That(emAprovacao.Status, Is.EqualTo(StatusCriacao.EmRevisao));
+            Assert.That(mesa.DarPotencial(emAprovacao.Id, 1, null).Ok, Is.False);
         }
 
         [Test]

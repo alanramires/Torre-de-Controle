@@ -49,6 +49,8 @@ namespace TorreDeControle.Core.Personagens
                 p.ItensDeJogo ??= new Dictionary<string, List<ItemDeJogo>>();
                 p.ObsMovimentos ??= new Dictionary<string, string>();
                 p.CondicoesMarcadas ??= new List<string>();
+                p.Relacionamentos ??= new List<string>();
+                p.InfluenciaPara ??= new List<string>();
                 if (p.Vilao != null)
                 {
                     p.Vilao.Movimentos ??= new List<string>();
@@ -124,7 +126,7 @@ namespace TorreDeControle.Core.Personagens
                 return Resultado.Falha(erro);
 
             // Depois de criada, trocar de arquétipo é um avanço (tardio), não uma edição.
-            if (personagem.Status != StatusCriacao.Novo && identidade.Arquetipo != personagem.Identidade.Arquetipo)
+            if (!personagem.EmCriacao && identidade.Arquetipo != personagem.Identidade.Arquetipo)
                 return Resultado.Falha("Depois de criada, trocar de arquétipo é um avanço, não uma edição.");
 
             // Em "novo", trocar de arquétipo reseta a ficha de criação: as escolhas eram do arquétipo antigo.
@@ -178,7 +180,7 @@ namespace TorreDeControle.Core.Personagens
             var p = Buscar(id);
             if (p == null)
                 return Resultado.Falha("Personagem não encontrada.");
-            if (p.Status != StatusCriacao.Novo)
+            if (!p.EmCriacao)
                 return Resultado.Falha("A ficha já foi aprovada; o +1 livre é da criação.");
             if (rotulo != null)
             {
@@ -224,7 +226,7 @@ namespace TorreDeControle.Core.Personagens
             var p = Buscar(id);
             if (p == null)
                 return Resultado.Falha("Personagem não encontrada.");
-            if (p.Status != StatusCriacao.Novo)
+            if (!p.EmCriacao)
                 return Resultado.Falha("Essa ficha já foi aprovada.");
 
             var (erros, avisos) = Validar(p);
@@ -267,9 +269,8 @@ namespace TorreDeControle.Core.Personagens
             }
             if (!p.Ativo)
                 return "Ficha do arquivo da sala (vaga liberada): só consulta.";
-            return p.Status == StatusCriacao.EmAprovacao || p.Status == StatusCriacao.EmCarreira
-                ? null
-                : "Só ficha em aprovação ou em carreira volta para novo.";
+            // Em carreira não volta (nem para aprovação, nem para revisão); aposentado também não.
+            return p.Status == StatusCriacao.EmAprovacao ? null : "Só ficha em aprovação vai para revisão.";
         }
 
         /// <summary>
@@ -289,7 +290,8 @@ namespace TorreDeControle.Core.Personagens
             p.Foto = null;
             // Refazer a criação refaz os Rótulos: os de jogo voltam a partir da nova foto.
             p.RotulosJogo = null;
-            p.Status = StatusCriacao.Novo;
+            // Na sala, a instância reaberta fica em revisão (na vaga); no laboratório, volta a novo.
+            p.Status = p.Sala != null ? StatusCriacao.EmRevisao : StatusCriacao.Novo;
             Gravar();
             return Resultado.Sucesso();
         }
@@ -357,6 +359,8 @@ namespace TorreDeControle.Core.Personagens
                 return Resultado.Falha("Ficha do arquivo da sala: só consulta.");
             if (p.Status != StatusCriacao.EmAprovacao)
                 return Resultado.Falha("Só ficha em aprovação se aprova.");
+            // A segunda etapa (PendenciasDaEquipe) ainda não trava: a tela da equipe não existe e a
+            // regra da Influência está para ser definida com o Alan.
             p.Status = StatusCriacao.EmCarreira;
             Gravar();
             return Resultado.Sucesso();
