@@ -39,7 +39,7 @@ namespace TorreDeControle.UI
         /// <summary>Personagem do laboratório escolhida na lista de cada slot vazio (antes de "Adicionar").</summary>
         readonly Dictionary<int, string> escolhida = new Dictionary<int, string>();
 
-        enum Aba { Vagas, Npcs, Equipe }
+        enum Aba { Vagas, Npcs, Equipe, Influencia }
         Aba abaAtual = Aba.Vagas;
 
         TextMeshProUGUI titulo;
@@ -256,13 +256,22 @@ namespace TorreDeControle.UI
             contagem.text = $"{sala.Slots.Count} vagas · {comJogador} com jogador · {comPersonagem} com personagem" +
                             (sala.Ativo ? string.Empty : " · sala inativa");
 
-            if (abaAtual == Aba.Equipe && EmAprovacao().Count == 0)
-                abaAtual = Aba.Vagas; // a aba só existe com alguém em aprovação
+            var daAprovacao = abaAtual == Aba.Equipe || abaAtual == Aba.Influencia;
+            if (daAprovacao && EmAprovacao().Count == 0)
+            {
+                abaAtual = Aba.Vagas; // essas abas só existem com alguém em aprovação
+                daAprovacao = false;
+            }
             MontarAbas();
             cabecalhoVagas.gameObject.SetActive(abaAtual == Aba.Vagas);
-            // Formação da equipe tem área própria (fixa); as outras abas usam a lista rolável.
-            rolagemDaLista.SetActive(abaAtual != Aba.Equipe);
-            areaEquipe.gameObject.SetActive(abaAtual == Aba.Equipe);
+            // Formação e Influência têm área própria (fixa); as outras abas usam a lista rolável.
+            rolagemDaLista.SetActive(!daAprovacao);
+            areaEquipe.gameObject.SetActive(daAprovacao);
+            if (abaAtual == Aba.Influencia)
+            {
+                SecaoInfluencia();
+                return;
+            }
             if (abaAtual == Aba.Npcs)
             {
                 SecaoNpcs();
@@ -289,7 +298,10 @@ namespace TorreDeControle.UI
             // Formação da equipe: aparece com ao menos uma personagem em aprovação nas vagas.
             var emAprovacao = EmAprovacao().Count;
             if (emAprovacao > 0)
+            {
                 lista.Add((Aba.Equipe, $"Formação da equipe · {emAprovacao}"));
+                lista.Add((Aba.Influencia, "Influência"));
+            }
             foreach (var (aba, nome) in lista)
             {
                 var alvo = aba;
@@ -428,7 +440,9 @@ namespace TorreDeControle.UI
             if (sala.FormacaoEquipe.Count > 0)
             {
                 var abrir = Estilo.BotaoContorno(filaCabeca, "•••", 70, Estilo.Dourado,
-                    () => Estilo.LeitorDeTexto(transform, $"FORMAÇÃO DA EQUIPE · {sala.Nome}", TextoDaFormacao()));
+                    () => Estilo.LeitorDeTexto(transform, $"FORMAÇÃO DA EQUIPE · {sala.Nome}", TextoDaFormacao(),
+                        ("Copiar para o fórum", () => FormacaoParaColar("[b]", "[/b]")),
+                        ("Copiar para o WhatsApp", () => FormacaoParaColar("*", "*"))));
                 abrir.GetComponent<LayoutElement>().preferredHeight = 34;
             }
             var textoDaFormacao = Estilo.ListaRolavel(formacao, 10); // só aqui rola: o resto da aba fica parado
@@ -467,6 +481,132 @@ namespace TorreDeControle.UI
             RodapeDaFormacao(formacao);
         }
 
+        // ---------- Influência inicial (segunda etapa, na campanha) ----------
+
+
+        /// <summary>
+        /// Influência (desenho do Alan): à esquerda, quem está em aprovação; em azul, a regra do arquétipo
+        /// (e o comportamento, quando há); em vermelho, os colegas para marcar e o confirmar ("Dar
+        /// Influência a todos" quando a regra é todos); em verde, a quem deu; em rosa, a leitura reversa
+        /// (quem deu Influência a ela, lido das outras fichas).
+        /// </summary>
+        void SecaoInfluencia()
+        {
+            var candidatas = EmAprovacao();
+            if (candidatas.All(c => c.Id != equipeSelecionada))
+                equipeSelecionada = (candidatas.FirstOrDefault(c => !personagens.InfluenciaConfirmada(c)) ?? candidatas.First()).Id;
+            var p = candidatas.First(c => c.Id == equipeSelecionada);
+            var bloco = areaEquipe;
+
+            // Esquerda: quem está em aprovação.
+            var coluna = Coluna(bloco, 300, 8);
+            foreach (var c in candidatas)
+            {
+                var alvo = c;
+                var feito = personagens.InfluenciaConfirmada(c);
+                var texto = $"{c.NomeExibicao}\n<size=65%>{(feito ? "deu Influência" : "ainda não deu")}</size>";
+                var botao = c.Id == equipeSelecionada
+                    ? Estilo.BotaoPrincipal(coluna, texto, 0, () => { })
+                    : Estilo.BotaoContorno(coluna, texto, 0, feito ? Estilo.TextoSuave : Estilo.Dourado, () =>
+                    {
+                        equipeSelecionada = alvo.Id;
+                        Mostrar(null);
+                        Redesenhar();
+                    });
+                AjustarBotaoDeLista(botao);
+            }
+
+            // Centro: a regra (azul) e, embaixo, escolher (vermelho) | deu (verde).
+            var centro = Coluna(bloco, -1, 12);
+            var regra = personagens.RegraDoArquetipo(p)?.Influencia;
+            var caixaRegra = Caixa(centro, Estilo.Azul);
+            Estilo.Rotulo(caixaRegra, $"{p.NomeExibicao} — Influência inicial", 22, Estilo.Azul, FontStyles.Bold);
+            var textoRegra = Estilo.Rotulo(caixaRegra, regra?.Texto ?? string.Empty, 22, Estilo.Texto, FontStyles.Italic);
+            textoRegra.textWrappingMode = TextWrappingModes.Normal;
+            SeletorDeInfluencia.MontarComportamento(caixaRegra, p, personagens, AoMudarInfluencia);
+
+            var baixo = Estilo.Rect("Escolha", centro);
+            baixo.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            var hb = baixo.gameObject.AddComponent<HorizontalLayoutGroup>();
+            hb.spacing = 12;
+            hb.childControlWidth = true;
+            hb.childControlHeight = true;
+            hb.childForceExpandWidth = false;
+            hb.childForceExpandHeight = true;
+
+            // Vermelho: os colegas para marcar e o confirmar.
+            var escolha = Caixa(baixo, Estilo.Erro);
+            var le = escolha.gameObject.AddComponent<LayoutElement>();
+            le.layoutPriority = 2;
+            le.minWidth = le.preferredWidth = 380;
+            le.flexibleWidth = 0;
+            SeletorDeInfluencia.MontarEscolha(escolha, p, personagens, AoMudarInfluencia, colunas: 1, larguraDoChip: 340);
+
+            // Verde: a quem deu.
+            var deu = Caixa(baixo, new Color(0.45f, 0.80f, 0.50f));
+            deu.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            Estilo.Rotulo(deu, "DEU INFLUÊNCIA A", 20, new Color(0.45f, 0.80f, 0.50f), FontStyles.Bold).characterSpacing = 4;
+            var dados = personagens.InfluenciaDada(p);
+            if (dados.Count == 0)
+                Nota(deu, personagens.InfluenciaConfirmada(p) ? "Ninguém (pela regra)." : "Ainda não deu.");
+            var suaveInfluencia = ColorUtility.ToHtmlStringRGB(Estilo.TextoSuave);
+            foreach (var id in personagens.InfluenciaPerdida(p))
+                Estilo.Rotulo(deu, "• " + (personagens.Buscar(id)?.NomeExibicao ?? "?") + " (perdida)", 24, Estilo.TextoApagado);
+            foreach (var id in dados)
+            {
+                // O nome e, se houver, o porquê (escrito pelo jogador na ficha).
+                var porque = personagens.PorqueDaInfluencia(p, id);
+                var linha = Estilo.Rotulo(deu, "• " + (personagens.Buscar(id)?.NomeExibicao ?? "?") +
+                    (string.IsNullOrEmpty(porque) ? string.Empty
+                        : $"\n<size=80%><i><color=#{suaveInfluencia}><noparse>{porque}</noparse></color></i></size>"),
+                    24, Estilo.Texto);
+                linha.textWrappingMode = TextWrappingModes.Normal;
+            }
+
+            // Rosa: a leitura reversa.
+            var rosa = new Color(0.95f, 0.55f, 0.85f);
+            var reversa = Caixa(Coluna(bloco, 340, 0), rosa);
+            reversa.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            var tituloReversa = Estilo.Rotulo(reversa, $"{p.NomeExibicao.ToUpperInvariant()} EXERCE INFLUÊNCIA SOBRE", 20, rosa, FontStyles.Bold);
+            tituloReversa.textWrappingMode = TextWrappingModes.Normal;
+            var deram = personagens.QuemDeuInfluencia(p);
+            if (deram.Count == 0)
+                Nota(reversa, "Ninguém ainda (nenhum colega deu Influência a ela).");
+            foreach (var c in deram)
+                Estilo.Rotulo(reversa, "• " + c.NomeExibicao, 24, Estilo.Texto);
+            // Pelo estado nas fichas dos colegas: quem deu Influência a ela e, no jogo, tirou.
+            foreach (var c in personagens.QuemPerdeuInfluencia(p))
+                Estilo.Rotulo(reversa, "• " + c.NomeExibicao + " (perdida)", 24, Estilo.TextoApagado);
+            Nota(reversa, "Lido das fichas dos colegas.");
+        }
+
+        void AoMudarInfluencia(Resultado r)
+        {
+            Mostrar(r);
+            Redesenhar();
+        }
+
+        static void Nota(Transform pai, string texto)
+        {
+            var n = Estilo.Rotulo(pai, texto, 20, Estilo.TextoSuave, FontStyles.Italic);
+            n.textWrappingMode = TextWrappingModes.Normal;
+        }
+
+        /// <summary>Botão da coluna de personagens: nome numa linha, situação menor embaixo.</summary>
+        static void AjustarBotaoDeLista(UnityEngine.UI.Button botao)
+        {
+            var le = botao.GetComponent<LayoutElement>();
+            le.minHeight = 64;
+            le.preferredHeight = 64;
+            var rotulo = botao.GetComponentInChildren<TextMeshProUGUI>();
+            rotulo.fontSize = 22;
+            rotulo.characterSpacing = 2;
+            rotulo.textWrappingMode = TextWrappingModes.NoWrap;
+            rotulo.overflowMode = TextOverflowModes.Ellipsis;
+            rotulo.rectTransform.offsetMin = new Vector2(10, 0);
+            rotulo.rectTransform.offsetMax = new Vector2(-10, 0);
+        }
+
         /// <summary>A formação inteira num texto só (para o leitor do •••), no mesmo formato da caixa.</summary>
         string TextoDaFormacao()
         {
@@ -484,6 +624,25 @@ namespace TorreDeControle.UI
                            $"<size=80%><color=#{suave}>({quem?.NomeExibicao ?? "?"}, {jogador})</color></size>\n" +
                            $"<color=#{leitura}><noparse>{envio.Texto}</noparse></color>");
             }
+            return string.Join("\n\n", partes);
+        }
+
+        /// <summary>
+        /// A formação em texto simples para colar fora da Torre: a pergunta numerada em negrito (BBCode no
+        /// fórum, *asteriscos* no WhatsApp), quem respondeu, a resposta. A regra da fila vai no fim.
+        /// </summary>
+        string FormacaoParaColar(string abreNegrito, string fechaNegrito)
+        {
+            var partes = new List<string> { $"{abreNegrito}Formação da equipe · {sala.Nome}{fechaNegrito}" };
+            for (var k = 0; k < sala.FormacaoEquipe.Count; k++)
+            {
+                var envio = sala.FormacaoEquipe[k];
+                var quem = personagens.Buscar(envio.Personagem);
+                var jogador = quem?.Identidade.Jogador == null ? "sem jogador" : jogadores.Buscar(quem.Identidade.Jogador)?.Nome ?? "?";
+                var pergunta = quem == null ? null : personagens.RegraDoArquetipo(quem)?.Equipe.Pergunta;
+                partes.Add($"{abreNegrito}{k + 1}. {pergunta}{fechaNegrito}\n({quem?.NomeExibicao ?? "?"}, {jogador})\n{envio.Texto}");
+            }
+            partes.Add("Quem responde primeiro estabelece a verdade; os demais constroem sobre ela.");
             return string.Join("\n\n", partes);
         }
 

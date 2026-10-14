@@ -33,6 +33,13 @@ namespace TorreDeControle.Core.Personagens
     [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
     public enum AprovacaoFoto { Aguardando, Aprovada, Recusada }
 
+    /// <summary>
+    /// Estado de uma Influência que a personagem deu: dada, ou perdida no jogo (amizades se perdem e podem
+    /// voltar). Uma vez dada, não sai da ficha.
+    /// </summary>
+    [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
+    public enum EstadoInfluencia { Dada, Perdida }
+
     /// <summary>Seção Identidade da ficha.</summary>
     public sealed class Identidade
     {
@@ -205,7 +212,22 @@ namespace TorreDeControle.Core.Personagens
         /// <summary>Comportamento escolhido, quando a regra de Influência é por comportamento.</summary>
         [JsonProperty("influencia_comportamento")] public string InfluenciaComportamento { get; set; }
         /// <summary>Colegas (ids) a quem deu Influência inicial, quando a regra deixa escolher.</summary>
-        [JsonProperty("influencia_para")] public List<string> InfluenciaPara { get; set; } = new List<string>();
+        /// <summary>
+        /// A Influência que a personagem deu, por colega (id): dada ou perdida. A leitura reversa (quem tem
+        /// Influência sobre quem) lê este estado nas fichas. Na criação, desmarcar tira o colega (nunca valeu);
+        /// no jogo, perder vira "perdida" e fica na ficha.
+        /// </summary>
+        [JsonProperty("influencias")] public Dictionary<string, EstadoInfluencia> Influencias { get; set; } = new Dictionary<string, EstadoInfluencia>();
+        /// <summary>Formato de 2026-10-14 (uma lista de ids): lido só para converter, não é mais gravado.</summary>
+        [JsonProperty("influencia_para")] public List<string> InfluenciaParaAntiga { get; set; }
+        public bool ShouldSerializeInfluenciaParaAntiga() => false;
+        /// <summary>
+        /// Por que cada colega (id) tem Influência sobre a personagem: texto livre, opcional, para roleplay.
+        /// Anotação, não regra: editável sempre.
+        /// </summary>
+        [JsonProperty("influencia_porque")] public Dictionary<string, string> InfluenciaPorque { get; set; } = new Dictionary<string, string>();
+        /// <summary>Por que ninguém tem Influência sobre ela (quando não deu a ninguém): opcional, roleplay.</summary>
+        [JsonProperty("influencia_porque_ninguem")] public string InfluenciaPorqueNinguem { get; set; } = string.Empty;
 
         /// <summary>Perfil PNJ (controle do mestre); null em herói.</summary>
         [JsonProperty("pnj")] public PerfilPnj Pnj { get; set; }

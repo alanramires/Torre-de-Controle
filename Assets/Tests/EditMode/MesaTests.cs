@@ -25,7 +25,7 @@ namespace TorreDeControle.Tests
             var original = FichaPronta.Criada(personagens, "Estrela");
             salas.PorPersonagem(sala.Id, 0, original.Id, false);
             heroi = personagens.Buscar(sala.Slots[0].Personagem);
-            personagens.AprovarParaCampanha(heroi.Id);
+            FichaPronta.ParaCarreira(salas, personagens, sala, heroi);
             mesa = Mesa.Carregar(armazenamento, personagens, sala.Id);
         }
 

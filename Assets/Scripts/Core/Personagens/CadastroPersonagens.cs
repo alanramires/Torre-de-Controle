@@ -57,7 +57,16 @@ namespace TorreDeControle.Core.Personagens
             p.ObsMovimentos ??= new Dictionary<string, string>();
             p.CondicoesMarcadas ??= new List<string>();
             p.Relacionamentos ??= new List<string>();
-            p.InfluenciaPara ??= new List<string>();
+            p.Influencias ??= new Dictionary<string, EstadoInfluencia>();
+            if (p.InfluenciaParaAntiga != null)
+            {
+                // Lista do formato anterior: quem estava nela recebeu Influência (dada).
+                foreach (var id in p.InfluenciaParaAntiga.Where(id => !p.Influencias.ContainsKey(id)))
+                    p.Influencias[id] = EstadoInfluencia.Dada;
+                p.InfluenciaParaAntiga = null;
+            }
+            p.InfluenciaPorque ??= new Dictionary<string, string>();
+            p.InfluenciaPorqueNinguem ??= string.Empty;
             if (p.Vilao != null)
             {
                 p.Vilao.Movimentos ??= new List<string>();
@@ -368,8 +377,9 @@ namespace TorreDeControle.Core.Personagens
                 return Resultado.Falha("Ficha do arquivo da sala: só consulta.");
             if (p.Status != StatusCriacao.EmAprovacao)
                 return Resultado.Falha("Só ficha em aprovação se aprova.");
-            // A segunda etapa (PendenciasDaEquipe) ainda não trava: a tela da equipe não existe e a
-            // regra da Influência está para ser definida com o Alan.
+            var pendencias = PendenciasParaCarreira(p);
+            if (pendencias.Count > 0)
+                return Resultado.Falha("Ainda falta: " + string.Join(" ", pendencias));
             p.Status = StatusCriacao.EmCarreira;
             Gravar();
             return Resultado.Sucesso();

@@ -6,6 +6,20 @@ namespace TorreDeControle.Tests
     /// <summary>Preenche a ficha de criação a partir do JSON, até ela poder ser concluída.</summary>
     static class FichaPronta
     {
+        /// <summary>
+        /// Cumpre os requisitos da campanha (formação enviada, Influência pela regra) e aprova a instância
+        /// para em carreira. A ficha pronta é uma Nova: escolhe "cara fechada" (1 colega, ou 0 se sozinha).
+        /// </summary>
+        public static void ParaCarreira(TorreDeControle.Core.Salas.CadastroSalas salas, CadastroPersonagens personagens,
+            TorreDeControle.Core.Salas.Sala sala, Personagem copia)
+        {
+            salas.EnviarFormacao(sala.Id, copia.Id, "a formação da " + copia.NomeExibicao);
+            personagens.EscolherComportamento(copia.Id, "cara_fechada");
+            var quantas = personagens.QuantasInfluencias(copia) ?? 0;
+            personagens.DarInfluencia(copia.Id, personagens.Colegas(copia).Take(quantas).Select(c => c.Id));
+            NUnit.Framework.Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, NUnit.Framework.Is.True);
+        }
+
         /// <summary>Uma Nova criada (foto congelada) no laboratório.</summary>
         public static Personagem Criada(CadastroPersonagens cadastro, string codinome, string jogador = null)
         {

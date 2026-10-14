@@ -65,7 +65,9 @@ namespace TorreDeControle.Core.Personagens
             p.Ordem = Ordenacao.Fim(personagens);
             // A campanha de lá não vem: colegas e Influência apontam para personagens de outra Torre.
             p.Relacionamentos = new List<string>();
-            p.InfluenciaPara = new List<string>();
+            p.Influencias = new Dictionary<string, EstadoInfluencia>();
+            p.InfluenciaPorque = new Dictionary<string, string>();
+            p.InfluenciaPorqueNinguem = string.Empty;
             p.InfluenciaComportamento = null;
             p.EquipeResposta = string.Empty;
             p.Status = p.Foto != null ? StatusCriacao.EmAprovacao : StatusCriacao.Novo;
@@ -111,7 +113,7 @@ namespace TorreDeControle.Core.Personagens
             var (sala, origem, ativo, ordem, status, jogador) =
                 (p.Sala, p.Origem, p.Ativo, p.Ordem, p.Status, p.Identidade.Jogador);
             var (relacionamentos, influencia, comportamento, equipe) =
-                (p.Relacionamentos, p.InfluenciaPara, p.InfluenciaComportamento, p.EquipeResposta);
+                (p.Relacionamentos, p.Influencias, p.InfluenciaComportamento, p.EquipeResposta);
 
             JsonConvert.PopulateObject(JsonConvert.SerializeObject(lida), p, Restaurar);
             Normalizar(p);
@@ -119,7 +121,7 @@ namespace TorreDeControle.Core.Personagens
             (p.Sala, p.Origem, p.Ativo, p.Ordem, p.Status) = (sala, origem, ativo, ordem, status);
             p.Identidade.Jogador = jogador;
             if (!mesma)
-                (p.Relacionamentos, p.InfluenciaPara, p.InfluenciaComportamento, p.EquipeResposta) =
+                (p.Relacionamentos, p.Influencias, p.InfluenciaComportamento, p.EquipeResposta) =
                     (relacionamentos, influencia, comportamento, equipe);
             Gravar();
             return Resultado.Sucesso();

@@ -183,7 +183,7 @@ namespace TorreDeControle.Tests
             var original = FichaPronta.Criada(personagens, "Estrela");
             salas.PorPersonagem(sala.Id, 0, original.Id, false);
             var copia = personagens.Buscar(sala.Slots[0].Personagem);
-            Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.True);
+            FichaPronta.ParaCarreira(salas, personagens, sala, copia);
             copia.Potencial = 4;
 
             Assert.That(personagens.ReabrirCriacao(copia.Id).Ok, Is.True);
@@ -194,7 +194,7 @@ namespace TorreDeControle.Tests
             // Concluída de novo: volta a em aprovação, e o mestre aprova outra vez.
             Assert.That(personagens.Aprovar(copia.Id).Ok, Is.True);
             Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmAprovacao));
-            Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.True);
+            Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.True); // a equipe já estava feita
             Assert.That(copia.Status, Is.EqualTo(StatusCriacao.EmCarreira));
         }
 
@@ -217,7 +217,9 @@ namespace TorreDeControle.Tests
             Assert.That(personagens.AprovarParaCampanha(original.Id).Ok, Is.False); // laboratório
             salas.PorPersonagem(sala.Id, 0, original.Id, false);
             var copia = personagens.Buscar(sala.Slots[0].Personagem);
-            Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.True);
+            Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.False); // falta a equipe
+            Assert.That(personagens.PendenciasParaCarreira(copia), Has.Count.EqualTo(2));
+            FichaPronta.ParaCarreira(salas, personagens, sala, copia);
             Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.False); // já em carreira
         }
 

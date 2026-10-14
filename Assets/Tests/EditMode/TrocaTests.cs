@@ -40,7 +40,7 @@ namespace TorreDeControle.Tests
             var original = FichaPronta.Criada(personagens, "Estrela");
             salas.PorPersonagem(sala.Id, 0, original.Id, false);
             var copia = personagens.Buscar(sala.Slots[0].Personagem);
-            personagens.AprovarParaCampanha(copia.Id);
+            FichaPronta.ParaCarreira(salas, personagens, sala, copia);
 
             Assert.That(personagens.Importar(personagens.Exportar(copia.Id), out var nova).Ok, Is.True);
             Assert.That(nova.Sala, Is.Null);

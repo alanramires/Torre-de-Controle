@@ -555,8 +555,13 @@ namespace TorreDeControle.UI
         }
 
         /// <summary>Mini-tela modal com uma área de texto grande: Cancelar ou Salvar.</summary>
-        /// <summary>Mini-tela modal para ler um texto longo (rich text), só leitura, com rolagem e Fechar.</summary>
-        public static void LeitorDeTexto(Transform qualquer, string titulo, string textoRico)
+        /// <summary>
+        /// Mini-tela modal para ler um texto longo (rich text), só leitura, com rolagem e Fechar.
+        /// <paramref name="copias"/>: botões que copiam uma versão do texto para a área de transferência
+        /// (ex.: para o fórum, para o WhatsApp).
+        /// </summary>
+        public static void LeitorDeTexto(Transform qualquer, string titulo, string textoRico,
+            params (string rotulo, System.Func<string> texto)[] copias)
         {
             var raiz = (RectTransform)qualquer.GetComponentInParent<Canvas>().rootCanvas.transform;
             var veu = Rect("LeitorDeTexto", raiz);
@@ -584,8 +589,18 @@ namespace TorreDeControle.UI
             corpo.textWrappingMode = TextWrappingModes.Normal;
 
             var botoes = Fila(caixa, 60);
-            var vao = Rect("Vao", botoes);
-            vao.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            var aviso = Rotulo(botoes, string.Empty, 20, Dourado, FontStyles.Italic);
+            ColunaElastica(aviso);
+            foreach (var (rotulo, texto) in copias)
+            {
+                var nome = rotulo;
+                var gerar = texto;
+                BotaoContorno(botoes, rotulo, 360, Dourado, () =>
+                {
+                    GUIUtility.systemCopyBuffer = gerar();
+                    aviso.text = $"Copiado ({nome.ToLowerInvariant()}): é só colar.";
+                });
+            }
             BotaoContorno(botoes, "Fechar", 220, TextoSuave, () => Object.Destroy(veu.gameObject));
         }
 

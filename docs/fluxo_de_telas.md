@@ -247,6 +247,12 @@ Cenário alvo, já de pé: uma sala com 5 personagens **em aprovação**. Para c
 
 1. **História do time**: a resposta de "quando a equipe se reuniu pela primeira vez" (pergunta do arquétipo).
 2. **Influências distribuídas**: a Influência inicial pela regra do arquétipo, entre os colegas da sala.
+   Feito (2026-10-14): **o jogador marca na ficha** (Núcleo, seção Influência); a **aba Influência da sala**
+   é a visão do mestre (quem deu a quem, leitura reversa). Quando o jogo começar, essa aba vira o
+   **painel do mestre para dar e tirar Influência** (evento da mesa, com rodada e motivo).
+   **Influência dada não sai da ficha** (Alan, 2026-10-14): no jogo ela fica **dada** ou **perdida** (amizades
+   se perdem e podem voltar), com o histórico. O **porquê** de cada uma (texto opcional, roleplay) nunca é
+   apagado pela Torre: o jogador atualiza quando quiser.
    **O Alan ainda vai explicar como quer a Influência** — não implementar a regra antes disso
    (o rascunho em `CadastroPersonagens.Equipe.cs` lê o JSON, mas não trava nada).
 3. **Relacionamentos selecionados**: o colega de cada frase de relacionamento, escolhido entre as

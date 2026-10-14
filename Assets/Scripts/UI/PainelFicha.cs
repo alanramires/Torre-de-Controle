@@ -181,7 +181,8 @@ namespace TorreDeControle.UI
         {
             var i = p.Identidade;
             var arte = RetratoDoArquetipo;
-            var temFotoHeroica = !string.IsNullOrWhiteSpace(i.FotoHeroica);
+            var temFotoHeroica = !string.IsNullOrWhiteSpace(i.FotoHeroica) &&
+                                 i.FotoHeroicaAprovacao != AprovacaoFoto.Recusada;
             retrato.transform.parent.gameObject.SetActive(temFotoHeroica || arte != null);
             if (temFotoHeroica || arte != null)
                 fotoRetrato.Mostrar(i.FotoHeroica, retrato, proporcaoRetrato, avisoRetrato,
@@ -333,9 +334,19 @@ namespace TorreDeControle.UI
             // Instância em aprovação, aberta pela sala: completa o que é da equipe e o mestre aprova.
             if (p.Sala != null && p.Status == StatusCriacao.EmAprovacao && pelaSala)
             {
-                mensagem.text = "Em aprovação na campanha: complete o que é da equipe e aprove para entrar em carreira.";
-                mensagem.color = Estilo.Dourado;
-                Estilo.BotaoPrincipal(rodape, "Aprovar para a campanha", 360, AprovarParaCampanha);
+                var falta = cadastro.PendenciasParaCarreira(p);
+                if (falta.Count == 0)
+                {
+                    mensagem.text = "Pronta para a campanha: aprove para entrar em carreira.";
+                    mensagem.color = Estilo.Dourado;
+                    Estilo.BotaoPrincipal(rodape, "Aprovar para a campanha", 360, AprovarParaCampanha);
+                }
+                else
+                {
+                    mensagem.text = $"{falta.Count} pendência{(falta.Count == 1 ? "" : "s")} para a campanha: {falta[0]}";
+                    detalheDoRodape = "Para entrar em carreira (na sala):" + Itens(falta);
+                    Estilo.BotaoContorno(rodape, "Aprovar para a campanha", 360, Estilo.TextoApagado, () => { }).interactable = false;
+                }
                 return;
             }
             if (!p.EmCriacao)
@@ -634,7 +645,14 @@ namespace TorreDeControle.UI
             Estilo.Esticar(texto.rectTransform);
             texto.rectTransform.offsetMin = new Vector2(10, 10);
             texto.rectTransform.offsetMax = new Vector2(-10, -10);
-            if (temLink)
+            if (temLink && aprovacao == AprovacaoFoto.Recusada)
+            {
+                // Recusada: a imagem some (o link continua no campo) para o jogador saber que tem de trocar.
+                imagem.enabled = false;
+                texto.text = $"{titulo}\n\n<size=80%>recusada: troque o link</size>";
+                texto.color = Estilo.Erro;
+            }
+            else if (temLink)
                 quadro.gameObject.AddComponent<FotoDaWeb>().Mostrar(link, imagem, proporcao, texto, padrao);
             else if (usaPadrao)
             {
@@ -670,9 +688,11 @@ namespace TorreDeControle.UI
                         cadastro.AvaliarFoto(p.Id, ehHeroica, novo);
                         MontarConteudo(manterRolagem: true);
                     };
-                    var b = aprovacao == alvo
-                        ? Estilo.BotaoPrincipal(botoes, nome, 0, clicar)
-                        : Estilo.BotaoContorno(botoes, nome, 0, cor, clicar);
+                    var escolhido = aprovacao == alvo;
+                    var rotulo = !escolhido ? nome : alvo == AprovacaoFoto.Aprovada ? "Aprovado" : "Recusado";
+                    var b = escolhido
+                        ? Estilo.BotaoPrincipal(botoes, rotulo, 0, clicar)
+                        : Estilo.BotaoContorno(botoes, rotulo, 0, cor, clicar);
                     b.GetComponent<LayoutElement>().flexibleWidth = 1;
                     var t = b.GetComponentInChildren<TextMeshProUGUI>();
                     t.fontSize = 16;
@@ -2016,6 +2036,50 @@ namespace TorreDeControle.UI
             var influencia = Estilo.Rotulo(conteudo, texto, 22, Estilo.TextoApagado, FontStyles.Italic);
             influencia.textWrappingMode = TextWrappingModes.Normal;
             influencia.gameObject.AddComponent<LayoutElement>().minHeight = 34;
+
+            // Na campanha, em aprovação, aberta pela sala: o jogador marca aqui (a sala tem a visão do mestre).
+            if (p.Sala != null && pelaSala && cadastro.EquipeEditavel(p))
+            {
+                void AoMudar(Resultado r)
+                {
+                    MontarConteudo(manterRolagem: true);
+                    MontarRodape();
+                    if (!r.Ok)
+                        Aviso(r.Erro);
+                }
+                SeletorDeInfluencia.MontarComportamento(conteudo, p, cadastro, AoMudar);
+                SeletorDeInfluencia.MontarEscolha(conteudo, p, cadastro, AoMudar);
+            }
+
+            // O porquê de cada Influência (roleplay): anotação, editável também depois de aprovada.
+            if (p.Sala != null && pelaSala && p.Ativo)
+                SeletorDeInfluencia.MontarPorques(conteudo, p, cadastro);
+
+            // Na sala: o que já foi decidido, lido das fichas.
+            if (p.Sala != null)
+            {
+                string Nomes(IEnumerable<string> ids)
+                {
+                    var nomes = ids.Select(id => cadastro.Buscar(id)?.NomeExibicao ?? "?").ToList();
+                    return nomes.Count == 0 ? "ninguém ainda" : string.Join(", ", nomes);
+                }
+                var suave = ColorUtility.ToHtmlStringRGB(Estilo.TextoSuave);
+                var apagado = ColorUtility.ToHtmlStringRGB(Estilo.TextoApagado);
+                string Perdidas(IEnumerable<string> ids)
+                {
+                    var lista = ids.ToList();
+                    return lista.Count == 0 ? string.Empty
+                        : $"   <color=#{apagado}>perdida: {string.Join(", ", lista.Select(id => cadastro.Buscar(id)?.NomeExibicao ?? "?"))}</color>";
+                }
+                var deu = Estilo.Rotulo(conteudo,
+                    $"<color=#{suave}>Deu Influência a:</color>  {Nomes(cadastro.InfluenciaDada(p))}" +
+                    Perdidas(cadastro.InfluenciaPerdida(p)), 22, Estilo.Texto);
+                deu.textWrappingMode = TextWrappingModes.Normal;
+                var recebeu = Estilo.Rotulo(conteudo,
+                    $"<color=#{suave}>{p.NomeExibicao} exerce Influência sobre:</color>  {Nomes(cadastro.QuemDeuInfluencia(p).Select(c => c.Id))}" +
+                    Perdidas(cadastro.QuemPerdeuInfluencia(p).Select(c => c.Id)), 22, Estilo.Texto);
+                recebeu.textWrappingMode = TextWrappingModes.Normal;
+            }
         }
 
         void Secao(string nome, string legenda)
