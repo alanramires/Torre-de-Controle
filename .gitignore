@@ -118,3 +118,6 @@ desktop.ini
 *.psd.meta
 *.PSD
 *.PSD.meta
+
+# Ícones do Icons8: licença gratuita não permite redistribuir soltos (repositório público)
+/Assets/img/icones/icons8-*

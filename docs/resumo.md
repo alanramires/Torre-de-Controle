@@ -3,6 +3,14 @@
 > Handoff para a próxima conversa. Atualizado no fechamento da **v0.0.1** (2026-10-13).
 > Se algo aqui contradiz o código, o código manda — e este arquivo precisa de poda.
 
+## Leitura para retomar
+
+Leia este resumo junto com [regras_masks.md](regras_masks.md): entendimento do sistema,
+cuidados de interpretação e direção dos painéis de ajuda, em palavras próprias.
+As regras executáveis continuam em `Assets/Resources/Regras/*.json`; consulte também
+`CLAUDE.md`, `regras.md`, `fluxo_de_telas.md` e os achados do relatório antes de alterar regras.
+O resumo abaixo retrata o fechamento da v0.0.1; não presume registrar todas as mudanças posteriores.
+
 ## Estado
 
 - **Versão:** v0.0.1 — *Escopo, Cadastro de Players e construção de Personagens (em andamento)*.
