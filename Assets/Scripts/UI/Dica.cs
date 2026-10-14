@@ -44,11 +44,19 @@ namespace TorreDeControle.UI
             t.alignment = TextAlignmentOptions.TopLeft;
 
             // Embaixo e à direita do alvo; se passar da borda direita, alinha pela direita.
+            // Se não couber embaixo (ex.: o rodapé da ficha), abre para cima do alvo.
+            LayoutRebuilder.ForceRebuildLayoutImmediate(caixa);
+            var altura = caixa.rect.height;
             var cantos = new Vector3[4];
             ((RectTransform)transform).GetWorldCorners(cantos);
             Vector2 baixoEsq = raiz.InverseTransformPoint(cantos[0]);
-            var x = Mathf.Min(baixoEsq.x, raiz.rect.xMax - Largura - 10);
-            caixa.anchoredPosition = new Vector2(x, baixoEsq.y - 6);
+            Vector2 cimaEsq = raiz.InverseTransformPoint(cantos[1]);
+            var x = Mathf.Max(raiz.rect.xMin + 10, Mathf.Min(baixoEsq.x, raiz.rect.xMax - Largura - 10));
+            var cabeEmbaixo = baixoEsq.y - 6 - altura >= raiz.rect.yMin + 10;
+            caixa.pivot = cabeEmbaixo ? new Vector2(0, 1) : new Vector2(0, 0);
+            caixa.anchoredPosition = cabeEmbaixo
+                ? new Vector2(x, baixoEsq.y - 6)
+                : new Vector2(x, Mathf.Min(cimaEsq.y + 6, raiz.rect.yMax - 10 - altura));
             caixa.SetAsLastSibling();
         }
 
