@@ -1,6 +1,6 @@
 # Resumo — onde a Torre está
 
-> Handoff para a próxima conversa. Atualizado no fechamento da **v0.0.2** (2026-10-13).
+> Handoff para a próxima conversa. Atualizado no fechamento da **v0.0.3** (2026-10-14).
 > Se algo aqui contradiz o código, o código manda — e este arquivo precisa de poda.
 
 ## Leitura para retomar
@@ -16,24 +16,31 @@ novo é seu.
 
 ## Estado
 
-- **Versão:** v0.0.2 — *Salas, instâncias e o ciclo da ficha*. Relatório: `docs/relatorio_v0.0.2.md`.
-- **O que organiza o que vem:** a ficha tem um **caminho**, e cada ação depende de onde ela está:
+- **Versão:** v0.0.3 — *Ficha ágil, exportável e corrigível*. Relatório: `docs/relatorio_v0.0.3.md`.
+- **Onde o Alan chegou:** uma sala com 5 personagens **em aprovação**. O próximo passo é a **aprovação
+  na campanha** (ver "Onde eu parei").
+- **O caminho da ficha**, e cada ação depende de onde ela está (e de onde foi aberta: hierarquia):
 
   ```
   laboratório:  novo ⇄ em aprovação
-  sala:         em aprovação ⇄ em revisão; em aprovação → em carreira → aposentado (sem volta)
+  sala:         em aprovação → em carreira → aposentado (sem volta)
+                em aprovação e em carreira → em revisão (botão na aba Mestre) → em aprovação
   ```
 
-  Pôr na vaga **copia** a ficha (a original fica no laboratório). Em carreira só muda por evento da
-  **mesa** (com rodada e motivo), que existe no Core mas ainda não tem tela.
+  Pôr na vaga **copia** a ficha (a original fica no laboratório). Do laboratório, a instância é só
+  consulta. Em carreira, o jogo muda por evento da **mesa** (Core pronto, sem tela).
+- **Troca com outras máquinas:** exportar/importar JSON (lista = personagem nova; ficha = por cima da
+  mesma). Ida e volta conferida pelo Alan.
 - **Princípio:** a Torre é só do mestre, mas se comporta como se um dia fosse pública (conteúdo do
   jogador passa por moderação: fotos por link com aprovar/recusar).
 
 ## Onde eu parei
 
-- **Segunda etapa (equipe na campanha)** — `Core/Personagens/CadastroPersonagens.Equipe.cs`: resposta da
-  equipe, relacionamentos com colegas e um **rascunho** da Influência inicial. Sem tela e **sem travar**
-  `AprovarParaCampanha`. **Esperar o Alan explicar como quer a Influência** antes de seguir.
+- **Aprovação na campanha (próximo passo do Alan)** — para subir de em aprovação a em carreira, a sala
+  vai cobrar: história do time, Influências distribuídas, relacionamentos com os colegas e **NPCs que
+  orbitam as personagens, criados pelos jogadores**. Detalhado em `fluxo_de_telas.md` ("Aprovação na
+  campanha"). O Core da equipe é rascunho (`Core/Personagens/CadastroPersonagens.Equipe.cs`), sem tela e
+  sem travar `AprovarParaCampanha`. **Esperar o Alan explicar a Influência e desenhar os NPCs.**
 - **Área do mestre** — o botão está na sala (`PainelSala.AreaDoMestre`, só avisa "em construção"). O
   Core está pronto em `Core/Mesa/Mesa.cs` (rodada, eventos, potencial, condições, Rótulos com estouro,
   corrigir). Falta a tela: cartões das personagens em carreira, comandos com motivo, log da rodada.
@@ -41,7 +48,9 @@ novo é seu.
   Bruta e Delinquente sem validação; Discípula, Legado e Transformado sem revisão. Esperar o Alan.
 - Anotados para depois: aposentar no 15º avanço; ajuste do mestre em ficha em carreira
   (`implementacao_futura.md`).
-- Testes: `Assets/Tests/EditMode/` — 84 passando no harness dotnet fora da Unity; rodar também no Test
+- **Ajuste pontual com motivo** em ficha em carreira (sem reabrir a criação) e **resultado sem rolagem**
+  (Sobrecarga 10+, Vou te salvar! 12+) para o rolador: anotados.
+- Testes: `Assets/Tests/EditMode/` — 91 passando no harness dotnet fora da Unity; rodar também no Test
   Runner da Unity.
 
 ## Armadilhas
@@ -66,6 +75,11 @@ novo é seu.
 | Ficha concluída sem movimentos | foto posta antes de congelar os módulos | montar a foto inteira antes de atribuir |
 | String C# quebrada | heredoc do Bash come `\` | patch em arquivo `.py` no scratchpad |
 | Imagem não carrega por caminho | fora de uma pasta `Resources` | `Resources/...` ou lista no Inspector |
+| Ficha em branco ao abrir (2º Play) | Play sem domain reload: cache estático com textura destruída | limpar estáticos com `[RuntimeInitializeOnLoadMethod]` |
+| Texto digitado some | gravava só ao sair do campo | `onValueChanged` (barato com a gravação adiada) |
+| "Textos trocados" nas descrições | caixas na ordem do JSON, jogador preenche na ordem que marcou | caixas na ordem da marcação |
+| Engasgo a cada clique | aba inteira refeita + arquivo gravado por clique | `SecaoRefazivel` + `ArmazenamentoAdiado` |
+| Recompilação de 6–16 s ao voltar à Unity | Auto Refresh com duas IAs editando | desligar Auto Refresh, Ctrl+R quando quiser |
 | Texto de regra copiado | repo é **público** | texto próprio sempre; livro/acervo só como consulta |
 | Ícone de terceiros no repo | licença (ex.: Icons8) | fora do repositório (`.gitignore`) |
 
@@ -81,7 +95,8 @@ novo é seu.
 | Rolador 2d6 + log | **log pronto no Core**; rolador falta |
 | Exportar log para o fórum | falta |
 
-Fora do MVP, já de pé: jogadores; NPCs com ficha de vilão; fotos por link com aprovação; retratos.
+Fora do MVP, já de pé: jogadores; NPCs com ficha de vilão; fotos por link com aprovação; retratos;
+exportar/importar a ficha em JSON (troca com outras máquinas).
 
 ## Schema da ficha
 
