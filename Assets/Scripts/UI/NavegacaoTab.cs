@@ -23,12 +23,17 @@ namespace TorreDeControle.UI
         static readonly List<NavegacaoTab> ligadas = new List<NavegacaoTab>();
         readonly List<Tabulavel> paradas = new List<Tabulavel>();
 
+        /// <summary>Play sem recarregar o domínio: a pilha estática começa vazia a cada Play.</summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void LimparAoEntrarNoPlay() => ligadas.Clear();
+
         void OnEnable() => ligadas.Add(this);
         void OnDisable() => ligadas.Remove(this);
 
         void Update()
         {
-            if (ligadas[ligadas.Count - 1] != this)
+            ligadas.RemoveAll(n => n == null);
+            if (ligadas.Count == 0 || ligadas[ligadas.Count - 1] != this)
                 return;
 
             var teclado = Keyboard.current;

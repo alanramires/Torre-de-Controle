@@ -19,6 +19,17 @@ namespace TorreDeControle.UI
         static readonly Dictionary<string, Texture2D> baixadas = new Dictionary<string, Texture2D>();
         static readonly HashSet<string> falharam = new HashSet<string>();
 
+        /// <summary>
+        /// O projeto entra no Play sem recarregar o domínio: estáticos sobrevivem de um Play para o outro,
+        /// mas as texturas baixadas são destruídas ao sair. Sem limpar, o cache devolve textura morta.
+        /// </summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void LimparAoEntrarNoPlay()
+        {
+            baixadas.Clear();
+            falharam.Clear();
+        }
+
         RawImage imagem;
         AspectRatioFitter proporcao;
         TextMeshProUGUI aviso;
@@ -45,8 +56,12 @@ namespace TorreDeControle.UI
 
             if (baixadas.TryGetValue(link, out var pronta))
             {
-                Aplicar(pronta);
-                return;
+                if (pronta != null)
+                {
+                    Aplicar(pronta);
+                    return;
+                }
+                baixadas.Remove(link); // destruída: baixa de novo
             }
             if (falharam.Contains(link))
             {

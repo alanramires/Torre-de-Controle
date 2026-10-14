@@ -12,6 +12,10 @@ namespace TorreDeControle.UI
     {
         static readonly Dictionary<string, Texture2D> porNome = new Dictionary<string, Texture2D>();
 
+        /// <summary>Play sem recarregar o domínio: o cache estático começa limpo a cada Play.</summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void LimparAoEntrarNoPlay() => porNome.Clear();
+
         public static void Registrar(IEnumerable<Texture2D> texturas)
         {
             porNome.Clear();
