@@ -201,6 +201,7 @@
               "id": "caracteristicas",
               "tipo": "lista",
               "rotulo": "Características",
+              "descrever_opcional": true,
               "opcoes": [
                 {
                   "id": "ajudante-ou-assistente",
@@ -261,6 +262,7 @@
               "id": "desvantagens",
               "tipo": "lista",
               "rotulo": "Desvantagens",
+              "descrever_opcional": true,
               "opcoes": [
                 {
                   "id": "dificil-de-acessar",
@@ -958,27 +960,33 @@
         "opcoes": [
           {
             "id": "andei-lendo-os-arquivos",
-            "nome": "Andei lendo os arquivos"
+            "nome": "Andei lendo os arquivos",
+            "regra": "Ao topar pela primeira vez com um fenômeno superpoderoso importante, role + Superior. Num acerto, conte à equipe um detalhe que estudou; o MJ diz o que parece diferente. Com 10+, faça mais uma pergunta ao MJ. Numa falha, o MJ diz por que isso foge do que você sabe."
           },
           {
             "id": "capita",
-            "nome": "Capitã"
+            "nome": "Capitã",
+            "regra": "Quando a equipe entra em batalha junta, ponha 1 Equipe a mais na pilha; se você lidera, ganhe +1 adiante."
           },
           {
             "id": "desabafo",
-            "nome": "Desabafo"
+            "nome": "Desabafo",
+            "regra": "Ao enfrentar diretamente estando Irritada, pode rolar + o Rótulo que sua mentora nega e desmarcar Irritada."
           },
           {
             "id": "conversa-ao-pe-do-fogo",
-            "nome": "Conversa ao pé do fogo"
+            "nome": "Conversa ao pé do fogo",
+            "regra": "Ao pedir conselho à mentora, role + o Rótulo que ela encarna. Num acerto, ela diz o que fazer; com 10+, marque potencial se seguir e ganhe +1 contínuo para cumprir; com 7–9, +1 adiante se fizer do jeito dela. Numa falha, ela não tem tempo (algo grande aconteceu): marque uma condição à escolha do MJ."
           },
           {
             "id": "atencao-ao-redor",
-            "nome": "Atenção ao redor"
+            "nome": "Atenção ao redor",
+            "regra": "Ao avaliar a situação antes de entrar numa luta, faça uma pergunta a mais, mesmo numa falha."
           },
           {
             "id": "tradicao-heroica",
-            "nome": "Tradição heroica"
+            "nome": "Tradição heroica",
+            "regra": "Ao dar o conselho que acha que sua mentora daria, pode confortar ou apoiar rolando + o Rótulo que ela encarna, no lugar de + Mundano."
           }
         ]
       },
@@ -1030,6 +1038,13 @@
                 "superior",
                 "mundano"
               ]
+            },
+            {
+              "id": "conflitos",
+              "tipo": "texto",
+              "rotulo": "Conflitos esperados entre você e sua mentora pelos Rótulos",
+              "opcional": true,
+              "varias_linhas": true
             }
           ]
         },
@@ -1041,6 +1056,7 @@
               "id": "recursos",
               "tipo": "lista",
               "rotulo": "Até 3 recursos para você e a equipe",
+              "descrever_opcional": true,
               "opcoes": [
                 {
                   "id": "base-secreta",
@@ -1261,7 +1277,8 @@
         "opcoes": [
           {
             "id": "na-espreita",
-            "nome": "Na espreita"
+            "nome": "Na espreita",
+            "regra": "Ao sondar uma pessoa ou lugar, role + Mundano: com 10+, faça duas perguntas; com 7–9, uma (melhor jeito de entrar ou sair, o que houve aqui, o que vale pegar, quem ou o que não é o que parece, de quem é o lugar). Numa falha, você se mete onde não devia."
           },
           {
             "id": "sem-poderes-e-quase-sem-treino",
@@ -1271,17 +1288,20 @@
               {
                 "id": "equipamento",
                 "tipo": "texto",
-                "rotulo": "Equipamento (vira uma habilidade nova se a linha estiver vazia)"
+                "rotulo": "Equipamento (vira uma habilidade nova se a linha estiver vazia)",
+                "no_jogo": true
               }
             ]
           },
           {
             "id": "nao-vou-te-decepcionar",
-            "nome": "Não vou te decepcionar"
+            "nome": "Não vou te decepcionar",
+            "regra": "Ao ajudar um colega, pode gastar 2 da pilha de Equipe para dar +2 na rolagem dele."
           },
           {
             "id": "quase-um-super-heroi",
-            "nome": "Quase um super-herói"
+            "nome": "Quase um super-herói",
+            "regra": "Ao dizer seu nome de herói pela primeira vez a alguém importante, role + Salvador. Num acerto, já ouviram falar de você: diga que façanha e que Rótulo acham que se aplica. Com 7–9, o MJ conta outra coisa que ouviram e escolhe um segundo Rótulo. Numa falha, não te levam a sério ou passam a desconfiar."
           },
           {
             "id": "vamos-sortudo",
@@ -1339,7 +1359,8 @@
           },
           {
             "id": "chupa-domiciano",
-            "nome": "Chupa, Domiciano!"
+            "nome": "Chupa, Domiciano!",
+            "regra": "Ao se manter firme sob fogo, de forma dramática, enfrente diretamente rolando + Salvador no lugar de + Perigoso."
           }
         ]
       },
@@ -2012,23 +2033,28 @@
           },
           {
             "id": "agora-e-serio",
-            "nome": "Agora é sério"
+            "nome": "Agora é sério",
+            "regra": "Ao se comprometer a salvar alguém ou derrotar um inimigo terrível, marque uma condição e ganhe +1 contínuo em tudo que buscar diretamente isso. Fim de cena sem avançar no objetivo: marque uma condição. Cumpriu: marque potencial."
           },
           {
             "id": "eu-sou-o-que-voce-ve",
-            "nome": "Eu sou o que você vê"
+            "nome": "Eu sou o que você vê",
+            "regra": "Ao conversar com alguém sobre sua identidade, pergunte que Rótulo essa pessoa quer impor a você; o jogador responde com sinceridade. Se aceitar, ganhe +1 adiante e marque potencial ou desmarque uma condição."
           },
           {
             "id": "discreta",
-            "nome": "Discreta"
+            "nome": "Discreta",
+            "regra": "Ao usar a identidade civil para enganar, iludir ou passar despercebida, role + Mundano. Num acerto, caem no disfarce; com 7–9, escolha um: continua sendo observada, deixa algo comprometedor para trás, ou passa vergonha para convencer. Numa falha, uma obrigação civil aparece na pior hora."
           },
           {
             "id": "vou-te-salvar",
-            "nome": "Vou te salvar!"
+            "nome": "Vou te salvar!",
+            "regra": "Para defender alguém que você ama como se tivesse rolado 12+, revele sua identidade secreta a alguém que esteja vendo ou marque uma condição."
           },
           {
             "id": "teia-perigosa",
-            "nome": "Teia perigosa"
+            "nome": "Teia perigosa",
+            "regra": "Ao revelar uma armadilha que deixou para alguém com seus poderes, role + o Rótulo da máscara. Num acerto, o oponente cai nela e você ganha uma abertura contra ele; com 10+, também +1 adiante para aproveitá-la. Numa falha, a armadilha leva a uma escalada perigosa."
           }
         ],
         "nota": "A Máscara + 2 à escolha"
@@ -2048,6 +2074,7 @@
               "id": "obrigacoes",
               "tipo": "lista",
               "rotulo": "3 obrigações",
+              "descrever_opcional": true,
               "opcoes": [
                 {
                   "id": "emprego-barista",
@@ -2421,27 +2448,33 @@
         "opcoes": [
           {
             "id": "lute-o-bom-combate",
-            "nome": "Lute o bom combate"
+            "nome": "Lute o bom combate",
+            "regra": "Ao segurar os golpes enfrentando diretamente, pode rolar + Salvador no lugar de + Perigoso; se fizer, não pode escolher impressionar, surpreender ou amedrontar o inimigo."
           },
           {
             "id": "eu-sei-o-que-sou",
-            "nome": "Eu sei o que sou"
+            "nome": "Eu sei o que sou",
+            "regra": "Uma vez por cena, ao defender um colega, pode subir Salvador e descer outro Rótulo, além dos efeitos do movimento, mesmo numa falha. Se fizer, ponha 1 Equipe na pilha."
           },
           {
             "id": "palavras-do-passado",
-            "nome": "Palavras do passado"
+            "nome": "Palavras do passado",
+            "regra": "Ao buscar orientação de um mais velho ou de alguém do seu legado, conte um problema e faça uma pergunta sobre ele: respondem com sinceridade e dizem o que fazer. Ganhe +1 contínuo se ouvir; se seguir seu próprio caminho, marque potencial."
           },
           {
             "id": "o-legado-importa",
-            "nome": "O legado importa"
+            "nome": "O legado importa",
+            "regra": "Ao ganhar Influência sobre alguém do seu legado (ou dar a essa pessoa Influência sobre você), marque potencial e ganhe +1 adiante. Quando alguém do seu legado muda seus Rótulos, também: marque potencial e +1 adiante."
           },
           {
             "id": "nunca-desista-nunca-se-renda",
-            "nome": "Nunca desista, nunca se renda"
+            "nome": "Nunca desista, nunca se renda",
+            "regra": "Ao levar um golpe poderoso de alguém muito mais forte, use este movimento no lugar do básico: role + Salvador. Num acerto, fica de pé e escolhe um (abertura contra quem atacou, inspira a equipe e põe 1 Equipe na pilha, ou mantém a atenção do atacante); com 7–9, marque uma condição. Numa falha, cai feio, mas deixa o oponente desequilibrado e vulnerável."
           },
           {
             "id": "simbolo-de-autoridade",
-            "nome": "Símbolo de autoridade"
+            "nome": "Símbolo de autoridade",
+            "regra": "Ao dar uma ordem a um PNJ com base numa autoridade que ele reconhece, role + Salvador. Num acerto, ele escolhe: obedece, sai do caminho, ataca em desvantagem ou congela; com 10+, você ganha +1 adiante contra ele. Numa falha, ele faz o que quer e você fica com −1 adiante contra ele."
           }
         ]
       },
@@ -2667,56 +2700,57 @@
               "id": "faiscas",
               "tipo": "lista",
               "rotulo": "Escolha 4 faíscas",
+              "descrever_opcional": true,
               "opcoes": [
                 {
                   "id": "tempestade-de-realidade",
                   "nome": "Tempestade de realidade",
-                  "regra": "1 chama: enfrente diretamente com os poderes, rolando + Aberração no lugar de + Perigoso; causa estrago colateral, a menos que gaste mais 1."
+                  "regra": "Você canaliza uma rajada destrutiva com seus poderes. Gaste 1 chama para enfrentar diretamente uma ameaça usando os poderes, rolando + Aberração no lugar de + Perigoso. Se fizer, causa estrago colateral indesejado, a menos que gaste mais 1 chama."
                 },
                 {
                   "id": "escudo",
                   "nome": "Escudo",
-                  "regra": "1 chama: defenda outra pessoa de uma ameaça imediata, rolando + Aberração no lugar de + Salvador."
+                  "regra": "Você ergue um campo protetor rápido para deter um perigo. Gaste 1 chama para defender outra pessoa de uma ameaça imediata, rolando + Aberração no lugar de + Salvador."
                 },
                 {
                   "id": "construtos",
                   "nome": "Construtos",
-                  "regra": "1 chama: crie qualquer objeto até o tamanho de uma pessoa; mais 1 para ele agir sozinho. Some no fim da cena."
+                  "regra": "Gaste 1 chama para criar com seus poderes qualquer objeto, até o tamanho de uma pessoa. Gaste mais 1 para dar vida a ele, agindo por conta própria. O construto se desfaz no fim da cena."
                 },
                 {
                   "id": "fosso",
                   "nome": "Fosso",
-                  "regra": "1 chama: crie uma barreira que segura as ameaças enquanto você prestar atenção nela; o MJ pode pedir mais 1 contra inimigos muito fortes."
+                  "regra": "Gaste 1 chama para criar uma barreira que segura as ameaças enquanto você mantiver a atenção nela. O MJ pode pedir mais 1 chama se a barreira for ameaçada por inimigos especialmente poderosos."
                 },
                 {
                   "id": "adoracao",
                   "nome": "Adoração",
-                  "regra": "1 chama: ao liberar seus poderes, deixe a plateia em silêncio, respeito e atenção."
+                  "regra": "Você faz uma demonstração tremenda do seu poder. Gaste 1 chama para deixar uma plateia em silêncio, respeito e atenção quando liberar seus poderes."
                 },
                 {
                   "id": "movimento",
                   "nome": "Movimento",
-                  "regra": "1 chama: vá a qualquer lugar da cena, passando por barreiras e amarras; mais 1 para ir a um lugar onde já esteve."
+                  "regra": "Gaste 1 chama para ir a qualquer lugar que escolher dentro da cena, rompendo ou escapando de barreiras e amarras no caminho. Gaste uma segunda chama para ir a qualquer lugar onde você já esteve."
                 },
                 {
                   "id": "impulso",
                   "nome": "Impulso",
-                  "regra": "1 chama: dê +1 na rolagem de um colega, como se tivesse gastado Equipe."
+                  "regra": "Gaste 1 chama para turbinar o esforço de um colega, dando +1 na rolagem dele, como se você tivesse gastado Equipe da pilha."
                 },
                 {
                   "id": "sobrecarga",
                   "nome": "Sobrecarga",
-                  "regra": "2 chamas: tire 10+ ao liberar seus poderes."
+                  "regra": "Você canaliza toda a capacidade dos seus poderes incríveis para vencer um obstáculo, remodelar o ambiente ou ampliar os sentidos. Gaste 2 chamas para liberar seus poderes com 10+ direto, sem rolar os dados."
                 },
                 {
                   "id": "consciencia-elemental",
                   "nome": "Consciência elemental",
-                  "regra": "1 chama e marque uma condição: faça uma pergunta sobre o mundo ao redor; o MJ responde com honestidade."
+                  "regra": "Gaste 1 chama e marque uma condição para abrir a mente ao mundo ao seu redor com seus poderes. Faça uma pergunta sobre o mundo à sua volta, e o MJ responde com honestidade."
                 },
                 {
                   "id": "arrebatar",
                   "nome": "Arrebatar",
-                  "regra": "1 chama: tome com os poderes um objeto, até o tamanho de uma pessoa, de alguém à vista."
+                  "regra": "Gaste 1 chama para usar seus poderes e tomar um objeto, até o tamanho de uma pessoa, de alguém que você esteja vendo."
                 }
               ],
               "escolher": 4
@@ -2901,27 +2935,33 @@
         "opcoes": [
           {
             "id": "eu-nao-sou-meu-corpo",
-            "nome": "Eu não sou meu corpo"
+            "nome": "Eu não sou meu corpo",
+            "regra": "Ao levar um golpe poderoso físico, pode rolar como se tivesse duas condições a menos marcadas; se fizer, num 10+ você é obrigado a perder o controle de um jeito terrível."
           },
           {
             "id": "nao-humano-o-bastante",
-            "nome": "Não humano o bastante"
+            "nome": "Não humano o bastante",
+            "regra": "Ao enfrentar diretamente de um jeito aterrorizante, marque uma condição para escolher uma opção a mais, mesmo numa falha."
           },
           {
             "id": "imparavel",
-            "nome": "Imparável"
+            "nome": "Imparável",
+            "regra": "Ao atravessar o cenário à força para chegar a algo ou fugir, role + Perigoso. Num acerto, o mundo se quebra à sua frente e você consegue; com 7–9, escolha um: marque uma condição, deixe algo para trás ou leve algo junto. Numa falha, atravessa, mas deixa destruição ou acaba num lugar pior (escolha do MJ)."
           },
           {
             "id": "vou-atras-de-voce",
-            "nome": "Vou atrás de você"
+            "nome": "Vou atrás de você",
+            "regra": "Ao marcar uma condição, ganhe +1 adiante contra quem você mais culpa por ela."
           },
           {
             "id": "quem-me-dera-ser",
-            "nome": "Quem me dera ser"
+            "nome": "Quem me dera ser",
+            "regra": "Ao confortar ou apoiar alguém, se disser o que mais inveja nessa pessoa, pode rolar + Aberração no lugar de + Mundano."
           },
           {
             "id": "eu-sou-o-monstro",
-            "nome": "Eu sou o monstro"
+            "nome": "Eu sou o monstro",
+            "regra": "Ao assustar, intimidar ou acuar com sua forma monstruosa, role + Aberração. Num acerto, ficam desnorteados e vulneráveis a você, ou fogem. Com 10+, escolha uma complicação; com 7–9, duas: assusta quem não queria, machuca alguém ou quebra o que não devia, ou se sente mais monstro (marque uma condição à escolha do MJ). Numa falha, reagem com violência, ódio e paranoia, e você leva a pior."
           }
         ]
       },

@@ -154,7 +154,10 @@ namespace TorreDeControle.Core.Regras
             /// <summary>Opção final: só libera com todas as outras tomadas, ou pelo avanço indicado.</summary>
             [JsonProperty("final")] public string Final { get; set; }
             [JsonProperty("final_libera_com_avanco")] public string FinalLiberaComAvanco { get; set; }
-            /// <summary>Campo preenchido no jogo, não na criação (ex.: uso do santuário).</summary>
+            /// <summary>
+            /// Campo preenchido no jogo, não na criação (ex.: uso do santuário; o equipamento do Farol, que
+            /// começa vazio). Não é pendência da criação; no jogo, quem escreve é o painel do mestre.
+            /// </summary>
             [JsonProperty("no_jogo")] public bool NoJogo { get; set; }
             [JsonProperty("nota")] public string Nota { get; set; }
 

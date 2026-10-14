@@ -147,13 +147,19 @@ namespace TorreDeControle.Core.Personagens
             return Resultado.Sucesso();
         }
 
-        /// <summary>Texto de jogo: o pedido (sub = "pedido") ou a lacuna de uma condição (sub = id da condição).</summary>
+        /// <summary>Sub do texto de um campo de texto "no_jogo" (ex.: o equipamento do Farol).</summary>
+        public const string SubTexto = "texto";
+
+        /// <summary>
+        /// Texto de jogo: o pedido (sub = "pedido"), a lacuna de uma condição (sub = id da condição) ou um
+        /// campo de texto "no_jogo" (sub = <see cref="SubTexto"/>).
+        /// </summary>
         public Resultado DefinirTextoDeJogo(string id, string extra, string campo, string sub, string texto)
         {
             if (!NoJogo(id, out var p, out var erro))
                 return erro;
             var c = BuscarCampo(p, extra, campo);
-            if (c == null || c.Tipo != Campo.Condicoes)
+            if (c == null || !(c.Tipo == Campo.Condicoes || (c.Tipo == Campo.Texto && c.NoJogo)))
                 return Resultado.Falha("Campo de jogo desconhecido.");
             var chave = Sub(extra, campo, sub);
             var limpo = (texto ?? string.Empty).Trim();

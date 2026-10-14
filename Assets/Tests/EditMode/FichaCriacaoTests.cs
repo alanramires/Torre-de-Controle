@@ -32,6 +32,9 @@ namespace TorreDeControle.Tests
                 Assert.That(regra, Is.Not.Null, a.Id);
                 Assert.That(regra.Rotulos.Values.Sum(), Is.EqualTo(2), a.Id);
                 Assert.That(regra.Retrato, Is.EqualTo(a.Id + "_retrato"), a.Id);
+                // Todo movimento de arquétipo tem a regra (é o balão do chip na ficha).
+                foreach (var m in regra.Movimentos.Opcoes)
+                    Assert.That(m.Regra, Is.Not.Null.And.Not.Empty, $"{a.Id}/{m.Id}");
             }
         }
 
@@ -278,6 +281,23 @@ namespace TorreDeControle.Tests
 
         /// <summary>Preenche movimentos e extras seguindo as regras do próprio JSON (o mínimo pedido).</summary>
         void CompletarModulos(Personagem p) => FichaPronta.CompletarModulos(cadastro, p);
+
+        [Test]
+        public void Farol_comeca_sem_equipamento_e_isso_nao_e_pendencia()
+        {
+            // "No powers and not nearly enough training": a linha começa vazia e se preenche no jogo.
+            var p = Nova("farol");
+            cadastro.AlternarMovimento(p.Id, "sem-poderes-e-quase-sem-treino");
+            var (_, avisos) = cadastro.Validar(p);
+            Assert.That(avisos, Has.None.Contains("Equipamento"));
+
+            // No jogo (aqui pelo modo teste), o equipamento é texto de jogo.
+            const string extra = "mov:sem-poderes-e-quase-sem-treino";
+            Assert.That(cadastro.DefinirTextoDeJogo(p.Id, extra, "equipamento", CadastroPersonagens.SubTexto, "arpéu").Ok, Is.False);
+            cadastro.LigarTeste(p.Id);
+            Assert.That(cadastro.DefinirTextoDeJogo(p.Id, extra, "equipamento", CadastroPersonagens.SubTexto, "arpéu").Ok, Is.True);
+            Assert.That(cadastro.TextoDeJogo(p, extra, "equipamento", CadastroPersonagens.SubTexto), Is.EqualTo("arpéu"));
+        }
 
         [Test]
         public void Movimento_com_subsecao_cobra_e_desmarcar_apaga()

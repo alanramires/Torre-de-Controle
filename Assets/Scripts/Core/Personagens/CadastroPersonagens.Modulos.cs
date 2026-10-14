@@ -231,7 +231,7 @@ namespace TorreDeControle.Core.Personagens
                     case Campo.Rotulo when escolhas.Count == 0:
                         avisos.Add($"{nome}: {c.Titulo.ToLowerInvariant()}.");
                         break;
-                    case Campo.Texto when !c.NaSala && !c.Opcional && string.IsNullOrWhiteSpace(TextoDoExtra(p, extra, c.Id)):
+                    case Campo.Texto when !c.NaSala && !c.Opcional && !c.NoJogo && string.IsNullOrWhiteSpace(TextoDoExtra(p, extra, c.Id)):
                         avisos.Add($"{nome}: {c.Titulo.ToLowerInvariant()}.");
                         break;
                     case Campo.Textos:
