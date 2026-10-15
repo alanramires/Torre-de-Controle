@@ -40,6 +40,18 @@ namespace TorreDeControle.Core.Personagens
     [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
     public enum EstadoInfluencia { Dada, Perdida }
 
+    /// <summary>
+    /// Um relacionamento da ficha (o "___" de uma frase do arquétipo): o colega de agora, quem ocupou a
+    /// frase antes (no jogo, trocado ou perdido: nada sai da ficha) e o porquê (opcional, roleplay).
+    /// </summary>
+    public sealed class Relacao
+    {
+        /// <summary>Id do colega de agora; null = vazio (não escolhido, ou perdido no jogo).</summary>
+        [JsonProperty("colega")] public string Colega { get; set; }
+        [JsonProperty("anteriores")] public List<string> Anteriores { get; set; } = new List<string>();
+        [JsonProperty("porque")] public string Porque { get; set; } = string.Empty;
+    }
+
     /// <summary>Seção Identidade da ficha.</summary>
     public sealed class Identidade
     {
@@ -208,7 +220,11 @@ namespace TorreDeControle.Core.Personagens
         /// <summary>Resposta a "quando a equipe se reuniu pela primeira vez" (pergunta do arquétipo).</summary>
         [JsonProperty("equipe_resposta")] public string EquipeResposta { get; set; } = string.Empty;
         /// <summary>O colega (id) de cada relacionamento da ficha, na ordem das frases; null = não escolhido.</summary>
-        [JsonProperty("relacionamentos")] public List<string> Relacionamentos { get; set; } = new List<string>();
+        /// <summary>Os relacionamentos, na ordem das frases do arquétipo.</summary>
+        [JsonProperty("relacoes")] public List<Relacao> Relacoes { get; set; } = new List<Relacao>();
+        /// <summary>Formato anterior (uma lista de ids, na ordem das frases): lido só para converter.</summary>
+        [JsonProperty("relacionamentos")] public List<string> RelacionamentosAntigos { get; set; }
+        public bool ShouldSerializeRelacionamentosAntigos() => false;
         /// <summary>Comportamento escolhido, quando a regra de Influência é por comportamento.</summary>
         [JsonProperty("influencia_comportamento")] public string InfluenciaComportamento { get; set; }
         /// <summary>Colegas (ids) a quem deu Influência inicial, quando a regra deixa escolher.</summary>

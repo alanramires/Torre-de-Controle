@@ -218,7 +218,7 @@ namespace TorreDeControle.Tests
             salas.PorPersonagem(sala.Id, 0, original.Id, false);
             var copia = personagens.Buscar(sala.Slots[0].Personagem);
             Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.False); // falta a equipe
-            Assert.That(personagens.PendenciasParaCarreira(copia), Has.Count.EqualTo(2));
+            Assert.That(personagens.PendenciasParaCarreira(copia), Has.Count.EqualTo(3)); // formação, relacionamentos, Influência
             FichaPronta.ParaCarreira(salas, personagens, sala, copia);
             Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, Is.False); // já em carreira
         }

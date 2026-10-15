@@ -121,10 +121,10 @@ namespace TorreDeControle.UI
                 // Confirmou "a ninguém" (profissional, arrogante...): também tem um porquê, para o roleplay.
                 if (cadastro.InfluenciaConfirmada(p))
                 {
-                    var fila = Estilo.Fila(pai, 52, 12);
+                    var fila = Estilo.Fila(pai, 90, 12);
                     var r = Estilo.Rotulo(fila, "Ninguém", 22, Estilo.Dourado, FontStyles.Bold);
                     r.gameObject.AddComponent<LayoutElement>().preferredWidth = 260;
-                    var campo = Estilo.CampoTexto(fila, "por que ninguém tem Influência sobre você? (opcional)");
+                    var campo = Estilo.AreaTexto(fila, "por que ninguém tem Influência sobre você? (opcional)", 90);
                     campo.text = p.InfluenciaPorqueNinguem;
                     Estilo.ColunaElastica(campo);
                     campo.onValueChanged.AddListener(t => cadastro.DescreverInfluenciaDeNinguem(p.Id, t));
@@ -138,12 +138,13 @@ namespace TorreDeControle.UI
                 var colega = id;
                 var perdida = perdidas.Contains(id);
                 var nome = (cadastro.Buscar(colega)?.NomeExibicao ?? "?") + (perdida ? " (perdida)" : string.Empty);
-                var fila = Estilo.Fila(pai, 52, 12);
+                var fila = Estilo.Fila(pai, 90, 12);
                 var r = Estilo.Rotulo(fila, nome, 22, perdida ? Estilo.TextoApagado : Estilo.Dourado, FontStyles.Bold);
                 r.textWrappingMode = TextWrappingModes.NoWrap;
                 r.overflowMode = TextOverflowModes.Ellipsis;
                 r.gameObject.AddComponent<LayoutElement>().preferredWidth = 260;
-                var campo = Estilo.CampoTexto(fila, "por quê? (opcional)");
+                // Várias linhas: um texto colado com quebras não vaza da caixa (rola dentro; ••• para ler inteiro).
+                var campo = Estilo.AreaTexto(fila, "por quê? (opcional)", 90);
                 campo.text = cadastro.PorqueDaInfluencia(p, colega);
                 Estilo.ColunaElastica(campo);
                 campo.onValueChanged.AddListener(t => cadastro.DescreverInfluencia(p.Id, colega, t));

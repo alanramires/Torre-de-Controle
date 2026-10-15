@@ -34,22 +34,120 @@ namespace TorreDeControle.Core.Personagens
             return Resultado.Sucesso();
         }
 
-        /// <summary>O colega do relacionamento de número <paramref name="indice"/> (null tira).</summary>
+        /// <summary>
+        /// Na criação (em aprovação, na sala): o colega da frase de número <paramref name="indice"/> (null tira).
+        /// Trocar aqui é escolher, não histórico. O mesmo colega pode estar nas duas frases (não é recomendado:
+        /// vira observação).
+        /// </summary>
         public Resultado DefinirRelacionamento(string id, int indice, string colega)
         {
             if (!NaEquipe(id, out var p, out var erro))
                 return erro;
-            var frases = RegraDoArquetipo(p)?.Equipe.Relacionamentos ?? new List<string>();
-            if (indice < 0 || indice >= frases.Count)
+            if (!FraseValida(p, indice))
+                return Resultado.Falha("Relacionamento desconhecido.");
+            colega = string.IsNullOrEmpty(colega) ? null : colega;
+            if (colega != null && OpcoesDeRelacionamento(p).All(c => c.Id != colega))
+                return Resultado.Falha(RelacionamentoVemDaInfluencia(p)
+                    ? "O amor e o rival saem de quem recebeu a Influência inicial."
+                    : "Escolha um colega desta sala.");
+            var influenciaJaFeita = RelacionamentoVemDaInfluencia(p) && InfluenciaConfirmada(p);
+            Relacao(p, indice).Colega = colega;
+            // Bruta, amor e rival escolhidos antes da Influência: eles viram a Influência dela.
+            if (RelacionamentoVemDaInfluencia(p) && !influenciaJaFeita)
+            {
+                RetirarDadas(p);
+                foreach (var c in p.Relacoes.Select(r => r.Colega).Where(c => c != null).Distinct())
+                    p.Influencias[c] = EstadoInfluencia.Dada;
+            }
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>
+        /// No jogo (o painel do mestre): troca o colega da frase (null = perdeu). Quem estava vai para os
+        /// anteriores: nada sai da ficha. Só personagem em carreira.
+        /// </summary>
+        public Resultado TrocarRelacionamento(string id, int indice, string colega)
+        {
+            var p = Buscar(id);
+            if (p == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            if (p.Status != StatusCriacao.EmCarreira)
+                return Resultado.Falha("Trocar ou perder relacionamento é do jogo (personagem em carreira).");
+            if (!FraseValida(p, indice))
                 return Resultado.Falha("Relacionamento desconhecido.");
             colega = string.IsNullOrEmpty(colega) ? null : colega;
             if (colega != null && Colegas(p).All(c => c.Id != colega))
                 return Resultado.Falha("Escolha um colega desta sala.");
-            while (p.Relacionamentos.Count < frases.Count)
-                p.Relacionamentos.Add(null);
-            p.Relacionamentos[indice] = colega;
+            var r = Relacao(p, indice);
+            if (r.Colega == colega)
+                return Resultado.Sucesso();
+            if (r.Colega != null)
+                r.Anteriores.Add(r.Colega);
+            r.Colega = colega;
             Gravar();
             return Resultado.Sucesso();
+        }
+
+        /// <summary>O porquê de um relacionamento (opcional, roleplay). Anotação: editável sempre; a Torre não apaga.</summary>
+        public Resultado DescreverRelacionamento(string id, int indice, string porque)
+        {
+            var p = Buscar(id);
+            if (p == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            if (!FraseValida(p, indice))
+                return Resultado.Falha("Relacionamento desconhecido.");
+            var limpo = (porque ?? string.Empty).Trim();
+            var r = Relacao(p, indice);
+            if (r.Porque == limpo)
+                return Resultado.Sucesso();
+            r.Porque = limpo;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>
+        /// A Bruta (Influência "amor e rival"): na criação, o amor e o rival saem de quem recebeu a Influência
+        /// inicial dela (Alan, 2026-10-14).
+        /// </summary>
+        public bool RelacionamentoVemDaInfluencia(Personagem p) =>
+            RegraDoArquetipo(p)?.Influencia?.Regra == RegrasArquetipos.RegraInfluencia.AmorERival;
+
+        /// <summary>
+        /// Os colegas que podem ocupar uma frase: todos da sala; a Bruta, com a Influência já feita, só os que a
+        /// receberam (feita a Influência antes, ela filtra; escolhidos amor e rival antes, eles viram a Influência).
+        /// </summary>
+        public IReadOnlyList<Personagem> OpcoesDeRelacionamento(Personagem p)
+        {
+            var colegas = Colegas(p);
+            if (!RelacionamentoVemDaInfluencia(p) || !InfluenciaConfirmada(p))
+                return colegas;
+            var dados = InfluenciaDada(p);
+            return colegas.Where(c => dados.Contains(c.Id)).ToList();
+        }
+
+        bool FraseValida(Personagem p, int indice) =>
+            indice >= 0 && indice < (RegraDoArquetipo(p)?.Equipe.Relacionamentos.Count ?? 0);
+
+        /// <summary>A relação da frase (cria as vagas que faltarem).</summary>
+        public Relacao Relacao(Personagem p, int indice)
+        {
+            while (p.Relacoes.Count <= indice)
+                p.Relacoes.Add(new Relacao());
+            return p.Relacoes[indice];
+        }
+
+        /// <summary>
+        /// A leitura reversa: em quais frases dos colegas esta personagem aparece agora (colega, índice da frase).
+        /// </summary>
+        public IReadOnlyList<(Personagem colega, int frase)> CitacoesEmRelacionamentos(Personagem p)
+        {
+            var citacoes = new List<(Personagem, int)>();
+            foreach (var c in Colegas(p))
+                for (var k = 0; k < c.Relacoes.Count; k++)
+                    if (c.Relacoes[k].Colega == p.Id)
+                        citacoes.Add((c, k));
+            return citacoes;
         }
 
         /// <summary>
@@ -130,6 +228,10 @@ namespace TorreDeControle.Core.Personagens
             RetirarDadas(p);
             foreach (var c in escolhidos)
                 p.Influencias[c] = EstadoInfluencia.Dada;
+            // Bruta: amor ou rival que apontava para quem saiu da Influência fica vazio (ajuste nos dois sentidos).
+            if (RelacionamentoVemDaInfluencia(p))
+                foreach (var r in p.Relacoes.Where(r => r.Colega != null && !escolhidos.Contains(r.Colega)))
+                    r.Colega = null;
             Gravar();
             return Resultado.Sucesso();
         }
@@ -236,11 +338,21 @@ namespace TorreDeControle.Core.Personagens
                     RegraDoArquetipo(p)?.Influencia?.Regra != RegrasArquetipos.RegraInfluencia.Comportamento);
         }
 
-        /// <summary>O colega de um relacionamento (o "___" da frase), ou null.</summary>
+        /// <summary>O colega de agora de um relacionamento (o "___" da frase), se ainda está na sala; senão null.</summary>
         public Personagem ColegaDoRelacionamento(Personagem p, int indice) =>
-            indice < p.Relacionamentos.Count && p.Relacionamentos[indice] != null
-                ? Colegas(p).FirstOrDefault(c => c.Id == p.Relacionamentos[indice])
+            indice < p.Relacoes.Count && p.Relacoes[indice].Colega != null
+                ? Colegas(p).FirstOrDefault(c => c.Id == p.Relacoes[indice].Colega)
                 : null;
+
+        /// <summary>Observações da equipe (não travam): o mesmo colega nas duas frases.</summary>
+        public IReadOnlyList<string> ObservacoesDaEquipe(Personagem p)
+        {
+            var obs = new List<string>();
+            var repetidos = p.Relacoes.Where(r => r.Colega != null).GroupBy(r => r.Colega).Where(g => g.Count() > 1);
+            foreach (var g in repetidos)
+                obs.Add($"Relacionamentos: {Buscar(g.Key)?.NomeExibicao ?? "?"} está em mais de uma frase (permitido, mas não recomendado).");
+            return obs;
+        }
 
         /// <summary>O que falta na segunda etapa (na campanha). Vazio = o mestre pode aprovar.</summary>
         public IReadOnlyList<string> PendenciasDaEquipe(Personagem p)
@@ -277,14 +389,26 @@ namespace TorreDeControle.Core.Personagens
 
         /// <summary>
         /// O que falta para a personagem subir de em aprovação a em carreira (trava o "Aprovar para a
-        /// campanha"). Hoje: a formação da equipe enviada e a Influência inicial distribuída pela regra.
-        /// Relacionamentos e os NPCs de cada um entram aqui quando forem feitos.
+        /// campanha"). Hoje: a formação da equipe enviada, os relacionamentos escolhidos e a Influência
+        /// inicial distribuída pela regra. Os NPCs de cada um entram aqui quando forem feitos.
         /// </summary>
         public IReadOnlyList<string> PendenciasParaCarreira(Personagem p)
         {
             var pendencias = new List<string>();
             if (string.IsNullOrWhiteSpace(p.EquipeResposta))
                 pendencias.Add("Formação da equipe: envie a resposta.");
+            var frases = RegraDoArquetipo(p)?.Equipe.Relacionamentos.Count ?? 0;
+            if (frases > 0)
+            {
+                if (Colegas(p).Count == 0)
+                    pendencias.Add("Relacionamentos: precisa de colegas nas vagas da sala.");
+                else
+                {
+                    var faltam = Enumerable.Range(0, frases).Count(k => ColegaDoRelacionamento(p, k) == null);
+                    if (faltam > 0)
+                        pendencias.Add($"Relacionamentos: escolha o colega (faltam {faltam}).");
+                }
+            }
             var influencia = RegraDoArquetipo(p)?.Influencia;
             if (influencia?.Regra == RegrasArquetipos.RegraInfluencia.Comportamento && p.InfluenciaComportamento == null)
                 pendencias.Add("Influência: escolha o comportamento.");

@@ -46,7 +46,7 @@ namespace TorreDeControle.Tests
             Assert.That(nova.Sala, Is.Null);
             Assert.That(nova.Origem, Is.Null);
             Assert.That(nova.Status, Is.EqualTo(StatusCriacao.EmAprovacao));
-            Assert.That(nova.Relacionamentos, Is.Empty);
+            Assert.That(nova.Relacoes, Is.Empty);
         }
 
         [Test]

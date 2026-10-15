@@ -56,7 +56,18 @@ namespace TorreDeControle.Core.Personagens
             p.ItensDeJogo ??= new Dictionary<string, List<ItemDeJogo>>();
             p.ObsMovimentos ??= new Dictionary<string, string>();
             p.CondicoesMarcadas ??= new List<string>();
-            p.Relacionamentos ??= new List<string>();
+            p.Relacoes ??= new List<Relacao>();
+            foreach (var r in p.Relacoes)
+            {
+                r.Anteriores ??= new List<string>();
+                r.Porque ??= string.Empty;
+            }
+            if (p.RelacionamentosAntigos != null)
+            {
+                if (p.Relacoes.Count == 0)
+                    p.Relacoes = p.RelacionamentosAntigos.Select(id => new Relacao { Colega = id }).ToList();
+                p.RelacionamentosAntigos = null;
+            }
             p.Influencias ??= new Dictionary<string, EstadoInfluencia>();
             if (p.InfluenciaParaAntiga != null)
             {

@@ -39,7 +39,7 @@ namespace TorreDeControle.UI
         /// <summary>Personagem do laboratório escolhida na lista de cada slot vazio (antes de "Adicionar").</summary>
         readonly Dictionary<int, string> escolhida = new Dictionary<int, string>();
 
-        enum Aba { Vagas, Npcs, Equipe, Influencia }
+        enum Aba { Vagas, Npcs, Equipe, Influencia, Relacionamentos }
         Aba abaAtual = Aba.Vagas;
 
         TextMeshProUGUI titulo;
@@ -161,6 +161,9 @@ namespace TorreDeControle.UI
             Redesenhar();
         }
 
+        /// <summary>Abre a ficha de uma instância desta sala, como se clicada na vaga (o atalho do laboratório usa).</summary>
+        public void MostrarFicha(Personagem p) => AbrirFicha(p);
+
         void AbrirFicha(Personagem p)
         {
             if (painelFicha == null)
@@ -256,7 +259,7 @@ namespace TorreDeControle.UI
             contagem.text = $"{sala.Slots.Count} vagas · {comJogador} com jogador · {comPersonagem} com personagem" +
                             (sala.Ativo ? string.Empty : " · sala inativa");
 
-            var daAprovacao = abaAtual == Aba.Equipe || abaAtual == Aba.Influencia;
+            var daAprovacao = abaAtual == Aba.Equipe || abaAtual == Aba.Influencia || abaAtual == Aba.Relacionamentos;
             if (daAprovacao && EmAprovacao().Count == 0)
             {
                 abaAtual = Aba.Vagas; // essas abas só existem com alguém em aprovação
@@ -270,6 +273,11 @@ namespace TorreDeControle.UI
             if (abaAtual == Aba.Influencia)
             {
                 SecaoInfluencia();
+                return;
+            }
+            if (abaAtual == Aba.Relacionamentos)
+            {
+                SecaoRelacionamentos();
                 return;
             }
             if (abaAtual == Aba.Npcs)
@@ -301,20 +309,28 @@ namespace TorreDeControle.UI
             {
                 lista.Add((Aba.Equipe, $"Formação da equipe · {emAprovacao}"));
                 lista.Add((Aba.Influencia, "Influência"));
+                lista.Add((Aba.Relacionamentos, "Relacionamentos"));
             }
             foreach (var (aba, nome) in lista)
             {
                 var alvo = aba;
                 var largura = aba == Aba.Equipe ? 400 : 260;
-                if (aba == abaAtual)
-                    Estilo.BotaoPrincipal(abas, nome, largura, () => { });
-                else
-                    Estilo.BotaoContorno(abas, nome, largura, Estilo.Dourado, () =>
+                var botao = aba == abaAtual
+                    ? Estilo.BotaoPrincipal(abas, nome, largura, () => { })
+                    : Estilo.BotaoContorno(abas, nome, largura, Estilo.Dourado, () =>
                     {
                         abaAtual = alvo;
                         Mostrar(null);
                         Redesenhar();
                     });
+                // Nome comprido ("Relacionamentos"): numa linha só, a fonte encolhe até caber no botão.
+                var rotulo = botao.GetComponentInChildren<TextMeshProUGUI>();
+                rotulo.textWrappingMode = TextWrappingModes.NoWrap;
+                rotulo.enableAutoSizing = true;
+                rotulo.fontSizeMin = 14;
+                rotulo.fontSizeMax = 24;
+                rotulo.rectTransform.offsetMin = new Vector2(10, 0);
+                rotulo.rectTransform.offsetMax = new Vector2(-10, 0);
             }
             Estilo.Rect("Vao", abas).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
         }
@@ -402,6 +418,14 @@ namespace TorreDeControle.UI
                     Redesenhar();
                 });
             enviar.GetComponent<LayoutElement>().preferredHeight = jaEnviou ? 60 : 110;
+            // Nome comprido ("Reenviar como Garça Escarlate"): a fonte encolhe até caber.
+            var rotuloEnviar = enviar.GetComponentInChildren<TextMeshProUGUI>();
+            rotuloEnviar.characterSpacing = 1;
+            rotuloEnviar.enableAutoSizing = true;
+            rotuloEnviar.fontSizeMin = 14;
+            rotuloEnviar.fontSizeMax = 22;
+            rotuloEnviar.rectTransform.offsetMin = new Vector2(8, 4);
+            rotuloEnviar.rectTransform.offsetMax = new Vector2(-8, -4);
             if (jaEnviou)
             {
                 var envio = sala.FormacaoEquipe.First(e => e.Personagem == selecionada.Id);
@@ -481,6 +505,86 @@ namespace TorreDeControle.UI
             RodapeDaFormacao(formacao);
         }
 
+        // ---------- Relacionamentos (segunda etapa, na campanha): visão do mestre, só leitura ----------
+
+        /// <summary>
+        /// Relacionamentos da equipe (o jogador escolhe na ficha, aba História): à esquerda, quem está em
+        /// aprovação; no meio, as frases da selecionada com o colega, o porquê e quem ocupou antes; à direita,
+        /// a leitura reversa (em quais frases dos colegas ela aparece).
+        /// </summary>
+        void SecaoRelacionamentos()
+        {
+            var candidatas = EmAprovacao();
+            if (candidatas.All(c => c.Id != equipeSelecionada))
+                equipeSelecionada = candidatas.First().Id;
+            var p = candidatas.First(c => c.Id == equipeSelecionada);
+            var bloco = areaEquipe;
+
+            var coluna = Coluna(bloco, 300, 8);
+            foreach (var c in candidatas)
+            {
+                var alvo = c;
+                var frases = personagens.RegraDoArquetipo(c)?.Equipe.Relacionamentos.Count ?? 0;
+                var feitas = Enumerable.Range(0, frases).Count(k => personagens.ColegaDoRelacionamento(c, k) != null);
+                var texto = $"{c.NomeExibicao}\n<size=65%>{(feitas == frases ? "escolheu" : $"falta{(frases - feitas == 1 ? "" : "m")} {frases - feitas}")}</size>";
+                var botao = c.Id == equipeSelecionada
+                    ? Estilo.BotaoPrincipal(coluna, texto, 0, () => { })
+                    : Estilo.BotaoContorno(coluna, texto, 0, feitas == frases ? Estilo.TextoSuave : Estilo.Dourado, () =>
+                    {
+                        equipeSelecionada = alvo.Id;
+                        Mostrar(null);
+                        Redesenhar();
+                    });
+                AjustarBotaoDeLista(botao);
+            }
+
+            // Meio: as frases dela.
+            var centro = Caixa(Coluna(bloco, -1, 0), Estilo.Azul);
+            centro.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            Estilo.Rotulo(centro, $"{p.NomeExibicao} — relacionamentos", 22, Estilo.Azul, FontStyles.Bold);
+            var regra = personagens.RegraDoArquetipo(p);
+            var suave = ColorUtility.ToHtmlStringRGB(Estilo.TextoSuave);
+            var dourado = ColorUtility.ToHtmlStringRGB(Estilo.Dourado);
+            var frasesDela = Estilo.ListaRolavel(centro, 14); // só as frases rolam: título e nota ficam parados
+            for (var k = 0; k < (regra?.Equipe.Relacionamentos.Count ?? 0); k++)
+            {
+                var colega = personagens.ColegaDoRelacionamento(p, k);
+                var r = k < p.Relacoes.Count ? p.Relacoes[k] : null;
+                // O nome entra no lugar do "___" (dourado); sem colega, o "___" fica em cinza.
+                var lacuna = colega != null
+                    ? $"</i><b><color=#{dourado}>{colega.NomeExibicao}</color></b><i>"
+                    : $"<color=#{ColorUtility.ToHtmlStringRGB(Estilo.TextoApagado)}>___</color>";
+                var linha = $"<i>{regra.Equipe.Relacionamentos[k].Replace("___", lacuna)}</i>";
+                if (!string.IsNullOrEmpty(r?.Porque))
+                    linha += $"\n<size=85%><color=#{suave}><noparse>{r.Porque}</noparse></color></size>";
+                if (r != null && r.Anteriores.Count > 0)
+                    linha += $"\n<size=80%><color=#{suave}>antes: {string.Join(", ", r.Anteriores.Select(id => personagens.Buscar(id)?.NomeExibicao ?? "?"))}</color></size>";
+                var rotulo = Estilo.Rotulo(frasesDela, linha, 22, Estilo.Texto);
+                rotulo.textWrappingMode = TextWrappingModes.Normal;
+            }
+            foreach (var obs in personagens.ObservacoesDaEquipe(p))
+                Nota(frasesDela, obs);
+            Nota(centro, "O jogador escolhe na ficha (aba História).");
+
+            // Direita: a leitura reversa.
+            var rosa = new Color(0.95f, 0.55f, 0.85f);
+            var reversa = Caixa(Coluna(bloco, 380, 0), rosa);
+            reversa.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            var tituloReversa = Estilo.Rotulo(reversa, $"{p.NomeExibicao.ToUpperInvariant()} APARECE NAS FRASES DE", 20, rosa, FontStyles.Bold);
+            tituloReversa.textWrappingMode = TextWrappingModes.Normal;
+            var citacoes = personagens.CitacoesEmRelacionamentos(p);
+            var citadaEm = Estilo.ListaRolavel(reversa, 10);
+            if (citacoes.Count == 0)
+                Nota(citadaEm, "Ninguém ainda.");
+            foreach (var (quem, frase) in citacoes)
+            {
+                var textoFrase = personagens.RegraDoArquetipo(quem)?.Equipe.Relacionamentos[frase] ?? string.Empty;
+                var c = Estilo.Rotulo(citadaEm, $"<b>{quem.NomeExibicao}</b>\n<size=85%><i>{textoFrase.Replace("___", $"</i><b><color=#{dourado}>{p.NomeExibicao}</color></b><i>")}</i></size>", 22, Estilo.Texto);
+                c.textWrappingMode = TextWrappingModes.Normal;
+            }
+            Nota(reversa, "Lido das fichas dos colegas.");
+        }
+
         // ---------- Influência inicial (segunda etapa, na campanha) ----------
 
 
@@ -523,7 +627,14 @@ namespace TorreDeControle.UI
             Estilo.Rotulo(caixaRegra, $"{p.NomeExibicao} — Influência inicial", 22, Estilo.Azul, FontStyles.Bold);
             var textoRegra = Estilo.Rotulo(caixaRegra, regra?.Texto ?? string.Empty, 22, Estilo.Texto, FontStyles.Italic);
             textoRegra.textWrappingMode = TextWrappingModes.Normal;
-            SeletorDeInfluencia.MontarComportamento(caixaRegra, p, personagens, AoMudarInfluencia);
+            // A escolha é do jogador, na ficha (Núcleo): aqui o mestre só lê.
+            if (regra?.Regra == Core.Regras.RegrasArquetipos.RegraInfluencia.Comportamento)
+            {
+                var escolhido = regra.Opcoes.FirstOrDefault(o => o.Id == p.InfluenciaComportamento);
+                Nota(caixaRegra, escolhido == null
+                    ? "Comportamento: ainda não escolhido (na ficha)."
+                    : $"Comportamento escolhido: {escolhido.Nome}.");
+            }
 
             var baixo = Estilo.Rect("Escolha", centro);
             baixo.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
@@ -534,21 +645,13 @@ namespace TorreDeControle.UI
             hb.childForceExpandWidth = false;
             hb.childForceExpandHeight = true;
 
-            // Vermelho: os colegas para marcar e o confirmar.
-            var escolha = Caixa(baixo, Estilo.Erro);
-            var le = escolha.gameObject.AddComponent<LayoutElement>();
-            le.layoutPriority = 2;
-            le.minWidth = le.preferredWidth = 380;
-            le.flexibleWidth = 0;
-            SeletorDeInfluencia.MontarEscolha(escolha, p, personagens, AoMudarInfluencia, colunas: 1, larguraDoChip: 340);
-
             // Verde: a quem deu.
             var deu = Caixa(baixo, new Color(0.45f, 0.80f, 0.50f));
             deu.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
             Estilo.Rotulo(deu, "DEU INFLUÊNCIA A", 20, new Color(0.45f, 0.80f, 0.50f), FontStyles.Bold).characterSpacing = 4;
             var dados = personagens.InfluenciaDada(p);
             if (dados.Count == 0)
-                Nota(deu, personagens.InfluenciaConfirmada(p) ? "Ninguém (pela regra)." : "Ainda não deu.");
+                Nota(deu, personagens.InfluenciaConfirmada(p) ? "Ninguém (pela regra)." : "Ainda não deu (o jogador marca na ficha, Núcleo).");
             var suaveInfluencia = ColorUtility.ToHtmlStringRGB(Estilo.TextoSuave);
             foreach (var id in personagens.InfluenciaPerdida(p))
                 Estilo.Rotulo(deu, "• " + (personagens.Buscar(id)?.NomeExibicao ?? "?") + " (perdida)", 24, Estilo.TextoApagado);
@@ -580,11 +683,6 @@ namespace TorreDeControle.UI
             Nota(reversa, "Lido das fichas dos colegas.");
         }
 
-        void AoMudarInfluencia(Resultado r)
-        {
-            Mostrar(r);
-            Redesenhar();
-        }
 
         static void Nota(Transform pai, string texto)
         {

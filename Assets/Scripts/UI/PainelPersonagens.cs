@@ -28,6 +28,7 @@ namespace TorreDeControle.UI
         CadastroJogadores jogadores;
         CadastroSalas salas;
         PainelFicha painelFicha;
+        PainelSala painelSala;
 
         TMP_InputField campoCodinome;
         TMP_InputField campoNome;
@@ -355,10 +356,10 @@ namespace TorreDeControle.UI
             }
             var opcoes = new List<(string, UnityEngine.Events.UnityAction, bool)>();
             foreach (var c in copias.Where(c => c.Ativo))
-                opcoes.Add((Instancia(c, null), () => AbrirFicha(c), false));
+                opcoes.Add((Instancia(c, null), () => IrParaASala(c), false));
             opcoes.Add((p.NomeExibicao, () => AbrirFicha(p), false));
             foreach (var c in copias.Where(c => !c.Ativo))
-                opcoes.Add((Instancia(c, "vaga liberada"), () => AbrirFicha(c), true));
+                opcoes.Add((Instancia(c, "vaga liberada"), () => IrParaASala(c), true));
             Estilo.Escolher(transform, $"Qual ficha de {p.NomeExibicao}?", opcoes.ToArray());
         }
 
@@ -399,6 +400,29 @@ namespace TorreDeControle.UI
             var resultado = cadastro.Importar(json, out _);
             Mostrar(resultado);
             Redesenhar();
+        }
+
+        /// <summary>
+        /// O atalho para a instância: leva para a sala dela e abre a ficha por lá (editável como na vaga: quem
+        /// mexe na instância é a sala). Fechar a ficha deixa na sala; o Voltar da sala volta ao laboratório.
+        /// </summary>
+        void IrParaASala(Personagem instancia)
+        {
+            var sala = salas?.Buscar(instancia.Sala);
+            if (sala == null)
+            {
+                AbrirFicha(instancia);
+                return;
+            }
+            if (painelSala == null)
+                painelSala = PainelSala.Criar(transform.parent);
+            gameObject.SetActive(false);
+            painelSala.Abrir(sala, salas, cadastro, jogadores, () =>
+            {
+                gameObject.SetActive(true);
+                Redesenhar();
+            });
+            painelSala.MostrarFicha(instancia);
         }
 
         void AbrirFicha(Personagem p)

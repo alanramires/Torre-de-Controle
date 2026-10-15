@@ -14,9 +14,19 @@ namespace TorreDeControle.Tests
             TorreDeControle.Core.Salas.Sala sala, Personagem copia)
         {
             salas.EnviarFormacao(sala.Id, copia.Id, "a formação da " + copia.NomeExibicao);
+            // Relacionamento é entre membros da equipe: sozinha na sala, ganha uma colega na última vaga livre.
+            if (personagens.Colegas(copia).Count == 0)
+            {
+                var livre = sala.Slots.FindLastIndex(s => s.Personagem == null && s.Jogador == null);
+                var colega = Criada(personagens, "Colega de " + copia.NomeExibicao);
+                salas.PorPersonagem(sala.Id, livre, colega.Id, false);
+            }
             personagens.EscolherComportamento(copia.Id, "cara_fechada");
             var quantas = personagens.QuantasInfluencias(copia) ?? 0;
             personagens.DarInfluencia(copia.Id, personagens.Colegas(copia).Take(quantas).Select(c => c.Id));
+            var primeiro = personagens.OpcoesDeRelacionamento(copia).First();
+            for (var k = 0; k < personagens.RegraDoArquetipo(copia).Equipe.Relacionamentos.Count; k++)
+                personagens.DefinirRelacionamento(copia.Id, k, primeiro.Id);
             NUnit.Framework.Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, NUnit.Framework.Is.True);
         }
 

@@ -1142,6 +1142,8 @@ namespace TorreDeControle.UI
             // Texto livre de várias linhas (ex.: descrição da nave): área, grava ao sair.
             var campo = c.VariasLinhas && pai == null ? Estilo.AreaTexto(alvo, marcador, 120) : Estilo.CampoTexto(alvo, marcador);
             campo.text = cadastro.TextoDoExtra(p, extra, c.Id, vaga);
+            if (c.DeRelacionamento is int frase && p.Sala != null)
+                campo.text = cadastro.ColegaDoRelacionamento(p, frase)?.NomeExibicao ?? "(escolha na aba História)";
             if (pai == null && !c.VariasLinhas)
             {
                 var layout = campo.gameObject.AddComponent<LayoutElement>();
@@ -1645,23 +1647,99 @@ namespace TorreDeControle.UI
                 titulo.gameObject.AddComponent<LayoutElement>().minHeight = 30;
                 var pergunta = Estilo.Rotulo(conteudo, regra.Equipe.Pergunta, 22, Estilo.TextoApagado, FontStyles.Italic);
                 pergunta.textWrappingMode = TextWrappingModes.Normal;
-                CampoDaSala(Estilo.AreaTexto(conteudo, "resposta da equipe (na sala)", 64));
+                // A resposta vem da formação da equipe (aba da sala): aqui só se lê.
+                var resposta = Estilo.AreaTexto(conteudo, p.Sala == null
+                    ? "resposta da equipe (na sala)"
+                    : "envie na sala, aba Formação da equipe", 64);
+                resposta.text = p.EquipeResposta;
+                CampoDaSala(resposta);
             }
 
             if (regra.Equipe.Relacionamentos.Count > 0)
+                Relacionamentos(regra);
+        }
+
+        /// <summary>
+        /// Relacionamentos: em aprovação, aberta pela sala, o jogador escolhe o colega de cada frase (a Bruta:
+        /// entre quem recebeu a Influência). Depois, só leitura, com quem ocupou a frase antes. O porquê de
+        /// cada um é anotação (opcional, editável sempre).
+        /// </summary>
+        void Relacionamentos(Core.Regras.RegrasArquetipos.RegraArquetipo regra)
+        {
+            var titulo = Estilo.Rotulo(conteudo, "Relacionamentos", 22, p.Sala == null ? Estilo.TextoApagado : Estilo.Dourado, FontStyles.Bold);
+            titulo.gameObject.AddComponent<LayoutElement>().minHeight = 30;
+            var editavel = p.Sala != null && pelaSala && cadastro.EquipeEditavel(p);
+            var opcoes = cadastro.OpcoesDeRelacionamento(p);
+            if (editavel && cadastro.RelacionamentoVemDaInfluencia(p))
             {
-                var titulo = Estilo.Rotulo(conteudo, "Relacionamentos", 22, Estilo.TextoApagado, FontStyles.Bold);
-                titulo.gameObject.AddComponent<LayoutElement>().minHeight = 30;
-                foreach (var frase in regra.Equipe.Relacionamentos)
+                var nota = Estilo.Rotulo(conteudo, cadastro.InfluenciaConfirmada(p)
+                        ? "O amor e o rival saem de quem recebeu a sua Influência (aba Núcleo)."
+                        : "Escolher o amor e o rival já dá a Influência a eles (ou dê a Influência primeiro, no Núcleo, e escolha entre eles).",
+                    20, Estilo.TextoSuave, FontStyles.Italic);
+                nota.textWrappingMode = TextWrappingModes.Normal;
+            }
+
+            for (var k = 0; k < regra.Equipe.Relacionamentos.Count; k++)
+            {
+                var indice = k;
+                var fila = Estilo.Fila(conteudo, 52, 12);
+                var frase = Estilo.Rotulo(fila, regra.Equipe.Relacionamentos[k], 22,
+                    p.Sala == null ? Estilo.TextoApagado : Estilo.Texto, FontStyles.Italic);
+                frase.textWrappingMode = TextWrappingModes.Normal;
+                Estilo.ColunaElastica(frase);
+
+                if (p.Sala == null)
                 {
-                    var fila = Estilo.Fila(conteudo, 50, 12);
-                    var t = Estilo.Rotulo(fila, frase, 22, Estilo.TextoApagado, FontStyles.Italic);
-                    t.textWrappingMode = TextWrappingModes.Normal;
-                    Estilo.ColunaElastica(t);
-                    var colega = Estilo.CampoTexto(fila, "colega (na sala)");
-                    colega.gameObject.AddComponent<LayoutElement>().preferredWidth = 320;
-                    CampoDaSala(colega);
+                    var vazio = Estilo.CampoTexto(fila, "colega (na sala)");
+                    vazio.gameObject.AddComponent<LayoutElement>().preferredWidth = 320;
+                    CampoDaSala(vazio);
+                    continue;
                 }
+
+                var atual = cadastro.ColegaDoRelacionamento(p, k);
+                if (editavel)
+                {
+                    var lista = new List<(string id, string nome)> { (string.Empty, "— escolher colega —") };
+                    lista.AddRange(opcoes.Select(c => (c.Id, c.NomeExibicao)));
+                    Estilo.ListaSuspensa(fila, 320, lista, atual?.Id ?? string.Empty, id =>
+                    {
+                        var r = cadastro.DefinirRelacionamento(p.Id, indice, id.Length == 0 ? null : id);
+                        MontarConteudo(manterRolagem: true);
+                        MontarRodape();
+                        if (!r.Ok)
+                            Aviso(r.Erro);
+                    });
+                }
+                else
+                {
+                    var nome = Estilo.Rotulo(fila, atual?.NomeExibicao ?? "—", 22, Estilo.Dourado, FontStyles.Bold);
+                    nome.gameObject.AddComponent<LayoutElement>().preferredWidth = 320;
+                }
+
+                // Quem ocupou a frase antes (no jogo: trocado ou perdido).
+                var anteriores = k < p.Relacoes.Count ? p.Relacoes[k].Anteriores : new List<string>();
+                if (anteriores.Count > 0)
+                {
+                    var antes = Estilo.Rotulo(conteudo, "antes: " + string.Join(", ",
+                        anteriores.Select(id => cadastro.Buscar(id)?.NomeExibicao ?? "?")), 18, Estilo.TextoApagado, FontStyles.Italic);
+                    antes.gameObject.AddComponent<LayoutElement>().minHeight = 24;
+                }
+
+                // O porquê (roleplay): anotação, editável sempre (exceto no arquivo da sala, que é só consulta).
+                if (pelaSala && p.Ativo)
+                {
+                    // Várias linhas: um texto colado com quebras não vaza da caixa (rola dentro; ••• para ler inteiro).
+                    var porque = Estilo.AreaTexto(conteudo, "por quê? (opcional)", 90);
+                    porque.text = k < p.Relacoes.Count ? p.Relacoes[k].Porque : string.Empty;
+                    porque.onValueChanged.AddListener(t => cadastro.DescreverRelacionamento(p.Id, indice, t));
+                    Estilo.ComExpandir(porque, regra.Equipe.Relacionamentos[k]);
+                }
+            }
+
+            foreach (var obs in cadastro.ObservacoesDaEquipe(p))
+            {
+                var o = Estilo.Rotulo(conteudo, obs, 20, Estilo.TextoApagado, FontStyles.Italic);
+                o.textWrappingMode = TextWrappingModes.Normal;
             }
         }
 
