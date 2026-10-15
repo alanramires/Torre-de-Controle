@@ -89,11 +89,21 @@
           "id": "amaldicoada/nemesis",
           "nome": "Nêmesis",
           "nota": "no fim da sessão: avançou contra ele? sim, potencial; não, marca a perdição",
+          "npcs": [
+            { "campo": "nome", "campo_descricao": "descricao", "papel": "vilao", "vinculo": "nêmesis" }
+          ],
           "campos": [
             {
               "id": "nome",
               "tipo": "texto",
-              "rotulo": "Quem é o seu nêmesis"
+              "rotulo": "Nome do seu nêmesis"
+            },
+            {
+              "id": "descricao",
+              "tipo": "texto",
+              "rotulo": "Quem é ele",
+              "varias_linhas": true,
+              "opcional": true
             }
           ]
         },
@@ -606,6 +616,10 @@
         "Por que você tenta ser herói?",
         "Por que a equipe importa para você?"
       ],
+      "npcs_historico": [
+        { "pergunta": 0, "papel": "neutro", "maturidade": "mestre", "vinculo": "quem a mudou" },
+        { "pergunta": 2, "papel": "aliado", "maturidade": "mestre", "vinculo": "tenta cuidar dela" }
+      ],
       "equipe": {
         "pergunta": "Derrotamos um inimigo perigoso. Quem ou o que era?",
         "relacionamentos": [
@@ -803,6 +817,9 @@
         "Quem, fora da equipe, pensa melhor de você do que você mesmo?",
         "Por que você tenta ser herói?",
         "Por que a equipe importa para você?"
+      ],
+      "npcs_historico": [
+        { "pergunta": 2, "papel": "aliado", "maturidade": "mestre", "vinculo": "pensa melhor dela" }
       ],
       "equipe": {
         "pergunta": "Quebramos regras importantes para vencer a luta. Que regras? De quem eram?",
@@ -1009,11 +1026,21 @@
           "id": "discipula/mentora",
           "nome": "Mentora",
           "nota": "quem treinou você e talvez prenda você a um caminho só",
+          "npcs": [
+            { "campo": "nome", "campo_descricao": "descricao", "papel": "vilao", "vinculo": "mentora" }
+          ],
           "campos": [
             {
               "id": "nome",
               "tipo": "texto",
-              "rotulo": "Quem é a mentora"
+              "rotulo": "Nome da mentora"
+            },
+            {
+              "id": "descricao",
+              "tipo": "texto",
+              "rotulo": "Quem é ela",
+              "varias_linhas": true,
+              "opcional": true
             },
             {
               "id": "incorpora",
@@ -1374,6 +1401,16 @@
           "id": "farol/impulsos",
           "nome": "Impulsos",
           "nota": "cumprir um marcado: potencial, remove condição ou Influência sobre alguém envolvido",
+          "npcs": [
+            {
+              "campo": "marcados", "por_escolha": true,
+              "opcoes": {
+                "conquistar-o-respeito-de-um-heroi-que-voce-admira": { "papel": "aliado", "maturidade": "mestre", "dica": "vazio: qualquer herói que você admira" },
+                "beijar-alguem-perigoso": { "papel": "vilao", "maturidade": "mestre", "dica": "vazio: qualquer inimigo poderoso" },
+                "superar-um-heroi-adulto": { "papel": "aliado", "maturidade": "adulto", "dica": "vazio: qualquer herói adulto" }
+              }
+            }
+          ],
           "campos": [
             {
               "id": "marcados",
@@ -1523,6 +1560,9 @@
         "Quem, fora da equipe, acha que você não deveria ser super-herói?",
         "Por que você tenta ser herói?",
         "Por que a equipe importa para você?"
+      ],
+      "npcs_historico": [
+        { "pergunta": 2, "papel": "neutro", "maturidade": "mestre", "vinculo": "acha que não deveria ser herói" }
       ],
       "equipe": {
         "pergunta": "Encontramos sinais de que aquele incidente era só o começo de algo maior. Que sinais?",
@@ -1880,6 +1920,9 @@
         "Por que seu povo quer que você volte?",
         "Por que a equipe importa para você?"
       ],
+      "npcs_historico": [
+        { "pergunta": 0, "papel": "neutro", "vinculo": "de onde vem (o planeta, o povo)" }
+      ],
       "equipe": {
         "pergunta": "No começo não confiávamos uns nos outros, mas isso mudou. Como? Por quê?",
         "relacionamentos": [
@@ -2069,6 +2112,9 @@
           "id": "janus/identidade-secreta",
           "nome": "Identidade secreta",
           "nota": "quando o tempo passa, role + Mundano para ver como vão as obrigações",
+          "npcs": [
+            { "campo": "obrigacoes", "por_escolha": true, "papel": "neutro", "maturidade": "mestre" }
+          ],
           "campos": [
             {
               "id": "obrigacoes",
@@ -2222,6 +2268,10 @@
         "Quem, fora da equipe, sabe das suas duas identidades?",
         "Quem pensa o pior da sua identidade mascarada?",
         "Por que a equipe importa para você?"
+      ],
+      "npcs_historico": [
+        { "pergunta": 2, "papel": "aliado", "maturidade": "mestre", "vinculo": "sabe das duas identidades" },
+        { "pergunta": 3, "papel": "neutro", "maturidade": "mestre", "vinculo": "pensa o pior da máscara" }
       ],
       "equipe": {
         "pergunta": "Salvamos a vida de alguém importante, para a cidade ou para nós. Quem? Por que essa pessoa importa?",
@@ -2487,11 +2537,18 @@
           "id": "legado/membros",
           "nome": "Legado",
           "nota": "quando o tempo passa, role + Salvador para ver como o legado reage",
+          "npcs": [
+            { "campo": "membros", "vaga": "ainda-ativo-e-em-destaque", "papel": "aliado", "vinculo": "legado, ainda ativo" },
+            { "campo": "membros", "vaga": "aposentado-e-critico", "papel": "aliado", "vinculo": "legado, aposentado" },
+            { "campo": "membros", "vaga": "proximo-da-linhagem", "papel": "aliado", "maturidade": "jovem", "vinculo": "legado, próximo da linhagem" },
+            { "campo": "membros", "vaga": "maior-inimigo-ainda-a-solta", "papel": "vilao", "vinculo": "maior inimigo do legado" }
+          ],
           "campos": [
             {
               "id": "membros",
               "tipo": "textos",
               "rotulo": "Membros do legado (pelo menos 2)",
+              "com_descricao": true,
               "vagas": [
                 {
                   "id": "ainda-ativo-e-em-destaque",
@@ -2809,6 +2866,10 @@
         "Por que você continua usando seus poderes?",
         "Por que a equipe importa para você?"
       ],
+      "npcs_historico": [
+        { "pergunta": 1, "papel": "neutro", "maturidade": "mestre", "vinculo": "feriu sem querer" },
+        { "pergunta": 2, "papel": "aliado", "maturidade": "mestre", "vinculo": "ajuda a controlar os poderes" }
+      ],
       "equipe": {
         "pergunta": "Destruímos tudo em volta na luta. Onde foi? O que destruímos?",
         "relacionamentos": [
@@ -3015,6 +3076,9 @@
         "Quem, fora da equipe, ajuda você a entender seu novo corpo?",
         "Por que você não se esconde de vez?",
         "Por que a equipe importa para você?"
+      ],
+      "npcs_historico": [
+        { "pergunta": 2, "papel": "aliado", "maturidade": "mestre", "vinculo": "ajuda a entender o novo corpo" }
       ],
       "equipe": {
         "pergunta": "Chamamos atenção e raiva de muita gente na luta. Uma pessoa importante, em especial, agora nos odeia e teme. Quem?",

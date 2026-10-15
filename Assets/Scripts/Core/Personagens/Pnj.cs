@@ -63,6 +63,20 @@ namespace TorreDeControle.Core.Personagens
     {
         [JsonProperty("modo_de_agir")] public string ModoDeAgir { get; set; } = string.Empty;
         [JsonProperty("motivacao")] public string Motivacao { get; set; } = string.Empty;
+        /// <summary>NPC criado pela ficha de uma heroína (ex.: o nêmesis da Amaldiçoada); null se o mestre criou.</summary>
+        [JsonProperty("vinculo")] public VinculoNpc Vinculo { get; set; }
+        /// <summary>Nasceu da ficha sem saber se é adulto ou jovem: o mestre decide (aviso até lá).</summary>
+        [JsonProperty("maturidade_a_definir")] public bool MaturidadeADefinir { get; set; }
+    }
+
+    /// <summary>De quem o NPC é (a instância na sala) e de qual extra ele nasceu.</summary>
+    public sealed class VinculoNpc
+    {
+        [JsonProperty("personagem")] public string Personagem { get; set; }
+        [JsonProperty("extra")] public string Extra { get; set; }
+        /// <summary>Qual dos NPCs do extra (campo e vaga), quando o extra dá mais de um.</summary>
+        [JsonProperty("campo")] public string Campo { get; set; }
+        [JsonProperty("vaga")] public string Vaga { get; set; }
     }
 
     /// <summary>

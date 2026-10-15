@@ -125,8 +125,11 @@ namespace TorreDeControle.UI
         {
             titulo.text = npc.NomeExibicao.ToUpperInvariant();
             var maturidade = npc.Maturidade == Maturidade.Adulto ? "adulto" : "jovem";
-            var papel = npc.Papel switch { Papel.Vilao => "vilão", Papel.Heroi => "herói", _ => "neutro" };
-            subtitulo.text = $"NPC · {maturidade} · {papel}" + (npc.Ativo ? string.Empty : " · inativo");
+            var papel = npc.Papel switch { Papel.Vilao => "vilão", Papel.Aliado => "aliado", _ => "neutro" };
+            var origem = cadastro.OrigemDoNpc(npc);
+            subtitulo.text = $"NPC · {maturidade} · {papel}" +
+                             (origem is { } o ? $" · {o.dono.NomeExibicao} · {o.vinculo}" : string.Empty) +
+                             (npc.Ativo ? string.Empty : " · inativo");
         }
 
         void Rodape()
@@ -138,6 +141,16 @@ namespace TorreDeControle.UI
 
         void MontarFicha()
         {
+            if (cadastro.OrigemDoNpc(npc) is { } origem)
+            {
+                Secao($"{origem.dono.NomeExibicao.ToUpperInvariant()} · {origem.vinculo.ToUpperInvariant()}", "escrito pelo jogador");
+                var d = Estilo.Rotulo(conteudo, string.IsNullOrWhiteSpace(origem.descricao)
+                    ? "<i>Sem descrição ainda.</i>"
+                    : $"<noparse>{origem.descricao}</noparse>", 22, Estilo.TextoSuave);
+                d.textWrappingMode = TextWrappingModes.Normal;
+                Nota("Nasceu da ficha dela: o nome vem de lá (mudou lá, muda aqui); o resto da ficha é do mestre.");
+                Vao();
+            }
             Secao("IDENTIDADE", null);
             var nome = CampoRotulado("NOME", npc.Identidade.Nome, "nome");
             var codinome = CampoRotulado(npc.Papel == Papel.Vilao ? "NOME DE VILÃO" : "CODINOME",

@@ -800,10 +800,12 @@ namespace TorreDeControle.UI
                 Secao(extra.Nome.ToUpperInvariant(), extra.Nota);
                 foreach (var c in extra.Campos)
                 {
+                    // Nome e descrição de NPC (ex.: nêmesis) se acertam na sala, em aprovação, junto com a equipe.
+                    var editavel = emCriacao || cadastro.ExtraEditavelNaSala(p, extra.Id, c.Id);
                     if (c.Id == extra.CumpreCampo)
-                        ListaDeCumprimento(extra, c, emCriacao);
+                        ListaDeCumprimento(extra, c, editavel);
                     else
-                        CampoDeExtra(extra.Id, c, emCriacao);
+                        CampoDeExtra(extra.Id, c, editavel);
                 }
             }
         }
@@ -886,9 +888,12 @@ namespace TorreDeControle.UI
         {
             // Na ordem em que foram marcadas (a mesma do JSON), não na ordem da lista: preencher de cima
             // para baixo pensando na ordem da marcação trocava os textos de lugar.
-            var naOrdem = escolhidas
-                .Select(id => c.Opcoes.FirstOrDefault(o => o.Id == id))
-                .Where(o => o != null && (c.Descrever || c.DescreverOpcional || o.Lacuna));
+            bool ComPessoa(string opcao) => cadastro.PessoaPorEscolha(p, extra, c.Id, opcao);
+            var escolhidasNaOrdem = escolhidas.Select(id => c.Opcoes.FirstOrDefault(o => o.Id == id)).Where(o => o != null).ToList();
+            var naOrdem = escolhidasNaOrdem.Where(o => c.Descrever || c.DescreverOpcional || o.Lacuna);
+            // Opção sem caixa de descrição mas com pessoa: só a caixa de pessoa, com o nome da opção (hoje nenhuma; o Farol e o Janus descrevem).
+            foreach (var o in escolhidasNaOrdem.Where(o => ComPessoa(o.Id) && !(c.Descrever || c.DescreverOpcional || o.Lacuna)))
+                PessoaDaOpcao(extra, c, o, o.Nome);
             foreach (var o in naOrdem)
             {
                 var fila = FilaRotulada(o.Nome);
@@ -898,7 +903,41 @@ namespace TorreDeControle.UI
                     : "descrição (opcional)";
                 var campo = CampoTextoDeExtra(extra, c, o.Id, emCriacao, fila, dica, tituloExpandir: o.Nome);
                 Estilo.ColunaElastica(campo);
+                if (ComPessoa(o.Id))
+                    PessoaDaOpcao(extra, c, o);
             }
+        }
+
+        /// <summary>
+        /// Pessoa ligada à opção (opcional): quem dá rosto à obrigação (chefe, namorado, a professora que
+        /// fica no pé). Preenchida, vira NPC da sala; a descrição da opção é a descrição dele.
+        /// </summary>
+        void PessoaDaOpcao(string extra, Core.Regras.RegrasArquetipos.CampoExtra c, Core.Regras.RegrasArquetipos.Opcao o,
+            string rotulo = null)
+        {
+            var chave = Core.Regras.RegrasArquetipos.CampoExtra.PessoaDaOpcao(o.Id);
+            RectTransform fila;
+            if (rotulo != null)
+            {
+                fila = FilaRotulada(rotulo);
+                fila.GetComponentInChildren<TextMeshProUGUI>().textWrappingMode = TextWrappingModes.Normal;
+            }
+            else
+            {
+                fila = Estilo.Fila(conteudo, 50);
+                Estilo.Rect("Recuo", fila).gameObject.AddComponent<LayoutElement>().preferredWidth = 240;
+            }
+            var dica = cadastro.DicaDaPessoa(p, extra, c.Id, o.Id);
+            var campo = Estilo.CampoTexto(fila, dica != null ? $"pessoa ligada (opcional) · {dica}" : "pessoa ligada (opcional): chefe, namorado, professora…");
+            Estilo.ColunaElastica(campo);
+            campo.text = cadastro.TextoDoExtra(p, extra, c.Id, chave);
+            if (!cadastro.PessoaEditavel(p))
+            {
+                CampoDaSala(campo);
+                return;
+            }
+            campo.onDeselect.AddListener(t => { cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, chave, t); MontarRodape(); });
+            campo.onSubmit.AddListener(t => { cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, chave, t); MontarRodape(); });
         }
 
         /// <summary>Caixinha de marcar (quadrado dourado quando marcada).</summary>
@@ -986,8 +1025,10 @@ namespace TorreDeControle.UI
                     {
                         var fila = FilaRotulada(vaga.Nome);
                         fila.GetComponentInChildren<TextMeshProUGUI>().textWrappingMode = TextWrappingModes.Normal;
-                        var campo = CampoTextoDeExtra(extra, c, vaga.Id, emCriacao, fila);
+                        var campo = CampoTextoDeExtra(extra, c, vaga.Id, emCriacao, fila, c.ComDescricao ? "nome" : null);
                         Estilo.ColunaElastica(campo);
+                        if (c.ComDescricao)
+                            DescricaoDaVaga(extra, c, vaga, emCriacao);
                     }
                     break;
                 case Core.Regras.RegrasArquetipos.CampoExtra.Trilha:
@@ -1131,6 +1172,27 @@ namespace TorreDeControle.UI
             }
         }
 
+        /// <summary>A descrição opcional de uma vaga (ex.: quem é cada membro do Legado), embaixo do nome.</summary>
+        void DescricaoDaVaga(string extra, Core.Regras.RegrasArquetipos.CampoExtra c,
+            Core.Regras.RegrasArquetipos.Opcao vaga, bool emCriacao)
+        {
+            var chave = Core.Regras.RegrasArquetipos.CampoExtra.DescricaoDaVaga(vaga.Id);
+            var fila = Estilo.Fila(conteudo, 90);
+            Estilo.Rect("Recuo", fila).gameObject.AddComponent<LayoutElement>().preferredWidth = 240;
+            var campo = Estilo.AreaTexto(fila, "quem é (opcional)", 90);
+            Estilo.ColunaElastica(campo);
+            campo.text = cadastro.TextoDoExtra(p, extra, c.Id, chave);
+            if (!emCriacao)
+            {
+                CampoDaSala(campo);
+                Estilo.ComExpandir(campo, $"{vaga.Nome}: quem é");
+                return;
+            }
+            campo.onValueChanged.AddListener(t => cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, chave, t));
+            campo.onDeselect.AddListener(t => { cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, chave, t); MontarRodape(); });
+            Estilo.ComExpandir(campo, $"{vaga.Nome}: quem é");
+        }
+
         static string TextoComLacuna(Core.Regras.RegrasArquetipos.Opcao o, string preenchido) =>
             o.Lacuna && !string.IsNullOrEmpty(preenchido) ? o.Nome.Replace("___", preenchido) : o.Nome;
 
@@ -1153,6 +1215,7 @@ namespace TorreDeControle.UI
             if (c.NaSala || !emCriacao)
             {
                 CampoDaSala(campo);
+                Estilo.ComExpandir(campo, tituloExpandir ?? c.Titulo);
                 return campo;
             }
             campo.onValueChanged.AddListener(t => cadastro.DefinirTextoDeExtra(p.Id, extra, c.Id, vaga, t));
@@ -1620,9 +1683,22 @@ namespace TorreDeControle.UI
             {
                 var pergunta = Estilo.Rotulo(conteudo, regra.Historico[k], 22, Estilo.TextoSuave, FontStyles.Italic);
                 pergunta.textWrappingMode = TextWrappingModes.Normal;
-                var campo = Estilo.AreaTexto(conteudo, "resposta", 64);
-                campo.text = k < respostas.Count ? respostas[k] : string.Empty;
                 var indice = k;
+                var daNpc = cadastro.PerguntaDaNpc(p, k);
+                if (daNpc)
+                {
+                    // Pergunta que dá NPC: nome à parte; a resposta vira a descrição dele.
+                    var nome = Estilo.CampoTexto(conteudo, "nome");
+                    nome.text = cadastro.NomeNoHistorico(p, k);
+                    var ln = nome.gameObject.AddComponent<LayoutElement>();
+                    ln.minHeight = 50;
+                    ln.preferredHeight = 50;
+                    ln.layoutPriority = 2;
+                    nome.onDeselect.AddListener(t => { cadastro.DefinirNomeNoHistorico(p.Id, indice, t); MontarRodape(); });
+                    nome.onSubmit.AddListener(t => { cadastro.DefinirNomeNoHistorico(p.Id, indice, t); MontarRodape(); });
+                }
+                var campo = Estilo.AreaTexto(conteudo, daNpc ? "quem é" : "resposta", 64);
+                campo.text = k < respostas.Count ? respostas[k] : string.Empty;
                 campo.onDeselect.AddListener(t => { cadastro.ResponderHistorico(p.Id, indice, t); MontarRodape(); });
                 Estilo.ComExpandir(campo, regra.Historico[k]);
             }

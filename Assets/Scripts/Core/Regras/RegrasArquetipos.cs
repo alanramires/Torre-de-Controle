@@ -46,6 +46,8 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("visual")] public List<List<string>> Visual { get; set; } = new List<List<string>>();
             /// <summary>Perguntas de histórico da ficha, respondidas na criação.</summary>
             [JsonProperty("historico")] public List<string> Historico { get; set; } = new List<string>();
+            /// <summary>Perguntas de histórico que dão NPC (ex.: Nova: quem feriu, quem ajuda a controlar).</summary>
+            [JsonProperty("npcs_historico")] public List<NpcDoExtra> NpcsHistorico { get; set; } = new List<NpcDoExtra>();
             /// <summary>"Quando a equipe se reuniu" e relacionamentos: respondidos na sala, com a equipe.</summary>
             [JsonProperty("equipe")] public RegraEquipe Equipe { get; set; } = new RegraEquipe();
             [JsonProperty("influencia")] public RegraInfluencia Influencia { get; set; } = new RegraInfluencia();
@@ -86,6 +88,56 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("cumpre_campo")] public string CumpreCampo { get; set; }
             /// <summary>Benefícios para escolher ao cumprir.</summary>
             [JsonProperty("ao_cumprir")] public List<Opcao> AoCumprir { get; set; } = new List<Opcao>();
+            /// <summary>Os NPCs que o extra dá na sala (ex.: o nêmesis da Amaldiçoada, os membros do Legado).</summary>
+            [JsonProperty("npcs")] public List<NpcDoExtra> Npcs { get; set; } = new List<NpcDoExtra>();
+        }
+
+        /// <summary>
+        /// Um NPC que nasce do extra: com a heroína numa sala, preencher o nome cria (ou reativa) o NPC lá;
+        /// apagar o nome inativa. O jogador escreve nome e descrição; o resto da ficha é do mestre.
+        /// O nome é o texto de <see cref="Campo"/> (na <see cref="Vaga"/>, se for de vagas); a descrição é
+        /// o <see cref="CampoDescricao"/> ou, nas vagas com descrição, a descrição da vaga.
+        /// </summary>
+        /// <summary>Papel, maturidade e dica de uma opção que dá pessoa (ver NpcDoExtra.Opcoes).</summary>
+        public sealed class NpcDaOpcao
+        {
+            [JsonProperty("papel")] public string Papel { get; set; }
+            [JsonProperty("maturidade")] public string Maturidade { get; set; }
+            /// <summary>O que a caixa diz quando vazia (ex.: "vazio: qualquer herói adulto").</summary>
+            [JsonProperty("dica")] public string Dica { get; set; }
+        }
+
+        public sealed class NpcDoExtra
+        {
+            [JsonProperty("campo")] public string Campo { get; set; }
+            [JsonProperty("vaga")] public string Vaga { get; set; }
+            /// <summary>
+            /// Lista: cada opção escolhida ganha uma caixa opcional de pessoa (ex.: obrigações do Janus:
+            /// o chefe do estágio, a professora que fica no pé); preenchida, vira NPC. A descrição é a da opção
+            /// e o laço é o nome da opção.
+            /// </summary>
+            [JsonProperty("por_escolha")] public bool PorEscolha { get; set; }
+            /// <summary>
+            /// Por escolha: se houver, só estas opções ganham a caixa de pessoa, cada uma com papel, maturidade e
+            /// dica próprios (ex.: impulsos do Farol: "beijar alguém perigoso" → vilão). Vazio: todas, com os da regra.
+            /// </summary>
+            [JsonProperty("opcoes")] public Dictionary<string, NpcDaOpcao> Opcoes { get; set; } = new Dictionary<string, NpcDaOpcao>();
+
+            /// <summary>Esta opção escolhida ganha caixa de pessoa?</summary>
+            public bool DaPessoa(string opcao) => PorEscolha && (Opcoes == null || Opcoes.Count == 0 || Opcoes.ContainsKey(opcao));
+
+            public string PapelDa(string opcao) => Opcoes != null && Opcoes.TryGetValue(opcao, out var o) && o.Papel != null ? o.Papel : Papel;
+            public string MaturidadeDa(string opcao) => Opcoes != null && Opcoes.TryGetValue(opcao, out var o) && o.Maturidade != null ? o.Maturidade : Maturidade;
+            public string DicaDa(string opcao) => Opcoes != null && Opcoes.TryGetValue(opcao, out var o) ? o.Dica : null;
+            [JsonProperty("campo_descricao")] public string CampoDescricao { get; set; }
+            /// <summary>neutro, aliado ou vilao.</summary>
+            [JsonProperty("papel")] public string Papel { get; set; }
+            /// <summary>Em npcs_historico: o número da pergunta (de 0), cuja resposta é a descrição.</summary>
+            [JsonProperty("pergunta")] public int? Pergunta { get; set; }
+            /// <summary>jovem, adulto (padrão) ou mestre (nasce adulto, com aviso até o mestre decidir).</summary>
+            [JsonProperty("maturidade")] public string Maturidade { get; set; }
+            /// <summary>Como a sala chama o laço (ex.: "nêmesis" → "Estrela Negra · nêmesis").</summary>
+            [JsonProperty("vinculo")] public string Vinculo { get; set; }
         }
 
         /// <summary>
@@ -119,6 +171,21 @@ namespace TorreDeControle.Core.Regras
             /// Ex.: Amor e Rival da Bruta = os dois relacionamentos dela.
             /// </summary>
             [JsonProperty("de_relacionamento")] public int? DeRelacionamento { get; set; }
+
+            /// <summary>Textos: cada vaga ganha, abaixo do nome, uma descrição opcional (ex.: membros do Legado).</summary>
+            [JsonProperty("com_descricao")] public bool ComDescricao { get; set; }
+
+            /// <summary>A "vaga" onde mora a descrição da vaga (mesma chave de texto, sufixo próprio).</summary>
+            public static string DescricaoDaVaga(string vaga) => vaga + "#descricao";
+
+            const string SufixoPessoa = "#pessoa";
+
+            /// <summary>A "vaga" onde mora a pessoa ligada a uma opção escolhida (ver NpcDoExtra.PorEscolha).</summary>
+            public static string PessoaDaOpcao(string opcao) => opcao + SufixoPessoa;
+
+            /// <summary>A opção de uma chave de pessoa; null se não for chave de pessoa.</summary>
+            public static string OpcaoDaPessoa(string vaga) =>
+                vaga != null && vaga.EndsWith(SufixoPessoa) ? vaga.Substring(0, vaga.Length - SufixoPessoa.Length) : null;
 
             /// <summary>Texto que não entra nas pendências (ex.: descrição livre da nave).</summary>
             [JsonProperty("opcional")] public bool Opcional { get; set; }

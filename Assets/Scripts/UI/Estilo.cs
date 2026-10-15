@@ -517,7 +517,9 @@ namespace TorreDeControle.UI
         /// </summary>
         public static void ComExpandir(TMP_InputField campo, string titulo)
         {
-            if (!campo.interactable)
+            // Só leitura: o ••• abre o texto inteiro para ler, sem editar.
+            var soLeitura = !campo.interactable;
+            if (soLeitura && string.IsNullOrWhiteSpace(campo.text))
                 return;
             // Abre espaço à direita do texto para o botão.
             var area = campo.textViewport;
@@ -547,11 +549,14 @@ namespace TorreDeControle.UI
             var pontos = Rotulo(rect, "•••", 22, Dourado, FontStyles.Bold);
             pontos.alignment = TextAlignmentOptions.Center;
             Esticar(pontos.rectTransform);
-            botao.onClick.AddListener(() => EditorDeTexto(campo.transform, titulo, campo.text, novo =>
-            {
-                campo.text = novo;
-                campo.onDeselect.Invoke(novo);
-            }));
+            if (soLeitura)
+                botao.onClick.AddListener(() => LeitorDeTexto(campo.transform, titulo, $"<noparse>{campo.text}</noparse>"));
+            else
+                botao.onClick.AddListener(() => EditorDeTexto(campo.transform, titulo, campo.text, novo =>
+                {
+                    campo.text = novo;
+                    campo.onDeselect.Invoke(novo);
+                }));
         }
 
         /// <summary>Mini-tela modal com uma área de texto grande: Cancelar ou Salvar.</summary>

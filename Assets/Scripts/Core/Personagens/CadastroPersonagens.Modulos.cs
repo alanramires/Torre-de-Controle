@@ -133,6 +133,7 @@ namespace TorreDeControle.Core.Personagens
                     if (atuais.Remove(opcao))
                     {
                         p.Criacao.ExtrasTextos.Remove(ChaveExtra(extra, campo, opcao));
+                        p.Criacao.ExtrasTextos.Remove(ChaveExtra(extra, campo, Campo.PessoaDaOpcao(opcao)));
                     }
                     else
                     {
@@ -146,23 +147,32 @@ namespace TorreDeControle.Core.Personagens
             }
             if (atuais.Count == 0)
                 p.Criacao.ExtrasEscolhas.Remove(chave);
+            SincronizarNpcsDaFicha(p); // opção desmarcada inativa o NPC da pessoa dela
             Gravar();
             return Resultado.Sucesso();
         }
 
         public Resultado DefinirTextoDeExtra(string id, string extra, string campo, string vaga, string texto)
         {
-            if (!EmCriacao(id, out var p, out var erro))
+            // Pessoa de uma opção escolhida (ex.: o chefe do estágio do Janus): vira NPC na sala.
+            var opcaoDaPessoa = Campo.OpcaoDaPessoa(vaga);
+            var alvo = Buscar(id);
+            var pessoa = alvo != null && opcaoDaPessoa != null && PessoaPorEscolha(alvo, extra, campo, opcaoDaPessoa);
+            var naSala = alvo != null && (pessoa ? PessoaEditavel(alvo) : ExtraEditavelNaSala(alvo, extra, campo));
+            if (opcaoDaPessoa != null && !pessoa)
+                return Resultado.Falha("Essa opção não tem pessoa ligada.");
+            if (!EmCriacao(id, out var p, out var erro) && !naSala)
                 return erro;
+            p ??= alvo;
             var c = BuscarCampo(p, extra, campo);
             // Lista com descrição: todas as escolhidas (descrever) ou só as que têm lacuna ("Suscetível a ___").
             var descricaoDeLista = c != null && c.Tipo == Campo.Lista &&
-                                   (c.Descrever || c.DescreverOpcional || c.Opcoes.Any(o => o.Id == vaga && o.Lacuna));
+                                   (pessoa || c.Descrever || c.DescreverOpcional || c.Opcoes.Any(o => o.Id == vaga && o.Lacuna));
             if (c == null || (c.Tipo != Campo.Texto && c.Tipo != Campo.Textos && !descricaoDeLista))
                 return Resultado.Falha("Campo de texto desconhecido.");
             if (c.NaSala)
                 return Resultado.Falha("Isso se preenche na sala, com a equipe.");
-            if (descricaoDeLista && !Escolhas(p, extra, campo).Contains(vaga))
+            if (descricaoDeLista && !Escolhas(p, extra, campo).Contains(opcaoDaPessoa ?? vaga))
                 return Resultado.Falha("Escolha a opção antes de descrevê-la.");
 
             var chave = ChaveExtra(extra, campo, c.Tipo == Campo.Texto ? null : vaga);
@@ -174,6 +184,15 @@ namespace TorreDeControle.Core.Personagens
                 p.Criacao.ExtrasTextos.Remove(chave);
             else
                 p.Criacao.ExtrasTextos[chave] = limpo;
+            // Em aprovação a ficha lê da foto: o ajuste vale nas duas (a criação refeita mantém).
+            if (p.Foto != null)
+            {
+                if (limpo.Length == 0)
+                    p.Foto.ExtrasTextos.Remove(chave);
+                else
+                    p.Foto.ExtrasTextos[chave] = limpo;
+            }
+            SincronizarNpcsDaFicha(p);
             Gravar();
             return Resultado.Sucesso();
         }

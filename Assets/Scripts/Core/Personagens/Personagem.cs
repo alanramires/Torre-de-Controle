@@ -14,7 +14,11 @@ namespace TorreDeControle.Core.Personagens
     public enum Maturidade { Jovem, Adulto }
 
     [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
-    public enum Papel { Heroi, Vilao, Neutro }
+    /// <summary>
+    /// Heroi é o das PJs. NPC é Neutro, Aliado ou Vilão (um herói adulto que enfrenta os jovens entra
+    /// como Vilão: o papel diz o que ele é na história, não o que ele é no mundo).
+    /// </summary>
+    public enum Papel { Heroi, Vilao, Neutro, Aliado }
 
     /// <summary>
     /// Ciclo da ficha de herói (decidido com o Alan, 2026-10-13):
@@ -75,6 +79,8 @@ namespace TorreDeControle.Core.Personagens
         /// então trocar de arquétipo em "novo" as apaga.
         /// </summary>
         [JsonProperty("respostas_historico")] public List<string> RespostasHistorico { get; set; } = new List<string>();
+        /// <summary>Nome do NPC das perguntas que dão NPC (chave: número da pergunta); a resposta é a descrição.</summary>
+        [JsonProperty("nomes_historico")] public Dictionary<string, string> NomesHistorico { get; set; } = new Dictionary<string, string>();
     }
 
     /// <summary>

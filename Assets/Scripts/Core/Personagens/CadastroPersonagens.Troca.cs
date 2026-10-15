@@ -123,6 +123,7 @@ namespace TorreDeControle.Core.Personagens
             if (!mesma)
                 (p.Relacoes, p.Influencias, p.InfluenciaComportamento, p.EquipeResposta) =
                     (relacionamentos, influencia, comportamento, equipe);
+            SincronizarNpcsDaFicha(p);
             Gravar();
             return Resultado.Sucesso();
         }

@@ -36,13 +36,19 @@ namespace TorreDeControle.Core.Personagens
             var lista = arquivo.Personagens ?? new List<Personagem>();
             foreach (var p in lista)
                 Normalizar(p);
-            return new CadastroPersonagens(armazenamento, regras, lista);
+            var cadastro = new CadastroPersonagens(armazenamento, regras, lista);
+            cadastro.SincronizarTodosOsNpcsDaFicha();
+            return cadastro;
         }
 
         /// <summary>Completa as coleções que um JSON antigo (ou de outra máquina) não trouxe.</summary>
         static void Normalizar(Personagem p)
         {
             p.Identidade ??= new Identidade();
+            p.Identidade.NomesHistorico ??= new Dictionary<string, string>();
+            // NPC "herói" (papel antigo) é Aliado; Heroi ficou só para as PJs.
+            if (p.Controle == Controle.Mestre && p.Papel == Papel.Heroi)
+                p.Papel = Papel.Aliado;
             p.Criacao ??= new RascunhoCriacao();
             p.Criacao.Habilidades ??= new EscolhasHabilidades();
             p.Criacao.Movimentos ??= new List<string>();
@@ -368,6 +374,7 @@ namespace TorreDeControle.Core.Personagens
                 copia.Cumpridos = new Dictionary<string, string>();
             }
             personagens.Add(copia);
+            SincronizarNpcsDaFicha(copia); // ex.: o nêmesis escrito no laboratório nasce como NPC desta sala
             Gravar();
             resultado = Resultado.Sucesso();
             return copia;
@@ -538,6 +545,7 @@ namespace TorreDeControle.Core.Personagens
             if (respostas[indice] == limpa)
                 return Resultado.Sucesso();
             respostas[indice] = limpa;
+            SincronizarNpcsDaFicha(personagem);
             Gravar();
             return Resultado.Sucesso();
         }

@@ -834,7 +834,7 @@ namespace TorreDeControle.UI
         static IReadOnlyList<(string id, string nome)> OpcoesPapel() =>
             new List<(string, string)>
             {
-                (Papel.Neutro.ToString(), "Neutro"), (Papel.Heroi.ToString(), "Herói"), (Papel.Vilao.ToString(), "Vilão"),
+                (Papel.Neutro.ToString(), "Neutro"), (Papel.Aliado.ToString(), "Aliado"), (Papel.Vilao.ToString(), "Vilão"),
             };
 
         void SecaoNpcs()
@@ -893,7 +893,9 @@ namespace TorreDeControle.UI
             Estilo.Alca(linha, indice => Mostrar(personagens.Mover(npc.Id, indice)));
 
             var motivacao = npc.Pnj?.Motivacao;
+            var origem = personagens.OrigemDoNpc(npc);
             var texto = $"<b>{npc.NomeExibicao}</b>" +
+                        (origem is { } o ? $"  <size=80%><color=#{ColorUtility.ToHtmlStringRGB(Estilo.Dourado)}>{o.dono.NomeExibicao} · {o.vinculo}</color></size>" : string.Empty) +
                         (string.IsNullOrWhiteSpace(motivacao) ? string.Empty : $"  <i><color=#9AA3B5>quer {motivacao}</color></i>");
             var nome = Estilo.Rotulo(linha, texto, 24, npc.Ativo ? Estilo.Texto : Estilo.TextoApagado);
             nome.textWrappingMode = TextWrappingModes.NoWrap;
