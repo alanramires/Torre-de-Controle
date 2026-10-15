@@ -2228,11 +2228,6 @@ namespace TorreDeControle.UI
             // Na sala: o que já foi decidido, lido das fichas.
             if (p.Sala != null)
             {
-                string Nomes(IEnumerable<string> ids)
-                {
-                    var nomes = ids.Select(id => cadastro.Buscar(id)?.NomeExibicao ?? "?").ToList();
-                    return nomes.Count == 0 ? "ninguém ainda" : string.Join(", ", nomes);
-                }
                 var suave = ColorUtility.ToHtmlStringRGB(Estilo.TextoSuave);
                 var apagado = ColorUtility.ToHtmlStringRGB(Estilo.TextoApagado);
                 string Perdidas(IEnumerable<string> ids)

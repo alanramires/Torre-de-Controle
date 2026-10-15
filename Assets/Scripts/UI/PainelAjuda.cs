@@ -12,6 +12,13 @@ namespace TorreDeControle.UI
         string[] nomes;
         string[] arquivos;
         string[] ids;
+        JObject[] entradasAtuais;
+        // Segundo nível da cortina (os movimentos da classe aberta) e se ele está aberto.
+        RectTransform subGrupo;
+        bool grupoAberto = true;
+
+        // Todas as cartas do help são desenhadas pela Unity (DesenhoDeCarta) a partir do catalogo.json: corrigir
+        // texto é editar JSON. Os PNG (tools/cards) ficam só para exportar/imprimir; aqui não são mais lidos.
         JArray catalogo;
         Texture2D[] panoramas;
         readonly string[] categorias = { "referencia-rapida", "movimentos-basicos", "pvp", "influencia", "condicoes", "equipe-sessao", "movimentos-equipe", "movimentos-arquetipo", "viloes" };
@@ -85,6 +92,7 @@ namespace TorreDeControle.UI
         public void AbrirMovimentos(string arquetipoId, string movimento = null)
         {
             Abrir(null);
+            grupoAberto = true; // vindo da ficha, a classe já chega aberta
             var prefixo = PrefixoDoArquetipo(arquetipoId);
             catalogo = new JArray(catalogo.Cast<JObject>().Where(c =>
                 (string)c["categoria"] == "movimentos-arquetipo" &&
@@ -119,9 +127,10 @@ namespace TorreDeControle.UI
                 SomBotao.Ligar(botao);
                 botao.targetGraphic = alvo;
                 botao.onClick.AddListener(() => Ler(escolhido));
+                // A carta é desenhada pela Unity dentro da área (que guarda a proporção das cartas).
                 var imagem = Imagem(quadro);
-                imagem.texture = Textura(k);
-                imagem.enabled = imagem.texture != null;
+                imagem.enabled = false;
+                DesenhoDeCarta.CriarDaAjuda((RectTransform)imagem.transform, entradasAtuais[k]);
             }
             MostrarGaleria();
         }
@@ -166,11 +175,10 @@ namespace TorreDeControle.UI
                 entradas = entradas.Where(c => (string)c["arquetipo"] == arquetipoAtual).ToArray();
             nomes = entradas.Select(c => (string)c["titulo"]).ToArray();
             ids = entradas.Select(c => (string)c["id"]).ToArray();
+            entradasAtuais = entradas;
             arquivos = entradas.Select(c => ((string)c["arquivo"]).Replace(".png", string.Empty)).ToArray();
+            // Sem carregar PNG: as cartas são desenhadas pelo DesenhoDeCarta.
             cards = new Texture2D[arquivos.Length];
-            for (var k = 0; k < cards.Length; k++)
-                cards[k] = categoria == 0 && panoramas != null && k < panoramas.Length && panoramas[k] != null
-                    ? panoramas[k] : Resources.Load<Texture2D>("Cards/Regras/" + arquivos[k]);
             for (var k = 0; k < cortinas.Length; k++)
             {
                 cortinas[k].gameObject.SetActive(k == categoria);
@@ -191,19 +199,40 @@ namespace TorreDeControle.UI
                 textoGrupo.fontSize = 15;
                 textoGrupo.characterSpacing = 0;
             }
+            // Dois níveis de cortina quando há grupos (Movimentos de arquétipo → classe → movimentos): os
+            // movimentos abrem logo abaixo da classe escolhida; clicar de novo na classe recolhe.
+            Transform paiDosAtalhos = assuntos;
+            subGrupo = null;
             foreach (var grupo in grupos)
             {
                 var selecionado = grupo;
-                var b = Estilo.BotaoContorno(assuntos, grupo, 0, Estilo.Dourado,
-                    () => EscolherCategoria(categoria, selecionado));
+                var aberto = grupo == arquetipoAtual && grupoAberto;
+                var b = Estilo.BotaoContorno(assuntos, (aberto ? "– " : "+ ") + grupo, 0, Estilo.Dourado, () =>
+                {
+                    // Como a categoria: de uma carta, volta para a grade da classe com a lista aberta;
+                    // já na grade com a lista aberta, recolhe.
+                    grupoAberto = !(selecionado == arquetipoAtual && grupoAberto && areaGaleria.gameObject.activeSelf);
+                    EscolherCategoria(categoria, selecionado);
+                });
                 b.GetComponent<LayoutElement>().preferredHeight = 42;
                 b.GetComponentInChildren<TextMeshProUGUI>().fontSize = 17;
+                if (grupo == arquetipoAtual)
+                {
+                    subGrupo = Estilo.Rect("Movimentos " + grupo, assuntos);
+                    var v = subGrupo.gameObject.AddComponent<VerticalLayoutGroup>();
+                    v.padding = new RectOffset(16, 0, 0, 4);
+                    v.spacing = 4;
+                    v.childControlWidth = v.childControlHeight = true;
+                    v.childForceExpandHeight = false;
+                    subGrupo.gameObject.SetActive(grupoAberto);
+                    paiDosAtalhos = subGrupo;
+                }
             }
             atalhos = new Button[nomes.Length];
             for (var k = 0; k < nomes.Length; k++)
             {
                 var escolhido = k;
-                var b = Estilo.BotaoContorno(assuntos, nomes[k], 0, Estilo.TextoSuave, () => Ler(escolhido));
+                var b = Estilo.BotaoContorno(paiDosAtalhos, nomes[k], 0, Estilo.TextoSuave, () => Ler(escolhido));
                 var tamanho = b.GetComponent<LayoutElement>();
                 tamanho.minHeight = tamanho.preferredHeight = 42;
                 tamanho.flexibleHeight = 0;
@@ -236,6 +265,8 @@ namespace TorreDeControle.UI
             var topo = Estilo.Fila(cartao, 62);
             titulo = Estilo.Rotulo(topo, "AJUDA", 36, Estilo.Dourado, FontStyles.Bold);
             Estilo.ColunaElastica(titulo);
+            // Por enquanto a gestão das cartas do jogo (Regras/cartas.json, desenhadas pela Unity) mora aqui.
+            Estilo.BotaoContorno(topo, "Gestão das cartas", 340, Estilo.Dourado, AbrirGestaoDasCartas);
             Estilo.BotaoContorno(topo, "Voltar", 190, Estilo.TextoSuave, Voltar);
             var corpo = Estilo.Fila(cartao, 0, 24);
             var corpoLayout = corpo.GetComponent<LayoutElement>();
@@ -264,9 +295,12 @@ namespace TorreDeControle.UI
                 var b = Estilo.BotaoContorno(listaMenu, categoriasNomes[categoria], 0,
                     Estilo.TextoSuave, () =>
                     {
+                        // Cortina: numa carta, clicar na categoria volta para a grade com a lista aberta;
+                        // já na grade com a lista aberta, clicar recolhe.
                         var recolher = categoriaAtual == escolhida && areaGaleria.gameObject.activeSelf
                             && assuntos.gameObject.activeSelf;
-                        EscolherCategoria(escolhida);
+                        // Na mesma categoria, fica na classe em que estava (não volta para a primeira).
+                        EscolherCategoria(escolhida, escolhida == categoriaAtual ? arquetipoAtual : null);
                         assuntos.gameObject.SetActive(!recolher);
                     });
                 b.GetComponent<LayoutElement>().preferredHeight = 64;
@@ -365,18 +399,33 @@ namespace TorreDeControle.UI
         {
             indice = Mathf.Clamp(escolhido, 0, nomes.Length - 1);
             assuntos.gameObject.SetActive(true);
+            if (subGrupo != null)
+            {
+                grupoAberto = true; // lendo um movimento, a classe dele fica aberta
+                subGrupo.gameObject.SetActive(true);
+            }
             DestacarAssunto(indice);
             areaGaleria.gameObject.SetActive(false);
             leitor.gameObject.SetActive(true);
-            ampliada.texture = Textura(indice);
-            ampliada.enabled = ampliada.texture != null;
+            for (var i = ampliada.transform.childCount - 1; i >= 0; i--)
+                Destroy(ampliada.transform.GetChild(i).gameObject);
+            ampliada.enabled = false;
+            DesenhoDeCarta.CriarDaAjuda((RectTransform)ampliada.transform, entradasAtuais[indice], rolavel: true);
             titulo.text = "AJUDA · " + nomes[indice].ToUpperInvariant();
-            pagina.text = ampliada.texture != null ? $"{indice + 1} / {nomes.Length}"
-                : "Imagem não ligada no Canvas (Cards Ajuda).";
+            pagina.text = $"{indice + 1} / {nomes.Length}";
             anterior.gameObject.SetActive(true);
             proxima.gameObject.SetActive(true);
             anterior.interactable = indice > 0;
             proxima.interactable = indice < nomes.Length - 1;
+        }
+
+        PainelCartas gestaoDasCartas;
+
+        void AbrirGestaoDasCartas()
+        {
+            if (gestaoDasCartas == null)
+                gestaoDasCartas = PainelCartas.Criar(transform.parent);
+            gestaoDasCartas.Abrir(Core.Cartas.CatalogoDeCartas.Carregar(new FonteDeRegrasResources()));
         }
 
         void Voltar()

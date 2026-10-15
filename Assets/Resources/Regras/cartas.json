@@ -1,0 +1,1085 @@
+{
+  "versao": 1,
+  "_sobre": "Catálogo de cartas: o que cada carta É (id, tipo, título, origem, de onde vem a regra e qual carta de help a explica). Sem texto de regra: o texto mora em Regras/*.json e no help. Ids estáveis: as regras já apontam para eles (campo 'catalogo'). Semeado das regras em 2026-10-15; popular à mão (adulto, mj, referência, personalizado).",
+  "tipos": [
+    "basico",
+    "pvp",
+    "arquetipo",
+    "equipe",
+    "extra",
+    "adulto",
+    "referencia",
+    "mj",
+    "personalizado"
+  ],
+  "cartas": [
+    {
+      "id": "basico/enfrentar",
+      "tipo": "basico",
+      "titulo": "Enfrentar diretamente a ameaça",
+      "origem": "todos",
+      "regra": "movimentos_basicos.json#basico/enfrentar",
+      "ajuda": "movimento/enfrentar",
+      "rotulo": "perigoso",
+      "rodape": [
+        "adiante",
+        "potencial"
+      ]
+    },
+    {
+      "id": "basico/liberar-poderes",
+      "tipo": "basico",
+      "titulo": "Liberar seus poderes",
+      "origem": "todos",
+      "regra": "movimentos_basicos.json#basico/liberar-poderes",
+      "ajuda": "movimento/liberar-poderes",
+      "rotulo": "aberracao",
+      "rodape": [
+        "potencial"
+      ]
+    },
+    {
+      "id": "basico/defender",
+      "tipo": "basico",
+      "titulo": "Defender",
+      "origem": "todos",
+      "regra": "movimentos_basicos.json#basico/defender",
+      "ajuda": "movimento/defender",
+      "rotulo": "salvador",
+      "rodape": [
+        "equipe",
+        "influencia",
+        "condicao",
+        "potencial"
+      ]
+    },
+    {
+      "id": "basico/avaliar",
+      "tipo": "basico",
+      "titulo": "Avaliar a situação",
+      "origem": "todos",
+      "regra": "movimentos_basicos.json#basico/avaliar",
+      "ajuda": "movimento/avaliar",
+      "rotulo": "superior",
+      "rodape": [
+        "constante",
+        "potencial"
+      ]
+    },
+    {
+      "id": "basico/provocar",
+      "tipo": "basico",
+      "titulo": "Provocar",
+      "origem": "todos",
+      "regra": "movimentos_basicos.json#basico/provocar",
+      "ajuda": "movimento/provocar",
+      "rotulo": "superior",
+      "rodape": [
+        "influencia",
+        "adiante",
+        "potencial"
+      ]
+    },
+    {
+      "id": "basico/confortar",
+      "tipo": "basico",
+      "titulo": "Confortar ou apoiar",
+      "origem": "todos",
+      "regra": "movimentos_basicos.json#basico/confortar",
+      "ajuda": "movimento/confortar",
+      "rotulo": "mundano",
+      "rodape": [
+        "equipe",
+        "condicao",
+        "potencial"
+      ]
+    },
+    {
+      "id": "basico/perfurar-mascara",
+      "tipo": "basico",
+      "titulo": "Perfurar a máscara",
+      "origem": "todos",
+      "regra": "movimentos_basicos.json#basico/perfurar-mascara",
+      "ajuda": "movimento/perfurar-mascara",
+      "rotulo": "mundano",
+      "rodape": [
+        "influencia",
+        "potencial"
+      ]
+    },
+    {
+      "id": "basico/golpe-poderoso",
+      "tipo": "basico",
+      "titulo": "Tomar um golpe poderoso",
+      "origem": "todos",
+      "regra": "movimentos_basicos.json#basico/golpe-poderoso",
+      "ajuda": "movimento/golpe-poderoso"
+    },
+    {
+      "id": "basico/usar-influencia",
+      "tipo": "basico",
+      "titulo": "Usar Influência",
+      "origem": "todos",
+      "regra": "influencia.json#influencia/dizer-quem-voce-e",
+      "ajuda": "influencia/usar",
+      "rodape": [
+        "influencia"
+      ]
+    },
+    {
+      "id": "basico/rejeitar-influencia",
+      "tipo": "basico",
+      "titulo": "Rejeitar Influência",
+      "origem": "todos",
+      "regra": "influencia.json#influencia/rejeitar",
+      "ajuda": "influencia/rejeitar",
+      "rodape": [
+        "adiante",
+        "condicao",
+        "potencial"
+      ]
+    },
+    {
+      "id": "basico/pilha-equipe",
+      "tipo": "basico",
+      "titulo": "Ajudar com a pilha de Equipe",
+      "origem": "todos",
+      "regra": "equipe_e_sessao.json#equipe/ajudar",
+      "ajuda": "equipe/ajudar",
+      "rodape": [
+        "equipe"
+      ]
+    },
+    {
+      "id": "basico/egoista",
+      "tipo": "basico",
+      "titulo": "Usar a Equipe de forma egoísta",
+      "origem": "todos",
+      "regra": "equipe_e_sessao.json#equipe/egoista",
+      "ajuda": "equipe/egoista"
+    },
+    {
+      "id": "pvp/pvp-00-regras",
+      "tipo": "pvp",
+      "titulo": "PJ contra PJ: regras gerais",
+      "origem": "todos",
+      "regra": "pvp.json#fluxo",
+      "ajuda": "pvp/regras"
+    },
+    {
+      "id": "pvp/pvp-01-enfrentar",
+      "tipo": "pvp",
+      "titulo": "Enfrentar um PJ",
+      "origem": "todos",
+      "regra": "pvp.json#basico/enfrentar",
+      "ajuda": "pvp/enfrentar"
+    },
+    {
+      "id": "pvp/pvp-02-defender",
+      "tipo": "pvp",
+      "titulo": "Defender contra um PJ",
+      "origem": "todos",
+      "regra": "pvp.json#basico/defender",
+      "ajuda": "pvp/defender"
+    },
+    {
+      "id": "pvp/pvp-03-provocar",
+      "tipo": "pvp",
+      "titulo": "Provocar um PJ",
+      "origem": "todos",
+      "regra": "pvp.json#basico/provocar",
+      "ajuda": "pvp/provocar"
+    },
+    {
+      "id": "pvp/pvp-04-confortar",
+      "tipo": "pvp",
+      "titulo": "Confortar ou apoiar um PJ",
+      "origem": "todos",
+      "regra": "pvp.json#basico/confortar",
+      "ajuda": "pvp/confortar"
+    },
+    {
+      "id": "pvp/pvp-05-perfurar",
+      "tipo": "pvp",
+      "titulo": "Perfurar a máscara de um PJ",
+      "origem": "todos",
+      "regra": "pvp.json#basico/perfurar-mascara",
+      "ajuda": "pvp/perfurar"
+    },
+    {
+      "id": "pvp/pvp-06-influencia",
+      "tipo": "pvp",
+      "titulo": "Influência entre PJs",
+      "origem": "todos",
+      "regra": "influencia.json",
+      "ajuda": "pvp/influencia"
+    },
+    {
+      "id": "pvp/pvp-07-renunciar",
+      "tipo": "pvp",
+      "titulo": "Renunciar à Influência",
+      "origem": "todos",
+      "regra": "influencia.json#influencia/aproveitar",
+      "ajuda": "pvp/renunciar"
+    },
+    {
+      "id": "pvp/pvp-08-virar-o-jogo",
+      "tipo": "pvp",
+      "titulo": "Virando o jogo",
+      "origem": "todos",
+      "regra": "pvp.json#fluxo",
+      "ajuda": "pvp/virar-o-jogo"
+    },
+    {
+      "id": "equipe/amaldicoada",
+      "tipo": "equipe",
+      "titulo": "Movimento de equipe: Amaldiçoada",
+      "origem": "amaldicoada",
+      "regra": "equipe_e_sessao.json#equipe/movimentos_de_arquetipo",
+      "ajuda": "equipe/amaldicoada"
+    },
+    {
+      "id": "amaldicoada/nemesis",
+      "tipo": "extra",
+      "titulo": "Nêmesis",
+      "origem": "amaldicoada",
+      "regra": "arquetipos.json#amaldicoada/nemesis",
+      "modulo": "amaldicoada/nemesis"
+    },
+    {
+      "id": "amaldicoada/perdicao",
+      "tipo": "extra",
+      "titulo": "Perdição",
+      "origem": "amaldicoada",
+      "regra": "arquetipos.json#amaldicoada/perdicao",
+      "modulo": "amaldicoada/perdicao"
+    },
+    {
+      "id": "amaldicoada/sinais",
+      "tipo": "extra",
+      "titulo": "Sinais da perdição",
+      "origem": "amaldicoada",
+      "regra": "arquetipos.json#amaldicoada/sinais",
+      "modulo": "amaldicoada/sinais"
+    },
+    {
+      "id": "amaldicoada/santuario",
+      "tipo": "extra",
+      "titulo": "Santuário",
+      "origem": "amaldicoada",
+      "regra": "arquetipos.json#amaldicoada/santuario",
+      "modulo": "amaldicoada/santuario"
+    },
+    {
+      "id": "bruta/casca-grossa-pele-fina",
+      "tipo": "arquetipo",
+      "titulo": "Casca grossa, pele fina",
+      "origem": "bruta",
+      "regra": "arquetipos.json#bruta/movimentos/casca-grossa-pele-fina",
+      "ajuda": "arquetipo/bruta/casca-grossa-pele-fina"
+    },
+    {
+      "id": "bruta/pra-que-essa-cabeca",
+      "tipo": "arquetipo",
+      "titulo": "Pra que essa cabeça?",
+      "origem": "bruta",
+      "regra": "arquetipos.json#bruta/movimentos/pra-que-essa-cabeca",
+      "ajuda": "arquetipo/bruta/pra-que-essa-cabeca"
+    },
+    {
+      "id": "bruta/soco-em-todo-mundo",
+      "tipo": "arquetipo",
+      "titulo": "Soco em todo mundo",
+      "origem": "bruta",
+      "regra": "arquetipos.json#bruta/movimentos/soco-em-todo-mundo",
+      "ajuda": "arquetipo/bruta/soco-em-todo-mundo"
+    },
+    {
+      "id": "bruta/la-quando-importa",
+      "tipo": "arquetipo",
+      "titulo": "Lá quando importa",
+      "origem": "bruta",
+      "regra": "arquetipos.json#bruta/movimentos/la-quando-importa",
+      "ajuda": "arquetipo/bruta/la-quando-importa"
+    },
+    {
+      "id": "bruta/numa-loja-de-loucas",
+      "tipo": "arquetipo",
+      "titulo": "Numa loja de louças",
+      "origem": "bruta",
+      "regra": "arquetipos.json#bruta/movimentos/numa-loja-de-loucas",
+      "ajuda": "arquetipo/bruta/numa-loja-de-loucas"
+    },
+    {
+      "id": "bruta/fisica-que-fisica",
+      "tipo": "arquetipo",
+      "titulo": "Física? Que física?",
+      "origem": "bruta",
+      "regra": "arquetipos.json#bruta/movimentos/fisica-que-fisica",
+      "ajuda": "arquetipo/bruta/fisica-que-fisica"
+    },
+    {
+      "id": "equipe/bruta",
+      "tipo": "equipe",
+      "titulo": "Movimento de equipe: Bruta",
+      "origem": "bruta",
+      "regra": "equipe_e_sessao.json#equipe/movimentos_de_arquetipo",
+      "ajuda": "equipe/bruta"
+    },
+    {
+      "id": "bruta/coracao",
+      "tipo": "extra",
+      "titulo": "Coração da Bruta",
+      "origem": "bruta",
+      "regra": "arquetipos.json#bruta/coracao",
+      "modulo": "bruta/coracao"
+    },
+    {
+      "id": "delinquente/do-contra",
+      "tipo": "arquetipo",
+      "titulo": "Do contra",
+      "origem": "delinquente",
+      "regra": "arquetipos.json#delinquente/movimentos/do-contra",
+      "ajuda": "arquetipo/delinquente/do-contra"
+    },
+    {
+      "id": "delinquente/nao-ligo-pro-que-voce-pensa",
+      "tipo": "arquetipo",
+      "titulo": "Não ligo pro que você pensa!",
+      "origem": "delinquente",
+      "regra": "arquetipos.json#delinquente/movimentos/nao-ligo-pro-que-voce-pensa",
+      "ajuda": "arquetipo/delinquente/nao-ligo-pro-que-voce-pensa"
+    },
+    {
+      "id": "delinquente/equipe-que-equipe",
+      "tipo": "arquetipo",
+      "titulo": "Equipe? Que equipe?",
+      "origem": "delinquente",
+      "regra": "arquetipos.json#delinquente/movimentos/equipe-que-equipe",
+      "ajuda": "arquetipo/delinquente/equipe-que-equipe"
+    },
+    {
+      "id": "delinquente/mente-criminosa",
+      "tipo": "arquetipo",
+      "titulo": "Mente criminosa",
+      "origem": "delinquente",
+      "regra": "arquetipos.json#delinquente/movimentos/mente-criminosa",
+      "ajuda": "arquetipo/delinquente/mente-criminosa"
+    },
+    {
+      "id": "delinquente/encrenqueiro",
+      "tipo": "arquetipo",
+      "titulo": "Encrenqueiro",
+      "origem": "delinquente",
+      "regra": "arquetipos.json#delinquente/movimentos/encrenqueiro",
+      "ajuda": "arquetipo/delinquente/encrenqueiro"
+    },
+    {
+      "id": "delinquente/ta-prestando-atencao",
+      "tipo": "arquetipo",
+      "titulo": "Tá prestando atenção?",
+      "origem": "delinquente",
+      "regra": "arquetipos.json#delinquente/movimentos/ta-prestando-atencao",
+      "ajuda": "arquetipo/delinquente/ta-prestando-atencao"
+    },
+    {
+      "id": "equipe/delinquente",
+      "tipo": "equipe",
+      "titulo": "Movimento de equipe: Delinquente",
+      "origem": "delinquente",
+      "regra": "equipe_e_sessao.json#equipe/movimentos_de_arquetipo",
+      "ajuda": "equipe/delinquente"
+    },
+    {
+      "id": "discipula/andei-lendo-os-arquivos",
+      "tipo": "arquetipo",
+      "titulo": "Andei lendo os arquivos",
+      "origem": "discipula",
+      "regra": "arquetipos.json#discipula/movimentos/andei-lendo-os-arquivos",
+      "ajuda": "arquetipo/discipula/andei-lendo-os-arquivos"
+    },
+    {
+      "id": "discipula/capita",
+      "tipo": "arquetipo",
+      "titulo": "Capitã",
+      "origem": "discipula",
+      "regra": "arquetipos.json#discipula/movimentos/capita",
+      "ajuda": "arquetipo/discipula/capita"
+    },
+    {
+      "id": "discipula/desabafo",
+      "tipo": "arquetipo",
+      "titulo": "Desabafo",
+      "origem": "discipula",
+      "regra": "arquetipos.json#discipula/movimentos/desabafo",
+      "ajuda": "arquetipo/discipula/desabafo"
+    },
+    {
+      "id": "discipula/conversa-ao-pe-do-fogo",
+      "tipo": "arquetipo",
+      "titulo": "Conversa ao pé do fogo",
+      "origem": "discipula",
+      "regra": "arquetipos.json#discipula/movimentos/conversa-ao-pe-do-fogo",
+      "ajuda": "arquetipo/discipula/conversa-ao-pe-do-fogo"
+    },
+    {
+      "id": "discipula/atencao-ao-redor",
+      "tipo": "arquetipo",
+      "titulo": "Atenção ao redor",
+      "origem": "discipula",
+      "regra": "arquetipos.json#discipula/movimentos/atencao-ao-redor",
+      "ajuda": "arquetipo/discipula/atencao-ao-redor"
+    },
+    {
+      "id": "discipula/tradicao-heroica",
+      "tipo": "arquetipo",
+      "titulo": "Tradição heroica",
+      "origem": "discipula",
+      "regra": "arquetipos.json#discipula/movimentos/tradicao-heroica",
+      "ajuda": "arquetipo/discipula/tradicao-heroica"
+    },
+    {
+      "id": "equipe/discipula",
+      "tipo": "equipe",
+      "titulo": "Movimento de equipe: Discípula",
+      "origem": "discipula",
+      "regra": "equipe_e_sessao.json#equipe/movimentos_de_arquetipo",
+      "ajuda": "equipe/discipula"
+    },
+    {
+      "id": "discipula/mentora",
+      "tipo": "extra",
+      "titulo": "Mentora",
+      "origem": "discipula",
+      "regra": "arquetipos.json#discipula/mentora",
+      "modulo": "discipula/mentora"
+    },
+    {
+      "id": "discipula/recursos",
+      "tipo": "extra",
+      "titulo": "Recursos da mentora",
+      "origem": "discipula",
+      "regra": "arquetipos.json#discipula/recursos",
+      "modulo": "discipula/recursos"
+    },
+    {
+      "id": "farol/na-espreita",
+      "tipo": "arquetipo",
+      "titulo": "Na espreita",
+      "origem": "farol",
+      "regra": "arquetipos.json#farol/movimentos/na-espreita",
+      "ajuda": "arquetipo/farol/na-espreita"
+    },
+    {
+      "id": "farol/sem-poderes-e-quase-sem-treino",
+      "tipo": "arquetipo",
+      "titulo": "Sem poderes e quase sem treino",
+      "origem": "farol",
+      "regra": "arquetipos.json#farol/movimentos/sem-poderes-e-quase-sem-treino",
+      "ajuda": "arquetipo/farol/sem-poderes-e-quase-sem-treino"
+    },
+    {
+      "id": "farol/nao-vou-te-decepcionar",
+      "tipo": "arquetipo",
+      "titulo": "Não vou te decepcionar",
+      "origem": "farol",
+      "regra": "arquetipos.json#farol/movimentos/nao-vou-te-decepcionar",
+      "ajuda": "arquetipo/farol/nao-vou-te-decepcionar"
+    },
+    {
+      "id": "farol/quase-um-super-heroi",
+      "tipo": "arquetipo",
+      "titulo": "Quase um super-herói",
+      "origem": "farol",
+      "regra": "arquetipos.json#farol/movimentos/quase-um-super-heroi",
+      "ajuda": "arquetipo/farol/quase-um-super-heroi"
+    },
+    {
+      "id": "farol/vamos-sortudo",
+      "tipo": "arquetipo",
+      "titulo": "Vamos, Sortudo!",
+      "origem": "farol",
+      "regra": "arquetipos.json#farol/movimentos/vamos-sortudo",
+      "ajuda": "arquetipo/farol/vamos-sortudo"
+    },
+    {
+      "id": "farol/chupa-domiciano",
+      "tipo": "arquetipo",
+      "titulo": "Chupa, Domiciano!",
+      "origem": "farol",
+      "regra": "arquetipos.json#farol/movimentos/chupa-domiciano",
+      "ajuda": "arquetipo/farol/chupa-domiciano"
+    },
+    {
+      "id": "equipe/farol",
+      "tipo": "equipe",
+      "titulo": "Movimento de equipe: Farol",
+      "origem": "farol",
+      "regra": "equipe_e_sessao.json#equipe/movimentos_de_arquetipo",
+      "ajuda": "equipe/farol"
+    },
+    {
+      "id": "farol/impulsos",
+      "tipo": "extra",
+      "titulo": "Impulsos",
+      "origem": "farol",
+      "regra": "arquetipos.json#farol/impulsos",
+      "modulo": "farol/impulsos"
+    },
+    {
+      "id": "forasteira/entre-dois-mundos",
+      "tipo": "arquetipo",
+      "titulo": "Entre dois mundos",
+      "origem": "forasteira",
+      "regra": "arquetipos.json#forasteira/movimentos/entre-dois-mundos",
+      "ajuda": "arquetipo/forasteira/entre-dois-mundos"
+    },
+    {
+      "id": "forasteira/tecnologia-alienigena",
+      "tipo": "arquetipo",
+      "titulo": "Tecnologia alienígena",
+      "origem": "forasteira",
+      "regra": "arquetipos.json#forasteira/movimentos/tecnologia-alienigena",
+      "ajuda": "arquetipo/forasteira/tecnologia-alienigena"
+    },
+    {
+      "id": "forasteira/costumes-alienigenas",
+      "tipo": "arquetipo",
+      "titulo": "Costumes alienígenas",
+      "origem": "forasteira",
+      "regra": "arquetipos.json#forasteira/movimentos/costumes-alienigenas",
+      "ajuda": "arquetipo/forasteira/costumes-alienigenas"
+    },
+    {
+      "id": "forasteira/nave-a-kirby",
+      "tipo": "arquetipo",
+      "titulo": "Nave Kirby",
+      "origem": "forasteira",
+      "regra": "arquetipos.json#forasteira/movimentos/nave-a-kirby",
+      "ajuda": "arquetipo/forasteira/nave-a-kirby"
+    },
+    {
+      "id": "forasteira/o-melhor-deles",
+      "tipo": "arquetipo",
+      "titulo": "O melhor deles",
+      "origem": "forasteira",
+      "regra": "arquetipos.json#forasteira/movimentos/o-melhor-deles",
+      "ajuda": "arquetipo/forasteira/o-melhor-deles"
+    },
+    {
+      "id": "forasteira/nao-tao-diferentes-assim",
+      "tipo": "arquetipo",
+      "titulo": "Não tão diferentes assim",
+      "origem": "forasteira",
+      "regra": "arquetipos.json#forasteira/movimentos/nao-tao-diferentes-assim",
+      "ajuda": "arquetipo/forasteira/nao-tao-diferentes-assim"
+    },
+    {
+      "id": "equipe/forasteira",
+      "tipo": "equipe",
+      "titulo": "Movimento de equipe: Forasteira",
+      "origem": "forasteira",
+      "regra": "equipe_e_sessao.json#equipe/movimentos_de_arquetipo",
+      "ajuda": "equipe/forasteira"
+    },
+    {
+      "id": "janus/a-mascara",
+      "tipo": "arquetipo",
+      "titulo": "A Máscara",
+      "origem": "janus",
+      "regra": "arquetipos.json#janus/movimentos/a-mascara",
+      "ajuda": "arquetipo/janus/a-mascara"
+    },
+    {
+      "id": "janus/agora-e-serio",
+      "tipo": "arquetipo",
+      "titulo": "Agora é sério",
+      "origem": "janus",
+      "regra": "arquetipos.json#janus/movimentos/agora-e-serio",
+      "ajuda": "arquetipo/janus/agora-e-serio"
+    },
+    {
+      "id": "janus/eu-sou-o-que-voce-ve",
+      "tipo": "arquetipo",
+      "titulo": "Eu sou o que você vê",
+      "origem": "janus",
+      "regra": "arquetipos.json#janus/movimentos/eu-sou-o-que-voce-ve",
+      "ajuda": "arquetipo/janus/eu-sou-o-que-voce-ve"
+    },
+    {
+      "id": "janus/discreta",
+      "tipo": "arquetipo",
+      "titulo": "Discreta",
+      "origem": "janus",
+      "regra": "arquetipos.json#janus/movimentos/discreta",
+      "ajuda": "arquetipo/janus/discreta"
+    },
+    {
+      "id": "janus/vou-te-salvar",
+      "tipo": "arquetipo",
+      "titulo": "Vou te salvar!",
+      "origem": "janus",
+      "regra": "arquetipos.json#janus/movimentos/vou-te-salvar",
+      "ajuda": "arquetipo/janus/vou-te-salvar"
+    },
+    {
+      "id": "janus/teia-perigosa",
+      "tipo": "arquetipo",
+      "titulo": "Teia perigosa",
+      "origem": "janus",
+      "regra": "arquetipos.json#janus/movimentos/teia-perigosa",
+      "ajuda": "arquetipo/janus/teia-perigosa"
+    },
+    {
+      "id": "equipe/janus",
+      "tipo": "equipe",
+      "titulo": "Movimento de equipe: Janus",
+      "origem": "janus",
+      "regra": "equipe_e_sessao.json#equipe/movimentos_de_arquetipo",
+      "ajuda": "equipe/janus"
+    },
+    {
+      "id": "janus/identidade-secreta",
+      "tipo": "extra",
+      "titulo": "Identidade secreta",
+      "origem": "janus",
+      "regra": "arquetipos.json#janus/identidade-secreta",
+      "modulo": "janus/identidade-secreta"
+    },
+    {
+      "id": "legado/lute-o-bom-combate",
+      "tipo": "arquetipo",
+      "titulo": "Lute o bom combate",
+      "origem": "legado",
+      "regra": "arquetipos.json#legado/movimentos/lute-o-bom-combate",
+      "ajuda": "arquetipo/legado/lute-o-bom-combate"
+    },
+    {
+      "id": "legado/eu-sei-o-que-sou",
+      "tipo": "arquetipo",
+      "titulo": "Eu sei o que sou",
+      "origem": "legado",
+      "regra": "arquetipos.json#legado/movimentos/eu-sei-o-que-sou",
+      "ajuda": "arquetipo/legado/eu-sei-o-que-sou"
+    },
+    {
+      "id": "legado/palavras-do-passado",
+      "tipo": "arquetipo",
+      "titulo": "Palavras do passado",
+      "origem": "legado",
+      "regra": "arquetipos.json#legado/movimentos/palavras-do-passado",
+      "ajuda": "arquetipo/legado/palavras-do-passado"
+    },
+    {
+      "id": "legado/o-legado-importa",
+      "tipo": "arquetipo",
+      "titulo": "O legado importa",
+      "origem": "legado",
+      "regra": "arquetipos.json#legado/movimentos/o-legado-importa",
+      "ajuda": "arquetipo/legado/o-legado-importa"
+    },
+    {
+      "id": "legado/nunca-desista-nunca-se-renda",
+      "tipo": "arquetipo",
+      "titulo": "Nunca desista, nunca se renda",
+      "origem": "legado",
+      "regra": "arquetipos.json#legado/movimentos/nunca-desista-nunca-se-renda",
+      "ajuda": "arquetipo/legado/nunca-desista-nunca-se-renda"
+    },
+    {
+      "id": "legado/simbolo-de-autoridade",
+      "tipo": "arquetipo",
+      "titulo": "Símbolo de autoridade",
+      "origem": "legado",
+      "regra": "arquetipos.json#legado/movimentos/simbolo-de-autoridade",
+      "ajuda": "arquetipo/legado/simbolo-de-autoridade"
+    },
+    {
+      "id": "equipe/legado",
+      "tipo": "equipe",
+      "titulo": "Movimento de equipe: Legado",
+      "origem": "legado",
+      "regra": "equipe_e_sessao.json#equipe/movimentos_de_arquetipo",
+      "ajuda": "equipe/legado"
+    },
+    {
+      "id": "legado/membros",
+      "tipo": "extra",
+      "titulo": "Legado",
+      "origem": "legado",
+      "regra": "arquetipos.json#legado/membros",
+      "modulo": "legado/membros"
+    },
+    {
+      "id": "equipe/nova",
+      "tipo": "equipe",
+      "titulo": "Movimento de equipe: Nova",
+      "origem": "nova",
+      "regra": "equipe_e_sessao.json#equipe/movimentos_de_arquetipo",
+      "ajuda": "equipe/nova"
+    },
+    {
+      "id": "nova/chamas",
+      "tipo": "extra",
+      "titulo": "Chamas e faíscas",
+      "origem": "nova",
+      "regra": "arquetipos.json#nova/chamas",
+      "ajuda": "arquetipo/nova/chamas",
+      "modulo": "nova/chamas"
+    },
+    {
+      "id": "transformado/eu-nao-sou-meu-corpo",
+      "tipo": "arquetipo",
+      "titulo": "Eu não sou meu corpo",
+      "origem": "transformado",
+      "regra": "arquetipos.json#transformado/movimentos/eu-nao-sou-meu-corpo",
+      "ajuda": "arquetipo/transformado/eu-nao-sou-meu-corpo"
+    },
+    {
+      "id": "transformado/nao-humano-o-bastante",
+      "tipo": "arquetipo",
+      "titulo": "Não humano o bastante",
+      "origem": "transformado",
+      "regra": "arquetipos.json#transformado/movimentos/nao-humano-o-bastante",
+      "ajuda": "arquetipo/transformado/nao-humano-o-bastante"
+    },
+    {
+      "id": "transformado/imparavel",
+      "tipo": "arquetipo",
+      "titulo": "Imparável",
+      "origem": "transformado",
+      "regra": "arquetipos.json#transformado/movimentos/imparavel",
+      "ajuda": "arquetipo/transformado/imparavel"
+    },
+    {
+      "id": "transformado/vou-atras-de-voce",
+      "tipo": "arquetipo",
+      "titulo": "Vou atrás de você",
+      "origem": "transformado",
+      "regra": "arquetipos.json#transformado/movimentos/vou-atras-de-voce",
+      "ajuda": "arquetipo/transformado/vou-atras-de-voce"
+    },
+    {
+      "id": "transformado/quem-me-dera-ser",
+      "tipo": "arquetipo",
+      "titulo": "Quem me dera ser",
+      "origem": "transformado",
+      "regra": "arquetipos.json#transformado/movimentos/quem-me-dera-ser",
+      "ajuda": "arquetipo/transformado/quem-me-dera-ser"
+    },
+    {
+      "id": "transformado/eu-sou-o-monstro",
+      "tipo": "arquetipo",
+      "titulo": "Eu sou o monstro",
+      "origem": "transformado",
+      "regra": "arquetipos.json#transformado/movimentos/eu-sou-o-monstro",
+      "ajuda": "arquetipo/transformado/eu-sou-o-monstro"
+    },
+    {
+      "id": "equipe/transformado",
+      "tipo": "equipe",
+      "titulo": "Movimento de equipe: Transformado",
+      "origem": "transformado",
+      "regra": "equipe_e_sessao.json#equipe/movimentos_de_arquetipo",
+      "ajuda": "equipe/transformado"
+    },
+    {
+      "id": "ref/panorama-rotulos",
+      "tipo": "referencia",
+      "titulo": "RÓTULOS",
+      "origem": "todos",
+      "regra": "nucleo.json#/rotulos",
+      "ajuda": "panorama/rotulos"
+    },
+    {
+      "id": "ref/panorama-movimentos",
+      "tipo": "referencia",
+      "titulo": "SUCESSOS E FALHAS",
+      "origem": "todos",
+      "regra": "nucleo.json#/rolagem",
+      "ajuda": "panorama/movimentos"
+    },
+    {
+      "id": "ref/panorama-lista-movimentos",
+      "tipo": "referencia",
+      "titulo": "MOVIMENTOS",
+      "origem": "todos",
+      "regra": "movimentos_basicos.json#/movimentos",
+      "ajuda": "panorama/lista-movimentos"
+    },
+    {
+      "id": "ref/panorama-controles",
+      "tipo": "referencia",
+      "titulo": "RECURSOS E BÔNUS",
+      "origem": "todos",
+      "regra": "nucleo.json#/bonus",
+      "ajuda": "panorama/controles"
+    },
+    {
+      "id": "ref/influencia-conceito",
+      "tipo": "referencia",
+      "titulo": "INFLUÊNCIA",
+      "origem": "todos",
+      "regra": "influencia.json",
+      "ajuda": "influencia/conceito"
+    },
+    {
+      "id": "ref/influencia-renunciar",
+      "tipo": "referencia",
+      "titulo": "RENUNCIANDO À INFLUÊNCIA",
+      "origem": "todos",
+      "regra": "influencia.json",
+      "ajuda": "influencia/renunciar"
+    },
+    {
+      "id": "ref/condicoes-efeitos",
+      "tipo": "referencia",
+      "titulo": "CONDIÇÕES",
+      "origem": "todos",
+      "regra": "nucleo.json#/condicoes",
+      "ajuda": "condicoes/efeitos"
+    },
+    {
+      "id": "ref/condicoes-remover",
+      "tipo": "referencia",
+      "titulo": "REMOVENDO CONDIÇÕES",
+      "origem": "todos",
+      "regra": "nucleo.json#/condicoes",
+      "ajuda": "condicoes/remover"
+    },
+    {
+      "id": "ref/equipe-batalha",
+      "tipo": "referencia",
+      "titulo": "ENTRANDO EM BATALHA",
+      "origem": "todos",
+      "regra": "equipe_e_sessao.json",
+      "ajuda": "equipe/batalha"
+    },
+    {
+      "id": "ref/equipe-tempo",
+      "tipo": "referencia",
+      "titulo": "QUANDO O TEMPO PASSA",
+      "origem": "todos",
+      "regra": "equipe_e_sessao.json",
+      "ajuda": "equipe/tempo"
+    },
+    {
+      "id": "ref/equipe-arquetipos",
+      "tipo": "referencia",
+      "titulo": "MOVIMENTOS DE EQUIPE",
+      "origem": "todos",
+      "regra": "equipe_e_sessao.json",
+      "ajuda": "equipe/arquetipos"
+    },
+    {
+      "id": "ref/equipe-sessao",
+      "tipo": "referencia",
+      "titulo": "INÍCIO E FIM DE SESSÃO",
+      "origem": "todos",
+      "regra": "equipe_e_sessao.json",
+      "ajuda": "equipe/sessao"
+    },
+    {
+      "id": "ref/influencia-npcs",
+      "tipo": "referencia",
+      "titulo": "INFLUÊNCIA E NPCs",
+      "origem": "todos",
+      "regra": "influencia.json",
+      "ajuda": "influencia/npcs"
+    },
+    {
+      "id": "ref/influencia-ganhar-perder",
+      "tipo": "referencia",
+      "titulo": "GANHAR E PERDER INFLUÊNCIA",
+      "origem": "todos",
+      "regra": "influencia.json",
+      "ajuda": "influencia/ganhar-perder"
+    },
+    {
+      "id": "mj/viloes-movimentos",
+      "tipo": "mj",
+      "titulo": "MOVIMENTOS DE VILÃO",
+      "origem": "mestre",
+      "regra": "viloes.json#/movimentos",
+      "ajuda": "viloes/movimentos"
+    },
+    {
+      "id": "mj/viloes-ficha",
+      "tipo": "mj",
+      "titulo": "FICHA DE VILÃO",
+      "origem": "mestre",
+      "regra": "viloes.json#/ficha",
+      "ajuda": "viloes/ficha"
+    },
+    {
+      "id": "mj/viloes-condicoes",
+      "tipo": "mj",
+      "titulo": "CONDIÇÕES DO VILÃO",
+      "origem": "mestre",
+      "regra": "viloes.json#/condicoes",
+      "ajuda": "viloes/condicoes"
+    },
+    {
+      "id": "mj/viloes-luta",
+      "tipo": "mj",
+      "titulo": "VILÃO NA LUTA",
+      "origem": "mestre",
+      "regra": "viloes.json#/luta",
+      "ajuda": "viloes/luta"
+    },
+    {
+      "id": "mj/viloes-condicao-assustado",
+      "tipo": "mj",
+      "titulo": "VILÃO · ASSUSTADO",
+      "origem": "mestre",
+      "regra": "viloes.json#/condicao-assustado",
+      "ajuda": "viloes/condicao-assustado"
+    },
+    {
+      "id": "mj/viloes-condicao-irritado",
+      "tipo": "mj",
+      "titulo": "VILÃO · IRRITADO",
+      "origem": "mestre",
+      "regra": "viloes.json#/condicao-irritado",
+      "ajuda": "viloes/condicao-irritado"
+    },
+    {
+      "id": "mj/viloes-condicao-culpado",
+      "tipo": "mj",
+      "titulo": "VILÃO · CULPADO",
+      "origem": "mestre",
+      "regra": "viloes.json#/condicao-culpado",
+      "ajuda": "viloes/condicao-culpado"
+    },
+    {
+      "id": "mj/viloes-condicao-desesperancoso",
+      "tipo": "mj",
+      "titulo": "VILÃO · DESESPERANÇOSO",
+      "origem": "mestre",
+      "regra": "viloes.json#/condicao-desesperancoso",
+      "ajuda": "viloes/condicao-desesperancoso"
+    },
+    {
+      "id": "mj/viloes-condicao-inseguro",
+      "tipo": "mj",
+      "titulo": "VILÃO · INSEGURO",
+      "origem": "mestre",
+      "regra": "viloes.json#/condicao-inseguro",
+      "ajuda": "viloes/condicao-inseguro"
+    },
+    {
+      "id": "mj/viloes-capangas",
+      "tipo": "mj",
+      "titulo": "CAPANGAS",
+      "origem": "mestre",
+      "regra": "viloes.json#/capangas",
+      "ajuda": "viloes/capangas"
+    },
+    {
+      "id": "mj/viloes-exemplo-professora",
+      "tipo": "mj",
+      "titulo": "EXEMPLO · A PROFESSORA",
+      "origem": "mestre",
+      "regra": "viloes.json#/exemplo-professora",
+      "ajuda": "viloes/exemplo-professora"
+    },
+    {
+      "id": "mj/viloes-exemplo-rosa-rook",
+      "tipo": "mj",
+      "titulo": "EXEMPLO · ROSA ROOK",
+      "origem": "mestre",
+      "regra": "viloes.json#/exemplo-rosa-rook",
+      "ajuda": "viloes/exemplo-rosa-rook"
+    },
+    {
+      "id": "nova/tempestade-de-realidade",
+      "tipo": "extra",
+      "titulo": "TEMPESTADE DE REALIDADE",
+      "origem": "nova",
+      "modulo": "nova/chamas",
+      "regra": "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/0",
+      "ajuda": "arquetipo/nova/tempestade-de-realidade"
+    },
+    {
+      "id": "nova/escudo",
+      "tipo": "extra",
+      "titulo": "ESCUDO",
+      "origem": "nova",
+      "modulo": "nova/chamas",
+      "regra": "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/1",
+      "ajuda": "arquetipo/nova/escudo"
+    },
+    {
+      "id": "nova/construtos",
+      "tipo": "extra",
+      "titulo": "CONSTRUTOS",
+      "origem": "nova",
+      "modulo": "nova/chamas",
+      "regra": "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/2",
+      "ajuda": "arquetipo/nova/construtos"
+    },
+    {
+      "id": "nova/fosso",
+      "tipo": "extra",
+      "titulo": "FOSSO",
+      "origem": "nova",
+      "modulo": "nova/chamas",
+      "regra": "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/3",
+      "ajuda": "arquetipo/nova/fosso"
+    },
+    {
+      "id": "nova/adoracao",
+      "tipo": "extra",
+      "titulo": "ADORAÇÃO",
+      "origem": "nova",
+      "modulo": "nova/chamas",
+      "regra": "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/4",
+      "ajuda": "arquetipo/nova/adoracao"
+    },
+    {
+      "id": "nova/movimento",
+      "tipo": "extra",
+      "titulo": "MOVIMENTO",
+      "origem": "nova",
+      "modulo": "nova/chamas",
+      "regra": "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/5",
+      "ajuda": "arquetipo/nova/movimento"
+    },
+    {
+      "id": "nova/impulso",
+      "tipo": "extra",
+      "titulo": "IMPULSO",
+      "origem": "nova",
+      "modulo": "nova/chamas",
+      "regra": "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/6",
+      "ajuda": "arquetipo/nova/impulso"
+    },
+    {
+      "id": "nova/sobrecarga",
+      "tipo": "extra",
+      "titulo": "SOBRECARGA",
+      "origem": "nova",
+      "modulo": "nova/chamas",
+      "regra": "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/7",
+      "ajuda": "arquetipo/nova/sobrecarga"
+    },
+    {
+      "id": "nova/consciencia-elemental",
+      "tipo": "extra",
+      "titulo": "CONSCIÊNCIA ELEMENTAL",
+      "origem": "nova",
+      "modulo": "nova/chamas",
+      "regra": "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/8",
+      "ajuda": "arquetipo/nova/consciencia-elemental"
+    },
+    {
+      "id": "nova/arrebatar",
+      "tipo": "extra",
+      "titulo": "ARREBATAR",
+      "origem": "nova",
+      "modulo": "nova/chamas",
+      "regra": "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/9",
+      "ajuda": "arquetipo/nova/arrebatar"
+    }
+  ]
+}
