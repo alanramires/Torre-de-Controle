@@ -165,10 +165,10 @@ MonoBehaviour:
   botaoPersonagens: {fileID: 600319667}
   botaoSalas: {fileID: 1525411925}
   botaoNpcs: {fileID: 1182198301}
+  somCursor: {fileID: 0}
+  somConfirmar: {fileID: 0}
+  somCancelar: {fileID: 0}
   botaoAjuda: {fileID: 709780685}
-  somCursor: {fileID: 8300000, guid: 55ccdef545262174c85bf52a46da94c8, type: 3}
-  somConfirmar: {fileID: 8300000, guid: 5248340e9230a2746850c97be27d406b, type: 3}
-  somCancelar: {fileID: 8300000, guid: 524c9df653eb81d40bd0413b9d11d3d3, type: 3}
   cardsAjuda: []
   retratos:
   - {fileID: 2800000, guid: 78597c8b52af51840946f8a93beeeb57, type: 3}
@@ -315,7 +315,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &135387363
 RectTransform:
   m_ObjectHideFlags: 0
@@ -331,9 +331,9 @@ RectTransform:
   - {fileID: 513544459}
   m_Father: {fileID: 561839392}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 235, y: -65}
   m_SizeDelta: {x: 450, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &135387364
