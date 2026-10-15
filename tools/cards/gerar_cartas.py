@@ -16,12 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 RULES = ROOT / 'Assets/Resources/Regras'
 OUTPUT = ROOT / 'Assets/img/cards/regras'
 SIZE = (672, 1050)  # mesma proporção pocket card, com texto de maior resolução
-NAMES = {'aberracao': 'Aberração', 'perigoso': 'Perigoso', 'mundano': 'Mundano',
-         'salvador': 'Salvador', 'superior': 'Superior'}
-
-
-def read_rule(name):
-    return json.loads((RULES / (name + '.json')).read_text(encoding='utf-8'))
+CATALOG = ROOT / 'Assets/Resources/Ajuda/catalogo.json'
 
 
 def font(size, bold=False):
@@ -53,56 +48,32 @@ def wrap(text, face, width):
 
 
 def cards():
-    core = read_rule('nucleo')
-    basics = read_rule('movimentos_basicos')['movimentos']
-    influence = read_rule('influencia')
-    if not any(m['id'] == 'influencia/rejeitar' for m in influence['movimentos']):
-        raise ValueError('Regra de rejeitar Influência ausente; revisar o panorama.')
-    overview = {
-        'basico/enfrentar': 'Trocar golpes com uma ameaça real.',
-        'basico/liberar-poderes': 'Ir além dos limites conhecidos dos poderes.',
-        'basico/defender': 'Proteger alguém ou algo de perigo iminente.',
-        'basico/avaliar': 'Investigar a situação para orientar sua ação.',
-        'basico/provocar': 'Levar alguém suscetível a agir como você deseja.',
-        'basico/confortar': 'Oferecer apoio emocional significativo.',
-        'basico/perfurar-mascara': 'Entender intenções e sentimentos de alguém.',
-        'basico/golpe-poderoso': 'Resolver o impacto de um golpe físico ou emocional.',
-    }
-    limit = core['modificador']
-    ranges = {r['id']: r for r in core['rolagem']['faixas']}
-    descriptions = {
-        'aberracao': 'Como você percebe sua diferença, seus poderes e o que o torna incomum.',
-        'perigoso': 'Como você percebe sua capacidade de ameaçar, ferir ou vencer pela força.',
-        'mundano': 'Como você percebe sua humanidade e sua conexão com as outras pessoas.',
-        'salvador': 'Como você percebe seu papel de proteger, resgatar e assumir responsabilidades.',
-        'superior': 'Como você percebe sua inteligência e sua capacidade de entender e conduzir situações.',
-    }
-    return [
-        dict(out='00-rotulos.png', title='RÓTULOS', sections=[
-            (NAMES[k], descriptions[k]) for k in core['rotulos']['ids']
-        ] + [('AUTOIMAGEM', 'Não são uma medida fixa de poder. As relações e os acontecimentos podem mudar seus valores.'),
-             ('LIMITES', f"De {core['rotulos']['minimo']} a +{core['rotulos']['maximo']}. Na troca comum, um sobe e outro desce. Se houver estouro, nenhum muda: marque uma condição.")],
-             source='Núcleo · livro pp.45–46 e 91'),
-        dict(out='00-movimentos.png', title='SUCESSOS E FALHAS', sections=[
-            ('ANTES DOS DADOS', 'Descreva a ação. Role quando ela acionar um movimento que pede dados; usar um poder nem sempre exige teste.'),
-            ('ROLAGEM', f"{core['rolagem']['dados']} + modificador. Some Rótulo, bônus e penalidades aplicáveis. O modificador final fica entre {limit['minimo']} e +{limit['maximo']}."),
-            (f"{ranges['forte']['de']}+", 'Use o resultado forte do movimento e qualquer efeito indicado para todo sucesso.'),
-            (f"{ranges['parcial']['de']}–{ranges['parcial']['ate']}", 'Use o resultado parcial e os efeitos comuns ao sucesso. Respeite escolhas e custos.'),
-            (f"{ranges['falha']['ate']} OU MENOS", 'Marque potencial. Siga a falha específica; quando não houver, o mestre faz um movimento conforme a ficção.'),
-            ('ATENÇÃO', 'Tomar um golpe poderoso é invertido: uma falha permite resistir. Equipe e outros efeitos podem mudar o resultado depois dos dados, antes da resolução.')],
-             source='Núcleo e movimentos básicos · livro pp.32–35, 76–78 e 84'),
-        dict(out='00-lista-movimentos.png', title='MOVIMENTOS', compact=True, sections=[
-            (m['nome'], overview[m['id']]) for m in basics
-        ] + [('Rejeitar Influência', 'Resistir a quem tem Influência sobre você, seja PJ ou PNJ.')],
-             source='Movimentos básicos e Influência · livro pp.57–83'),
-        dict(out='00-controles.png', title='RECURSOS E BÔNUS', sections=[
-            ('CONTROLE', core['bonus']['controle'].capitalize() + '. Confira no efeito o que pode comprar e quando a reserva termina.'),
-            ('ADIANTE', core['bonus']['adiante'] + '. Não se aplica a qualquer teste: respeite o alvo e a situação.'),
-            ('CONSTANTE', core['bonus']['constante'] + '. Registre a circunstância que mantém o bônus ativo.'),
-            ('POTENCIAL', f"Falhas e alguns efeitos rendem potencial. Cada ciclo de {core['potencial']['trilha']} pontos concede um avanço, não um nível. Na Torre, o total é acumulado; a ficha mostra o progresso do ciclo."),
-            ('CHAMAS DO NOVA', 'Reserva própria do arquétipo: carregar gera Chamas, gastas nas faíscas escolhidas. Elas expiram no fim da cena; não são um bônus genérico.')],
-             source='Núcleo, Nova e decisão da Torre · livro pp.56, 92 e 146–148'),
-    ]
+    catalog = json.loads(CATALOG.read_text(encoding='utf-8'))
+    if catalog['versao'] != 1:
+        raise ValueError('Vers?o de cat?logo n?o suportada.')
+    result, ids, outputs = [], set(), set()
+    for item in catalog['cartas']:
+        if item['id'] in ids or item['arquivo'] in outputs:
+            raise ValueError('ID ou arquivo repetido no cat?logo: ' + item['id'])
+        ids.add(item['id'])
+        outputs.add(item['arquivo'])
+        if Path(item['arquivo']).name != item['arquivo'] or not item['arquivo'].endswith('.png'):
+            raise ValueError('Arquivo deve ser um nome PNG simples.')
+        for ref in item['regras_ref']:
+            name, _, pointer = ref.partition('#')
+            path = ROOT/name if name.startswith('docs/') else RULES/name
+            if not path.is_file():
+                raise ValueError('Refer?ncia ausente: ' + ref)
+            if pointer:
+                value = json.loads(path.read_text(encoding='utf-8'))
+                for key in pointer.lstrip('/').split('/'):
+                    value = value[int(key)] if isinstance(value, list) else value[key]
+        if not item['secoes']:
+            raise ValueError('Carta sem se??es: ' + item['id'])
+        result.append(dict(out=item['arquivo'], title=item['titulo'],
+                           compact=item.get('compacto', False), source=item['origem'],
+                           sections=[(section['titulo'], section['texto']) for section in item['secoes']]))
+    return result
 
 
 def render(spec, destination):
@@ -163,6 +134,12 @@ def main():
     args = parser.parse_args()
     for spec in cards():
         render(spec, args.out_dir)
+    if args.out_dir.resolve() == OUTPUT.resolve():
+        import shutil
+        runtime = ROOT / 'Assets/Resources/Cards/Regras'
+        runtime.mkdir(parents=True, exist_ok=True)
+        for spec in cards():
+            shutil.copyfile(OUTPUT/spec['out'], runtime/spec['out'])
 
 
 if __name__ == '__main__':

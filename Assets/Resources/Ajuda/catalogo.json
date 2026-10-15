@@ -1,0 +1,863 @@
+{
+  "versao": 1,
+  "_sobre": "Catálogo editorial de help da Torre, com texto próprio e reduzido. As regras executáveis permanecem em Regras/.",
+  "cartas": [
+    {
+      "id": "panorama/rotulos",
+      "categoria": "referencia-rapida",
+      "arquivo": "00-rotulos.png",
+      "titulo": "RÓTULOS",
+      "compacto": false,
+      "origem": "Núcleo · livro pp.45–46 e 91",
+      "regras_ref": [
+        "nucleo.json#/rotulos"
+      ],
+      "secoes": [
+        {
+          "titulo": "Perigoso",
+          "texto": "Como você percebe sua capacidade de ameaçar, ferir ou vencer pela força."
+        },
+        {
+          "titulo": "Aberração",
+          "texto": "Como você percebe sua diferença, seus poderes e o que o torna incomum."
+        },
+        {
+          "titulo": "Salvador",
+          "texto": "Como você percebe seu papel de proteger, resgatar e assumir responsabilidades."
+        },
+        {
+          "titulo": "Superior",
+          "texto": "Como você percebe sua inteligência e sua capacidade de entender e conduzir situações."
+        },
+        {
+          "titulo": "Mundano",
+          "texto": "Como você percebe sua humanidade e sua conexão com as outras pessoas."
+        },
+        {
+          "titulo": "AUTOIMAGEM",
+          "texto": "Não são uma medida fixa de poder. As relações e os acontecimentos podem mudar seus valores."
+        },
+        {
+          "titulo": "LIMITES",
+          "texto": "De −2 a +3. Na troca comum, um sobe e outro desce. Se houver estouro, nenhum muda: marque uma condição."
+        }
+      ]
+    },
+    {
+      "id": "panorama/movimentos",
+      "categoria": "referencia-rapida",
+      "arquivo": "00-movimentos.png",
+      "titulo": "SUCESSOS E FALHAS",
+      "compacto": false,
+      "origem": "Núcleo e movimentos básicos · livro pp.32–35, 76–78 e 84",
+      "regras_ref": [
+        "nucleo.json#/rolagem",
+        "nucleo.json#/modificador",
+        "movimentos_basicos.json#/movimentos",
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "ANTES DOS DADOS",
+          "texto": "Descreva a ação. Role quando ela acionar um movimento que pede dados; usar um poder nem sempre exige teste."
+        },
+        {
+          "titulo": "ROLAGEM",
+          "texto": "2d6 + modificador. Some Rótulo, bônus e penalidades aplicáveis. O modificador final fica entre −3 e +4."
+        },
+        {
+          "titulo": "10+",
+          "texto": "Use o resultado forte do movimento e qualquer efeito indicado para todo sucesso."
+        },
+        {
+          "titulo": "7–9",
+          "texto": "Use o resultado parcial e os efeitos comuns ao sucesso. Respeite escolhas e custos."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. Siga a falha específica; quando não houver, o mestre faz um movimento conforme a ficção."
+        },
+        {
+          "titulo": "ATENÇÃO",
+          "texto": "Tomar um golpe poderoso é invertido: uma falha permite resistir. Equipe e outros efeitos podem mudar o resultado depois dos dados, antes da resolução."
+        }
+      ]
+    },
+    {
+      "id": "panorama/lista-movimentos",
+      "categoria": "referencia-rapida",
+      "arquivo": "00-lista-movimentos.png",
+      "titulo": "MOVIMENTOS",
+      "compacto": true,
+      "origem": "Movimentos básicos e Influência · livro pp.57–83",
+      "regras_ref": [
+        "movimentos_basicos.json#/movimentos",
+        "influencia.json#/movimentos"
+      ],
+      "secoes": [
+        {
+          "titulo": "Enfrentar diretamente a ameaça",
+          "texto": "Trocar golpes com uma ameaça real."
+        },
+        {
+          "titulo": "Liberar seus poderes",
+          "texto": "Ir além dos limites conhecidos dos poderes."
+        },
+        {
+          "titulo": "Defender",
+          "texto": "Proteger alguém ou algo de perigo iminente."
+        },
+        {
+          "titulo": "Avaliar a situação",
+          "texto": "Investigar a situação para orientar sua ação."
+        },
+        {
+          "titulo": "Provocar",
+          "texto": "Levar alguém suscetível a agir como você deseja."
+        },
+        {
+          "titulo": "Confortar ou apoiar",
+          "texto": "Oferecer apoio emocional significativo."
+        },
+        {
+          "titulo": "Perfurar a máscara",
+          "texto": "Entender intenções e sentimentos de alguém."
+        },
+        {
+          "titulo": "Tomar um golpe poderoso",
+          "texto": "Resolver o impacto de um golpe físico ou emocional."
+        },
+        {
+          "titulo": "Rejeitar Influência",
+          "texto": "Resistir a quem tem Influência sobre você, seja PJ ou PNJ."
+        }
+      ]
+    },
+    {
+      "id": "panorama/controles",
+      "categoria": "referencia-rapida",
+      "arquivo": "00-controles.png",
+      "titulo": "RECURSOS E BÔNUS",
+      "compacto": false,
+      "origem": "Núcleo, Nova e decisão da Torre · livro pp.56, 92 e 146–148",
+      "regras_ref": [
+        "nucleo.json#/bonus",
+        "nucleo.json#/potencial",
+        "arquetipos.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "CONTROLE",
+          "texto": "Pontos temporários gastos 1 a 1 conforme o movimento. Confira no efeito o que pode comprar e quando a reserva termina."
+        },
+        {
+          "titulo": "ADIANTE",
+          "texto": "+N na próxima rolagem aplicável, depois some. Não se aplica a qualquer teste: respeite o alvo e a situação."
+        },
+        {
+          "titulo": "CONSTANTE",
+          "texto": "+N em toda rolagem aplicável enquanto durar (o efeito diz até quando). Registre a circunstância que mantém o bônus ativo."
+        },
+        {
+          "titulo": "POTENCIAL",
+          "texto": "Falhas e alguns efeitos rendem potencial. Cada ciclo de 5 pontos concede um avanço, não um nível. Na Torre, o total é acumulado; a ficha mostra o progresso do ciclo."
+        },
+        {
+          "titulo": "CHAMAS DO NOVA",
+          "texto": "Reserva própria do arquétipo: carregar gera Chamas, gastas nas faíscas escolhidas. Elas expiram no fim da cena; não são um bônus genérico."
+        }
+      ]
+    },
+    {
+      "id": "movimento/enfrentar",
+      "categoria": "movimentos-basicos",
+      "arquivo": "01-enfrentar.png",
+      "titulo": "ENFRENTAR DIRETAMENTE A AMEAÇA",
+      "compacto": false,
+      "origem": "livro pp.57–59",
+      "regras_ref": [
+        "movimentos_basicos.json#/movimentos/0",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + PERIGOSO",
+          "texto": "Entre numa briga contra algo realmente perigoso para você. Assustado: −2."
+        },
+        {
+          "titulo": "SUCESSO",
+          "texto": "Vocês trocam golpes. Em 10+, escolha 2; em 7–9, escolha 1."
+        },
+        {
+          "titulo": "ESCOLHAS",
+          "texto": "• Evitar os golpes.\n• Tirar algo do adversário.\n• Abrir uma chance para aliados.\n• Impressionar, surpreender ou assustar."
+        },
+        {
+          "titulo": "TROCA DE GOLPES",
+          "texto": "Contra PNJ, o mestre marca uma condição na ameaça e decide seu retorno: condição ou golpe poderoso. Evitar os golpes protege você."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial; o mestre faz um movimento."
+        }
+      ]
+    },
+    {
+      "id": "movimento/liberar-poderes",
+      "categoria": "movimentos-basicos",
+      "arquivo": "01-liberar-poderes.png",
+      "titulo": "LIBERAR SEUS PODERES",
+      "compacto": false,
+      "origem": "livro pp.60–62",
+      "regras_ref": [
+        "movimentos_basicos.json#/movimentos/1",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + ABERRAÇÃO",
+          "texto": "Force seus poderes para superar obstáculo, alterar o ambiente ou ampliar sentidos. Desesperançoso: −2."
+        },
+        {
+          "titulo": "10+",
+          "texto": "Você consegue o efeito desejado."
+        },
+        {
+          "titulo": "7–9",
+          "texto": "Você consegue. Escolha: marcar uma condição sua OU deixar o mestre tornar o efeito instável ou temporário."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial; o mestre faz um movimento."
+        },
+        {
+          "titulo": "LEMBRETE",
+          "texto": "Uso comum de poder pode dispensar teste. Confira se a ação é melhor resolvida por Enfrentar ou Defender."
+        }
+      ]
+    },
+    {
+      "id": "movimento/defender",
+      "categoria": "movimentos-basicos",
+      "arquivo": "01-defender.png",
+      "titulo": "DEFENDER",
+      "compacto": false,
+      "origem": "livro pp.63–65",
+      "regras_ref": [
+        "movimentos_basicos.json#/movimentos/2",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + SALVADOR",
+          "texto": "Proteja alguém ou algo de perigo iminente. Inseguro: −2."
+        },
+        {
+          "titulo": "CONTRA PNJ / AMBIENTE",
+          "texto": "Em 7+, proteja o alvo e escolha 1:\n• +1 na pilha de Equipe.\n• Influência sobre quem protegeu.\n• Remover uma condição sua."
+        },
+        {
+          "titulo": "7–9: CUSTO ADICIONAL",
+          "texto": "Escolha expor-se ao perigo ou intensificar a situação."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial; o mestre faz um movimento."
+        },
+        {
+          "titulo": "LEMBRETE",
+          "texto": "Este movimento protege outra pessoa ou algo. Para se proteger de PNJ ou ambiente, escolha a resposta que a ficção permitir."
+        }
+      ]
+    },
+    {
+      "id": "movimento/avaliar",
+      "categoria": "movimentos-basicos",
+      "arquivo": "01-avaliar.png",
+      "titulo": "AVALIAR A SITUAÇÃO",
+      "compacto": false,
+      "origem": "livro pp.66–67",
+      "regras_ref": [
+        "movimentos_basicos.json#/movimentos/3",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + SUPERIOR",
+          "texto": "Examine a situação em busca de informações úteis. Culpado: −2."
+        },
+        {
+          "titulo": "RESULTADO",
+          "texto": "10+: faça 2 perguntas.\n7–9: faça 1 pergunta."
+        },
+        {
+          "titulo": "PERGUNTAS",
+          "texto": "• O que posso usar para ___?\n• Qual é a maior ameaça?\n• O que corre mais perigo?\n• Quem é vulnerável a mim?\n• Como encerrar isso rápido?"
+        },
+        {
+          "titulo": "USANDO AS RESPOSTAS",
+          "texto": "Ganhe +1 enquanto agir conforme cada resposta usada. Podem somar, respeitando o teto de +4 do modificador."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial; o mestre faz um movimento. Não há perguntas garantidas pela regra básica."
+        }
+      ]
+    },
+    {
+      "id": "movimento/provocar",
+      "categoria": "movimentos-basicos",
+      "arquivo": "01-provocar.png",
+      "titulo": "PROVOCAR",
+      "compacto": false,
+      "origem": "livro pp.69–71",
+      "regras_ref": [
+        "movimentos_basicos.json#/movimentos/4",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + SUPERIOR",
+          "texto": "Provoque um alvo suscetível. Diga qual ação deseja dele. Culpado: −2."
+        },
+        {
+          "titulo": "PNJ: 10+",
+          "texto": "Ele faz o que você queria."
+        },
+        {
+          "titulo": "PNJ: 7–9",
+          "texto": "O mestre escolhe: fazer o pedido; hesitar (+1 adiante contra ele); dar uma abertura crítica; ou exagerar (você ganha Influência)."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial; o mestre faz um movimento."
+        },
+        {
+          "titulo": "LEMBRETE",
+          "texto": "Ter Influência torna o alvo suscetível. Sem ela, a ficção precisa justificar por que suas palavras o atingem."
+        }
+      ]
+    },
+    {
+      "id": "movimento/confortar",
+      "categoria": "movimentos-basicos",
+      "arquivo": "01-confortar.png",
+      "titulo": "CONFORTAR OU APOIAR",
+      "compacto": false,
+      "origem": "livro pp.72–74",
+      "regras_ref": [
+        "movimentos_basicos.json#/movimentos/5",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + MUNDANO",
+          "texto": "Ofereça apoio emocional verdadeiro. Irritado: −2."
+        },
+        {
+          "titulo": "7+: SE O ALVO SE ABRIR",
+          "texto": "Ele escolhe 1: marcar potencial, remover uma condição ou mudar seus Rótulos (um sobe, outro desce)."
+        },
+        {
+          "titulo": "10+: BENEFÍCIO SEU",
+          "texto": "Se houve abertura, escolha +1 na pilha de Equipe ou remover uma condição sua."
+        },
+        {
+          "titulo": "SEM ABERTURA",
+          "texto": "Ninguém recebe os benefícios. Quem oferece o apoio julga se a resposta foi realmente aberta."
+        },
+        {
+          "titulo": "PNJ",
+          "texto": "Se tiver condições e se abrir, remove condições. Sem condições, o mestre determina a reação."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial; o mestre faz um movimento."
+        }
+      ]
+    },
+    {
+      "id": "movimento/perfurar-mascara",
+      "categoria": "movimentos-basicos",
+      "arquivo": "01-perfurar-mascara.png",
+      "titulo": "PERFURAR A MÁSCARA",
+      "compacto": false,
+      "origem": "livro p.75",
+      "regras_ref": [
+        "movimentos_basicos.json#/movimentos/6",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + MUNDANO",
+          "texto": "Observe alguém para entender quem está por trás da fachada. Irritado: −2."
+        },
+        {
+          "titulo": "RESULTADO",
+          "texto": "10+: faça 3 perguntas.\n7–9: faça 1 pergunta."
+        },
+        {
+          "titulo": "PERGUNTAS",
+          "texto": "• O que está planejando de verdade?\n• O que quer que eu faça?\n• O que fará agora?\n• Como eu faria você ___?\n• Como ganhar Influência sobre você?"
+        },
+        {
+          "titulo": "RESPOSTAS",
+          "texto": "O alvo responde honestamente. Cumprir o que ele diz na última pergunta concede Influência."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial; o mestre faz um movimento."
+        }
+      ]
+    },
+    {
+      "id": "movimento/golpe-poderoso",
+      "categoria": "movimentos-basicos",
+      "arquivo": "01-golpe-poderoso.png",
+      "titulo": "TOMAR UM GOLPE PODEROSO",
+      "compacto": false,
+      "origem": "livro pp.76–77",
+      "regras_ref": [
+        "movimentos_basicos.json#/movimentos/7",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + CONDIÇÕES",
+          "texto": "O mestre pede o teste ao ocorrer golpe físico ou emocional forte. Some as condições marcadas, no máximo +4."
+        },
+        {
+          "titulo": "10+: ESCOLHA 1",
+          "texto": "• Afastar-se da situação: fugir, desmaiar etc.\n• Perder o controle; o mestre descreve.\n• Escolher 2 opções de 7–9."
+        },
+        {
+          "titulo": "7–9: ESCOLHA 1",
+          "texto": "• Descontar num colega: provocá-lo a agir sem pensar ou gastar Influência para lhe infligir condição.\n• Ceder terreno e dar abertura à oposição.\n• Suportar a dor e marcar 2 condições."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial e descreva como resiste ao golpe."
+        },
+        {
+          "titulo": "RESULTADO INVERTIDO",
+          "texto": "Aqui, rolar alto é pior. Sem condições, role +0."
+        }
+      ]
+    },
+    {
+      "id": "pvp/regras",
+      "categoria": "pvp",
+      "arquivo": "02-pvp-regras.png",
+      "titulo": "PJ CONTRA PJ · REGRAS GERAIS",
+      "compacto": false,
+      "origem": "PvP · livro pp.57–75, 182 e 191–192 · casa (fórum)",
+      "regras_ref": [
+        "pvp.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "RESOLUÇÃO",
+          "texto": "Resolva um movimento inteiro antes da resposta do alvo. No fórum, as declarações vêm no mesmo turno; a resolução segue uma fila (regra da casa)."
+        },
+        {
+          "titulo": "INTERFERÊNCIA",
+          "texto": "Defender contra ameaça PJ entra antes de aplicar o resultado de uma ação perigosa e direta. Confortar e Perfurar não admitem essa defesa."
+        },
+        {
+          "titulo": "EQUIPE",
+          "texto": "Colegas podem gastar Equipe para ajudar qualquer lado, mesmo se quem recebe a ajuda não quiser. (Livro, p.191.)"
+        },
+        {
+          "titulo": "CONDIÇÕES E FALHA",
+          "texto": "Precisou marcar condição com todas já marcadas? Saia de cena. Uma falha rende potencial; o mestre pode virar o movimento contra você."
+        }
+      ]
+    },
+    {
+      "id": "pvp/enfrentar",
+      "categoria": "pvp",
+      "arquivo": "02-pvp-enfrentar.png",
+      "titulo": "ENFRENTAR UM PJ",
+      "compacto": false,
+      "origem": "PvP · livro pp.57–75, 182 e 191–192",
+      "regras_ref": [
+        "pvp.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + PERIGOSO",
+          "texto": "Entre em confronto com outro PJ que seja uma ameaça real. Assustado: −2."
+        },
+        {
+          "titulo": "SUCESSO",
+          "texto": "Troquem golpes. 10+: escolha 2; 7–9: escolha 1."
+        },
+        {
+          "titulo": "ESCOLHAS",
+          "texto": "• Resistir ou evitar os golpes.\n• Tirar algo do adversário.\n• Abrir uma chance para aliados.\n• Impressionar, surpreender ou assustar."
+        },
+        {
+          "titulo": "GOLPE PODEROSO",
+          "texto": "Ambos rolam Tomar um golpe poderoso; quem escolheu resistir ou evitar os golpes fica livre dessa rolagem."
+        },
+        {
+          "titulo": "ANTES DA RESOLUÇÃO",
+          "texto": "O alvo pode Defender, se houver ameaça iminente, e reduzir sua rolagem em 2. Uma falha rende potencial e um movimento do mestre."
+        }
+      ]
+    },
+    {
+      "id": "pvp/defender",
+      "categoria": "pvp",
+      "arquivo": "02-pvp-defender.png",
+      "titulo": "DEFENDER CONTRA UM PJ",
+      "compacto": false,
+      "origem": "PvP · livro pp.57–75, 182 e 191–192",
+      "regras_ref": [
+        "pvp.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + SALVADOR",
+          "texto": "Um PJ faz uma ação perigosa e direta contra você ou alguém que protege. Precisa haver ameaça iminente. Inseguro: −2."
+        },
+        {
+          "titulo": "7+",
+          "texto": "Aplique −2 à rolagem do agressor antes de resolver seu resultado. Se cair para falha, ele marca potencial e o mestre faz um movimento pesado."
+        },
+        {
+          "titulo": "7–9: O MESTRE ESCOLHE",
+          "texto": "• Custo: pagar um preço, como uma condição.\n• Retribuição: o outro age contra você sem interferência.\n• Julgamento: espectadores afetam seus Rótulos ou ganham Influência."
+        },
+        {
+          "titulo": "LIMITES",
+          "texto": "Não interrompe Confortar ou Perfurar a máscara. O agressor também pode receber ajuda de Equipe."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial; o mestre faz um movimento."
+        }
+      ]
+    },
+    {
+      "id": "pvp/provocar",
+      "categoria": "pvp",
+      "arquivo": "02-pvp-provocar.png",
+      "titulo": "PROVOCAR UM PJ",
+      "compacto": false,
+      "origem": "PvP · livro pp.57–75, 182 e 191–192",
+      "regras_ref": [
+        "pvp.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + SUPERIOR",
+          "texto": "O PJ deve ser suscetível às suas palavras; ter Influência basta. Declare fora da personagem o que quer que ele faça. Culpado: −2."
+        },
+        {
+          "titulo": "RESULTADO",
+          "texto": "10+: aplique os dois incentivos. 7–9: escolha um."
+        },
+        {
+          "titulo": "INCENTIVOS",
+          "texto": "• Se fizer o que você pediu, +1 na pilha de Equipe.\n• Se recusar, ele marca uma condição à escolha dele."
+        },
+        {
+          "titulo": "A DECISÃO É DO ALVO",
+          "texto": "Você não controla a ação do PJ. Se você tem Influência sobre ele, ele pode tentar rejeitá-la."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial; o mestre pode virar a provocação contra você."
+        }
+      ]
+    },
+    {
+      "id": "pvp/confortar",
+      "categoria": "pvp",
+      "arquivo": "02-pvp-confortar.png",
+      "titulo": "CONFORTAR OU APOIAR UM PJ",
+      "compacto": false,
+      "origem": "PvP · livro pp.57–75, 182 e 191–192",
+      "regras_ref": [
+        "pvp.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + MUNDANO",
+          "texto": "Ofereça apoio emocional verdadeiro, com palavras ou gestos que tenham significado. Irritado: −2."
+        },
+        {
+          "titulo": "7+: O ALVO DECIDE SE ABRE",
+          "texto": "Se abrir, ele escolhe: marcar potencial, remover uma condição ou mudar seus Rótulos (um sobe, outro desce)."
+        },
+        {
+          "titulo": "10+: BENEFÍCIO SEU",
+          "texto": "Se ele se abriu, escolha +1 na pilha de Equipe ou remover uma condição sua."
+        },
+        {
+          "titulo": "SEM ABERTURA",
+          "texto": "Ninguém recebe os benefícios. Quem conforta julga se houve abertura real. Compartilhar vulnerabilidade pode acionar um movimento de equipe."
+        },
+        {
+          "titulo": "SEM DEFESA / FALHA",
+          "texto": "Não cabe Defender para interromper. Em 6 ou menos, marque potencial; o mestre faz um movimento."
+        }
+      ]
+    },
+    {
+      "id": "pvp/perfurar",
+      "categoria": "pvp",
+      "arquivo": "02-pvp-perfurar.png",
+      "titulo": "PERFURAR A MÁSCARA DE UM PJ",
+      "compacto": false,
+      "origem": "PvP · livro pp.57–75, 182 e 191–192 · casa (fórum)",
+      "regras_ref": [
+        "pvp.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + MUNDANO",
+          "texto": "Observe o outro PJ para compreender suas intenções e sentimentos. Irritado: −2."
+        },
+        {
+          "titulo": "RESULTADO",
+          "texto": "10+: faça 3 perguntas. 7–9: faça 1."
+        },
+        {
+          "titulo": "PERGUNTAS",
+          "texto": "• O que está planejando de verdade?\n• O que quer que eu faça?\n• O que fará agora?\n• Como eu faria você ___?\n• Como ganhar Influência sobre você?"
+        },
+        {
+          "titulo": "HONESTIDADE",
+          "texto": "O jogador responde honestamente. No fórum, use o OFF se a resposta for segredo (regra da casa). Cumprir a última resposta dá Influência."
+        },
+        {
+          "titulo": "SEM DEFESA / FALHA",
+          "texto": "Resolva primeiro; o alvo responde depois. Em 6 ou menos, marque potencial; o mestre faz um movimento."
+        }
+      ]
+    },
+    {
+      "id": "pvp/influencia",
+      "categoria": "pvp",
+      "arquivo": "02-pvp-influencia.png",
+      "titulo": "INFLUÊNCIA ENTRE PJs",
+      "compacto": false,
+      "origem": "Influência · livro pp.79–83",
+      "regras_ref": [
+        "pvp.json",
+        "influencia.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "DIZER QUEM O OUTRO É",
+          "texto": "Se você tem Influência e sua fala atinge o alvo, o mestre indica um Rótulo para subir e outro para descer. O alvo aceita ou rola Rejeitar Influência."
+        },
+        {
+          "titulo": "SEM INFLUÊNCIA",
+          "texto": "A fala, por si só, não força essa mudança de Rótulos."
+        },
+        {
+          "titulo": "GANHAR DE NOVO",
+          "texto": "Se já tinha Influência sobre esse PJ, ganhar outra permite mudar os Rótulos dele imediatamente, sem rejeição."
+        },
+        {
+          "titulo": "BÔNUS",
+          "texto": "Ter Influência dá +1 em movimentos contra ou relacionados a esse PJ. Respeite o teto do modificador."
+        },
+        {
+          "titulo": "PRIORIDADE",
+          "texto": "Se a ação acionar Provocar ou Confortar, resolva esse movimento em vez de simplesmente determinar quem o alvo é."
+        }
+      ]
+    },
+    {
+      "id": "pvp/renunciar",
+      "categoria": "pvp",
+      "arquivo": "02-pvp-renunciar.png",
+      "titulo": "RENUNCIAR À INFLUÊNCIA",
+      "compacto": false,
+      "origem": "Influência · livro pp.79–83",
+      "regras_ref": [
+        "pvp.json",
+        "influencia.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "CUSTO",
+          "texto": "Abra mão da Influência que tem sobre o PJ e escolha um efeito imediato."
+        },
+        {
+          "titulo": "ESCOLHAS",
+          "texto": "• −2 num movimento que ele acabou de rolar.\n• Infligir uma condição nele, escolhida por você.\n• +1 extra numa rolagem sua contra ele, somado ao bônus passivo."
+        },
+        {
+          "titulo": "DEPOIS DOS DADOS",
+          "texto": "Os ajustes de rolagem podem ser usados depois dos dados, antes de resolver o resultado. Respeite o teto do modificador."
+        },
+        {
+          "titulo": "CONSEQUÊNCIA",
+          "texto": "Você perde essa Influência. Para voltar a ter os benefícios, precisa ganhá-la novamente."
+        }
+      ]
+    },
+    {
+      "id": "pvp/virar-o-jogo",
+      "categoria": "pvp",
+      "arquivo": "02-pvp-virar-o-jogo.png",
+      "titulo": "VIRANDO O JOGO",
+      "compacto": false,
+      "origem": "PvP · livro pp.57–75, 182 e 191–192",
+      "regras_ref": [
+        "pvp.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "FALHA CONTRA PJ",
+          "texto": "Quem falha marca potencial. O mestre pode usar a falha para virar o movimento contra quem rolou."
+        },
+        {
+          "titulo": "MOVIMENTO INVERTIDO",
+          "texto": "O alvo recebe a oportunidade de usar o mesmo movimento de volta, com efeito de 10+, sem uma nova rolagem."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "Uma provocação falha. O mestre permite que o alvo provoque de volta com os dois incentivos: cumprir gera Equipe; recusar exige uma condição."
+        },
+        {
+          "titulo": "DECISÃO DO MESTRE",
+          "texto": "É uma opção de movimento do mestre, conforme a ficção; não acontece automaticamente em toda falha."
+        }
+      ]
+    },
+    {
+      "id": "influencia/conceito",
+      "categoria": "influencia",
+      "arquivo": "03-influencia-conceito.png",
+      "titulo": "INFLUÊNCIA",
+      "compacto": false,
+      "origem": "Influência · livro pp.79–83 e 178",
+      "regras_ref": [
+        "influencia.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE SIGNIFICA",
+          "texto": "Você se importa com a opinião de quem tem Influência sobre você. A relação tem direção: ter sobre alguém não significa que ele tenha sobre você."
+        },
+        {
+          "titulo": "QUEM TEM",
+          "texto": "PNJs adultos começam com Influência sobre os jovens heróis; podem perdê-la. Você pode dar Influência sobre si a alguém que passou a importar."
+        },
+        {
+          "titulo": "GANHAR DE NOVO",
+          "texto": "Não acumula pontos. Sobre PJ: mude seus Rótulos imediatamente, sem rejeição. Sobre PNJ: ganhe +1 adiante contra ele."
+        },
+        {
+          "titulo": "PALAVRAS QUE AFETAM",
+          "texto": "Quem tem Influência pode dizer quem você é ou como o mundo funciona. O mestre indica um Rótulo que sobe e outro que desce; aceite ou rejeite."
+        }
+      ]
+    },
+    {
+      "id": "influencia/usar",
+      "categoria": "influencia",
+      "arquivo": "03-influencia-usar.png",
+      "titulo": "USANDO INFLUÊNCIA",
+      "compacto": false,
+      "origem": "Influência · livro pp.79–83 e 178",
+      "regras_ref": [
+        "influencia.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "BÔNUS PASSIVO",
+          "texto": "Ganhe +1 em movimentos contra ou relacionados a quem você tem Influência. O modificador final continua entre −3 e +4."
+        },
+        {
+          "titulo": "ONDE SE APLICA",
+          "texto": "Pode ajudar a enfrentar, defender, provocar, confortar ou perfurar a máscara, conforme o alvo e a ficção. Também vale para movimentos de arquétipo."
+        },
+        {
+          "titulo": "AVALIAR",
+          "texto": "O +1 pode valer ao avaliar uma situação quando essa pessoa for o foco da sua atenção."
+        },
+        {
+          "titulo": "DIZER QUEM ALGUÉM É",
+          "texto": "Sem Influência, a fala não força a mudança de Rótulos. Se a fala de um PJ acionar Provocar ou Confortar, esses movimentos têm prioridade."
+        }
+      ]
+    },
+    {
+      "id": "influencia/renunciar",
+      "categoria": "influencia",
+      "arquivo": "03-influencia-renunciar.png",
+      "titulo": "RENUNCIANDO À INFLUÊNCIA",
+      "compacto": false,
+      "origem": "Influência · livro pp.79–83 e 178",
+      "regras_ref": [
+        "influencia.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO",
+          "texto": "Use deliberadamente a importância que tem para alguém para conseguir uma vantagem imediata."
+        },
+        {
+          "titulo": "CUSTO",
+          "texto": "Renuncie à Influência sobre essa pessoa e escolha um efeito."
+        },
+        {
+          "titulo": "ESCOLHAS",
+          "texto": "• −2 num movimento que ela acabou de rolar.\n• Infligir uma condição nela, escolhida por você.\n• +1 extra numa rolagem sua contra ela, somado ao +1 passivo."
+        },
+        {
+          "titulo": "MOMENTO",
+          "texto": "Os ajustes podem ser escolhidos após os dados, antes de resolver o resultado. Respeite o teto do modificador."
+        },
+        {
+          "titulo": "DEPOIS",
+          "texto": "Você perde a Influência sobre o alvo; precisa ganhá-la novamente para voltar a ter seus benefícios."
+        }
+      ]
+    },
+    {
+      "id": "influencia/rejeitar",
+      "categoria": "influencia",
+      "arquivo": "03-influencia-rejeitar.png",
+      "titulo": "REJEITANDO INFLUÊNCIA",
+      "compacto": false,
+      "origem": "Influência · livro pp.79–83 e 178",
+      "regras_ref": [
+        "influencia.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / SEM RÓTULO",
+          "texto": "Reaja na ficção contra alguém que tem Influência sobre você, PJ ou PNJ. Role 2d6: +1 se também tem Influência sobre ele; Inseguro: −2."
+        },
+        {
+          "titulo": "SUCESSO",
+          "texto": "Você resiste à mudança de Rótulos proposta. 10+: escolha 2; 7–9: escolha 1."
+        },
+        {
+          "titulo": "ESCOLHAS",
+          "texto": "• Remover uma condição OU marcar potencial, agindo já para provar que a pessoa está errada.\n• Mudar seus Rótulos à sua escolha: um sobe, outro desce.\n• Cancelar a Influência dela sobre você e ganhar +1 adiante contra ela."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial e uma condição à sua escolha. O mestre ajusta seus Rótulos conforme as palavras que atingiram você."
+        },
+        {
+          "titulo": "LEMBRETE",
+          "texto": "Discordar não basta: mostre sua resistência na ficção. Este movimento também pode responder a tentativas de provocar ou confortar."
+        }
+      ]
+    }
+  ]
+}

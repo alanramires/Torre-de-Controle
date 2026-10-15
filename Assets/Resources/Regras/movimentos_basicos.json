@@ -135,7 +135,7 @@
       "parcial": [{ "op": "escolher", "n": 1, "opcoes_ref": ["atacar_verbal", "ceder", "aguentar"] }],
       "falha": [{ "op": "marcar_potencial", "quem": "rolou" }, { "op": "narrativo", "texto": "Você se mantém firme e diz como." }],
       "opcoes": [
-        { "id": "sair", "texto": "Sai da cena (foge, desmaia...); volta na seguinte com as condições", "efeitos": [{ "op": "sair_de_cena", "quem": "rolou" }] },
+        { "id": "sair", "texto": "Afasta-se da situação: foge, desmaia etc.", "efeitos": [{ "op": "sair_de_cena", "quem": "rolou" }] },
         { "id": "perder_controle", "texto": "Perde o controle de si ou dos poderes; o MJ diz o que acontece", "efeitos": [{ "op": "narrativo", "quem": "mj" }] },
         { "id": "duas_parcial", "texto": "Duas opções da lista de 7-9", "efeitos": [{ "op": "escolher", "n": 2, "opcoes_ref": ["atacar_verbal", "ceder", "aguentar"] }] },
         { "id": "atacar_verbal", "texto": "Descontar num colega: provocá-lo a agir sem pensar ou aproveitar sua Influência para lhe infligir uma condição", "efeitos": [{ "op": "acionar", "um_de": ["basico/provocar", "influencia/aproveitar:condicao"] }] },

@@ -17,6 +17,10 @@ namespace TorreDeControle.UI
         [SerializeField] Button botaoJogadores;
         [SerializeField] Button botaoPersonagens;
         [SerializeField] Button botaoSalas;
+        [Header("Ajuda")]
+        [SerializeField] Button botaoAjuda;
+        [Tooltip("Opcional: Rótulos, sucessos e falhas, movimentos, recursos e bônus. Vazio carrega de Resources.")]
+        [SerializeField] Texture2D[] cardsAjuda;
         [Tooltip("Retratos opcionais; sem eles, carrega automaticamente de Resources/Retratos. " +
                  "A Torre acha cada um pelo nome dado em arquetipos.json.")]
         [SerializeField] Texture2D[] retratos;
@@ -27,6 +31,7 @@ namespace TorreDeControle.UI
         PainelPersonagens painelPersonagens;
         CadastroSalas salas;
         PainelSalas painelSalas;
+        PainelAjuda painelAjuda;
 
         ArmazenamentoAdiado armazenamento;
 
@@ -60,6 +65,7 @@ namespace TorreDeControle.UI
 
             Ligar(botaoPersonagens, nameof(botaoPersonagens), AbrirPersonagens);
             Ligar(botaoSalas, nameof(botaoSalas), AbrirSalas);
+            Ligar(botaoAjuda, nameof(botaoAjuda), AbrirAjuda);
         }
 
         static void Ligar(Button botao, string campo, UnityEngine.Events.UnityAction acao)
@@ -89,6 +95,13 @@ namespace TorreDeControle.UI
             if (painelSalas == null)
                 painelSalas = PainelSalas.Criar(transform);
             painelSalas.Abrir(salas, personagens, jogadores);
+        }
+
+        void AbrirAjuda()
+        {
+            if (painelAjuda == null)
+                painelAjuda = PainelAjuda.Criar(transform);
+            painelAjuda.Abrir(cardsAjuda);
         }
     }
 }

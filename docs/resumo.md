@@ -40,9 +40,13 @@ novo é seu.
 ## Onde eu parei
 
 - **Help básico (2026-10-14):** gerador próprio em `tools/cards/gerar_cartas.py`,
-  instruções em `tools/cards/README.md`. Gera os quatro panoramas `00-*` em
+  textos unificados em `Assets/Resources/Ajuda/catalogo.json` (schema em `docs/ajuda.md`),
+  instruções em `tools/cards/README.md`. Agora são 25 cartas: quatro panoramas,
+  oito movimentos básicos, nove PvP e quatro de Influência. `PainelAjuda` ligado
+  ao botão do Canvas, com menu lateral compacto, cortinas e leitor ampliado.
+  Gera os panoramas `00-*` e as demais cartas em
   `Assets/img/cards/regras`, com texto próprio e moldura desenhada por código,
-  sem depender do acervo. Ainda não ligado ao menu de ajuda.
+  sem depender do acervo. As cópias em `Resources/Cards/Regras` alimentam a Ajuda.
 
 - **Aprovação na campanha** — feitos: **formação da equipe** (aba da sala, fila da sala) e **Influência**
   (jogador marca na ficha, Núcleo; aba da sala = visão do mestre; `SeletorDeInfluencia`; por colega,
