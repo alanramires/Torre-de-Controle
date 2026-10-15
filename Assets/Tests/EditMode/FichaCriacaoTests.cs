@@ -131,8 +131,9 @@ namespace TorreDeControle.Tests
             var p = Nova("bruta");
             Assert.That(cadastro.AlterarFotos(p.Id, "C:/fotos/titania.png", "").Ok, Is.False);
             Assert.That(cadastro.AlterarFotos(p.Id, "javascript:alert(1)", "").Ok, Is.False);
-            Assert.That(cadastro.AlterarFotos(p.Id, "https://exemplo.com/titania", "").Ok, Is.False); // página
-            Assert.That(cadastro.AlterarFotos(p.Id, "https://exemplo.com/titania.gif", "").Ok, Is.False);
+            // Qualquer link da web vale (webp, gif, sem extensão): quem garante é o aprovar/recusar.
+            Assert.That(cadastro.AlterarFotos(p.Id, "https://exemplo.com/titania", "").Ok, Is.True);
+            Assert.That(cadastro.AlterarFotos(p.Id, "https://exemplo.com/titania.webp", "").Ok, Is.True);
             Assert.That(cadastro.AlterarFotos(p.Id, "https://exemplo.com/titania.PNG?w=300", "http://exemplo.com/kima.jpeg").Ok, Is.True);
             Assert.That(cadastro.AlterarFotos(p.Id, "https://exemplo.com/titania.jpg", "http://exemplo.com/kima.jpeg").Ok, Is.True);
             cadastro.AlterarIdentidade(p.Id, "Kima", "Titânia", "bruta", null);

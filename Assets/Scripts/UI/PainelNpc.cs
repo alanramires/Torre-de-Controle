@@ -224,21 +224,30 @@ namespace TorreDeControle.UI
                 Nota("Nasceu da ficha dela: o nome vem de lá (mudou lá, muda aqui); o resto da ficha é do mestre.");
                 Vao();
             }
-            Secao("IDENTIDADE", null);
-            var nome = CampoRotulado("NOME", npc.Identidade.Nome, "nome");
+            Secao("IDENTIDADE", "clique na foto para abrir o link");
+            var topo = Estilo.Fila(conteudo, 262, 16);
+            QuadroDaFoto(topo);
+            var dados = Estilo.Rect("Dados", topo);
+            var ld = dados.gameObject.AddComponent<LayoutElement>();
+            ld.flexibleWidth = 1;
+            var vd = dados.gameObject.AddComponent<VerticalLayoutGroup>();
+            vd.spacing = 6;
+            vd.childControlWidth = true;
+            vd.childControlHeight = true;
+            vd.childForceExpandHeight = false;
+
+            CampoDaFoto(dados);
+            var nome = CampoRotulado("NOME", npc.Identidade.Nome, "nome", dados);
             var codinome = CampoRotulado(npc.Papel == Papel.Vilao ? "CODINOME / NOME DE VILÃO" : "CODINOME",
-                npc.Identidade.Codinome, "opcional");
+                npc.Identidade.Codinome, "opcional", dados);
             foreach (var campo in new[] { nome, codinome })
             {
                 campo.onSubmit.AddListener(_ => Renomear(nome.text, codinome.text));
                 campo.onDeselect.AddListener(_ => Renomear(nome.text, codinome.text));
             }
-            if (npc.Papel == Papel.Vilao)
-                Nota("O nome de vilão sinaliza a geração; o nome real é opcional.");
-
             // Papel e maturidade aqui também: promover a Vilão / Oponente na hora da briga, e voltar depois
             // (a ficha de vilão fica guardada).
-            var perfil = FilaRotulada("PAPEL");
+            var perfil = FilaRotulada("PAPEL", dados);
             Estilo.ListaSuspensa(perfil, 300, OpcoesPapel(), npc.Papel.ToString(), id =>
             {
                 cadastro.DefinirPapel(npc.Id, (Papel)Enum.Parse(typeof(Papel), id));
@@ -247,12 +256,14 @@ namespace TorreDeControle.UI
             var rotuloMaturidade = Estilo.Rotulo(perfil, "MATURIDADE", 20, Estilo.TextoSuave, FontStyles.Bold);
             rotuloMaturidade.characterSpacing = 4;
             rotuloMaturidade.alignment = TextAlignmentOptions.Right;
-            rotuloMaturidade.gameObject.AddComponent<LayoutElement>().preferredWidth = 220;
+            rotuloMaturidade.gameObject.AddComponent<LayoutElement>().preferredWidth = 190;
             Estilo.ListaSuspensa(perfil, 220, OpcoesMaturidade(), npc.Maturidade.ToString(), id =>
             {
                 cadastro.DefinirMaturidade(npc.Id, (Maturidade)Enum.Parse(typeof(Maturidade), id));
                 Redesenhar();
             });
+            if (npc.Papel == Papel.Vilao)
+                Nota("O nome de vilão sinaliza a geração; o nome real é opcional.");
 
             Secao("APARÊNCIA MARCANTE", "um maneirismo ou traço físico bem distinto");
             var aparencia = Estilo.AreaTexto(conteudo, "como reconhecer de longe", 90);
@@ -298,6 +309,72 @@ namespace TorreDeControle.UI
                 FichaDeVilao();
             else
                 Nota("NPC só marca condição se um herói o enfrentar diretamente. Para ter ficha de vilão, mude o papel para Vilão / Oponente (lá em cima).");
+        }
+
+        /// <summary>
+        /// A foto do NPC: uma por link (qualquer link da web), no mesmo campo da foto heroica das personagens.
+        /// Sem aprovar/recusar: quem põe a foto do NPC é o próprio mestre. Clicar no quadro abre o link.
+        /// </summary>
+        void QuadroDaFoto(Transform pai)
+        {
+            var link = npc.Identidade.FotoHeroica ?? string.Empty;
+            var temLink = link.Length > 0;
+            var quadro = Estilo.Rect("Foto", pai);
+            var lq = quadro.gameObject.AddComponent<LayoutElement>();
+            lq.preferredWidth = 190;
+            lq.flexibleWidth = 0;
+            lq.layoutPriority = 2;
+            var fundo = Estilo.Moldura(quadro.gameObject, Estilo.Campo, temLink ? Estilo.Dourado : Estilo.BordaApagada);
+            var botao = quadro.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(botao);
+            botao.targetGraphic = fundo;
+            botao.interactable = temLink;
+            var cores = botao.colors;
+            cores.disabledColor = Color.white;
+            botao.colors = cores;
+            if (temLink)
+                botao.onClick.AddListener(() => Application.OpenURL(link));
+
+            var area = Estilo.Rect("Imagem", quadro);
+            Estilo.Esticar(area);
+            area.offsetMin = new Vector2(4, 4);
+            area.offsetMax = new Vector2(-4, -4);
+            var miolo = Estilo.Rect("Miolo", area);
+            var imagem = miolo.gameObject.AddComponent<RawImage>();
+            imagem.raycastTarget = false;
+            var proporcao = miolo.gameObject.AddComponent<AspectRatioFitter>();
+            proporcao.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            var texto = Estilo.Rotulo(quadro, temLink ? string.Empty : "sem foto", 18, Estilo.TextoApagado, FontStyles.Bold);
+            texto.alignment = TextAlignmentOptions.Center;
+            texto.textWrappingMode = TextWrappingModes.Normal;
+            texto.raycastTarget = false;
+            Estilo.Esticar(texto.rectTransform);
+            texto.rectTransform.offsetMin = new Vector2(10, 10);
+            texto.rectTransform.offsetMax = new Vector2(-10, -10);
+            if (temLink)
+                quadro.gameObject.AddComponent<FotoDaWeb>().Mostrar(link, imagem, proporcao, texto);
+            else
+                imagem.enabled = false;
+        }
+
+        void CampoDaFoto(Transform pai)
+        {
+            var campo = CampoRotulado("FOTO (LINK)", npc.Identidade.FotoHeroica ?? string.Empty, "link da imagem (web)", pai);
+            void Gravar()
+            {
+                if (campo.text.Trim() == (npc.Identidade.FotoHeroica ?? string.Empty))
+                    return;
+                var r = cadastro.AlterarFotos(npc.Id, campo.text, npc.Identidade.FotoCivil);
+                if (!r.Ok)
+                {
+                    rodape.color = Estilo.Erro;
+                    rodape.text = r.Erro;
+                    return;
+                }
+                Redesenhar();
+            }
+            campo.onSubmit.AddListener(_ => Gravar());
+            campo.onDeselect.AddListener(_ => Gravar());
         }
 
         void FichaDeVilao()
@@ -414,18 +491,18 @@ namespace TorreDeControle.UI
             vao.gameObject.AddComponent<LayoutElement>().minHeight = 14;
         }
 
-        RectTransform FilaRotulada(string rotulo)
+        RectTransform FilaRotulada(string rotulo, Transform pai = null)
         {
-            var fila = Estilo.Fila(conteudo, 58);
+            var fila = Estilo.Fila(pai != null ? pai : conteudo, 58);
             var r = Estilo.Rotulo(fila, rotulo, 20, Estilo.TextoSuave, FontStyles.Bold);
             r.characterSpacing = 4;
             r.gameObject.AddComponent<LayoutElement>().preferredWidth = 240;
             return fila;
         }
 
-        TMP_InputField CampoRotulado(string rotulo, string valor, string dica)
+        TMP_InputField CampoRotulado(string rotulo, string valor, string dica, Transform pai = null)
         {
-            var fila = FilaRotulada(rotulo);
+            var fila = FilaRotulada(rotulo, pai);
             var campo = Estilo.CampoTexto(fila, dica);
             campo.text = valor;
             Estilo.ColunaElastica(campo);

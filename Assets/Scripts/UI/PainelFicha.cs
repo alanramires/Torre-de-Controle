@@ -664,7 +664,7 @@ namespace TorreDeControle.UI
             else
                 imagem.enabled = false;
 
-            var campo = Estilo.CampoTexto(coluna, "link .jpg / .png");
+            var campo = Estilo.CampoTexto(coluna, "link da imagem (web)");
             campo.text = link;
             foreach (var t in new[] { (TextMeshProUGUI)campo.textComponent, (TextMeshProUGUI)campo.placeholder })
                 t.fontSize = 18;
@@ -696,9 +696,15 @@ namespace TorreDeControle.UI
                         ? Estilo.BotaoPrincipal(botoes, rotulo, 0, clicar)
                         : Estilo.BotaoContorno(botoes, rotulo, 0, cor, clicar);
                     b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                    // "Aprovado" é mais comprido que "Aprovar": numa linha só, a fonte encolhe até caber.
                     var t = b.GetComponentInChildren<TextMeshProUGUI>();
-                    t.fontSize = 16;
                     t.characterSpacing = 1;
+                    t.textWrappingMode = TextWrappingModes.NoWrap;
+                    t.enableAutoSizing = true;
+                    t.fontSizeMin = 10;
+                    t.fontSizeMax = 16;
+                    t.rectTransform.offsetMin = new Vector2(4, 0);
+                    t.rectTransform.offsetMax = new Vector2(-4, 0);
                 }
             }
             return campo;

@@ -8,9 +8,9 @@ using UnityEngine.UI;
 namespace TorreDeControle.UI
 {
     /// <summary>
-    /// Mostra num RawImage a imagem de um link (foto da personagem: .jpg, .jpeg ou .png). Baixa uma vez
-    /// por link e guarda (a ficha se redesenha muito). Se o servidor não devolver uma imagem jpeg/png,
-    /// não mostra nada: o texto avisa e o quadro continua abrindo o link no navegador.
+    /// Mostra num RawImage a imagem de um link (qualquer link da web). Baixa uma vez por link e guarda (a
+    /// ficha se redesenha muito). A Unity só desenha jpg e png: se vier outra coisa (webp, gif, uma página),
+    /// não mostra; o texto avisa e o quadro continua abrindo o link no navegador.
     /// </summary>
     public sealed class FotoDaWeb : MonoBehaviour
     {
@@ -90,16 +90,17 @@ namespace TorreDeControle.UI
                 }
 
                 var tipo = (pedido.GetResponseHeader("Content-Type") ?? string.Empty).ToLowerInvariant();
-                var ehImagem = tipo.Length == 0 || tipo.Contains("image/jpeg") || tipo.Contains("image/jpg") ||
-                               tipo.Contains("image/png");
+                // Tenta qualquer imagem (o servidor pode mentir o tipo); página HTML nem tenta.
+                var ehImagem = !tipo.Contains("text/html");
                 if (pedido.result != UnityWebRequest.Result.Success || !ehImagem)
                 {
                     falharam.Add(link);
                     Falhou();
                     yield break;
                 }
+                // Formato que a Unity não lê vira uma textura 8x8 de "?": conta como falha.
                 var textura = DownloadHandlerTexture.GetContent(pedido);
-                if (textura == null)
+                if (textura == null || (textura.width == 8 && textura.height == 8))
                 {
                     falharam.Add(link);
                     Falhou();
@@ -123,7 +124,7 @@ namespace TorreDeControle.UI
             if (padrao != null)
                 Aplicar(padrao);
             else
-                aviso.text = "não deu para mostrar\n<size=80%>(não veio uma imagem .jpg ou .png)\nabrir o link</size>";
+                aviso.text = "não deu para mostrar aqui\n<size=80%>(a Torre só desenha .jpg e .png)\nclique para abrir o link</size>";
         }
     }
 }

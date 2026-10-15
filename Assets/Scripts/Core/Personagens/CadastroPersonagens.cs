@@ -487,7 +487,7 @@ namespace TorreDeControle.Core.Personagens
             var c = (civil ?? string.Empty).Trim();
             foreach (var link in new[] { h, c })
                 if (link.Length > 0 && !LinkValido(link))
-                    return Resultado.Falha("O link da foto precisa ser http(s) e terminar em .jpg, .jpeg ou .png.");
+                    return Resultado.Falha("O link da foto precisa ser um endereço da web (http ou https).");
             var i = personagem.Identidade;
             if (h == i.FotoHeroica && c == i.FotoCivil)
                 return Resultado.Sucesso();
@@ -519,14 +519,14 @@ namespace TorreDeControle.Core.Personagens
             return Resultado.Sucesso();
         }
 
-        /// <summary>Formatos de foto aceitos (os que a Torre consegue mostrar).</summary>
-        public static readonly IReadOnlyList<string> FormatosDeFoto = new[] { ".jpg", ".jpeg", ".png" };
-
-        /// <summary>Link http(s) direto para uma imagem .jpg, .jpeg ou .png (o "?..." no fim não conta).</summary>
+        /// <summary>
+        /// Qualquer link http(s) (Alan: com tanta ferramenta gerando imagem, nada de exigir .jpg/.png). Fora
+        /// ficam caminho local e esquemas estranhos. Quem garante a imagem é o aprovar/recusar do mestre; a
+        /// tela mostra o que a Unity sabe desenhar (jpg/png) e, no resto, abre o link no navegador.
+        /// </summary>
         public static bool LinkValido(string link) =>
             Uri.TryCreate(link, UriKind.Absolute, out var uri) &&
-            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps) &&
-            FormatosDeFoto.Any(f => uri.AbsolutePath.EndsWith(f, StringComparison.OrdinalIgnoreCase));
+            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
 
         /// <summary>Resposta à pergunta de histórico de número <paramref name="indice"/> (ordem da ficha).</summary>
         public Resultado ResponderHistorico(string id, int indice, string resposta)
