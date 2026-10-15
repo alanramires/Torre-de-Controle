@@ -54,7 +54,8 @@ o que é do livro e o que foi completado por nós.
   ou o mestre mostra que ele ignora (o livro manda avisar as PJs quando o vilão é imune a algo).
 
 Pergunta do Alan que vale virar texto de carta: "3 condições é o chefe ter 3 de vida?"
-Com três condições livres, ele marca uma por golpe poderoso e pode marcar as três.
+Com três condições livres, ele marca uma por golpe poderoso e pode marcar as três; só é derrotado no
+quarto golpe, quando precisa marcar e não tem mais nenhuma livre.
 É derrotado quando precisa marcar outra e não tem nenhuma livre (p.196).
 Cada condição marcada muda o jeito como ele luta.
 
