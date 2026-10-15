@@ -1,6 +1,6 @@
 # Resumo — onde a Torre está
 
-> Handoff para a próxima conversa. Atualizado no fechamento da **v0.0.4** (2026-10-14).
+> Handoff para a próxima conversa. Atualizado no fechamento da **v0.0.5** (2026-10-14).
 > Se algo aqui contradiz o código, o código manda — e este arquivo precisa de poda.
 
 ## Leitura para retomar
@@ -16,10 +16,14 @@ novo é seu.
 
 ## Estado
 
-- **Versão:** v0.0.4 — *A equipe se forma na sala*. Relatório: `docs/relatorio_v0.0.4.md`.
-- **Onde o Alan chegou:** uma sala com 5 personagens **em aprovação**, com a **formação da equipe** e a
-  **Influência inicial** prontas. A trava de em carreira (`PendenciasParaCarreira`) cobra os dois; faltam
-  relacionamentos e os NPCs dos jogadores.
+- **Versão:** v0.0.5 — *Personagens criando NPCs automaticamente*. Relatório: `docs/relatorio_v0.0.5.md`.
+- **Onde o Alan chegou:** uma sala com 5 personagens **em aprovação**, com **formação da equipe**,
+  **Influência inicial** e **relacionamentos** prontos (a trava `PendenciasParaCarreira` cobra os três).
+  O quarto requisito, os NPCs que orbitam cada personagem, já nasce da ficha: o nome escrito cria o NPC
+  na sala ("dona · laço"). Falta a Influência com NPCs, o laboratório e a tela de NPCs, todos **decididos**
+  em `docs/npc_lab.md`.
+- **O que organiza o que vem:** regra que gera NPC é **dado** no `arquetipos.json` (`npcs`,
+  `npcs_historico`, `por_escolha` com `opcoes`), não código. Arquétipo novo que gera NPC = configuração.
 - **Como o Alan trabalha esta fase:** ele **desenha cada tela** (rascunho colorido) e explica a regra.
   Não adiantar conteúdo nem regra antes do desenho (ele já parou isso duas vezes).
 - **O caminho da ficha**, e cada ação depende de onde ela está (e de onde foi aberta: hierarquia):
@@ -41,17 +45,27 @@ novo é seu.
 
 - **Help básico (2026-10-14):** gerador próprio em `tools/cards/gerar_cartas.py`,
   textos unificados em `Assets/Resources/Ajuda/catalogo.json` (schema em `docs/ajuda.md`),
-  instruções em `tools/cards/README.md`. Agora são 25 cartas: quatro panoramas,
-  oito movimentos básicos, nove PvP e quatro de Influência. `PainelAjuda` ligado
+  instruções em `tools/cards/README.md`. Agora são 45 cartas: quatro panoramas,
+  oito movimentos básicos, nove PvP, seis de Influência, duas de Condições e
+  seis de Equipe e sessão e dez de Movimentos de equipe (categoria principal
+  separada, uma carta por arquétipo). Bordas temáticas:
+  Condições amarela, Influência verde, Equipe azul; miolo preservado. `PainelAjuda` ligado
   ao botão do Canvas, com menu lateral compacto, cortinas e leitor ampliado.
   Gera os panoramas `00-*` e as demais cartas em
   `Assets/img/cards/regras`, com texto próprio e moldura desenhada por código,
   sem depender do acervo. As cópias em `Resources/Cards/Regras` alimentam a Ajuda.
 
-- **Aprovação na campanha** — feitos: **formação da equipe** (aba da sala, fila da sala) e **Influência**
-  (jogador marca na ficha, Núcleo; aba da sala = visão do mestre; `SeletorDeInfluencia`; por colega,
-  dada/perdida). Faltam **relacionamentos** (a Bruta liga amor e rival a eles) e os **NPCs que orbitam**
-  cada personagem, criados pelos jogadores. **Esperar o Alan desenhar.** Detalhes em `fluxo_de_telas.md`.
+- **Aprovação na campanha** — feitos: formação da equipe, Influência e **relacionamentos** (ficha, aba
+  História; sala só leitura; Bruta sincroniza amor/rival com a Influência). **NPCs da ficha** feitos em
+  `CadastroPersonagens.Pnj.cs` (`FontesDeNpc`, `SincronizarNpcsDaFicha`, `OrigemDoNpc`): nêmesis, mentora,
+  Legado, histórico de 7 arquétipos, obrigações do Janus, 3 impulsos do Farol. Em aprovação, nome e
+  descrição de NPC seguem editáveis (decisão do Alan: ajudar o mestre). **Ainda não** entram na trava.
+- **Próximo (decidido, sem código):** `docs/npc_lab.md` — Influência PJ↔NPC (adulto por padrão calculado,
+  só o mestre muda pela mesa, oculta, grade NPC × PJ, Influência de nascença pela regra), laboratório de
+  NPCs (originais/instâncias, reboot entre campanhas) e a tela de gestão de NPCs. Esperar o Alan desenhar
+  as telas.
+- **NPCs de fichas antigas** nasceram com o texto inteiro no nome (Estrela Negra, Aurora, a Discípula):
+  o Alan separa nome e descrição à mão.
 - **Influência no jogo** — `DefinirEstadoDaInfluencia` (dar nova, perder, voltar; só em carreira) está no
   Core, sem tela e sem evento no log: vai para o painel do mestre (a aba Influência da sala).
 - **Área do mestre** — o botão está na sala (`PainelSala.AreaDoMestre`, só avisa "em construção"). O
@@ -63,7 +77,7 @@ novo é seu.
   (`implementacao_futura.md`).
 - **Ajuste pontual com motivo** em ficha em carreira (sem reabrir a criação) e **resultado sem rolagem**
   (Sobrecarga 10+, Vou te salvar! 12+) para o rolador: anotados.
-- Testes: `Assets/Tests/EditMode/` — 104 passando no harness dotnet fora da Unity; rodar também no Test
+- Testes: `Assets/Tests/EditMode/` — 119 passando no harness dotnet fora da Unity; rodar também no Test
   Runner da Unity.
 
 ## Armadilhas
@@ -99,6 +113,12 @@ novo é seu.
 | `dotnet test` "sem resultado" | saída em inglês ("Passed!") | filtrar `Passed!|Failed!` também |
 | Texto de regra copiado | repo é **público** | texto próprio sempre; livro/acervo só como consulta |
 | Ícone de terceiros no repo | licença (ex.: Icons8) | fora do repositório (`.gitignore`) |
+| Caixa de texto "expande" às vezes | campo de uma linha com texto colado com quebras vaza | `AreaTexto` (várias linhas, rola dentro) |
+| NPC duplicado ao mudar a chave do vínculo | busca nova não acha o gravado no formato antigo | adotar o antigo no mesmo passo (`AcertarVinculosSemCampo`) |
+| Mudança de formato "não pegou" | o Unity só recompilou depois | conferir no Play mode depois do reload, antes de mexer à mão |
+| Em aprovação, chip parece clicável e não funciona | tela destravou o extra inteiro, o Core só o campo | destravar por **campo** (`ExtraEditavelNaSala(p, extra, campo)`) |
+| Desmarcar opção não mexe no NPC | sincronização só no texto | sincronizar também em `AlternarOpcaoDeExtra` |
+| Heredoc do Bash falha com aspas | "unexpected EOF" no Git Bash do Windows | script `.py` escrito com a ferramenta de arquivo |
 
 ## MVP (do `CLAUDE.md`)
 
@@ -112,13 +132,17 @@ novo é seu.
 | Rolador 2d6 + log | **log pronto no Core**; rolador falta |
 | Exportar log para o fórum | falta |
 
-Fora do MVP, já de pé: jogadores; NPCs com ficha de vilão; fotos por link com aprovação; retratos;
-exportar/importar a ficha em JSON (troca com outras máquinas).
+Fora do MVP, já de pé: jogadores; NPCs com ficha de vilão (Neutro/Aliado/Vilão) e **NPCs que nascem da
+ficha**; relacionamentos; help com 45 cartas; fotos por link com aprovação; retratos; exportar/importar a
+ficha em JSON (troca com outras máquinas).
 
 ## Schema da ficha
 
 - Gravado em JSON por `ArmazenamentoLocalJson` (`persistentDataPath/dados/`): `jogadores.json`,
   `personagens.json` (laboratório, instâncias e NPCs juntos), `salas.json` e `mesa_<sala>.json`.
+- Campos novos desta versão (sem migração, com conversão ao carregar quando preciso): `relacoes`
+  (era `relacionamentos`), `nomes_historico`, `pnj.vinculo` (personagem, extra, campo, vaga),
+  `pnj.maturidade_a_definir`; NPC com papel `heroi` vira `aliado` ao carregar.
 - **Ainda sem campo `versao` nem migração.** Na v0.0.2 o status `criado` deixou de existir; os dados
   locais do Alan foram convertidos à mão (backup em `dados/personagens.antes-dos-status.json`).
   Antes de uma campanha de verdade, criar `versao` + migração.
