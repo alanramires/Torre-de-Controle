@@ -251,6 +251,46 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Formacao_do_legado_da_um_npc_com_a_resposta_como_descricao()
+        {
+            var original = FichaPronta.Criada(personagens, "Aurora Dourada");
+            Assert.That(salas.PorPersonagem(sala.Id, 0, original.Id, false).Ok, Is.True); // na vaga: a formação exige
+            var copia = personagens.Buscar(sala.Slots[0].Personagem);
+            copia.Identidade.Arquetipo = "legado"; // atalho de teste
+            copia.Foto.Arquetipo = "legado";
+            Assert.That(salas.EnviarFormacao(sala.Id, copia.Id, "Impressionamos a Capitã Aurora com o salvamento do trem.").Ok, Is.True);
+            Assert.That(personagens.NpcDaFicha(copia, CadastroPersonagens.FonteFormacao), Is.Null); // nome é opcional
+            Assert.That(personagens.DefinirNomeNpcDaFormacao(copia.Id, "Capitã Aurora").Ok, Is.True);
+
+            var heroi = personagens.NpcDaFicha(copia, CadastroPersonagens.FonteFormacao);
+            Assert.That(heroi.NomeExibicao, Is.EqualTo("Capitã Aurora"));
+            Assert.That(heroi.Papel, Is.EqualTo(Papel.Aliado));
+            Assert.That(personagens.OrigemDoNpc(heroi).Value.descricao, Does.Contain("salvamento do trem"));
+
+            // O texto dela vira as Notas do NPC uma vez (cópia): mudar a história dela não mexe nas Notas.
+            Assert.That(heroi.Identidade.Resumo, Does.Contain("salvamento do trem"));
+            salas.EnviarFormacao(sala.Id, copia.Id, "Outra versão da história.");
+            Assert.That(heroi.Identidade.Resumo, Does.Contain("salvamento do trem"));
+        }
+
+        [Test]
+        public void Mesmo_nome_de_npc_ja_na_sala_nao_cria_outro()
+        {
+            var original = FichaPronta.Criada(personagens, "Aurora Dourada");
+            salas.PorPersonagem(sala.Id, 0, original.Id, false);
+            var copia = personagens.Buscar(sala.Slots[0].Personagem);
+            copia.Identidade.Arquetipo = "legado"; // atalho de teste
+            copia.Foto.Arquetipo = "legado";
+            personagens.CriarNpc(sala.Id, "Sentinela Solar", Maturidade.Adulto, Papel.Aliado);
+
+            personagens.DefinirNomeNpcDaFormacao(copia.Id, "sentinela solar");
+            Assert.That(personagens.NpcDaFicha(copia, CadastroPersonagens.FonteFormacao), Is.Null);
+            Assert.That(personagens.NpcsDaSala(sala.Id).Count(n => n.NomeExibicao == "Sentinela Solar"), Is.EqualTo(1));
+            Assert.That(personagens.AvisoDeNpcRepetido(copia, CadastroPersonagens.FonteFormacao, "resposta", "Sentinela Solar"),
+                Does.Contain("já é NPC"));
+        }
+
+        [Test]
         public void Npc_criado_pelo_mestre_nao_tem_origem()
         {
             personagens.CriarNpc(sala.Id, "Louva-a-Deus", Maturidade.Adulto, Papel.Aliado);

@@ -131,6 +131,9 @@ namespace TorreDeControle.Tests
             var p = Nova("bruta");
             Assert.That(cadastro.AlterarFotos(p.Id, "C:/fotos/titania.png", "").Ok, Is.False);
             Assert.That(cadastro.AlterarFotos(p.Id, "javascript:alert(1)", "").Ok, Is.False);
+            var blob = cadastro.AlterarFotos(p.Id, "blob:https://chatgpt.com/173b3a35-0b11-4f19-939e-efca662cf9c3", "");
+            Assert.That(blob.Ok, Is.False);
+            Assert.That(blob.Erro, Does.Contain("aba do navegador"));
             // Qualquer link da web vale (webp, gif, sem extensão): quem garante é o aprovar/recusar.
             Assert.That(cadastro.AlterarFotos(p.Id, "https://exemplo.com/titania", "").Ok, Is.True);
             Assert.That(cadastro.AlterarFotos(p.Id, "https://exemplo.com/titania.webp", "").Ok, Is.True);

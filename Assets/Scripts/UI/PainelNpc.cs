@@ -150,10 +150,27 @@ namespace TorreDeControle.UI
             pilha.childAlignment = TextAnchor.MiddleLeft;
             titulo = Estilo.Rotulo(titulos, string.Empty, 40, Estilo.Dourado, FontStyles.Bold);
             titulo.characterSpacing = 5;
+            // Nome comprido ("Sentinela Solar (pai: …)"): numa linha só, a fonte encolhe; o resto vira "…".
+            titulo.textWrappingMode = TextWrappingModes.NoWrap;
+            titulo.enableAutoSizing = true;
+            titulo.fontSizeMin = 22;
+            titulo.fontSizeMax = 40;
+            titulo.overflowMode = TextOverflowModes.Ellipsis;
             subtitulo = Estilo.Rotulo(titulos, string.Empty, 22, Estilo.TextoSuave);
-            Estilo.BotaoContorno(cabecalho, "Exportar", 190, Estilo.TextoSuave, Exportar);
-            Estilo.BotaoContorno(cabecalho, "Importar", 190, Estilo.TextoSuave, Importar);
-            Estilo.BotaoContorno(cabecalho, "Fechar", 190, Estilo.TextoSuave, Fechar);
+            subtitulo.textWrappingMode = TextWrappingModes.NoWrap;
+            subtitulo.overflowMode = TextOverflowModes.Ellipsis;
+            foreach (var (nome, acao) in new (string, UnityEngine.Events.UnityAction)[] { ("Exportar", Exportar), ("Importar", Importar), ("Fechar", Fechar) })
+            {
+                var b = Estilo.BotaoContorno(cabecalho, nome, 190, Estilo.TextoSuave, acao);
+                var t = b.GetComponentInChildren<TextMeshProUGUI>();
+                t.textWrappingMode = TextWrappingModes.NoWrap;
+                t.enableAutoSizing = true;
+                t.fontSizeMin = 14;
+                t.fontSizeMax = 24;
+                t.characterSpacing = 2;
+                t.rectTransform.offsetMin = new Vector2(8, 0);
+                t.rectTransform.offsetMax = new Vector2(-8, 0);
+            }
 
             var divisoria = Estilo.Rect("Divisoria", cartao);
             divisoria.gameObject.AddComponent<Image>().color =
@@ -216,12 +233,9 @@ namespace TorreDeControle.UI
         {
             if (cadastro.OrigemDoNpc(npc) is { } origem)
             {
-                Secao($"{origem.dono.NomeExibicao.ToUpperInvariant()} · {origem.vinculo.ToUpperInvariant()}", "escrito pelo jogador");
-                var d = Estilo.Rotulo(conteudo, string.IsNullOrWhiteSpace(origem.descricao)
-                    ? "<i>Sem descrição ainda.</i>"
-                    : $"<noparse>{origem.descricao}</noparse>", 22, Estilo.TextoSuave);
-                d.textWrappingMode = TextWrappingModes.Normal;
-                Nota("Nasceu da ficha dela: o nome vem de lá (mudou lá, muda aqui); o resto da ficha é do mestre.");
+                Secao($"{origem.dono.NomeExibicao.ToUpperInvariant()} · {origem.vinculo.ToUpperInvariant()}", null);
+                Nota("Nasceu da ficha dela. O texto dela foi copiado para as Notas (lá embaixo), e daqui em diante " +
+                     "são suas: editar as Notas não mexe na história dela, e o contrário também. O nome continua vindo de lá.");
                 Vao();
             }
             Secao("IDENTIDADE", "clique na foto para abrir o link");
@@ -568,7 +582,7 @@ namespace TorreDeControle.UI
 
         static void Altura(Component alvo, float altura)
         {
-            var layout = alvo.GetComponent<LayoutElement>() ?? alvo.gameObject.AddComponent<LayoutElement>();
+            if (!alvo.TryGetComponent<LayoutElement>(out var layout)) layout = alvo.gameObject.AddComponent<LayoutElement>();
             layout.minHeight = altura;
             layout.preferredHeight = altura;
         }

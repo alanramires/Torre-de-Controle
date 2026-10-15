@@ -30,6 +30,7 @@ namespace TorreDeControle.Core.Personagens
             if (limpa == p.EquipeResposta)
                 return Resultado.Sucesso();
             p.EquipeResposta = limpa;
+            SincronizarNpcsDaFicha(p);
             Gravar();
             return Resultado.Sucesso();
         }

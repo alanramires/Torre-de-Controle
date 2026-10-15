@@ -36,10 +36,14 @@ namespace TorreDeControle.UI
         Papel npcPapel = Papel.Neutro;
         TMP_InputField campoNpc;
 
+        string cenarioNome = string.Empty;
+        string cenarioTipo = ElementoDeCenario.Local;
+        TMP_InputField campoCenario;
+
         /// <summary>Personagem do laboratório escolhida na lista de cada slot vazio (antes de "Adicionar").</summary>
         readonly Dictionary<int, string> escolhida = new Dictionary<int, string>();
 
-        enum Aba { Vagas, Npcs, Equipe, Influencia, Relacionamentos }
+        enum Aba { Vagas, Npcs, Cenario, Equipe, Influencia, Relacionamentos }
         Aba abaAtual = Aba.Vagas;
 
         TextMeshProUGUI titulo;
@@ -88,10 +92,11 @@ namespace TorreDeControle.UI
             aoFechar?.Invoke();
         }
 
-        void Mostrar(Resultado? resultado)
+        void Mostrar(Resultado? resultado, string sucesso = null)
         {
             var erro = resultado.HasValue && !resultado.Value.Ok ? resultado.Value.Erro : null;
-            mensagem.text = erro ?? string.Empty;
+            mensagem.color = erro != null ? Estilo.Erro : Estilo.TextoSuave;
+            mensagem.text = erro ?? sucesso ?? string.Empty;
         }
 
         // ---------- opções ----------
@@ -285,6 +290,11 @@ namespace TorreDeControle.UI
                 SecaoNpcs();
                 return;
             }
+            if (abaAtual == Aba.Cenario)
+            {
+                SecaoCenario();
+                return;
+            }
             if (abaAtual == Aba.Equipe)
             {
                 SecaoEquipe();
@@ -302,7 +312,11 @@ namespace TorreDeControle.UI
             for (var i = abas.childCount - 1; i >= 0; i--)
                 Destroy(abas.GetChild(i).gameObject);
             var npcs = personagens.NpcsDaSala(sala.Id).Count(p => p.Ativo);
-            var lista = new List<(Aba, string)> { (Aba.Vagas, "Vagas"), (Aba.Npcs, $"NPCs · {npcs}") };
+            var lugares = personagens.CenarioDaSala(sala.Id).Count(e => e.Ativo);
+            var lista = new List<(Aba, string)>
+            {
+                (Aba.Vagas, "Vagas"), (Aba.Npcs, $"NPCs · {npcs}"), (Aba.Cenario, $"Cenário · {lugares}"),
+            };
             // Formação da equipe: aparece com ao menos uma personagem em aprovação nas vagas.
             var emAprovacao = EmAprovacao().Count;
             if (emAprovacao > 0)
@@ -406,7 +420,28 @@ namespace TorreDeControle.UI
             resposta.text = sala.FormacaoEquipe.FirstOrDefault(e => e.Personagem == selecionada.Id)?.Texto
                             ?? selecionada.EquipeResposta;
             Estilo.ColunaElastica(resposta);
-            Estilo.ComExpandir(resposta, $"{selecionada.NomeExibicao}: formação da equipe");
+            TMP_InputField nomeNpc = null;
+            // Formação que dá NPC (ex.: o herói que o Legado impressionou): nome opcional; a resposta é a descrição.
+            if (personagens.FormacaoDaNpc(selecionada))
+            {
+                var filaNpc = Estilo.Fila(pergunta, 50, 12);
+                var cria = personagens.OQueAFormacaoCria(selecionada);
+                var r = Estilo.Rotulo(filaNpc, $"{cria} · {personagens.VinculoDaFormacao(selecionada)}", 18, Estilo.TextoSuave, FontStyles.Italic);
+                r.gameObject.AddComponent<LayoutElement>().preferredWidth = 420;
+                nomeNpc = Estilo.CampoTexto(filaNpc, $"nome (opcional): vira {(cria == "NPC" ? "NPC" : "cenário")} da sala");
+                nomeNpc.text = selecionada.EquipeNpcNome;
+                Estilo.ColunaElastica(nomeNpc);
+                var alvoNpc = selecionada;
+                nomeNpc.onEndEdit.AddListener(t =>
+                {
+                    var r = personagens.DefinirNomeNpcDaFormacao(alvoNpc.Id, t);
+                    var aviso = personagens.AvisoDeNpcRepetido(alvoNpc, CadastroPersonagens.FonteFormacao, "resposta", t);
+                    Mostrar(aviso != null ? Resultado.Falha(aviso) : r);
+                });
+            }
+            // O ••• leva junto o nome do NPC (quando a formação dá um).
+            Estilo.ComExpandir(resposta, $"{selecionada.NomeExibicao}: formação da equipe", nomeNpc,
+                nomeNpc == null ? null : $"{personagens.OQueAFormacaoCria(selecionada)} · {personagens.VinculoDaFormacao(selecionada)}");
             // O nome no botão evita responder pela personagem errada.
             var jaEnviou = salas.PosicaoNaFormacao(sala, selecionada.Id) > 0;
             var botoes = Coluna(fila, 260, 8);
@@ -940,6 +975,167 @@ namespace TorreDeControle.UI
             if (painelNpc == null)
                 painelNpc = PainelNpc.Criar(transform.parent);
             painelNpc.Abrir(npc, personagens, Redesenhar);
+        }
+
+        // ---------- Cenário da sala: locais, organizações, outros (não é gente, então não é NPC) ----------
+
+        static IReadOnlyList<(string id, string nome)> OpcoesTipoCenario() =>
+            new[] { ElementoDeCenario.Local, ElementoDeCenario.Organizacao, ElementoDeCenario.Outro }
+                .Select(t => (t, ElementoDeCenario.NomeDoTipo(t))).ToList();
+
+        void SecaoCenario()
+        {
+            var novo = Estilo.Fila(lista, 62);
+            novo.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(10, 10, 0, 0);
+            campoCenario = Estilo.CampoTexto(novo, "Nome do lugar, organização ou outro e Enter");
+            campoCenario.text = cenarioNome;
+            Estilo.ColunaElastica(campoCenario);
+            campoCenario.onValueChanged.AddListener(t => cenarioNome = t);
+            campoCenario.onSubmit.AddListener(_ => CriarElemento());
+            Estilo.ListaSuspensa(novo, LarguraPerfil, OpcoesTipoCenario(), cenarioTipo, id => cenarioTipo = id);
+            Estilo.BotaoPrincipal(novo, "Criar", LarguraBotao * 2 + 14, CriarElemento);
+
+            // A cidade inteira (cada campanha é uma cidade, por enquanto) vai e vem em JSON.
+            var troca = Estilo.Fila(lista, 50);
+            troca.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(10, 10, 0, 0);
+            var dica = Estilo.Rotulo(troca, "Levar a cidade para outra campanha ou outra Torre: exporte aqui, importe lá.",
+                18, Estilo.TextoApagado, FontStyles.Italic);
+            Estilo.ColunaElastica(dica);
+            Estilo.BotaoContorno(troca, "Exportar", LarguraBotao, Estilo.Dourado, ExportarCenario);
+            Estilo.BotaoContorno(troca, "Importar", LarguraBotao, Estilo.Dourado, ImportarCenario);
+
+            var elementos = personagens.CenarioDaSala(sala.Id);
+            foreach (var (ativo, titulo) in new[] { (true, "CENÁRIO"), (false, "CENÁRIO INATIVO") })
+            {
+                var doBloco = elementos.Where(e => e.Ativo == ativo).ToList();
+                if (doBloco.Count == 0)
+                    continue;
+                var bloco = Estilo.Bloco(lista, titulo, doBloco.Count);
+                foreach (var e in doBloco)
+                    LinhaCenario(e, bloco);
+            }
+        }
+
+        void CriarElemento()
+        {
+            var resultado = personagens.CriarElemento(sala.Id, cenarioNome, cenarioTipo);
+            Mostrar(resultado);
+            if (!resultado.Ok)
+                return;
+            cenarioNome = string.Empty;
+            Redesenhar();
+            campoCenario.ActivateInputField();
+        }
+
+        /// <summary>Um elemento: nome, tipo e Ativo na primeira linha; a descrição (texto livre) embaixo.</summary>
+        void LinhaCenario(ElementoDeCenario e, RectTransform bloco)
+        {
+            var caixa = Estilo.Rect("Elemento", bloco);
+            var v = caixa.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.padding = new RectOffset(10, 10, 8, 10);
+            v.spacing = 8;
+            v.childControlWidth = v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+            Estilo.Moldura(caixa.gameObject, Estilo.Linha, e.Ativo ? Estilo.Borda : Estilo.BordaApagada);
+
+            var linha = Estilo.Fila(caixa, 48);
+            var nome = Estilo.CampoTexto(linha, "nome");
+            nome.text = e.Nome;
+            Estilo.ColunaElastica(nome);
+            var origem = personagens.OrigemDoElemento(e);
+            if (origem is { } o)
+            {
+                var laco = Estilo.Rotulo(linha, $"{o.dono.NomeExibicao} · {o.vinculo}", 18, Estilo.Dourado);
+                laco.textWrappingMode = TextWrappingModes.NoWrap;
+                laco.overflowMode = TextOverflowModes.Ellipsis;
+                laco.gameObject.AddComponent<LayoutElement>().preferredWidth = 300;
+                // O nome vem da ficha dela (muda lá, muda aqui); a descrição foi copiada uma vez e é do mestre.
+                // Nome automático (ex.: "Santuário da Crepúsculo") o mestre renomeia.
+                nome.interactable = !personagens.NomeDoElementoVemDaFicha(e);
+            }
+            Estilo.ListaSuspensa(linha, LarguraPerfil, OpcoesTipoCenario(), e.Tipo, id =>
+            {
+                Mostrar(personagens.AlterarElemento(e.Id, e.Nome, id, e.Descricao));
+                Redesenhar();
+            });
+            if (e.Ativo)
+                Estilo.BotaoContorno(linha, "Ativo", LarguraBotao, Estilo.Dourado, () => AlternarElemento(e));
+            else
+                Estilo.BotaoContorno(linha, "Inativo", LarguraBotao, Estilo.TextoApagado, () => AlternarElemento(e));
+
+            var descricao = Estilo.AreaTexto(caixa, "descrição: o que é, onde fica, quem manda, o que aconteceu lá...", 96);
+            descricao.text = e.Descricao;
+            Estilo.ComExpandir(descricao, e.Nome);
+
+            // Grava ao sair do campo (nome ou descrição), como as outras caixas da sala.
+            void Gravar(string _)
+            {
+                if (nome.text.Trim() == e.Nome && descricao.text.Trim() == e.Descricao)
+                    return;
+                Mostrar(personagens.AlterarElemento(e.Id, nome.text, e.Tipo, descricao.text));
+                Redesenhar();
+            }
+            nome.onEndEdit.AddListener(Gravar);
+            descricao.onDeselect.AddListener(Gravar);
+        }
+
+        void ExportarCenario()
+        {
+            var origem = "Campanha " + sala.Nome;
+            var json = personagens.ExportarCenario(sala.Id, origem);
+            if (json == null)
+            {
+                Mostrar(Resultado.Falha("Nenhum elemento de cenário para exportar."));
+                return;
+            }
+            if (Troca.Arquivos == null)
+                return;
+            string caminho;
+            try
+            {
+                caminho = Troca.Arquivos.Exportar("Cenário - " + origem, json);
+            }
+            catch (Exception e)
+            {
+                Mostrar(Resultado.Falha("Não deu para exportar: " + e.Message));
+                return;
+            }
+            GUIUtility.systemCopyBuffer = json;
+            Estilo.Confirmar(transform,
+                $"Cenário exportado ({origem}) em\n<size=80%>{caminho}</size>\nO JSON também foi copiado (Ctrl+V para colar).",
+                "Abrir a pasta",
+                () => Application.OpenURL("file:///" + Troca.Arquivos.PastaExportacoes.Replace('\\', '/')));
+        }
+
+        /// <summary>Um dos .json de cenário em dados/importar, ou a área de transferência; entra nesta campanha.</summary>
+        void ImportarCenario()
+        {
+            if (Troca.Arquivos == null)
+                return;
+            var opcoes = new List<(string, UnityEngine.Events.UnityAction, bool)>();
+            foreach (var caminho in Troca.Importaveis(CadastroPersonagens.FormatoDeTrocaCenario))
+            {
+                var arquivo = caminho;
+                opcoes.Add((System.IO.Path.GetFileName(arquivo), () => ImportarCenarioDe(Troca.Arquivos.Ler(arquivo)), false));
+            }
+            opcoes.Add(("Colar da área de transferência", () => ImportarCenarioDe(GUIUtility.systemCopyBuffer), false));
+            opcoes.Add(("Abrir a pasta de importar", () =>
+                Application.OpenURL("file:///" + Troca.Arquivos.PastaImportar.Replace('\\', '/')), true));
+            Estilo.Escolher(transform, $"Importar cenário para {sala.Nome}", opcoes.ToArray());
+        }
+
+        void ImportarCenarioDe(string json)
+        {
+            var resultado = personagens.ImportarCenario(json, sala.Id, out var novos, out var repetidos);
+            Redesenhar();
+            Mostrar(resultado, $"{novos} elemento{(novos == 1 ? "" : "s")} de cenário importado{(novos == 1 ? "" : "s")}" +
+                               (repetidos > 0 ? $"; {repetidos} já existia{(repetidos == 1 ? "" : "m")} (mesmo nome) e ficou como estava." : "."));
+        }
+
+        void AlternarElemento(ElementoDeCenario e)
+        {
+            Mostrar(personagens.DefinirAtivoElemento(e.Id, !e.Ativo));
+            Redesenhar();
         }
 
         void Linha(int indice, Slot slot, List<Personagem> candidatas)

@@ -669,7 +669,7 @@ namespace TorreDeControle.UI
             campo.text = link;
             foreach (var t in new[] { (TextMeshProUGUI)campo.textComponent, (TextMeshProUGUI)campo.placeholder })
                 t.fontSize = 18;
-            var lc = campo.GetComponent<LayoutElement>() ?? campo.gameObject.AddComponent<LayoutElement>();
+            if (!campo.TryGetComponent<LayoutElement>(out var lc)) lc = campo.gameObject.AddComponent<LayoutElement>();
             lc.minHeight = 44;
             lc.preferredHeight = 44;
             campo.onSubmit.AddListener(_ => aoMudar());
@@ -809,7 +809,9 @@ namespace TorreDeControle.UI
             {
                 var vao = Estilo.Rect("Vao", conteudo);
                 vao.gameObject.AddComponent<LayoutElement>().minHeight = 10;
-                Secao(extra.Nome.ToUpperInvariant(), extra.Nota);
+                var tituloExtra = Secao(extra.Nome.ToUpperInvariant(), extra.Nota);
+                if (cadastro.NomeDeCenarioDoExtra(p, extra.Id) is { } lugar)
+                    NomeDoLugarNoTitulo(tituloExtra, extra.Id, lugar.indice, lugar.dica);
                 foreach (var c in extra.Campos)
                 {
                     // Nome e descrição de NPC (ex.: nêmesis) se acertam na sala, em aprovação, junto com a equipe.
@@ -820,6 +822,36 @@ namespace TorreDeControle.UI
                         CampoDeExtra(extra.Id, c, editavel);
                 }
             }
+        }
+
+        /// <summary>
+        /// Caixa de nome do lugar ao lado do título do extra (ex.: o santuário da Amaldiçoada), no vão até a
+        /// legenda. Escrito, vira o nome do elemento de cenário na sala; vazio, vale o nome automático.
+        /// </summary>
+        void NomeDoLugarNoTitulo(TextMeshProUGUI titulo, string extra, int indice, string dica)
+        {
+            var fila = titulo.transform.parent;
+            var largura = titulo.GetPreferredValues(titulo.text).x + 4;
+            titulo.GetComponent<LayoutElement>().preferredWidth = largura;
+            var espaco = fila.GetComponent<HorizontalLayoutGroup>()?.spacing ?? 0;
+            var campo = Estilo.CampoTexto(fila, dica);
+            campo.transform.SetSiblingIndex(titulo.transform.GetSiblingIndex() + 1);
+            campo.text = cadastro.NomeDoCenarioNaFicha(p, extra, indice);
+            if (!campo.TryGetComponent<LayoutElement>(out var l))
+                l = campo.gameObject.AddComponent<LayoutElement>();
+            l.preferredWidth = Mathf.Max(200, 520 - largura - espaco);
+            l.flexibleWidth = 0;
+            l.layoutPriority = 2;
+            l.minHeight = l.preferredHeight = 36; // a altura do título
+            if (cadastro.PessoaEditavel(p))
+                campo.onEndEdit.AddListener(t =>
+                {
+                    var r = cadastro.DefinirNomeDoCenarioNaFicha(p.Id, extra, indice, t);
+                    if (!r.Ok)
+                        Aviso(r.Erro);
+                });
+            else
+                CampoDaSala(campo);
         }
 
         /// <summary>
@@ -1712,7 +1744,9 @@ namespace TorreDeControle.UI
                     nome.onDeselect.AddListener(t => { cadastro.DefinirNomeNoHistorico(p.Id, indice, t); MontarRodape(); });
                     nome.onSubmit.AddListener(t => { cadastro.DefinirNomeNoHistorico(p.Id, indice, t); MontarRodape(); });
                 }
-                var campo = Estilo.AreaTexto(conteudo, daNpc ? "quem é" : "resposta", 64);
+                // Pergunta que dá cenário (ex.: de onde a Forasteira vem): "o que é", não "quem é".
+                var doCenario = regra.NpcsHistorico.Any(r => r.Pergunta == k && r.Cenario != null);
+                var campo = Estilo.AreaTexto(conteudo, !daNpc ? "resposta" : doCenario ? "o que é" : "quem é", 64);
                 campo.text = k < respostas.Count ? respostas[k] : string.Empty;
                 campo.onDeselect.AddListener(t => { cadastro.ResponderHistorico(p.Id, indice, t); MontarRodape(); });
                 Estilo.ComExpandir(campo, regra.Historico[k]);
@@ -1736,8 +1770,32 @@ namespace TorreDeControle.UI
                 var titulo = Estilo.Rotulo(conteudo, "Quando a equipe se reuniu pela primeira vez...", 22,
                     Estilo.TextoApagado, FontStyles.Bold);
                 titulo.gameObject.AddComponent<LayoutElement>().minHeight = 30;
-                var pergunta = Estilo.Rotulo(conteudo, regra.Equipe.Pergunta, 22, Estilo.TextoApagado, FontStyles.Italic);
+                // A pergunta e, se ela der NPC (ex.: o herói que o Legado impressionou), o nome dele ao lado.
+                var filaPergunta = Estilo.Fila(conteudo, 44, 12);
+                var pergunta = Estilo.Rotulo(filaPergunta, regra.Equipe.Pergunta, 22, Estilo.TextoApagado, FontStyles.Italic);
                 pergunta.textWrappingMode = TextWrappingModes.Normal;
+                Estilo.ColunaElastica(pergunta);
+                if (cadastro.FormacaoDaNpc(p))
+                {
+                    var nomeNpc = Estilo.CampoTexto(filaPergunta, $"nome (opcional) · {cadastro.VinculoDaFormacao(p)}");
+                    nomeNpc.text = p.EquipeNpcNome;
+                    if (!nomeNpc.TryGetComponent<LayoutElement>(out var ln))
+                        ln = nomeNpc.gameObject.AddComponent<LayoutElement>();
+                    ln.preferredWidth = 380;
+                    ln.flexibleWidth = 0;
+                    ln.layoutPriority = 2;
+                    // Na sala, enquanto a equipe se acerta (em aprovação/criação); depois, só leitura.
+                    if (p.Sala != null && cadastro.EquipeEditavel(p))
+                        nomeNpc.onEndEdit.AddListener(t =>
+                        {
+                            cadastro.DefinirNomeNpcDaFormacao(p.Id, t);
+                            var aviso = cadastro.AvisoDeNpcRepetido(p, CadastroPersonagens.FonteFormacao, "resposta", t);
+                            if (aviso != null)
+                                Aviso(aviso);
+                        });
+                    else
+                        CampoDaSala(nomeNpc);
+                }
                 // A resposta vem da formação da equipe (aba da sala): aqui só se lê.
                 var resposta = Estilo.AreaTexto(conteudo, p.Sala == null
                     ? "resposta da equipe (na sala)"
@@ -2277,7 +2335,7 @@ namespace TorreDeControle.UI
             ajudaMovimentos.AbrirMovimentos(cadastro.RegraDoArquetipo(p)?.Id, movimento);
         }
 
-        void Secao(string nome, string legenda, Action ajuda = null, string dicaDaAjuda = null)
+        TextMeshProUGUI Secao(string nome, string legenda, Action ajuda = null, string dicaDaAjuda = null)
         {
             var fila = Estilo.Fila(conteudo, 36);
             var t = Estilo.Rotulo(fila, nome, 22, Estilo.Dourado, FontStyles.Bold);
@@ -2308,6 +2366,7 @@ namespace TorreDeControle.UI
                 l.gameObject.AddComponent<Dica>().Configurar(legenda);
                 Estilo.ColunaElastica(l);
             }
+            return t;
         }
 
         void LinhaRotulo(string rotulo, int valor)

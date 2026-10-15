@@ -37,6 +37,7 @@ namespace TorreDeControle.Core.Personagens
             foreach (var p in lista)
                 Normalizar(p);
             var cadastro = new CadastroPersonagens(armazenamento, regras, lista);
+            cadastro.cenario.AddRange(arquivo.Cenario ?? new List<ElementoDeCenario>());
             cadastro.SincronizarTodosOsNpcsDaFicha();
             return cadastro;
         }
@@ -45,6 +46,7 @@ namespace TorreDeControle.Core.Personagens
         static void Normalizar(Personagem p)
         {
             p.Identidade ??= new Identidade();
+            p.EquipeNpcNome ??= string.Empty;
             p.Identidade.NomesHistorico ??= new Dictionary<string, string>();
             // NPC "herói" (papel antigo) é Aliado; Heroi ficou só para as PJs.
             if (p.Controle == Controle.Mestre && p.Papel == Papel.Heroi)
@@ -486,8 +488,15 @@ namespace TorreDeControle.Core.Personagens
             var h = (heroica ?? string.Empty).Trim();
             var c = (civil ?? string.Empty).Trim();
             foreach (var link in new[] { h, c })
+            {
+                // "blob:" (ex.: imagem copiada do ChatGPT) só existe na memória daquela aba do navegador.
+                if (link.StartsWith("blob:", StringComparison.OrdinalIgnoreCase))
+                    return Resultado.Falha("Link \"blob:\" só existe na aba do navegador que gerou a imagem (ex.: ChatGPT): " +
+                                           "fora dela não abre. Baixe a imagem e suba num site que dê um link https " +
+                                           "(Imgur, Discord, o fórum) e cole esse link.");
                 if (link.Length > 0 && !LinkValido(link))
                     return Resultado.Falha("O link da foto precisa ser um endereço da web (http ou https).");
+            }
             var i = personagem.Identidade;
             if (h == i.FotoHeroica && c == i.FotoCivil)
                 return Resultado.Sucesso();
@@ -606,7 +615,7 @@ namespace TorreDeControle.Core.Personagens
             var gravar = personagens
                 .Select(p => emTeste.TryGetValue(p.Id, out var real) ? JsonConvert.DeserializeObject<Personagem>(real) : p)
                 .ToList();
-            var arquivo = new Arquivo { Versao = VersaoArquivo, Personagens = gravar };
+            var arquivo = new Arquivo { Versao = VersaoArquivo, Personagens = gravar, Cenario = cenario };
             return JsonConvert.SerializeObject(arquivo, Formatting.Indented);
         }
 
@@ -650,6 +659,7 @@ namespace TorreDeControle.Core.Personagens
         {
             [JsonProperty("versao")] public int Versao { get; set; } = VersaoArquivo;
             [JsonProperty("personagens")] public List<Personagem> Personagens { get; set; } = new List<Personagem>();
+            [JsonProperty("cenario")] public List<ElementoDeCenario> Cenario { get; set; } = new List<ElementoDeCenario>();
         }
     }
 }

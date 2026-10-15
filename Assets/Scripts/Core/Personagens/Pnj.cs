@@ -67,6 +67,11 @@ namespace TorreDeControle.Core.Personagens
         [JsonProperty("vinculo")] public VinculoNpc Vinculo { get; set; }
         /// <summary>Nasceu da ficha sem saber se é adulto ou jovem: o mestre decide (aviso até lá).</summary>
         [JsonProperty("maturidade_a_definir")] public bool MaturidadeADefinir { get; set; }
+        /// <summary>
+        /// O texto da jogadora já foi copiado para as Notas (uma vez, ao nascer): daí em diante a ficha dela é
+        /// história narrada e as Notas são do mestre; uma não mexe na outra.
+        /// </summary>
+        [JsonProperty("descricao_copiada")] public bool DescricaoCopiada { get; set; }
     }
 
     /// <summary>De quem o NPC é (a instância na sala) e de qual extra ele nasceu.</summary>

@@ -205,6 +205,7 @@
         {
           "id": "amaldicoada/santuario",
           "nome": "Santuário",
+          "cenario": [ { "nome": "Santuário de {personagem}", "dica_nome": "nome do santuário (opcional)", "tipo": "local", "vinculo": "santuário", "descricao_de": [ "caracteristicas", "desvantagens" ] } ],
           "nota": "para usar os recursos, o MJ diz de uma a quatro condições",
           "campos": [
             {
@@ -622,6 +623,7 @@
       ],
       "equipe": {
         "pergunta": "Derrotamos um inimigo perigoso. Quem ou o que era?",
+        "npc": { "papel": "vilao", "maturidade": "mestre", "vinculo": "inimigo derrotado na formação" },
         "relacionamentos": [
           "___ é seu amor. Você se abriu com essa pessoa sobre as piores partes do seu passado.",
           "___ é seu rival. Tentou controlar você num momento crucial."
@@ -1078,6 +1080,7 @@
         {
           "id": "discipula/recursos",
           "nome": "Recursos da mentora",
+          "cenario": [ { "nome": "Base secreta de {personagem}", "tipo": "local", "vinculo": "base secreta (recurso da mentora)", "campo": "recursos", "opcao": "base-secreta" } ],
           "campos": [
             {
               "id": "recursos",
@@ -1777,7 +1780,7 @@
             "nome": "Nave Kirby",
             "regra": "Você tem um veículo da sua terra. Pilotando a nave, pode usá-la para liberar seus poderes, enfrentar diretamente ou defender rolando + Superior.",
             "npcs": [
-              { "campo": "nave", "campo_descricao": "descricao", "papel": "aliado", "maturidade": "jovem", "vinculo": "nave" }
+              { "campo": "nave", "campo_descricao": "descricao", "papel": "aliado", "maturidade": "jovem", "vinculo": "nave", "npc_se": "forcas/telepatica", "senao_cenario": "outro" }
             ],
             "campos": [
               {
@@ -1934,7 +1937,7 @@
         "Por que a equipe importa para você?"
       ],
       "npcs_historico": [
-        { "pergunta": 0, "papel": "neutro", "vinculo": "de onde vem (o planeta, o povo)" }
+        { "pergunta": 0, "cenario": "local", "vinculo": "de onde vem (o planeta, o povo)" }
       ],
       "equipe": {
         "pergunta": "No começo não confiávamos uns nos outros, mas isso mudou. Como? Por quê?",
@@ -2288,6 +2291,7 @@
       ],
       "equipe": {
         "pergunta": "Salvamos a vida de alguém importante, para a cidade ou para nós. Quem? Por que essa pessoa importa?",
+        "npc": { "papel": "aliado", "maturidade": "mestre", "vinculo": "salvo pela equipe na formação" },
         "relacionamentos": [
           "___ conheceu você primeiro na vida civil.",
           "Você se recusou a contar sua identidade secreta a ___ quando perguntou."
@@ -2629,6 +2633,7 @@
       ],
       "equipe": {
         "pergunta": "No fim das contas, fomos bem e impressionamos um herói consagrado. Quem?",
+        "npc": { "papel": "aliado", "maturidade": "adulto", "vinculo": "herói impressionado na formação" },
         "relacionamentos": [
           "Uma vez você foi pego com ___ fazendo algo que envergonha o seu legado.",
           "Você confia em ___ e contou a essa pessoa um segredo importante do legado."
@@ -2885,6 +2890,7 @@
       ],
       "equipe": {
         "pergunta": "Destruímos tudo em volta na luta. Onde foi? O que destruímos?",
+        "npc": { "cenario": "local", "vinculo": "local destruído na formação" },
         "relacionamentos": [
           "Você passa muito tempo com ___ para extravasar.",
           "Você já machucou ___ quando perdeu o controle dos poderes."
@@ -3095,6 +3101,7 @@
       ],
       "equipe": {
         "pergunta": "Chamamos atenção e raiva de muita gente na luta. Uma pessoa importante, em especial, agora nos odeia e teme. Quem?",
+        "npc": { "papel": "neutro", "maturidade": "mestre", "vinculo": "nos odeia e teme (formação)" },
         "relacionamentos": [
           "___ consolou você quando estava no fundo do poço.",
           "___ conhecia você antes da mudança."

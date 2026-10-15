@@ -92,6 +92,31 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("ao_cumprir")] public List<Opcao> AoCumprir { get; set; } = new List<Opcao>();
             /// <summary>Os NPCs que o extra dá na sala (ex.: o nêmesis da Amaldiçoada, os membros do Legado).</summary>
             [JsonProperty("npcs")] public List<NpcDoExtra> Npcs { get; set; } = new List<NpcDoExtra>();
+            /// <summary>O cenário que o extra dá sozinho, sem o jogador escrever nome (ex.: o santuário da Amaldiçoada).</summary>
+            [JsonProperty("cenario")] public List<CenarioDoExtra> Cenario { get; set; } = new List<CenarioDoExtra>();
+        }
+
+        /// <summary>
+        /// Um elemento de cenário que nasce do extra com nome automático (o livro não pede nome): o mestre
+        /// pode renomear depois. Com <see cref="Opcao"/>, só existe se essa opção de <see cref="Campo"/> estiver
+        /// marcada (ex.: a base secreta entre os recursos da Discípula), e a descrição é o texto dela; sem, a
+        /// descrição junta as escolhas dos campos em <see cref="DescricaoDe"/> (ex.: características do santuário).
+        /// </summary>
+        public sealed class CenarioDoExtra
+        {
+            /// <summary>Nome ao nascer; {personagem} vira o nome da heroína.</summary>
+            [JsonProperty("nome")] public string Nome { get; set; }
+            /// <summary>
+            /// Se houver, a ficha ganha uma caixa de nome no título do extra (ex.: "nome do santuário (opcional)"):
+            /// escrito, o nome vem da ficha; vazio, vale o nome automático.
+            /// </summary>
+            [JsonProperty("dica_nome")] public string DicaNome { get; set; }
+            /// <summary>local, organizacao ou outro.</summary>
+            [JsonProperty("tipo")] public string Tipo { get; set; }
+            [JsonProperty("vinculo")] public string Vinculo { get; set; }
+            [JsonProperty("campo")] public string Campo { get; set; }
+            [JsonProperty("opcao")] public string Opcao { get; set; }
+            [JsonProperty("descricao_de")] public List<string> DescricaoDe { get; set; } = new List<string>();
         }
 
         /// <summary>
@@ -134,6 +159,25 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("campo_descricao")] public string CampoDescricao { get; set; }
             /// <summary>neutro, aliado ou vilao.</summary>
             [JsonProperty("papel")] public string Papel { get; set; }
+            /// <summary>
+            /// Em vez de NPC, um elemento do cenário deste tipo (local, organizacao, outro): lugar não é gente
+            /// (sem Influência nem maturidade). Ex.: o local destruído na formação da Nova.
+            /// </summary>
+            [JsonProperty("cenario")] public string Cenario { get; set; }
+            /// <summary>
+            /// Só é gente se esta opção estiver marcada (ex.: a Nave Kirby é NPC só se for telepática); senão
+            /// vira o cenário de <see cref="SenaoCenario"/>. Formato "campo/opcao".
+            /// </summary>
+            [JsonProperty("npc_se")] public string NpcSe { get; set; }
+            [JsonProperty("senao_cenario")] public string SenaoCenario { get; set; }
+
+            /// <summary>A mesma regra, como cenário do tipo dado (mesmo campo e vaga: o laço continua o mesmo).</summary>
+            public NpcDoExtra ComoCenario(string tipo)
+            {
+                var copia = (NpcDoExtra)MemberwiseClone();
+                copia.Cenario = tipo;
+                return copia;
+            }
             /// <summary>Em npcs_historico: o número da pergunta (de 0), cuja resposta é a descrição.</summary>
             [JsonProperty("pergunta")] public int? Pergunta { get; set; }
             /// <summary>jovem, adulto (padrão) ou mestre (nasce adulto, com aviso até o mestre decidir).</summary>
@@ -253,6 +297,11 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("pergunta")] public string Pergunta { get; set; }
             /// <summary>Duas frases; "___" marca o nome do colega.</summary>
             [JsonProperty("relacionamentos")] public List<string> Relacionamentos { get; set; } = new List<string>();
+            /// <summary>
+            /// A resposta da formação dá um NPC (ex.: o inimigo que a Bruta ajudou a derrotar, o herói que o Legado
+            /// impressionou): nome opcional à parte, a resposta é a descrição.
+            /// </summary>
+            [JsonProperty("npc")] public NpcDoExtra Npc { get; set; }
         }
 
         public sealed class RegraInfluencia

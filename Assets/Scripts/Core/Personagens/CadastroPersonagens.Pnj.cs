@@ -303,6 +303,61 @@ namespace TorreDeControle.Core.Personagens
 
         // ---------- NPCs que nascem da ficha (nêmesis, Legado, perguntas de histórico) ----------
 
+        /// <summary>A "fonte" da resposta da formação da equipe no vínculo do NPC.</summary>
+        public const string FonteFormacao = "formacao";
+
+        /// <summary>Um NPC ativo da sala com este nome (codinome ou nome), ou null. Evita NPC repetido.</summary>
+        public Personagem NpcComMesmoNome(string sala, string nome)
+        {
+            var limpo = (nome ?? string.Empty).Trim();
+            if (sala == null || limpo.Length == 0)
+                return null;
+            return personagens.FirstOrDefault(n => n.Sala == sala && n.Ativo && n.Controle == Controle.Mestre &&
+                (string.Equals(n.Identidade.Codinome, limpo, StringComparison.CurrentCultureIgnoreCase) ||
+                 string.Equals(n.Identidade.Nome, limpo, StringComparison.CurrentCultureIgnoreCase)));
+        }
+
+        /// <summary>
+        /// Para a tela: o nome escrito já é de outro NPC da sala (não é o desta fonte)? Devolve a frase de aviso.
+        /// </summary>
+        public string AvisoDeNpcRepetido(Personagem p, string fonte, string campo, string nome)
+        {
+            if (FontesDeNpc(p).Any(f => f.fonte == fonte && f.campo == campo && f.regra.Cenario != null))
+                return null; // vira cenário, não NPC: o nome pode repetir o de alguém
+            var outro = NpcComMesmoNome(p.Sala, nome);
+            if (outro == null || outro == NpcDaFicha(p, fonte, campo))
+                return null;
+            var origem = OrigemDoNpc(outro);
+            return $"{outro.NomeExibicao} já é NPC desta sala" +
+                   (origem is { } o ? $" ({o.dono.NomeExibicao} · {o.vinculo})" : string.Empty) + ": não cria outro.";
+        }
+
+        /// <summary>A pergunta de formação do arquétipo dá NPC (ou elemento de cenário)?</summary>
+        public bool FormacaoDaNpc(Personagem p) => RegraDoArquetipo(p)?.Equipe?.Npc != null;
+
+        /// <summary>O que a formação cria, para a tela: "Cenário" (ex.: o local destruído da Nova) ou "NPC".</summary>
+        public string OQueAFormacaoCria(Personagem p) => RegraDoArquetipo(p)?.Equipe?.Npc?.Cenario != null ? "Cenário" : "NPC";
+
+        /// <summary>O laço do NPC da formação (ex.: "herói impressionado na formação"), para a tela.</summary>
+        public string VinculoDaFormacao(Personagem p) => RegraDoArquetipo(p)?.Equipe?.Npc?.Vinculo;
+
+        /// <summary>Nome (opcional) do NPC da formação; a resposta é a descrição. Acerta o NPC da sala.</summary>
+        public Resultado DefinirNomeNpcDaFormacao(string id, string nome)
+        {
+            var p = Buscar(id);
+            if (p == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            if (!FormacaoDaNpc(p))
+                return Resultado.Falha("A formação deste arquétipo não dá NPC.");
+            var limpo = (nome ?? string.Empty).Trim();
+            if (limpo == (p.EquipeNpcNome ?? string.Empty))
+                return Resultado.Sucesso();
+            p.EquipeNpcNome = limpo;
+            SincronizarNpcsDaFicha(p);
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
         /// <summary>A "fonte" das perguntas de histórico no vínculo do NPC (o campo é o número da pergunta).</summary>
         public const string FonteHistorico = "historico";
 
@@ -333,11 +388,22 @@ namespace TorreDeControle.Core.Personagens
                 var descricao = regra.CampoDescricao != null ? TextoDoExtra(p, fonte, regra.CampoDescricao)
                     : regra.Vaga != null ? TextoDoExtra(p, fonte, regra.Campo, Regras.RegrasArquetipos.CampoExtra.DescricaoDaVaga(regra.Vaga))
                     : string.Empty;
-                yield return (fonte, regra.Campo, regra.Vaga, regra, TextoDoExtra(p, fonte, regra.Campo, regra.Vaga), descricao, regra.Vinculo, regra.Papel, regra.Maturidade);
+                // Gente só com a opção marcada (ex.: Nave Kirby telepática); senão, cenário, no mesmo laço.
+                var efetiva = regra;
+                if (regra.NpcSe != null && regra.SenaoCenario != null)
+                {
+                    var partes = regra.NpcSe.Split('/');
+                    if (!Escolhas(p, fonte, partes[0]).Contains(partes.Length > 1 ? partes[1] : string.Empty))
+                        efetiva = regra.ComoCenario(regra.SenaoCenario);
+                }
+                yield return (fonte, regra.Campo, regra.Vaga, efetiva, TextoDoExtra(p, fonte, regra.Campo, regra.Vaga), descricao, regra.Vinculo, regra.Papel, regra.Maturidade);
             }
             var arquetipo = RegraDoArquetipo(p);
             if (arquetipo == null)
                 yield break;
+            if (arquetipo.Equipe?.Npc is { } daFormacao)
+                yield return (FonteFormacao, "resposta", null, daFormacao, p.EquipeNpcNome ?? string.Empty,
+                    p.EquipeResposta ?? string.Empty, daFormacao.Vinculo, daFormacao.Papel, daFormacao.Maturidade);
             foreach (var regra in arquetipo.NpcsHistorico)
             {
                 var k = regra.Pergunta ?? -1;
@@ -356,12 +422,14 @@ namespace TorreDeControle.Core.Personagens
         {
             if (p == null || p.Sala == null || p.Controle != Controle.Jogador)
                 return;
-            var fontes = FontesDeNpc(p).ToList();
+            var todas = FontesDeNpc(p).ToList();
+            SincronizarCenarioDaFicha(p);
+            var fontes = todas.Where(f => f.regra.Cenario == null).ToList(); // as de cenário não viram NPC
             // O que deixou de ser fonte (opção desmarcada, troca de arquétipo) inativa o NPC; nada se exclui.
             foreach (var orfao in personagens.Where(n => n.Ativo && n.Pnj?.Vinculo is { } v && v.Personagem == p.Id &&
                                                         !fontes.Any(f => f.fonte == v.Extra && f.campo == v.Campo && f.vaga == v.Vaga)))
                 orfao.Ativo = false;
-            foreach (var (fonte, campo, vaga, _, texto, _, _, papelDaFonte, maturidade) in fontes)
+            foreach (var (fonte, campo, vaga, _, texto, descricao, _, papelDaFonte, maturidade) in fontes)
             {
                 var nome = (texto ?? string.Empty).Trim();
                 var npc = NpcDaFicha(p, fonte, campo, vaga);
@@ -373,6 +441,10 @@ namespace TorreDeControle.Core.Personagens
                 }
                 if (npc == null)
                 {
+                    // Mesmo nome de um NPC ativo que já está na sala (ex.: o pai da Aurora no Legado e na formação):
+                    // não cria outro; a tela avisa (NpcComMesmoNome).
+                    if (NpcComMesmoNome(p.Sala, nome) != null)
+                        continue;
                     npc = new Personagem
                     {
                         Id = Guid.NewGuid().ToString("N"),
@@ -397,6 +469,14 @@ namespace TorreDeControle.Core.Personagens
                     npc.Identidade.Codinome = nome;
                 else
                     npc.Identidade.Nome = nome;
+                // O texto dela vira as Notas do NPC uma vez só (cópia, não espelho): editar um não mexe no outro.
+                // Se ainda não havia texto, copia quando ele aparecer; Notas já escritas pelo mestre ficam.
+                if (!npc.Pnj.DescricaoCopiada && !string.IsNullOrWhiteSpace(descricao))
+                {
+                    if (string.IsNullOrWhiteSpace(npc.Identidade.Resumo))
+                        npc.Identidade.Resumo = descricao.Trim();
+                    npc.Pnj.DescricaoCopiada = true;
+                }
             }
         }
 
@@ -465,10 +545,12 @@ namespace TorreDeControle.Core.Personagens
             var mudou = AcertarVinculosSemCampo();
             var antes = personagens.Count;
             var nomes = personagens.Where(n => n.Pnj?.Vinculo != null).Select(n => (n.Id, n.NomeExibicao, n.Ativo)).ToList();
+            var lugares = cenario.Select(e => (e.Id, e.Nome, e.Ativo, e.Descricao)).ToList();
             foreach (var p in personagens.Where(p => p.Sala != null && p.Controle == Controle.Jogador).ToList())
                 SincronizarNpcsDaFicha(p);
             var depois = personagens.Where(n => n.Pnj?.Vinculo != null).Select(n => (n.Id, n.NomeExibicao, n.Ativo)).ToList();
-            if (mudou || personagens.Count != antes || !nomes.SequenceEqual(depois))
+            if (mudou || personagens.Count != antes || !nomes.SequenceEqual(depois) ||
+                !lugares.SequenceEqual(cenario.Select(e => (e.Id, e.Nome, e.Ativo, e.Descricao))))
                 Gravar();
         }
 
