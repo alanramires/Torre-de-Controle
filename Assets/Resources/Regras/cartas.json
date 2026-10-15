@@ -142,7 +142,7 @@
     {
       "id": "basico/pilha-equipe",
       "tipo": "basico",
-      "titulo": "Ajudar com a pilha de Equipe",
+      "titulo": "PONTOS DE EQUIPE",
       "origem": "todos",
       "regra": "equipe_e_sessao.json#equipe/ajudar",
       "ajuda": "equipe/ajudar",
@@ -241,42 +241,52 @@
     {
       "id": "amaldicoada/nemesis",
       "tipo": "extra",
-      "titulo": "Nêmesis",
+      "titulo": "NÊMESIS",
       "origem": "amaldicoada",
       "regra": "arquetipos.json#amaldicoada/nemesis",
-      "modulo": "amaldicoada/nemesis"
+      "modulo": "amaldicoada/nemesis",
+      "ajuda": "perdicao/nemesis",
+      "rodape": [
+        "potencial"
+      ]
     },
     {
       "id": "amaldicoada/perdicao",
       "tipo": "extra",
-      "titulo": "Perdição",
+      "titulo": "PERDIÇÃO",
       "origem": "amaldicoada",
       "regra": "arquetipos.json#amaldicoada/perdicao",
-      "modulo": "amaldicoada/perdicao"
+      "modulo": "amaldicoada/perdicao",
+      "ajuda": "perdicao/perdicao"
     },
     {
       "id": "amaldicoada/sinais",
       "tipo": "extra",
-      "titulo": "Sinais da perdição",
+      "titulo": "SINAIS DA PERDIÇÃO",
       "origem": "amaldicoada",
       "regra": "arquetipos.json#amaldicoada/sinais",
-      "modulo": "amaldicoada/sinais"
+      "modulo": "amaldicoada/sinais",
+      "ajuda": "perdicao/sinais"
     },
     {
       "id": "amaldicoada/santuario",
       "tipo": "extra",
-      "titulo": "Santuário",
+      "titulo": "SANTUÁRIO",
       "origem": "amaldicoada",
       "regra": "arquetipos.json#amaldicoada/santuario",
-      "modulo": "amaldicoada/santuario"
+      "modulo": "amaldicoada/santuario",
+      "ajuda": "perdicao/santuario"
     },
     {
       "id": "bruta/casca-grossa-pele-fina",
       "tipo": "arquetipo",
-      "titulo": "Casca grossa, pele fina",
+      "titulo": "CASCA GROSSA, PELE FINA",
       "origem": "bruta",
       "regra": "arquetipos.json#bruta/movimentos/casca-grossa-pele-fina",
-      "ajuda": "arquetipo/bruta/casca-grossa-pele-fina"
+      "ajuda": "arquetipo/bruta/casca-grossa-pele-fina",
+      "rodape": [
+        "constante"
+      ]
     },
     {
       "id": "bruta/pra-que-essa-cabeca",
@@ -1080,6 +1090,69 @@
       "modulo": "nova/chamas",
       "regra": "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/9",
       "ajuda": "arquetipo/nova/arrebatar"
+    },
+    {
+      "id": "amaldicoada/visoes-sombrias",
+      "tipo": "extra",
+      "titulo": "VISÕES SOMBRIAS",
+      "origem": "amaldicoada",
+      "regra": "arquetipos.json#amaldicoada/sinais",
+      "modulo": "amaldicoada/sinais",
+      "ajuda": "perdicao/visoes-sombrias"
+    },
+    {
+      "id": "amaldicoada/poderes-infinitos",
+      "tipo": "extra",
+      "titulo": "PODERES INFINITOS",
+      "origem": "amaldicoada",
+      "regra": "arquetipos.json#amaldicoada/sinais",
+      "modulo": "amaldicoada/sinais",
+      "ajuda": "perdicao/poderes-infinitos"
+    },
+    {
+      "id": "amaldicoada/portal",
+      "tipo": "extra",
+      "titulo": "PORTAL",
+      "origem": "amaldicoada",
+      "regra": "arquetipos.json#amaldicoada/sinais",
+      "modulo": "amaldicoada/sinais",
+      "ajuda": "perdicao/portal"
+    },
+    {
+      "id": "amaldicoada/brilho-intenso",
+      "tipo": "extra",
+      "titulo": "BRILHO INTENSO",
+      "origem": "amaldicoada",
+      "regra": "arquetipos.json#amaldicoada/sinais",
+      "modulo": "amaldicoada/sinais",
+      "ajuda": "perdicao/brilho-intenso"
+    },
+    {
+      "id": "amaldicoada/fortalecida",
+      "tipo": "extra",
+      "titulo": "FORTALECIDA",
+      "origem": "amaldicoada",
+      "regra": "arquetipos.json#amaldicoada/sinais",
+      "modulo": "amaldicoada/sinais",
+      "ajuda": "perdicao/fortalecida"
+    },
+    {
+      "id": "amaldicoada/sua-perdicao-chega",
+      "tipo": "extra",
+      "titulo": "SUA PERDIÇÃO CHEGA",
+      "origem": "amaldicoada",
+      "regra": "arquetipos.json#amaldicoada/sinais",
+      "modulo": "amaldicoada/sinais",
+      "ajuda": "perdicao/sua-perdicao-chega"
+    },
+    {
+      "id": "amaldicoada/invocar-santuario",
+      "tipo": "extra",
+      "titulo": "USAR O SANTUÁRIO",
+      "origem": "amaldicoada",
+      "regra": "arquetipos.json#amaldicoada/santuario",
+      "modulo": "amaldicoada/santuario",
+      "ajuda": "perdicao/invocar-santuario"
     }
   ]
 }

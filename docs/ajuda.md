@@ -1,5 +1,12 @@
 # Catálogo de help
 
+> Decisão do Alan — 2026-10-15: parar de fabricar cartas como PNGs.
+> A apresentação das cartas passa a ser desenhada pelo novo sistema a partir
+> de `Assets/Resources/Ajuda/catalogo.json`. Novos textos e correções entram
+> nesse catálogo, sem regenerar imagens de cartas. Tokens e ícones continuam
+> podendo ser criados como artes separadas. As instruções do gerador abaixo
+> descrevem o fluxo anterior; não executá-lo para novas cartas ou revisões.
+
 Fonte única dos textos das quatro cartas de panorama, dos oito movimentos básicos,
 das nove cartas PvP, das seis cartas de Influência, das duas de Condições
 das seis de Equipe e sessão, das dez de Movimentos de equipe e dos seis
@@ -155,3 +162,22 @@ e IDs de arquetipos.json. Conferidos com Fichas Exemplo/Transformado e o
 livro (pp.152 e 155). Eu não sou meu corpo reduz a contagem de condições
 em duas, com mínimo zero; Eu sou o monstro exige complicações mesmo no
 sucesso. Galeria e help contextual usam os parâmetros existentes.
+
+
+## Perdição da Amaldiçoada (2026-10-15)
+
+Onze cartas novas, somente em Ajuda/catalogo.json, categoria principal
+perdicao: Nêmesis, Perdição, Sinais (visão geral), os cinco poderes,
+Sua perdição chega, Santuário e Usar o santuário. Todas ligadas pelo
+campo ajuda em Regras/cartas.json, origem amaldicoada (selo da classe),
+tipo extra. Entradas existentes preservadas; criadas as faltantes para
+os sinais e para o uso do santuário. Referências por IDs dos extras,
+sem posições numéricas. Texto próprio conferido com livro pp.96,98–101
+e Cards/Novas/Arquetipos/Amaldicoada (só consulta).
+
+Começa com um Sinal; trilha de cinco casas rende outro. Poderes infinitos
+concede habilidade, não movimento. O Sinal final e o avanço de enfrentar
+a perdição são caminhos distintos. Requisitos do santuário não são
+condições emocionais. Não foram gerados PNGs de cartas nem novos tokens.
+Validado: IDs únicos, um vínculo de jogo por help, marcação e build UI.
+Conferência visual no Play ainda depende do Alan.

@@ -218,3 +218,30 @@ e IDs de arquetipos.json. Conferidos com Fichas Exemplo/Transformado e o
 livro (pp.152 e 155). Eu não sou meu corpo reduz a contagem de condições
 em duas, com mínimo zero; Eu sou o monstro exige complicações mesmo no
 sucesso. Galeria e help contextual usam os parâmetros existentes.
+
+
+## Decisão sobre cartas (2026-10-15)
+
+Não fabricar nem regenerar PNGs de cartas a partir de agora. O novo sistema
+desenha as cartas usando Assets/Resources/Ajuda/catalogo.json; textos novos
+e correções entram nele. Tokens e ícones podem continuar sendo gerados como
+artes separadas. Esta decisão substitui o fluxo antigo de geração de cartas.
+
+
+## Perdição da Amaldiçoada (2026-10-15)
+
+Onze cartas novas, somente em Ajuda/catalogo.json, categoria principal
+perdicao: Nêmesis, Perdição, Sinais (visão geral), os cinco poderes,
+Sua perdição chega, Santuário e Usar o santuário. Todas ligadas pelo
+campo ajuda em Regras/cartas.json, origem amaldicoada (selo da classe),
+tipo extra. Entradas existentes preservadas; criadas as faltantes para
+os sinais e para o uso do santuário. Referências por IDs dos extras,
+sem posições numéricas. Texto próprio conferido com livro pp.96,98–101
+e Cards/Novas/Arquetipos/Amaldicoada (só consulta).
+
+Começa com um Sinal; trilha de cinco casas rende outro. Poderes infinitos
+concede habilidade, não movimento. O Sinal final e o avanço de enfrentar
+a perdição são caminhos distintos. Requisitos do santuário não são
+condições emocionais. Não foram gerados PNGs de cartas nem novos tokens.
+Validado: IDs únicos, um vínculo de jogo por help, marcação e build UI.
+Conferência visual no Play ainda depende do Alan.
