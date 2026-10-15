@@ -45,10 +45,14 @@ novo é seu.
 
 - **Help básico (2026-10-14):** gerador próprio em `tools/cards/gerar_cartas.py`,
   textos unificados em `Assets/Resources/Ajuda/catalogo.json` (schema em `docs/ajuda.md`),
-  instruções em `tools/cards/README.md`. Agora são 45 cartas: quatro panoramas,
+  instruções em `tools/cards/README.md`. Agora são 81 cartas: quatro panoramas,
   oito movimentos básicos, nove PvP, seis de Influência, duas de Condições e
   seis de Equipe e sessão e dez de Movimentos de equipe (categoria principal
-  separada, uma carta por arquétipo). Bordas temáticas:
+  separada, uma carta por arquétipo), mais seis movimentos da Bruta em
+  Movimentos de arquétipo → Bruta (borda vermelha; Coração ainda pendente), e
+  doze de Vilões (categoria principal, borda vermelha, briefing em
+  `docs/briefing_ajuda_viloes.md`; referências em `Regras/viloes.json`, só consulta).
+  Bordas temáticas:
   Condições amarela, Influência verde, Equipe azul; miolo preservado. `PainelAjuda` ligado
   ao botão do Canvas, com menu lateral compacto, cortinas e leitor ampliado.
   Gera os panoramas `00-*` e as demais cartas em
@@ -146,3 +150,23 @@ ficha em JSON (troca com outras máquinas).
 - **Ainda sem campo `versao` nem migração.** Na v0.0.2 o status `criado` deixou de existir; os dados
   locais do Alan foram convertidos à mão (backup em `dados/personagens.antes-dos-status.json`).
   Antes de uma campanha de verdade, criar `versao` + migração.
+
+
+Movimentos de arquétipo: Delinquente adicionado com seis cartas de borda vermelha,
+conferidas com Fichas Exemplo/Delinquente e o livro (pp.110 e 113).
+Textos em Ajuda/catalogo.json; referências para as seis opções de
+arquetipos.json. A galeria e o help contextual da ficha usam os IDs existentes.
+Amaldiçoada não tem movimentos comuns na criação; seus extras ficam pendentes.
+
+
+Discípula: seis movimentos adicionados a Movimentos de arquétipo, com borda
+vermelha e IDs do arquetipos.json. Conferidos com as seis cartas de
+Fichas Exemplo/Discipula e o livro (pp.116 e 118–119). Recursos da mentora
+ficam para os extras. O help contextual usa os parâmetros existentes.
+
+
+Farol: seis movimentos adicionados a Movimentos de arquétipo, com borda
+vermelha e IDs do arquetipos.json. Conferidos com Fichas Exemplo/Farol
+e o livro (pp.122 e 124–125). Vamos, Sortudo! dá +1 quando o bicho ajuda
+nos três movimentos escolhidos, sem ser adiante de uso único. Impulsos
+ficam para os extras. O help contextual usa os parâmetros existentes.

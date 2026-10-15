@@ -161,6 +161,7 @@ namespace TorreDeControle.UI
                 : (new Color(Estilo.Dourado.r, Estilo.Dourado.g, Estilo.Dourado.b, 0.08f), Estilo.Dourado, Estilo.Dourado);
             var imagem = Estilo.Moldura(rect.gameObject, fundo, borda);
             var botao = rect.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(botao);
             botao.targetGraphic = imagem;
             botao.interactable = !travado;
             botao.onClick.AddListener(aoClicar);

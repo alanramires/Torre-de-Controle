@@ -1416,6 +1416,1156 @@
           "texto": "Para obter −2 na rolagem do alvo, infligir uma condição ou +1 extra na sua rolagem contra ele, você perde a Influência que tinha sobre essa pessoa."
         }
       ]
+    },
+    {
+      "id": "arquetipo/bruta/casca-grossa-pele-fina",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Bruta",
+      "arquivo": "06-bruta-casca-grossa-pele-fina.png",
+      "titulo": "CASCA GROSSA, PELE FINA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Bruta · livro pp.104 e 107",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/1/movimentos/opcoes/0",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "ENQUANTO IRRITADA",
+          "texto": "Ganhe +1 constante para Liberar seus poderes enquanto Irritado estiver marcado."
+        },
+        {
+          "titulo": "NÃO MARCA A CONDIÇÃO",
+          "texto": "O movimento não permite marcar Irritado quando quiser. A condição precisa vir de um efeito ou acontecimento da ficção."
+        },
+        {
+          "titulo": "AO REMOVER IRRITADO",
+          "texto": "O bônus termina. Some os demais ajustes normalmente e respeite o limite final de −3 a +4."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/bruta/pra-que-essa-cabeca",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Bruta",
+      "arquivo": "06-bruta-pra-que-essa-cabeca.png",
+      "titulo": "PRA QUE ESSA CABEÇA?",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Bruta · livro pp.104 e 107",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/1/movimentos/opcoes/1",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO",
+          "texto": "Provoque alguém por meio de força demonstrada ou ameaças evidentes."
+        },
+        {
+          "titulo": "TROCA DE RÓTULO",
+          "texto": "Role + Perigoso em vez de + Superior. O alvo ainda precisa ser suscetível às suas palavras."
+        },
+        {
+          "titulo": "RESULTADOS",
+          "texto": "Use os resultados normais de Provocar para o tipo de alvo. Culpado continua impondo −2 a Provocar: a penalidade acompanha o movimento."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/bruta/soco-em-todo-mundo",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Bruta",
+      "arquivo": "06-bruta-soco-em-todo-mundo.png",
+      "titulo": "SOCO EM TODO MUNDO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Bruta · livro pp.104 e 107",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/1/movimentos/opcoes/2",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO",
+          "texto": "Jogue-se numa briga sem se conter, ignorando os riscos para você e para os outros."
+        },
+        {
+          "titulo": "ESCOLHA",
+          "texto": "Você pode aumentar Perigoso em 1 e diminuir outro Rótulo em 1. A mudança permanece; respeite os limites dos Rótulos."
+        },
+        {
+          "titulo": "CONSEQUÊNCIAS",
+          "texto": "A imprudência precisa aparecer na história. Em geral, entrar desse jeito deixa você fora da preparação que gera Equipe para o confronto."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/bruta/la-quando-importa",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Bruta",
+      "arquivo": "06-bruta-la-quando-importa.png",
+      "titulo": "LÁ QUANDO IMPORTA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Bruta · livro pp.104 e 107",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/1/movimentos/opcoes/3",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO DEFENDER ALGUÉM",
+          "texto": "Num sucesso, você pode receber 1 de controle em vez de escolher uma opção da lista de Defender."
+        },
+        {
+          "titulo": "GUARDE PARA ESSA PESSOA",
+          "texto": "Gaste esse controle depois, quando a pessoa protegida estiver em perigo, para aparecer na cena pronta para ajudar."
+        },
+        {
+          "titulo": "NA FICÇÃO",
+          "texto": "Combine com o mestre como chegou ali. O movimento permite entrar numa cena em que você não estava."
+        },
+        {
+          "titulo": "DEFENDER CONTINUA VALENDO",
+          "texto": "A proteção e os custos do resultado continuam. Em 7–9 contra PNJ ou ambiente, ainda escolha expor-se ao perigo ou intensificar a situação."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/bruta/numa-loja-de-loucas",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Bruta",
+      "arquivo": "06-bruta-numa-loja-de-loucas.png",
+      "titulo": "NUMA LOJA DE LOUÇAS",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Bruta · livro pp.104 e 107",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/1/movimentos/opcoes/4",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO ENFRENTAR UMA AMEAÇA",
+          "texto": "Você pode provocar destruição significativa no ambiente para escolher mais uma opção da lista de Enfrentar."
+        },
+        {
+          "titulo": "EM QUALQUER FAIXA",
+          "texto": "10+: escolha 3 opções. 7–9: escolha 2. Falha: escolha 1, marque potencial e o mestre faz seu movimento."
+        },
+        {
+          "titulo": "O PREÇO É REAL",
+          "texto": "Descreva danos colaterais importantes. Não basta anunciar a opção extra: o estrago e suas consequências precisam existir na história."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/bruta/fisica-que-fisica",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Bruta",
+      "arquivo": "06-bruta-fisica-que-fisica.png",
+      "titulo": "FÍSICA? QUE FÍSICA?",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Bruta · livro pp.104 e 107",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/1/movimentos/opcoes/5",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO",
+          "texto": "Libere seus poderes para derrubar uma barreira que parecia intransponível."
+        },
+        {
+          "titulo": "TROCA DE RÓTULO",
+          "texto": "Role + Perigoso em vez de + Aberração."
+        },
+        {
+          "titulo": "RESULTADOS NORMAIS",
+          "texto": "10+: consiga. 7–9: consiga e escolha marcar uma condição OU deixar o mestre tornar o efeito instável ou temporário. Falha: potencial e movimento do mestre."
+        },
+        {
+          "titulo": "CONDIÇÃO",
+          "texto": "Desesperançoso ainda dá −2 a Liberar seus poderes, mesmo usando Perigoso."
+        }
+      ]
+    },
+    {
+      "id": "viloes/movimentos",
+      "categoria": "viloes",
+      "arquivo": "07-viloes-movimentos.png",
+      "titulo": "MOVIMENTOS DE VILÃO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Vilões · livro p.184 e 195",
+      "regras_ref": [
+        "viloes.json#/movimentos"
+      ],
+      "secoes": [
+        {
+          "titulo": "FERRAMENTAS DO MESTRE",
+          "texto": "São movimentos do mestre ligados a um vilão específico, usado quando ele está na cena. Revelam seu modo de agir e pioram a situação."
+        },
+        {
+          "titulo": "MAIS QUE ATAQUES",
+          "texto": "Podem ser fugas, ofertas, revelações ou efeitos extraordinários. Crie pelo menos três; acrescente outros quando precisar."
+        },
+        {
+          "titulo": "ESCREVA A MUDANÇA",
+          "texto": "Diga o que ele faz e o que muda. Exemplo próprio: arrastar o herói até o teto com um feixe magnético, em vez de apenas criar magnetismo."
+        },
+        {
+          "titulo": "USO FLEXÍVEL",
+          "texto": "Valem dentro e fora de lutas. Você pode revelar parte de um movimento e completar depois. Usá-lo não o gasta."
+        }
+      ]
+    },
+    {
+      "id": "viloes/ficha",
+      "categoria": "viloes",
+      "arquivo": "07-viloes-ficha.png",
+      "titulo": "FICHA DE VILÃO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Vilões · livro pp.194–196",
+      "regras_ref": [
+        "viloes.json#/ficha"
+      ],
+      "secoes": [
+        {
+          "titulo": "GERAÇÃO E NOME",
+          "texto": "Escolha a geração e um nome que combine: Ouro mais leve; Prata grandiosa; Bronze mais sóbria; Moderna ligada à cultura atual. Nome civil é opcional."
+        },
+        {
+          "titulo": "MOTIVAÇÃO HUMANA",
+          "texto": "Use um verbo e seu objeto, mostrando o que ele deseja e por quê. Exemplo próprio: recuperar o respeito da família, em vez de simplesmente dominar a cidade."
+        },
+        {
+          "titulo": "MOVIMENTOS",
+          "texto": "Crie pelo menos três ações características, ativas e descritivas, com consequências claras na história."
+        },
+        {
+          "titulo": "CONDIÇÕES",
+          "texto": "Escolha de uma a cinco condições. A quantidade define sua resistência; a seleção mostra que emoções guiam suas reações."
+        }
+      ]
+    },
+    {
+      "id": "viloes/condicoes",
+      "categoria": "viloes",
+      "arquivo": "07-viloes-condicoes.png",
+      "titulo": "CONDIÇÕES DO VILÃO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Vilões · livro pp.195–196",
+      "regras_ref": [
+        "viloes.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANTAS",
+          "texto": "Escolha de 1 a 5: resistência pequena, moderada, ameaçadora, perigosa ou de arquivilão. Ajuste a quantidade conforme o papel do inimigo."
+        },
+        {
+          "titulo": "COMO MARCA",
+          "texto": "Cada golpe poderoso, físico ou emocional, faz marcar uma condição apropriada. Ao marcar, o vilão reage imediatamente com um movimento dessa condição."
+        },
+        {
+          "titulo": "QUANDO É DERROTADO",
+          "texto": "Se precisar marcar e não houver condição livre, ele perde. Com três disponíveis, pode marcar as três; é derrotado ao precisar marcar outra."
+        },
+        {
+          "titulo": "QUAIS",
+          "texto": "As condições escolhidas definem suas reações. Se uma emoção não está na ficha, ela não o afeta desse modo: escolha outra consequência coerente ou mostre a imunidade às PJs."
+        }
+      ]
+    },
+    {
+      "id": "viloes/luta",
+      "categoria": "viloes",
+      "arquivo": "07-viloes-luta.png",
+      "titulo": "VILÃO NA LUTA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Vilões · livro p.186 e 196",
+      "regras_ref": [
+        "viloes.json#/luta"
+      ],
+      "secoes": [
+        {
+          "titulo": "GOLPE PODEROSO",
+          "texto": "Marque uma condição que corresponda ao que aconteceu. Não é preciso um ataque físico: palavras também podem atingir o vilão."
+        },
+        {
+          "titulo": "REAÇÃO IMEDIATA",
+          "texto": "Ao marcar, faça um movimento daquela condição antes de devolver a ação às PJs. Em geral é leve: prepara perigo e dá espaço para resposta."
+        },
+        {
+          "titulo": "PRÓXIMA AÇÃO",
+          "texto": "Consulte os movimentos do mestre, os próprios do vilão e os de condição. Preserve o que as PJs conquistaram e siga a ficção."
+        },
+        {
+          "titulo": "NÃO PRECISA LUTAR ATÉ CAIR",
+          "texto": "Ele pode fugir ou desistir antes. Sem condição livre quando precisa marcar outra, é derrotado."
+        },
+        {
+          "titulo": "REMOVER CONDIÇÕES",
+          "texto": "Vilões e outros PNJs se abrem após Confortar bem-sucedido para aliviar condições. Também podem removê-las quando a ficção permitir."
+        }
+      ]
+    },
+    {
+      "id": "viloes/condicao-assustado",
+      "categoria": "viloes",
+      "arquivo": "07-viloes-condicao-assustado.png",
+      "titulo": "VILÃO · ASSUSTADO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Vilões · livro p.197",
+      "regras_ref": [
+        "viloes.json#/condicao-assustado"
+      ],
+      "secoes": [
+        {
+          "titulo": "REAÇÕES POSSÍVEIS",
+          "texto": "• Buscar abrigo fora do alcance.\n• Escapar do conflito.\n• Golpear às cegas, sem avaliar o risco.\n• Suplicar para ser poupado.\n• Erguer obstáculos entre si e o perigo."
+        },
+        {
+          "titulo": "INTENÇÃO",
+          "texto": "Use para fazê-lo procurar saída ou proteger o que importa para ele. Sentir medo não significa que já foi vencido."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Ao marcar Assustado, escolha uma reação imediatamente. Mais tarde, essas opções também podem ocupar o lugar de um movimento do mestre."
+        }
+      ]
+    },
+    {
+      "id": "viloes/condicao-irritado",
+      "categoria": "viloes",
+      "arquivo": "07-viloes-condicao-irritado.png",
+      "titulo": "VILÃO · IRRITADO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Vilões · livro pp.197–198",
+      "regras_ref": [
+        "viloes.json#/condicao-irritado"
+      ],
+      "secoes": [
+        {
+          "titulo": "REAÇÕES POSSÍVEIS",
+          "texto": "• Descarregar a raiva sem cuidado.\n• Destruir o cenário.\n• Cortar a negociação.\n• Mirar um ponto fraco.\n• Levar o perigo a outro patamar."
+        },
+        {
+          "titulo": "INTENÇÃO",
+          "texto": "Faça-o lutar, exagerar e assumir riscos. A reação cria novos problemas, sem desfazer o sucesso que uma PJ acabou de conquistar."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Ao marcar Irritado, reaja imediatamente. Depois, pode voltar a essas opções quando fizer um movimento do mestre."
+        }
+      ]
+    },
+    {
+      "id": "viloes/condicao-culpado",
+      "categoria": "viloes",
+      "arquivo": "07-viloes-condicao-culpado.png",
+      "titulo": "VILÃO · CULPADO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Vilões · livro p.198",
+      "regras_ref": [
+        "viloes.json#/condicao-culpado"
+      ],
+      "secoes": [
+        {
+          "titulo": "REAÇÕES POSSÍVEIS",
+          "texto": "• Buscar perdão de alguém.\n• Abrir mão de algo valioso para se redimir.\n• Cruzar um limite que antes evitava.\n• Arrastar outras pessoas para a culpa.\n• Expor o motivo por trás dos crimes."
+        },
+        {
+          "titulo": "INTENÇÃO",
+          "texto": "Mostre a pessoa por trás do antagonista. Culpa não exige rendição: ele pode acreditar que não tem mais saída."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Ao marcar Culpado, mostre sua reação antes da próxima ação das PJs. Essas opções também servem em movimentos posteriores do mestre."
+        }
+      ]
+    },
+    {
+      "id": "viloes/condicao-desesperancoso",
+      "categoria": "viloes",
+      "arquivo": "07-viloes-condicao-desesperancoso.png",
+      "titulo": "VILÃO · DESESPERANÇOSO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Vilões · livro p.198",
+      "regras_ref": [
+        "viloes.json#/condicao-desesperancoso"
+      ],
+      "secoes": [
+        {
+          "titulo": "REAÇÕES POSSÍVEIS",
+          "texto": "• Abandonar a resistência.\n• Destruir o que resta à sua volta.\n• Agarrar uma possibilidade de esperança.\n• Abalar a confiança de outras pessoas.\n• Fazer algo terrível por desespero."
+        },
+        {
+          "titulo": "INTENÇÃO",
+          "texto": "A perda de esperança pode encerrar o confronto ou torná-lo muito pior. Use para controlar a tensão quando tudo parece perdido para o vilão."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Ao marcar Desesperançoso, reaja imediatamente. Mais tarde, pode escolher outra dessas ações como movimento do mestre."
+        }
+      ]
+    },
+    {
+      "id": "viloes/condicao-inseguro",
+      "categoria": "viloes",
+      "arquivo": "07-viloes-condicao-inseguro.png",
+      "titulo": "VILÃO · INSEGURO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Vilões · livro p.198",
+      "regras_ref": [
+        "viloes.json#/condicao-inseguro"
+      ],
+      "secoes": [
+        {
+          "titulo": "REAÇÕES POSSÍVEIS",
+          "texto": "• Dobrar a aposta numa ideia equivocada.\n• Deixar outra pessoa conduzir.\n• Questionar os aliados e o próprio plano.\n• Reconhecer que tratou alguém injustamente.\n• Recuar e ceder espaço."
+        },
+        {
+          "titulo": "INTENÇÃO",
+          "texto": "Abra espaço para diálogo, dúvidas e provocações durante o conflito. Uma conversa importante pode acontecer no meio da pancadaria."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Ao marcar Inseguro, faça uma reação imediatamente. As mesmas opções ficam disponíveis para movimentos posteriores do mestre."
+        }
+      ]
+    },
+    {
+      "id": "viloes/capangas",
+      "categoria": "viloes",
+      "arquivo": "07-viloes-capangas.png",
+      "titulo": "CAPANGAS",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Vilões · livro pp.196–197",
+      "regras_ref": [
+        "viloes.json#/capangas"
+      ],
+      "secoes": [
+        {
+          "titulo": "AMEAÇA COLETIVA",
+          "texto": "Um grupo realmente perigoso pode usar uma única ficha de vilão, com motivação, movimentos e condições. Descreva as ações como ações do conjunto."
+        },
+        {
+          "titulo": "EXEMPLO PRÓPRIO",
+          "texto": "Uma enxurrada de drones armados pode funcionar como um vilão coletivo, em vez de dezenas de fichas separadas."
+        },
+        {
+          "titulo": "PNJs COMUNS",
+          "texto": "Se o grupo não representa perigo real para as PJs, resolva pela ficção; elas podem lidar com esses capangas sem uma rolagem de Enfrentar."
+        },
+        {
+          "titulo": "GATILHO PRIMEIRO",
+          "texto": "Enfrentar exige uma ameaça real para quem age. Não peça o movimento só porque existe alguém do outro lado."
+        }
+      ]
+    },
+    {
+      "id": "viloes/exemplo-professora",
+      "categoria": "viloes",
+      "arquivo": "07-viloes-exemplo-professora.png",
+      "titulo": "EXEMPLO · A PROFESSORA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Vilões · livro pp.187–190",
+      "regras_ref": [
+        "viloes.json#/exemplo-professora"
+      ],
+      "secoes": [
+        {
+          "titulo": "O CONFLITO",
+          "texto": "No exemplo do livro, a Professora controla um labirinto escolar e tenta dominar o futuro dos jovens heróis."
+        },
+        {
+          "titulo": "MOVIMENTO EM PARTES",
+          "texto": "O mestre transforma o chão para prender uma heroína. Mais tarde, revela apenas parte da forma monstruosa da vilã: não precisa mostrar todo o movimento de uma vez."
+        },
+        {
+          "titulo": "CONDIÇÃO PELA FICÇÃO",
+          "texto": "Após uma troca de golpes que a impressiona, o mestre marca Inseguro e a faz insistir num plano equivocado: ela volta a perseguir quem queria capturar."
+        },
+        {
+          "titulo": "LIÇÃO PARA A MESA",
+          "texto": "A personalidade orienta o movimento; o que aconteceu orienta a condição; a condição inspira a reação imediata."
+        }
+      ]
+    },
+    {
+      "id": "viloes/exemplo-rosa-rook",
+      "categoria": "viloes",
+      "arquivo": "07-viloes-exemplo-rosa-rook.png",
+      "titulo": "EXEMPLO · ROSA ROOK",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Vilões · livro p.214",
+      "regras_ref": [
+        "viloes.json#/exemplo-rosa-rook"
+      ],
+      "secoes": [
+        {
+          "titulo": "PRESSÃO APÓS A LUTA",
+          "texto": "No exemplo do livro, Rosa espera os heróis exaustos com seguranças para exigir o giz. O mestre já pensava no que ela fazia enquanto a luta acontecia."
+        },
+        {
+          "titulo": "MOVIMENTO PREPARADO",
+          "texto": "Ele escolhe antecipadamente uma ação para retirar poder de quem está vulnerável. O movimento dá direção à cena, sem exigir um ataque."
+        },
+        {
+          "titulo": "INFLUÊNCIA ADULTA",
+          "texto": "Rosa usa a Influência que já tem para diminuir a autoridade da líder. Ela falha ao rejeitar: marca condição e potencial, e seus Rótulos mudam."
+        },
+        {
+          "titulo": "PRESSÃO ENTRE COLEGAS",
+          "texto": "Uma colega provoca a líder a entregar o giz. Com 10+, os dois incentivos valem; ela aceita e a pilha ganha 1 Equipe. Não cabe Defender dessa provocação."
+        },
+        {
+          "titulo": "LIÇÃO",
+          "texto": "Vilões agem além da pancadaria. Recursos sociais e o desgaste de uma luta podem mudar a próxima cena."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/delinquente/do-contra",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Delinquente",
+      "arquivo": "08-delinquente-do-contra.png",
+      "titulo": "DO CONTRA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Delinquente · livro pp.110 e 113",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/2/movimentos/opcoes/0",
+        "movimentos_basicos.json",
+        "influencia.json",
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + SUPERIOR",
+          "texto": "Alguém tenta Perfurar sua máscara, Provocar ou Confortar você. Você pode interferir com este movimento."
+        },
+        {
+          "titulo": "7+",
+          "texto": "Aplique −2 à rolagem da outra pessoa."
+        },
+        {
+          "titulo": "10+: TAMBÉM ESCOLHA 1",
+          "texto": "Ganhar Influência sobre ela OU remover uma condição sua."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. O movimento dela vale como 10+, independentemente dos dados, e você marca uma condição escolhida por ela."
+        },
+        {
+          "titulo": "EXCEÇÃO ESPECÍFICA",
+          "texto": "Esta interferência vem de Do contra. Não é o movimento Defender, que normalmente não interrompe Confortar ou Perfurar."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/delinquente/nao-ligo-pro-que-voce-pensa",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Delinquente",
+      "arquivo": "08-delinquente-nao-ligo-pro-que-voce-pensa.png",
+      "titulo": "NÃO LIGO PRO QUE VOCÊ PENSA!",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Delinquente · livro pp.110 e 113",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/2/movimentos/opcoes/1",
+        "movimentos_basicos.json",
+        "influencia.json",
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO REJEITAR INFLUÊNCIA",
+          "texto": "Some +2 à rolagem de Rejeitar Influência."
+        },
+        {
+          "titulo": "OUTROS AJUSTES",
+          "texto": "Continue rolando sem Rótulo. Some +1 se também tiver Influência sobre quem rejeita; Inseguro impõe −2. Respeite o teto final de +4."
+        },
+        {
+          "titulo": "RESULTADOS",
+          "texto": "Use as opções e consequências normais de Rejeitar Influência: 10+ escolhe duas opções; 7–9 escolhe uma; falha marca potencial, condição e muda Rótulos conforme o mestre."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/delinquente/equipe-que-equipe",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Delinquente",
+      "arquivo": "08-delinquente-equipe-que-equipe.png",
+      "titulo": "EQUIPE? QUE EQUIPE?",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Delinquente · livro pp.110 e 113",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/2/movimentos/opcoes/2",
+        "movimentos_basicos.json",
+        "influencia.json",
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO AGIR EGOISTICAMENTE",
+          "texto": "Quando gastar Equipe de forma egoísta, escolha remover uma condição OU marcar potencial, além dos efeitos normais desse uso."
+        },
+        {
+          "titulo": "AO AJUDAR",
+          "texto": "Na primeira vez da sessão em que gastar um ponto de Equipe para ajudar um colega, ganhe +1 adiante para você."
+        },
+        {
+          "titulo": "MANTENHA OS CUSTOS",
+          "texto": "O ponto sai da pilha e a ação precisa corresponder ao uso escolhido: ignorar ou insultar a equipe, ou ajudá-la de verdade."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/delinquente/mente-criminosa",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Delinquente",
+      "arquivo": "08-delinquente-mente-criminosa.png",
+      "titulo": "MENTE CRIMINOSA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Delinquente · livro pp.110 e 113",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/2/movimentos/opcoes/3",
+        "movimentos_basicos.json",
+        "influencia.json",
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO AVALIAR A SITUAÇÃO",
+          "texto": "Faça uma pergunta extra desta lista, inclusive numa falha."
+        },
+        {
+          "titulo": "PERGUNTAS",
+          "texto": "• O que aqui tem utilidade ou valor para mim?\n• Como posso irritar ou provocar ___?\n• Qual a melhor forma de entrar ou atravessar?"
+        },
+        {
+          "titulo": "AGIR PELA RESPOSTA",
+          "texto": "Ganhe +1 enquanto agir conforme a resposta, como em Avaliar. Bônus por respostas usadas podem somar, respeitando o teto de +4."
+        },
+        {
+          "titulo": "NUMA FALHA",
+          "texto": "A pergunta continua disponível, mas você ainda marca potencial e o mestre faz um movimento."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/delinquente/encrenqueiro",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Delinquente",
+      "arquivo": "08-delinquente-encrenqueiro.png",
+      "titulo": "ENCRENQUEIRO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Delinquente · livro pp.110 e 113",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/2/movimentos/opcoes/4",
+        "movimentos_basicos.json",
+        "influencia.json",
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO",
+          "texto": "Ajude um colega por meio de destruição, crime ou quebra de regras."
+        },
+        {
+          "titulo": "AJUDA MAIS FORTE",
+          "texto": "Ao gastar 1 ponto da pilha de Equipe, dê +2 à rolagem dele em vez de +1."
+        },
+        {
+          "titulo": "LIMITES DA AJUDA",
+          "texto": "Você precisa conseguir ajudar na ficção. Continua podendo gastar no máximo 1 ponto por rolagem; outros colegas podem ajudar também. O modificador final não passa de +4."
+        },
+        {
+          "titulo": "NA HISTÓRIA",
+          "texto": "Descreva a ação que viola as regras e aceite suas consequências. Não é um bônus para qualquer ajuda."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/delinquente/ta-prestando-atencao",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Delinquente",
+      "arquivo": "08-delinquente-ta-prestando-atencao.png",
+      "titulo": "TÁ PRESTANDO ATENÇÃO?",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Delinquente · livro pp.110 e 113",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/2/movimentos/opcoes/5",
+        "movimentos_basicos.json",
+        "influencia.json",
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + SUPERIOR",
+          "texto": "Engane, distraia ou iluda alguém."
+        },
+        {
+          "titulo": "SUCESSO",
+          "texto": "O alvo cai no truque ao menos por um momento. Em 10+, escolha 3; em 7–9, escolha 2."
+        },
+        {
+          "titulo": "ESCOLHAS",
+          "texto": "• Abrir uma oportunidade para agir.\n• Revelar um ponto fraco ou falha.\n• Manter os alvos confusos por mais tempo.\n• Escapar de complicações posteriores."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial e uma condição. Você fica envolvido na própria confusão, sob pressão."
+        },
+        {
+          "titulo": "O QUE NÃO ESCOLHEU",
+          "texto": "Não é garantido: o truque pode durar pouco ou trazer problemas depois se você não comprar essas proteções."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/discipula/andei-lendo-os-arquivos",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Discípula",
+      "arquivo": "09-discipula-andei-lendo-os-arquivos.png",
+      "titulo": "ANDEI LENDO OS ARQUIVOS",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Discípula · livro pp.116 e 118–119",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/3/movimentos/opcoes/0",
+        "movimentos_basicos.json",
+        "equipe_e_sessao.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "PRIMEIRO ENCONTRO / + SUPERIOR",
+          "texto": "Ao encontrar pela primeira vez um fenômeno superpoderoso importante, você decide se ele conta e rola + Superior."
+        },
+        {
+          "titulo": "7+",
+          "texto": "Conte à equipe um detalhe relevante aprendido com os recursos da mentoria. O mestre informa o que parece diferente do que você estudou, se houver diferença."
+        },
+        {
+          "titulo": "10+",
+          "texto": "Depois de ouvir sobre a diferença, faça mais uma pergunta ao mestre; a resposta deve ser verdadeira."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. O mestre explica por que o fenômeno está além dos seus conhecimentos."
+        },
+        {
+          "titulo": "CONHECIMENTO ESTABELECIDO",
+          "texto": "Seu detalhe precisa respeitar o que já existe na ficção. O movimento não pode ser guardado para um segundo encontro com o mesmo fenômeno."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/discipula/capita",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Discípula",
+      "arquivo": "09-discipula-capita.png",
+      "titulo": "CAPITÃ",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Discípula · livro pp.116 e 118–119",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/3/movimentos/opcoes/1",
+        "movimentos_basicos.json",
+        "equipe_e_sessao.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO ENTRAR EM BATALHA COMO EQUIPE",
+          "texto": "Adicione 1 ponto extra à pilha de Equipe, além do que o procedimento normal gerar."
+        },
+        {
+          "titulo": "SE VOCÊ LIDERA",
+          "texto": "Ganhe também +1 adiante. Confira quem está liderando este confronto, não apenas quem costuma liderar o grupo."
+        },
+        {
+          "titulo": "GATILHO",
+          "texto": "É preciso entrar em confronto como equipe contra um inimigo perigoso. Estar sozinha não aciona o procedimento."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/discipula/desabafo",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Discípula",
+      "arquivo": "09-discipula-desabafo.png",
+      "titulo": "DESABAFO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Discípula · livro pp.116 e 118–119",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/3/movimentos/opcoes/2",
+        "movimentos_basicos.json",
+        "equipe_e_sessao.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO ESTIVER IRRITADA",
+          "texto": "Ao Enfrentar diretamente a ameaça com Irritado marcado, você pode usar este movimento."
+        },
+        {
+          "titulo": "TROCA E ALÍVIO",
+          "texto": "Role + o Rótulo que sua mentora nega, em vez de + Perigoso, e remova Irritado."
+        },
+        {
+          "titulo": "RESULTADOS",
+          "texto": "Resolva Enfrentar normalmente, com suas escolhas, troca de golpes e consequências. O movimento não exige sucesso para remover Irritado."
+        },
+        {
+          "titulo": "QUAL RÓTULO?",
+          "texto": "Use o Rótulo negado pela mentora, registrado na criação. Ele é diferente do Rótulo que ela incorpora."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/discipula/conversa-ao-pe-do-fogo",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Discípula",
+      "arquivo": "09-discipula-conversa-ao-pe-do-fogo.png",
+      "titulo": "CONVERSA AO PÉ DO FOGO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Discípula · livro pp.116 e 118–119",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/3/movimentos/opcoes/3",
+        "movimentos_basicos.json",
+        "equipe_e_sessao.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "PEDIR CONSELHO",
+          "texto": "Busque a orientação da mentora e role + o Rótulo que ela incorpora."
+        },
+        {
+          "titulo": "7+",
+          "texto": "A mentora apresenta um caminho concreto para você seguir."
+        },
+        {
+          "titulo": "10+",
+          "texto": "Se decidir seguir o conselho, marque potencial. Ganhe +1 constante enquanto agir de acordo com ele."
+        },
+        {
+          "titulo": "7–9",
+          "texto": "Ganhe +1 adiante se fizer do jeito dela."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. A mentora enfrenta um problema importante e não tem tempo para você; marque uma condição escolhida pelo mestre."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/discipula/atencao-ao-redor",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Discípula",
+      "arquivo": "09-discipula-atencao-ao-redor.png",
+      "titulo": "ATENÇÃO AO REDOR",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Discípula · livro pp.116 e 118–119",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/3/movimentos/opcoes/4",
+        "movimentos_basicos.json",
+        "equipe_e_sessao.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "ANTES DE LUTAR",
+          "texto": "Ao Avaliar a situação antes de entrar numa luta, você pode fazer uma pergunta adicional, mesmo numa falha."
+        },
+        {
+          "titulo": "QUANTAS PERGUNTAS",
+          "texto": "10+: até 3 perguntas. 7–9: até 2. Falha: 1 pergunta, além de marcar potencial e receber um movimento do mestre."
+        },
+        {
+          "titulo": "LISTA E BÔNUS",
+          "texto": "Use as perguntas de Avaliar. Ganhe +1 enquanto agir conforme cada resposta usada; os bônus podem somar, respeitando o teto do modificador."
+        },
+        {
+          "titulo": "LIMITE DO GATILHO",
+          "texto": "Não é uma pergunta extra em toda avaliação: precisa acontecer antes de entrar na luta."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/discipula/tradicao-heroica",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Discípula",
+      "arquivo": "09-discipula-tradicao-heroica.png",
+      "titulo": "TRADIÇÃO HEROICA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Discípula · livro pp.116 e 118–119",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/3/movimentos/opcoes/5",
+        "movimentos_basicos.json",
+        "equipe_e_sessao.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO",
+          "texto": "Aconselhe alguém segundo os princípios que você acredita que sua mentora defenderia."
+        },
+        {
+          "titulo": "TROCA DE RÓTULO",
+          "texto": "Para Confortar ou apoiar, você pode rolar + o Rótulo que a mentora incorpora em vez de + Mundano."
+        },
+        {
+          "titulo": "MESMOS EFEITOS",
+          "texto": "Siga os resultados normais de Confortar. O alvo precisa se abrir para os benefícios acontecerem; a escolha de Rótulo não elimina essa exigência."
+        },
+        {
+          "titulo": "CONDIÇÃO",
+          "texto": "Irritado continua dando −2 a Confortar, mesmo quando outro Rótulo substitui Mundano."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/farol/na-espreita",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Farol",
+      "arquivo": "10-farol-na-espreita.png",
+      "titulo": "NA ESPREITA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Farol · livro pp.122 e 124–125",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/4/movimentos/opcoes/0",
+        "movimentos_basicos.json",
+        "equipe_e_sessao.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + MUNDANO",
+          "texto": "Investigue discretamente uma pessoa ou lugar. Role + Mundano."
+        },
+        {
+          "titulo": "RESULTADO",
+          "texto": "10+: faça 2 perguntas da lista. 7–9: faça 1."
+        },
+        {
+          "titulo": "PERGUNTAS",
+          "texto": "• Qual o melhor caminho para entrar ou sair?\n• O que aconteceu por aqui?\n• O que vale a pena pegar?\n• Quem ou o que esconde sua verdadeira natureza?\n• Quem é o dono deste lugar?"
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. Você se envolve numa situação complicada; o mestre explica por que este é um lugar ruim para você."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/farol/sem-poderes-e-quase-sem-treino",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Farol",
+      "arquivo": "10-farol-sem-poderes-e-quase-sem-treino.png",
+      "titulo": "SEM PODERES E QUASE SEM TREINO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Farol · livro pp.122 e 124–125",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/4/movimentos/opcoes/1",
+        "movimentos_basicos.json",
+        "equipe_e_sessao.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "NOVO EQUIPAMENTO",
+          "texto": "Ao obter um apetrecho novo, você pode registrá-lo como habilidade se o espaço deste movimento estiver vazio."
+        },
+        {
+          "titulo": "PRIMEIRO USO",
+          "texto": "Na primeira vez que usar um apetrecho para Enfrentar, Liberar poderes ou Defender, pode rolar + Mundano em vez do Rótulo normal."
+        },
+        {
+          "titulo": "MESMO MOVIMENTO",
+          "texto": "Use os resultados, escolhas e custos do movimento acionado. As condições que o penalizam continuam valendo, mesmo com a troca de Rótulo."
+        },
+        {
+          "titulo": "ACOMPANHE O USO",
+          "texto": "A troca não vale em todo teste feito com o equipamento: ela depende de ser seu primeiro uso para essa finalidade."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/farol/nao-vou-te-decepcionar",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Farol",
+      "arquivo": "10-farol-nao-vou-te-decepcionar.png",
+      "titulo": "NÃO VOU TE DECEPCIONAR",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Farol · livro pp.122 e 124–125",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/4/movimentos/opcoes/2",
+        "movimentos_basicos.json",
+        "equipe_e_sessao.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO AJUDAR UM COLEGA",
+          "texto": "Você pode gastar 2 pontos da pilha de Equipe para dar +2 à rolagem dele."
+        },
+        {
+          "titulo": "EXCEÇÃO À AJUDA NORMAL",
+          "texto": "A ajuda comum permite gastar só 1 ponto por personagem e teste. Este movimento permite que você gaste 2."
+        },
+        {
+          "titulo": "NA FICÇÃO",
+          "texto": "Descreva como ajuda. A contribuição precisa ser possível na cena e pode ser aplicada depois dos dados, antes da resolução."
+        },
+        {
+          "titulo": "LIMITE",
+          "texto": "Outros colegas também podem ajudar; o modificador final continua limitado a +4."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/farol/quase-um-super-heroi",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Farol",
+      "arquivo": "10-farol-quase-um-super-heroi.png",
+      "titulo": "QUASE UM SUPER-HERÓI",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Farol · livro pp.122 e 124–125",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/4/movimentos/opcoes/3",
+        "movimentos_basicos.json",
+        "equipe_e_sessao.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "PRIMEIRA APRESENTAÇÃO / + SALVADOR",
+          "texto": "Ao mencionar sua identidade heroica pela primeira vez para alguém importante, role + Salvador. Você decide se a pessoa é importante."
+        },
+        {
+          "titulo": "7+",
+          "texto": "Ela já ouviu falar de você. Conte que façanha conhece e qual Rótulo atribui a você por causa disso."
+        },
+        {
+          "titulo": "7–9",
+          "texto": "O mestre acrescenta outra coisa que ela ouviu e escolhe um segundo Rótulo pelo qual ela enxerga você."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. A pessoa não leva você a sério ou passa a desconfiar de você."
+        },
+        {
+          "titulo": "REPUTAÇÃO",
+          "texto": "O Rótulo escolhido orienta a imagem que essa pessoa reflete sobre você por meio da Influência dela; não é um aumento automático desse Rótulo."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/farol/vamos-sortudo",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Farol",
+      "arquivo": "10-farol-vamos-sortudo.png",
+      "titulo": "VAMOS, SORTUDO!",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Farol · livro pp.122 e 124–125",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/4/movimentos/opcoes/4",
+        "movimentos_basicos.json",
+        "equipe_e_sessao.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "SEU COMPANHEIRO",
+          "texto": "Descreva o animal que acompanha e ajuda você. Escolha 3 movimentos básicos e explique como ele contribui em cada um."
+        },
+        {
+          "titulo": "QUANDO ELE AJUDA",
+          "texto": "Ganhe +1 nos movimentos escolhidos quando o bicho puder ajudar na ficção. O bônus não depende de gastar Equipe."
+        },
+        {
+          "titulo": "NÃO É ADIANTE",
+          "texto": "O +1 vale sempre que a ajuda for possível; não se esgota depois de um único teste. Respeite o teto do modificador."
+        },
+        {
+          "titulo": "SE ELE SE MACHUCAR",
+          "texto": "Trate o ferimento como se o próprio bichinho tivesse tomado um golpe poderoso."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/farol/chupa-domiciano",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Farol",
+      "arquivo": "10-farol-chupa-domiciano.png",
+      "titulo": "CHUPA, DOMICIANO!",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Farol · livro pp.122 e 124–125",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/4/movimentos/opcoes/5",
+        "movimentos_basicos.json",
+        "equipe_e_sessao.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "SOB FOGO DRAMÁTICO",
+          "texto": "Você enfrenta uma ameaça terrível ou resiste em condições claramente desfavoráveis. A cena precisa mostrar essa pressão."
+        },
+        {
+          "titulo": "TROCA DE RÓTULO",
+          "texto": "Para Enfrentar diretamente a ameaça, role + Salvador em vez de + Perigoso."
+        },
+        {
+          "titulo": "RESULTADOS NORMAIS",
+          "texto": "Siga a troca de golpes e as escolhas de Enfrentar. Assustado continua dando −2 a esse movimento."
+        },
+        {
+          "titulo": "GATILHO",
+          "texto": "Não basta estar numa luta controlada. O destaque é sua resistência dramática diante de um perigo maior que você."
+        }
+      ]
     }
   ]
 }

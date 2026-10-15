@@ -831,11 +831,7 @@ namespace TorreDeControle.UI
         static IReadOnlyList<(string id, string nome)> OpcoesMaturidade() =>
             new List<(string, string)> { (Maturidade.Adulto.ToString(), "Adulto"), (Maturidade.Jovem.ToString(), "Jovem") };
 
-        static IReadOnlyList<(string id, string nome)> OpcoesPapel() =>
-            new List<(string, string)>
-            {
-                (Papel.Neutro.ToString(), "Neutro"), (Papel.Aliado.ToString(), "Aliado"), (Papel.Vilao.ToString(), "Vilão"),
-            };
+        static IReadOnlyList<(string id, string nome)> OpcoesPapel() => PainelNpc.OpcoesPapel();
 
         void SecaoNpcs()
         {

@@ -318,6 +318,7 @@ namespace TorreDeControle.UI
             var alvo = rect.gameObject.AddComponent<Image>();
             alvo.color = Color.clear;
             var botao = rect.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(botao);
             botao.targetGraphic = alvo;
             var quadrado = Estilo.Rect("Marca", rect);
             quadrado.anchorMin = quadrado.anchorMax = new Vector2(0.5f, 0.5f);
@@ -384,7 +385,7 @@ namespace TorreDeControle.UI
             if (Troca.Arquivos == null)
                 return;
             var opcoes = new List<(string, UnityEngine.Events.UnityAction, bool)>();
-            foreach (var caminho in Troca.Arquivos.Importaveis())
+            foreach (var caminho in Troca.Importaveis(CadastroPersonagens.FormatoDeTroca))
             {
                 var arquivo = caminho;
                 opcoes.Add((System.IO.Path.GetFileName(arquivo), () => ImportarTexto(Troca.Arquivos.Ler(arquivo)), false));

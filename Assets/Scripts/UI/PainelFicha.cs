@@ -34,6 +34,7 @@ namespace TorreDeControle.UI
         CadastroPersonagens cadastro;
         CadastroJogadores jogadores;
         Action aoFechar;
+        PainelAjuda ajudaMovimentos;
         Aba abaAtual = Aba.Identidade;
 
         TextMeshProUGUI titulo;
@@ -442,7 +443,7 @@ namespace TorreDeControle.UI
             {
                 ("Colar da área de transferência", () => ConfirmarImportar(GUIUtility.systemCopyBuffer), false),
             };
-            foreach (var caminho in Troca.Arquivos.Importaveis())
+            foreach (var caminho in Troca.Importaveis(CadastroPersonagens.FormatoDeTroca))
             {
                 var arquivo = caminho;
                 opcoes.Add((System.IO.Path.GetFileName(arquivo), () => ConfirmarImportar(Troca.Arquivos.Ler(arquivo)), false));
@@ -617,6 +618,7 @@ namespace TorreDeControle.UI
                 : Estilo.TextoSuave;
             var fundo = Estilo.Moldura(quadro.gameObject, Estilo.Campo, borda);
             var botao = quadro.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(botao);
             botao.targetGraphic = fundo;
             botao.interactable = temLink;
             var cores = botao.colors;
@@ -742,7 +744,8 @@ namespace TorreDeControle.UI
 
             Secao("MOVIMENTOS DO ARQUÉTIPO", mov.Escolher == 0 && mov.Opcoes.Count == 0
                 ? "não escolhe movimentos na criação: os extras abaixo fazem esse papel"
-                : mov.Obrigatorios.Count > 0 ? "os marcados vêm com o arquétipo; escolha os outros" : null);
+                : mov.Obrigatorios.Count > 0 ? "os marcados vêm com o arquétipo; escolha os outros" : null,
+                PainelAjuda.TemMovimentos(cadastro.RegraDoArquetipo(p)?.Id) ? () => AbrirAjudaMovimentos() : (Action)null);
             if (mov.Opcoes.Count > 0)
             {
                 if (emCriacao)
@@ -949,6 +952,7 @@ namespace TorreDeControle.UI
             var borda = ativa || marcada ? Estilo.Dourado : Estilo.BordaApagada;
             var imagem = Estilo.Moldura(rect.gameObject, fundo, borda);
             var botao = rect.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(botao);
             botao.targetGraphic = imagem;
             botao.interactable = ativa;
             var cores = botao.colors;
@@ -1543,6 +1547,7 @@ namespace TorreDeControle.UI
             var fundo = rect.gameObject.AddComponent<Image>();
             fundo.color = new Color(1, 1, 1, 0);
             var botao = rect.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(botao);
             botao.targetGraphic = fundo;
             var cores = botao.colors;
             cores.highlightedColor = new Color(1, 1, 1, 0.12f);
@@ -1643,6 +1648,7 @@ namespace TorreDeControle.UI
             var fundo = fila.gameObject.AddComponent<Image>();
             fundo.color = new Color(1, 1, 1, 0);
             var botao = fila.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(botao);
             botao.targetGraphic = fundo;
             var cores = botao.colors;
             cores.highlightedColor = new Color(1, 1, 1, 0.06f);
@@ -2047,6 +2053,7 @@ namespace TorreDeControle.UI
             };
             var imagem = Estilo.Moldura(rect.gameObject, fundo, borda);
             var botao = rect.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(botao);
             botao.targetGraphic = imagem;
             botao.interactable = estado != EstadoChip.Bloqueada && estado != EstadoChip.Fixa;
             if (estado == EstadoChip.Fixa)
@@ -2236,12 +2243,25 @@ namespace TorreDeControle.UI
             }
         }
 
-        void Secao(string nome, string legenda)
+        /// <summary>O help dos movimentos do arquétipo da ficha (o que vale: o da criação concluída, se houver).</summary>
+        void AbrirAjudaMovimentos(string movimento = null)
+        {
+            if (ajudaMovimentos == null)
+                ajudaMovimentos = PainelAjuda.Criar(transform.parent);
+            ajudaMovimentos.AbrirMovimentos(cadastro.RegraDoArquetipo(p)?.Id, movimento);
+        }
+
+        void Secao(string nome, string legenda, Action ajuda = null)
         {
             var fila = Estilo.Fila(conteudo, 36);
             var t = Estilo.Rotulo(fila, nome, 22, Estilo.Dourado, FontStyles.Bold);
             t.characterSpacing = 5;
             t.gameObject.AddComponent<LayoutElement>().preferredWidth = 520;
+            if (ajuda != null)
+            {
+                var botao = Estilo.BotaoContorno(fila, "?", 36, Estilo.Dourado, () => ajuda());
+                botao.gameObject.AddComponent<Dica>().Configurar("Consultar os movimentos deste arquétipo.");
+            }
             if (legenda != null)
             {
                 // Uma linha (reticências) com o texto inteiro no balão: legenda longa não invade a linha de baixo.

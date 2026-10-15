@@ -125,6 +125,7 @@ namespace TorreDeControle.UI
             var imagem = Moldura(rect.gameObject, fundo, borda);
             var botao = rect.gameObject.AddComponent<Button>();
             botao.targetGraphic = imagem;
+            SomBotao.Ligar(botao, rotulo == "Voltar" || rotulo == "Fechar" || rotulo == "Cancelar");
             var cores = botao.colors;
             cores.highlightedColor = new Color(1.15f, 1.15f, 1.15f);
             cores.pressedColor = new Color(0.8f, 0.8f, 0.8f);
@@ -168,7 +169,7 @@ namespace TorreDeControle.UI
             campo.customCaretColor = true;
             campo.selectionColor = new Color(Dourado.r, Dourado.g, Dourado.b, 0.35f);
             // Tab é navegação (ver NavegacaoTab), nunca caractere.
-            campo.onValidateInput = (_, __, c) => c == '	' ? ' ' : c;
+            campo.onValidateInput = (_, __, c) => c == '	' ? '\u0000' : c;
             rect.gameObject.AddComponent<Tabulavel>();
             rect.gameObject.SetActive(true);
             return campo;
@@ -185,6 +186,7 @@ namespace TorreDeControle.UI
             var rect = Rect("ListaSuspensa", pai);
             var imagem = Moldura(rect.gameObject, Campo, BordaApagada);
             var botao = rect.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(botao);
             botao.targetGraphic = imagem;
             var cores = botao.colors;
             cores.highlightedColor = new Color(1.25f, 1.25f, 1.25f);
@@ -252,6 +254,7 @@ namespace TorreDeControle.UI
             var fundoBloqueio = bloqueio.gameObject.AddComponent<Image>();
             fundoBloqueio.color = new Color(0, 0, 0, 0);
             var fechar = bloqueio.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(fechar, true, false);
             fechar.transition = Selectable.Transition.None;
             fechar.onClick.AddListener(() => Object.Destroy(bloqueio.gameObject));
 
@@ -289,6 +292,7 @@ namespace TorreDeControle.UI
                 var fundo = item.gameObject.AddComponent<Image>();
                 fundo.color = id == idAtual ? DouradoEscuro : new Color(1, 1, 1, 0);
                 var b = item.gameObject.AddComponent<Button>();
+                SomBotao.Ligar(b);
                 b.targetGraphic = fundo;
                 var c = b.colors;
                 c.highlightedColor = new Color(1f, 1f, 1f, 0.6f);
@@ -343,6 +347,7 @@ namespace TorreDeControle.UI
             Esticar(veu);
             veu.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 0.6f);
             var fora = veu.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(fora, true, false);
             fora.transition = Selectable.Transition.None;
             void Cancelar()
             {
@@ -399,6 +404,7 @@ namespace TorreDeControle.UI
             Esticar(veu);
             veu.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 0.6f);
             var fora = veu.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(fora, true, false);
             fora.transition = Selectable.Transition.None;
             fora.onClick.AddListener(() => Object.Destroy(veu.gameObject));
 
@@ -543,6 +549,7 @@ namespace TorreDeControle.UI
             fundo.color = new Color(1, 1, 1, 0);
             var botao = rect.gameObject.AddComponent<Button>();
             botao.targetGraphic = fundo;
+            SomBotao.Ligar(botao);
             var cores = botao.colors;
             cores.highlightedColor = new Color(1, 1, 1, 0.12f);
             botao.colors = cores;

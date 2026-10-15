@@ -1,0 +1,244 @@
+{
+  "versao": 1,
+  "_sobre": "Referência de regras de vilões para o mestre, em texto próprio. Dados para consulta; não implementa ações de combate nem log na Torre.",
+  "movimentos": {
+    "origem": "livro 184 e 195",
+    "topicos": [
+      {
+        "tema": "FERRAMENTAS DO MESTRE",
+        "texto": "São movimentos do mestre ligados a um vilão específico, usado quando ele está na cena. Revelam seu modo de agir e pioram a situação."
+      },
+      {
+        "tema": "MAIS QUE ATAQUES",
+        "texto": "Podem ser fugas, ofertas, revelações ou efeitos extraordinários. Crie pelo menos três; acrescente outros quando precisar."
+      },
+      {
+        "tema": "ESCREVA A MUDANÇA",
+        "texto": "Diga o que ele faz e o que muda. Exemplo próprio: arrastar o herói até o teto com um feixe magnético, em vez de apenas criar magnetismo."
+      },
+      {
+        "tema": "USO FLEXÍVEL",
+        "texto": "Valem dentro e fora de lutas. Você pode revelar parte de um movimento e completar depois. Usá-lo não o gasta."
+      }
+    ]
+  },
+  "ficha": {
+    "origem": "livro 194–196",
+    "topicos": [
+      {
+        "tema": "GERAÇÃO E NOME",
+        "texto": "Escolha a geração e um nome que combine: Ouro mais leve; Prata grandiosa; Bronze mais sóbria; Moderna ligada à cultura atual. Nome civil é opcional."
+      },
+      {
+        "tema": "MOTIVAÇÃO HUMANA",
+        "texto": "Use um verbo e seu objeto, mostrando o que ele deseja e por quê. Exemplo próprio: recuperar o respeito da família, em vez de simplesmente dominar a cidade."
+      },
+      {
+        "tema": "MOVIMENTOS",
+        "texto": "Crie pelo menos três ações características, ativas e descritivas, com consequências claras na história."
+      },
+      {
+        "tema": "CONDIÇÕES",
+        "texto": "Escolha de uma a cinco condições. A quantidade define sua resistência; a seleção mostra que emoções guiam suas reações."
+      }
+    ]
+  },
+  "condicoes": {
+    "origem": "livro 195–196",
+    "topicos": [
+      {
+        "tema": "QUANTAS",
+        "texto": "Escolha de 1 a 5: resistência pequena, moderada, ameaçadora, perigosa ou de arquivilão. Ajuste a quantidade conforme o papel do inimigo."
+      },
+      {
+        "tema": "COMO MARCA",
+        "texto": "Cada golpe poderoso, físico ou emocional, faz marcar uma condição apropriada. Ao marcar, o vilão reage imediatamente com um movimento dessa condição."
+      },
+      {
+        "tema": "QUANDO É DERROTADO",
+        "texto": "Se precisar marcar e não houver condição livre, ele perde. Com três disponíveis, pode marcar as três; é derrotado ao precisar marcar outra."
+      },
+      {
+        "tema": "QUAIS",
+        "texto": "As condições escolhidas definem suas reações. Se uma emoção não está na ficha, ela não o afeta desse modo: escolha outra consequência coerente ou mostre a imunidade às PJs."
+      }
+    ]
+  },
+  "luta": {
+    "origem": "livro 186 e 196",
+    "topicos": [
+      {
+        "tema": "GOLPE PODEROSO",
+        "texto": "Marque uma condição que corresponda ao que aconteceu. Não é preciso um ataque físico: palavras também podem atingir o vilão."
+      },
+      {
+        "tema": "REAÇÃO IMEDIATA",
+        "texto": "Ao marcar, faça um movimento daquela condição antes de devolver a ação às PJs. Em geral é leve: prepara perigo e dá espaço para resposta."
+      },
+      {
+        "tema": "PRÓXIMA AÇÃO",
+        "texto": "Consulte os movimentos do mestre, os próprios do vilão e os de condição. Preserve o que as PJs conquistaram e siga a ficção."
+      },
+      {
+        "tema": "NÃO PRECISA LUTAR ATÉ CAIR",
+        "texto": "Ele pode fugir ou desistir antes. Sem condição livre quando precisa marcar outra, é derrotado."
+      },
+      {
+        "tema": "REMOVER CONDIÇÕES",
+        "texto": "Vilões e outros PNJs se abrem após Confortar bem-sucedido para aliviar condições. Também podem removê-las quando a ficção permitir."
+      }
+    ]
+  },
+  "condicao-assustado": {
+    "origem": "livro 197",
+    "topicos": [
+      {
+        "tema": "REAÇÕES POSSÍVEIS",
+        "texto": "• Buscar abrigo fora do alcance.\n• Escapar do conflito.\n• Golpear às cegas, sem avaliar o risco.\n• Suplicar para ser poupado.\n• Erguer obstáculos entre si e o perigo."
+      },
+      {
+        "tema": "INTENÇÃO",
+        "texto": "Use para fazê-lo procurar saída ou proteger o que importa para ele. Sentir medo não significa que já foi vencido."
+      },
+      {
+        "tema": "QUANDO USAR",
+        "texto": "Ao marcar Assustado, escolha uma reação imediatamente. Mais tarde, essas opções também podem ocupar o lugar de um movimento do mestre."
+      }
+    ]
+  },
+  "condicao-irritado": {
+    "origem": "livro 197–198",
+    "topicos": [
+      {
+        "tema": "REAÇÕES POSSÍVEIS",
+        "texto": "• Descarregar a raiva sem cuidado.\n• Destruir o cenário.\n• Cortar a negociação.\n• Mirar um ponto fraco.\n• Levar o perigo a outro patamar."
+      },
+      {
+        "tema": "INTENÇÃO",
+        "texto": "Faça-o lutar, exagerar e assumir riscos. A reação cria novos problemas, sem desfazer o sucesso que uma PJ acabou de conquistar."
+      },
+      {
+        "tema": "QUANDO USAR",
+        "texto": "Ao marcar Irritado, reaja imediatamente. Depois, pode voltar a essas opções quando fizer um movimento do mestre."
+      }
+    ]
+  },
+  "condicao-culpado": {
+    "origem": "livro 198",
+    "topicos": [
+      {
+        "tema": "REAÇÕES POSSÍVEIS",
+        "texto": "• Buscar perdão de alguém.\n• Abrir mão de algo valioso para se redimir.\n• Cruzar um limite que antes evitava.\n• Arrastar outras pessoas para a culpa.\n• Expor o motivo por trás dos crimes."
+      },
+      {
+        "tema": "INTENÇÃO",
+        "texto": "Mostre a pessoa por trás do antagonista. Culpa não exige rendição: ele pode acreditar que não tem mais saída."
+      },
+      {
+        "tema": "QUANDO USAR",
+        "texto": "Ao marcar Culpado, mostre sua reação antes da próxima ação das PJs. Essas opções também servem em movimentos posteriores do mestre."
+      }
+    ]
+  },
+  "condicao-desesperancoso": {
+    "origem": "livro 198",
+    "topicos": [
+      {
+        "tema": "REAÇÕES POSSÍVEIS",
+        "texto": "• Abandonar a resistência.\n• Destruir o que resta à sua volta.\n• Agarrar uma possibilidade de esperança.\n• Abalar a confiança de outras pessoas.\n• Fazer algo terrível por desespero."
+      },
+      {
+        "tema": "INTENÇÃO",
+        "texto": "A perda de esperança pode encerrar o confronto ou torná-lo muito pior. Use para controlar a tensão quando tudo parece perdido para o vilão."
+      },
+      {
+        "tema": "QUANDO USAR",
+        "texto": "Ao marcar Desesperançoso, reaja imediatamente. Mais tarde, pode escolher outra dessas ações como movimento do mestre."
+      }
+    ]
+  },
+  "condicao-inseguro": {
+    "origem": "livro 198",
+    "topicos": [
+      {
+        "tema": "REAÇÕES POSSÍVEIS",
+        "texto": "• Dobrar a aposta numa ideia equivocada.\n• Deixar outra pessoa conduzir.\n• Questionar os aliados e o próprio plano.\n• Reconhecer que tratou alguém injustamente.\n• Recuar e ceder espaço."
+      },
+      {
+        "tema": "INTENÇÃO",
+        "texto": "Abra espaço para diálogo, dúvidas e provocações durante o conflito. Uma conversa importante pode acontecer no meio da pancadaria."
+      },
+      {
+        "tema": "QUANDO USAR",
+        "texto": "Ao marcar Inseguro, faça uma reação imediatamente. As mesmas opções ficam disponíveis para movimentos posteriores do mestre."
+      }
+    ]
+  },
+  "capangas": {
+    "origem": "livro 196–197",
+    "topicos": [
+      {
+        "tema": "AMEAÇA COLETIVA",
+        "texto": "Um grupo realmente perigoso pode usar uma única ficha de vilão, com motivação, movimentos e condições. Descreva as ações como ações do conjunto."
+      },
+      {
+        "tema": "EXEMPLO PRÓPRIO",
+        "texto": "Uma enxurrada de drones armados pode funcionar como um vilão coletivo, em vez de dezenas de fichas separadas."
+      },
+      {
+        "tema": "PNJs COMUNS",
+        "texto": "Se o grupo não representa perigo real para as PJs, resolva pela ficção; elas podem lidar com esses capangas sem uma rolagem de Enfrentar."
+      },
+      {
+        "tema": "GATILHO PRIMEIRO",
+        "texto": "Enfrentar exige uma ameaça real para quem age. Não peça o movimento só porque existe alguém do outro lado."
+      }
+    ]
+  },
+  "exemplo-professora": {
+    "origem": "livro 187–190",
+    "topicos": [
+      {
+        "tema": "O CONFLITO",
+        "texto": "No exemplo do livro, a Professora controla um labirinto escolar e tenta dominar o futuro dos jovens heróis."
+      },
+      {
+        "tema": "MOVIMENTO EM PARTES",
+        "texto": "O mestre transforma o chão para prender uma heroína. Mais tarde, revela apenas parte da forma monstruosa da vilã: não precisa mostrar todo o movimento de uma vez."
+      },
+      {
+        "tema": "CONDIÇÃO PELA FICÇÃO",
+        "texto": "Após uma troca de golpes que a impressiona, o mestre marca Inseguro e a faz insistir num plano equivocado: ela volta a perseguir quem queria capturar."
+      },
+      {
+        "tema": "LIÇÃO PARA A MESA",
+        "texto": "A personalidade orienta o movimento; o que aconteceu orienta a condição; a condição inspira a reação imediata."
+      }
+    ]
+  },
+  "exemplo-rosa-rook": {
+    "origem": "livro 214",
+    "topicos": [
+      {
+        "tema": "PRESSÃO APÓS A LUTA",
+        "texto": "No exemplo do livro, Rosa espera os heróis exaustos com seguranças para exigir o giz. O mestre já pensava no que ela fazia enquanto a luta acontecia."
+      },
+      {
+        "tema": "MOVIMENTO PREPARADO",
+        "texto": "Ele escolhe antecipadamente uma ação para retirar poder de quem está vulnerável. O movimento dá direção à cena, sem exigir um ataque."
+      },
+      {
+        "tema": "INFLUÊNCIA ADULTA",
+        "texto": "Rosa usa a Influência que já tem para diminuir a autoridade da líder. Ela falha ao rejeitar: marca condição e potencial, e seus Rótulos mudam."
+      },
+      {
+        "tema": "PRESSÃO ENTRE COLEGAS",
+        "texto": "Uma colega provoca a líder a entregar o giz. Com 10+, os dois incentivos valem; ela aceita e a pilha ganha 1 Equipe. Não cabe Defender dessa provocação."
+      },
+      {
+        "tema": "LIÇÃO",
+        "texto": "Vilões agem além da pancadaria. Recursos sociais e o desgaste de uma luta podem mudar a próxima cena."
+      }
+    ]
+  }
+}

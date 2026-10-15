@@ -2,7 +2,8 @@
 
 Fonte única dos textos das quatro cartas de panorama, dos oito movimentos básicos,
 das nove cartas PvP, das seis cartas de Influência, das duas de Condições
-das seis de Equipe e sessão e das dez de Movimentos de equipe (45 ao todo):
+das seis de Equipe e sessão, das dez de Movimentos de equipe e dos seis
+movimentos da Bruta e das doze cartas de Vilões (81 ao todo):
 `Assets/Resources/Ajuda/catalogo.json` (UTF-8, texto próprio).
 As regras executáveis continuam em `Assets/Resources/Regras/`; o catálogo
 editorial não substitui essas regras nem os dados de jogadores, personagens e salas.
@@ -18,6 +19,7 @@ editorial não substitui essas regras nem os dados de jogadores, personagens e s
 - `compacto`: opção de composição para conteúdos com muitas seções.
 - `borda`: cor hexadecimal opcional; altera somente o contorno da carta.
   Condições: amarelo; Influência: verde; Equipe e sessão: azul. Miolo preservado.
+- `arquetipo`: agrupamento opcional dentro de Movimentos de arquétipo.
 - `origem`: rodapé com as fontes/decisões consultadas.
 - `regras_ref`: caminhos de referência relativos a `Regras/` ou `docs/` desde a
   raiz. Para JSON, aceita fragmento como `nucleo.json#/bonus`.
@@ -59,6 +61,34 @@ ou fim de sessão. Os movimentos individuais foram conferidos diretamente no
 livro: as referências a `arquetipos.json` identificam o arquétipo, mas esse
 arquivo ainda não contém seus efeitos de celebração/vulnerabilidade no motor.
 
+Movimentos de arquétipo (`movimentos-arquetipo`) é categoria principal separada
+de Movimentos de equipe, com subseções pelo campo `arquetipo`. Começa com os
+seis movimentos da Bruta, borda vermelha e miolo padrão. Os nomes e IDs seguem
+`arquetipos.json`, mesmo quando diferem dos títulos das cartas antigas.
+Conferidos com `Fichas Exemplo/Bruta/bruta1.png` a `bruta6.png`, o livro
+(pp.104 e 107) e as regras da Torre. Coração da Bruta fica para os extras.
+
+Primeiro help contextual: na ficha da Bruta, aba Módulos, um botão `?` ao lado
+de Movimentos do arquétipo abre as seis cartas filtradas. A ficha fica aberta
+por baixo, sem reconstrução ou mudança dos movimentos escolhidos. No leitor,
+Voltar retorna à galeria filtrada; na galeria, Voltar fecha a ajuda. O menu
+principal de Ajuda continua abrindo o catálogo completo.
+
+Vilões (`viloes`) é categoria principal para o mestre, com borda vermelha:
+movimentos, ficha, condições, luta, cinco cartas de reações por condição,
+capangas e dois exemplos (Professora e Rosa Rook). Textos próprios, com base
+no briefing `docs/briefing_ajuda_viloes.md` e consulta ao livro. As referências
+apontam para `Regras/viloes.json`, material de consulta que não implementa
+combate ou registro de movimentos de vilão no motor. Derrota: precisa marcar
+uma condição e não tem nenhuma livre; marcar a última livre não basta.
+
+Na ficha de NPC com papel de vilão, `?` ao lado de Condições abre apenas as
+seis cartas: `viloes/luta` primeiro e as cinco `viloes/condicao-*`, mantendo a
+ficha por baixo. Mostra todas, independentemente das condições disponíveis naquela ficha; não marca
+condições nem altera dados. A Ajuda geral também oferece a subgaleria
+Movimentos de condição em Vilões, com retorno a Todos os vilões. Voltar do
+leitor retorna à galeria filtrada; Voltar da galeria fecha a ajuda contextual.
+
 ## Geração e uso
 
 `python tools/cards/gerar_cartas.py` valida IDs/arquivos únicos, referências e
@@ -70,3 +100,23 @@ Assim a apresentação textual e a geração de cartas usarão a mesma fonte edi
 Assets fora de Resources também podem entrar no build quando referenciados por
 cenas/assets incluídos. Resources permite carregar estes arquivos por caminho
 em tempo de execução; não é a única forma de incluir conteúdo no build.
+
+
+Movimentos de arquétipo: Delinquente adicionado com seis cartas de borda vermelha,
+conferidas com Fichas Exemplo/Delinquente e o livro (pp.110 e 113).
+Textos em Ajuda/catalogo.json; referências para as seis opções de
+arquetipos.json. A galeria e o help contextual da ficha usam os IDs existentes.
+Amaldiçoada não tem movimentos comuns na criação; seus extras ficam pendentes.
+
+
+Discípula: seis movimentos adicionados a Movimentos de arquétipo, com borda
+vermelha e IDs do arquetipos.json. Conferidos com as seis cartas de
+Fichas Exemplo/Discipula e o livro (pp.116 e 118–119). Recursos da mentora
+ficam para os extras. O help contextual usa os parâmetros existentes.
+
+
+Farol: seis movimentos adicionados a Movimentos de arquétipo, com borda
+vermelha e IDs do arquetipos.json. Conferidos com Fichas Exemplo/Farol
+e o livro (pp.122 e 124–125). Vamos, Sortudo! dá +1 quando o bicho ajuda
+nos três movimentos escolhidos, sem ser adiante de uso único. Impulsos
+ficam para os extras. O help contextual usa os parâmetros existentes.

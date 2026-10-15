@@ -17,6 +17,12 @@ namespace TorreDeControle.UI
         [SerializeField] Button botaoJogadores;
         [SerializeField] Button botaoPersonagens;
         [SerializeField] Button botaoSalas;
+        [Tooltip("Laboratório de NPCs (docs/npc_lab.md): originais, NPCs das campanhas e copiar entre elas.")]
+        [SerializeField] Button botaoNpcs;
+        [Header("Sons da interface")]
+        [SerializeField] AudioClip somCursor;
+        [SerializeField] AudioClip somConfirmar;
+        [SerializeField] AudioClip somCancelar;
         [Header("Ajuda")]
         [SerializeField] Button botaoAjuda;
         [Tooltip("Opcional: Rótulos, sucessos e falhas, movimentos, recursos e bônus. Vazio carrega de Resources.")]
@@ -32,6 +38,7 @@ namespace TorreDeControle.UI
         CadastroSalas salas;
         PainelSalas painelSalas;
         PainelAjuda painelAjuda;
+        PainelNpcs painelNpcs;
 
         ArmazenamentoAdiado armazenamento;
 
@@ -50,6 +57,10 @@ namespace TorreDeControle.UI
 
         void Awake()
         {
+            var sons = gameObject.AddComponent<SonsUI>();
+            sons.Configurar(somCursor, somConfirmar, somCancelar);
+            foreach (var botao in GetComponentsInChildren<Button>(true))
+                SomBotao.Ligar(botao);
             var arquivos = new ArmazenamentoLocalJson(Application.persistentDataPath + "/dados");
             Debug.Log($"[Torre] Dados em: {arquivos.Pasta}");
             // Junta as gravações (cliques seguidos gravam uma vez); Update pulsa, sair descarrega.
@@ -65,6 +76,7 @@ namespace TorreDeControle.UI
 
             Ligar(botaoPersonagens, nameof(botaoPersonagens), AbrirPersonagens);
             Ligar(botaoSalas, nameof(botaoSalas), AbrirSalas);
+            Ligar(botaoNpcs, nameof(botaoNpcs), AbrirNpcs);
             Ligar(botaoAjuda, nameof(botaoAjuda), AbrirAjuda);
         }
 
@@ -95,6 +107,13 @@ namespace TorreDeControle.UI
             if (painelSalas == null)
                 painelSalas = PainelSalas.Criar(transform);
             painelSalas.Abrir(salas, personagens, jogadores);
+        }
+
+        void AbrirNpcs()
+        {
+            if (painelNpcs == null)
+                painelNpcs = PainelNpcs.Criar(transform);
+            painelNpcs.Abrir(personagens, salas);
         }
 
         void AbrirAjuda()

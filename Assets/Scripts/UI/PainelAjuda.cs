@@ -11,10 +11,14 @@ namespace TorreDeControle.UI
     {
         string[] nomes;
         string[] arquivos;
+        string[] ids;
         JArray catalogo;
         Texture2D[] panoramas;
-        readonly string[] categorias = { "referencia-rapida", "movimentos-basicos", "pvp", "influencia", "condicoes", "equipe-sessao", "movimentos-equipe" };
-        readonly string[] categoriasNomes = { "Visão geral", "Movimentos básicos", "PvP", "Influência", "Condições", "Equipe e sessão", "Movimentos de equipe" };
+        readonly string[] categorias = { "referencia-rapida", "movimentos-basicos", "pvp", "influencia", "condicoes", "equipe-sessao", "movimentos-equipe", "movimentos-arquetipo", "viloes" };
+        readonly string[] categoriasNomes = { "Visão geral", "Movimentos básicos", "PvP", "Influência", "Condições", "Equipe e sessão", "Movimentos de equipe", "Movimentos de arquétipo", "Vilões" };
+        string arquetipoAtual;
+        bool condicoesVilao;
+        bool contextoCondicoesVilao;
         RectTransform[] cortinas;
         Button[] botoesCategoria;
         int categoriaAtual;
@@ -44,6 +48,7 @@ namespace TorreDeControle.UI
 
         public void Abrir(Texture2D[] texturas)
         {
+            contextoCondicoesVilao = false;
             var fonte = Resources.Load<TextAsset>("Ajuda/catalogo");
             if (fonte == null)
             {
@@ -52,9 +57,46 @@ namespace TorreDeControle.UI
             }
             catalogo = (JArray)JObject.Parse(fonte.text)["cartas"];
             panoramas = texturas;
+            foreach (var botao in botoesCategoria) botao.gameObject.SetActive(true);
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
             EscolherCategoria(0);
+        }
+
+        /// <summary>Prefixo dos ids das cartas de movimento de um arquétipo (o id é o do arquetipos.json).</summary>
+        static string PrefixoDoArquetipo(string arquetipoId) => $"arquetipo/{arquetipoId}/";
+
+        /// <summary>
+        /// O catálogo tem cartas de movimento deste arquétipo? Busca pelo id no texto (sem montar o JSON nem
+        /// guardar cache), barato o bastante para a ficha perguntar ao desenhar a seção.
+        /// </summary>
+        public static bool TemMovimentos(string arquetipoId)
+        {
+            if (string.IsNullOrEmpty(arquetipoId))
+                return false;
+            var fonte = Resources.Load<TextAsset>("Ajuda/catalogo");
+            return fonte != null && fonte.text.Contains("\"" + PrefixoDoArquetipo(arquetipoId));
+        }
+
+        /// <summary>
+        /// Consulta contextual: só os movimentos do arquétipo (pelo id, não pelo nome exibido) e, se
+        /// <paramref name="movimento"/> vier (id do movimento no arquetipos.json), já abre a carta dele.
+        /// </summary>
+        public void AbrirMovimentos(string arquetipoId, string movimento = null)
+        {
+            Abrir(null);
+            var prefixo = PrefixoDoArquetipo(arquetipoId);
+            catalogo = new JArray(catalogo.Cast<JObject>().Where(c =>
+                (string)c["categoria"] == "movimentos-arquetipo" &&
+                ((string)c["id"] ?? string.Empty).StartsWith(prefixo)));
+            var grupo = catalogo.Count > 0 ? (string)catalogo[0]["arquetipo"] : null;
+            var categoria = System.Array.IndexOf(categorias, "movimentos-arquetipo");
+            for (var k = 0; k < botoesCategoria.Length; k++)
+                botoesCategoria[k].gameObject.SetActive(k == categoria);
+            EscolherCategoria(categoria, grupo);
+            var carta = movimento == null ? -1 : System.Array.IndexOf(ids, prefixo + movimento);
+            if (carta >= 0)
+                Ler(carta);
         }
 
         void MontarGaleria()
@@ -74,6 +116,7 @@ namespace TorreDeControle.UI
                 var alvo = quadro.gameObject.AddComponent<Image>();
                 alvo.color = Estilo.Campo;
                 var botao = quadro.gameObject.AddComponent<Button>();
+                SomBotao.Ligar(botao);
                 botao.targetGraphic = alvo;
                 botao.onClick.AddListener(() => Ler(escolhido));
                 var imagem = Imagem(quadro);
@@ -83,12 +126,34 @@ namespace TorreDeControle.UI
             MostrarGaleria();
         }
 
-        void EscolherCategoria(int categoria)
+        public void AbrirCondicoesVilao()
+        {
+            Abrir(null);
+            contextoCondicoesVilao = true;
+            catalogo = new JArray(catalogo.Cast<JObject>().Where(c =>
+                (string)c["id"] == "viloes/luta" ||
+                ((string)c["id"] ?? string.Empty).StartsWith("viloes/condicao-")));
+            var categoria = System.Array.IndexOf(categorias, "viloes");
+            for (var k = 0; k < botoesCategoria.Length; k++)
+                botoesCategoria[k].gameObject.SetActive(k == categoria);
+            EscolherCategoria(categoria, somenteCondicoes: true);
+        }
+
+        void EscolherCategoria(int categoria, string arquetipo = null, bool somenteCondicoes = false)
         {
             categoriaAtual = categoria;
+            condicoesVilao = categorias[categoria] == "viloes" && somenteCondicoes;
             var entradas = catalogo.Cast<JObject>()
                 .Where(c => (string)c["categoria"] == categorias[categoria]).ToArray();
+            if (condicoesVilao)
+                entradas = entradas.Where(c => (string)c["id"] == "viloes/luta" ||
+                    ((string)c["id"] ?? string.Empty).StartsWith("viloes/condicao-")).ToArray();
+            var grupos = entradas.Select(c => (string)c["arquetipo"]).Where(a => a != null).Distinct().ToArray();
+            arquetipoAtual = grupos.Length == 0 ? null : arquetipo ?? grupos[0];
+            if (arquetipoAtual != null)
+                entradas = entradas.Where(c => (string)c["arquetipo"] == arquetipoAtual).ToArray();
             nomes = entradas.Select(c => (string)c["titulo"]).ToArray();
+            ids = entradas.Select(c => (string)c["id"]).ToArray();
             arquivos = entradas.Select(c => ((string)c["arquivo"]).Replace(".png", string.Empty)).ToArray();
             cards = new Texture2D[arquivos.Length];
             for (var k = 0; k < cards.Length; k++)
@@ -104,6 +169,24 @@ namespace TorreDeControle.UI
             }
             assuntos = cortinas[categoria];
             foreach (Transform filho in assuntos) Destroy(filho.gameObject);
+            if (categorias[categoria] == "viloes" && !contextoCondicoesVilao)
+            {
+                var b = Estilo.BotaoContorno(assuntos,
+                    condicoesVilao ? "Todos os vilões" : "Movimentos de condição", 0, Estilo.Dourado,
+                    () => EscolherCategoria(categoria, somenteCondicoes: !condicoesVilao));
+                b.GetComponent<LayoutElement>().preferredHeight = 42;
+                var textoGrupo = b.GetComponentInChildren<TextMeshProUGUI>();
+                textoGrupo.fontSize = 15;
+                textoGrupo.characterSpacing = 0;
+            }
+            foreach (var grupo in grupos)
+            {
+                var selecionado = grupo;
+                var b = Estilo.BotaoContorno(assuntos, grupo, 0, Estilo.Dourado,
+                    () => EscolherCategoria(categoria, selecionado));
+                b.GetComponent<LayoutElement>().preferredHeight = 42;
+                b.GetComponentInChildren<TextMeshProUGUI>().fontSize = 17;
+            }
             atalhos = new Button[nomes.Length];
             for (var k = 0; k < nomes.Length; k++)
             {
@@ -186,7 +269,9 @@ namespace TorreDeControle.UI
                     : categoria == 3 ? "Entender, usar, renunciar e rejeitar Influência."
                     : categoria == 4 ? "Penalidades, marcação e formas de remover condições."
                     : categoria == 5 ? "Pilha de Equipe e início e fim de sessão."
-                    : "Celebração e vulnerabilidade: movimentos de equipe dos dez arquétipos.");
+                    : categoria == 6 ? "Celebração e vulnerabilidade: movimentos de equipe dos dez arquétipos."
+                    : categoria == 7 ? "Movimentos próprios de cada arquétipo, agrupados por classe."
+                    : "Consulta do mestre: criar vilões, conduzir conflitos e reagir às condições.");
                 botoesCategoria[categoria] = b;
                 var cortinaRect = Estilo.Rect("Assuntos " + categoriasNomes[categoria], listaMenu);
                 var cortina = cortinaRect.gameObject.AddComponent<VerticalLayoutGroup>();
@@ -257,6 +342,8 @@ namespace TorreDeControle.UI
             areaGaleria.gameObject.SetActive(true);
             leitor.gameObject.SetActive(false);
             titulo.text = "AJUDA · " + categoriasNomes[categoriaAtual].ToUpperInvariant();
+            if (arquetipoAtual != null) titulo.text += " · " + arquetipoAtual.ToUpperInvariant();
+            if (condicoesVilao) titulo.text = "AJUDA · MOVIMENTOS DE CONDIÇÃO DO VILÃO";
             pagina.text = "Escolha uma carta para ampliar";
             anterior.gameObject.SetActive(false);
             proxima.gameObject.SetActive(false);

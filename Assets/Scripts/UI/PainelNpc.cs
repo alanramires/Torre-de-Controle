@@ -18,12 +18,26 @@ namespace TorreDeControle.UI
         Personagem npc;
         CadastroPersonagens cadastro;
         Action aoFechar;
+        PainelAjuda ajudaCondicoes;
 
         TextMeshProUGUI titulo;
         TextMeshProUGUI subtitulo;
         RectTransform moldura;
         RectTransform conteudo;
         TextMeshProUGUI rodape;
+
+        /// <summary>
+        /// Como a tela chama cada papel. "Vilão / Oponente": um aliado com quem a equipe briga (a babá
+        /// que apanhou) usa a ficha de vilão sem ser vilão. O id gravado é o do enum (vilao).
+        /// </summary>
+        public static string NomeDoPapel(Papel p) =>
+            p switch { Papel.Vilao => "Vilão / Oponente", Papel.Aliado => "Aliado", _ => "Neutro" };
+
+        public static System.Collections.Generic.IReadOnlyList<(string id, string nome)> OpcoesPapel() =>
+            new[] { Papel.Neutro, Papel.Aliado, Papel.Vilao }.Select(p => (p.ToString(), NomeDoPapel(p))).ToList();
+
+        static System.Collections.Generic.IReadOnlyList<(string id, string nome)> OpcoesMaturidade() =>
+            new[] { (Maturidade.Adulto.ToString(), "Adulto"), (Maturidade.Jovem.ToString(), "Jovem") };
 
         public static PainelNpc Criar(Transform pai)
         {
@@ -51,6 +65,63 @@ namespace TorreDeControle.UI
             gameObject.SetActive(false);
             aoFechar?.Invoke();
         }
+
+        // ---------- exportar e importar este NPC ----------
+
+        /// <summary>Grava em dados/exportacoes e copia o JSON (lista de um NPC: entra também na tela de NPCs).</summary>
+        void Exportar()
+        {
+            var json = cadastro.ExportarNpc(npc.Id);
+            if (json == null || Troca.Arquivos == null)
+                return;
+            string caminho;
+            try
+            {
+                caminho = Troca.Arquivos.Exportar("NPC - " + npc.NomeExibicao, json);
+            }
+            catch (Exception e)
+            {
+                rodape.color = Estilo.Erro;
+                rodape.text = "Não deu para exportar: " + e.Message;
+                return;
+            }
+            GUIUtility.systemCopyBuffer = json;
+            Estilo.Confirmar(transform,
+                $"{npc.NomeExibicao} exportado em\n<size=80%>{caminho}</size>\nO JSON também foi copiado (Ctrl+V para colar).",
+                "Abrir a pasta",
+                () => Application.OpenURL("file:///" + Troca.Arquivos.PastaExportacoes.Replace('\\', '/')));
+        }
+
+        /// <summary>Por cima deste NPC: um .json de dados/importar, ou a área de transferência.</summary>
+        void Importar()
+        {
+            if (Troca.Arquivos == null)
+                return;
+            var opcoes = new System.Collections.Generic.List<(string, UnityEngine.Events.UnityAction, bool)>();
+            foreach (var caminho in Troca.Importaveis(CadastroPersonagens.FormatoDeTrocaNpcs))
+            {
+                var arquivo = caminho;
+                opcoes.Add((System.IO.Path.GetFileName(arquivo), () => ImportarPorCima(Troca.Arquivos.Ler(arquivo)), false));
+            }
+            opcoes.Add(("Colar da área de transferência", () => ImportarPorCima(GUIUtility.systemCopyBuffer), false));
+            opcoes.Add(("Abrir a pasta de importar", () =>
+                Application.OpenURL("file:///" + Troca.Arquivos.PastaImportar.Replace('\\', '/')), true));
+            Estilo.Escolher(transform, $"Importar por cima de {npc.NomeExibicao}", opcoes.ToArray());
+        }
+
+        void ImportarPorCima(string json) =>
+            Estilo.Confirmar(transform,
+                $"Gravar o arquivo por cima de {npc.NomeExibicao}?\n<size=80%>Ficam a campanha, o vínculo com a heroína e as Influências daqui.</size>",
+                "Importar", () =>
+                {
+                    var resultado = cadastro.ReimportarNpc(npc.Id, json);
+                    Redesenhar();
+                    if (!resultado.Ok)
+                    {
+                        rodape.color = Estilo.Erro;
+                        rodape.text = resultado.Erro;
+                    }
+                });
 
         // ---------- montagem ----------
 
@@ -80,6 +151,8 @@ namespace TorreDeControle.UI
             titulo = Estilo.Rotulo(titulos, string.Empty, 40, Estilo.Dourado, FontStyles.Bold);
             titulo.characterSpacing = 5;
             subtitulo = Estilo.Rotulo(titulos, string.Empty, 22, Estilo.TextoSuave);
+            Estilo.BotaoContorno(cabecalho, "Exportar", 190, Estilo.TextoSuave, Exportar);
+            Estilo.BotaoContorno(cabecalho, "Importar", 190, Estilo.TextoSuave, Importar);
             Estilo.BotaoContorno(cabecalho, "Fechar", 190, Estilo.TextoSuave, Fechar);
 
             var divisoria = Estilo.Rect("Divisoria", cartao);
@@ -125,7 +198,7 @@ namespace TorreDeControle.UI
         {
             titulo.text = npc.NomeExibicao.ToUpperInvariant();
             var maturidade = npc.Maturidade == Maturidade.Adulto ? "adulto" : "jovem";
-            var papel = npc.Papel switch { Papel.Vilao => "vilão", Papel.Aliado => "aliado", _ => "neutro" };
+            var papel = NomeDoPapel(npc.Papel).ToLowerInvariant();
             var origem = cadastro.OrigemDoNpc(npc);
             subtitulo.text = $"NPC · {maturidade} · {papel}" +
                              (origem is { } o ? $" · {o.dono.NomeExibicao} · {o.vinculo}" : string.Empty) +
@@ -153,7 +226,7 @@ namespace TorreDeControle.UI
             }
             Secao("IDENTIDADE", null);
             var nome = CampoRotulado("NOME", npc.Identidade.Nome, "nome");
-            var codinome = CampoRotulado(npc.Papel == Papel.Vilao ? "NOME DE VILÃO" : "CODINOME",
+            var codinome = CampoRotulado(npc.Papel == Papel.Vilao ? "CODINOME / NOME DE VILÃO" : "CODINOME",
                 npc.Identidade.Codinome, "opcional");
             foreach (var campo in new[] { nome, codinome })
             {
@@ -162,6 +235,24 @@ namespace TorreDeControle.UI
             }
             if (npc.Papel == Papel.Vilao)
                 Nota("O nome de vilão sinaliza a geração; o nome real é opcional.");
+
+            // Papel e maturidade aqui também: promover a Vilão / Oponente na hora da briga, e voltar depois
+            // (a ficha de vilão fica guardada).
+            var perfil = FilaRotulada("PAPEL");
+            Estilo.ListaSuspensa(perfil, 300, OpcoesPapel(), npc.Papel.ToString(), id =>
+            {
+                cadastro.DefinirPapel(npc.Id, (Papel)Enum.Parse(typeof(Papel), id));
+                Redesenhar();
+            });
+            var rotuloMaturidade = Estilo.Rotulo(perfil, "MATURIDADE", 20, Estilo.TextoSuave, FontStyles.Bold);
+            rotuloMaturidade.characterSpacing = 4;
+            rotuloMaturidade.alignment = TextAlignmentOptions.Right;
+            rotuloMaturidade.gameObject.AddComponent<LayoutElement>().preferredWidth = 220;
+            Estilo.ListaSuspensa(perfil, 220, OpcoesMaturidade(), npc.Maturidade.ToString(), id =>
+            {
+                cadastro.DefinirMaturidade(npc.Id, (Maturidade)Enum.Parse(typeof(Maturidade), id));
+                Redesenhar();
+            });
 
             Secao("APARÊNCIA MARCANTE", "um maneirismo ou traço físico bem distinto");
             var aparencia = Estilo.AreaTexto(conteudo, "como reconhecer de longe", 90);
@@ -206,14 +297,14 @@ namespace TorreDeControle.UI
             if (npc.Papel == Papel.Vilao && npc.Vilao != null)
                 FichaDeVilao();
             else
-                Nota("NPC só marca condição se um herói o enfrentar diretamente. Para ter ficha de vilão, mude o papel para Vilão.");
+                Nota("NPC só marca condição se um herói o enfrentar diretamente. Para ter ficha de vilão, mude o papel para Vilão / Oponente (lá em cima).");
         }
 
         void FichaDeVilao()
         {
             var v = npc.Vilao;
             Vao();
-            Secao("FICHA DE VILÃO", null);
+            Secao("FICHA DE VILÃO / OPONENTE", null);
 
             var filaGeracao = FilaRotulada("GERAÇÃO");
             var opcoes = new System.Collections.Generic.List<(string id, string nome)> { (string.Empty, "escolher...") };
@@ -226,6 +317,10 @@ namespace TorreDeControle.UI
             var g = Geracoes.Buscar(v.Geracao);
             var dica = Estilo.Rotulo(filaGeracao, g == null ? string.Empty : g.Dica, 20, Estilo.TextoApagado, FontStyles.Italic);
             Estilo.ColunaElastica(dica);
+            Estilo.SeloDica(filaGeracao, "o que é",
+                "Sabor, sem efeito mecânico (livro p.194): diz a época do vilão e há quanto tempo ele está no jogo. " +
+                "Ouro surgiu nos anos 1920–40; Prata, 1950–60; Bronze, 1970–80; Moderna, dos anos 1990 até hoje " +
+                "(a mesma das PJs). O livro pede um nome que sinalize a geração.");
 
             Secao("MOVIMENTOS DE VILÃO", "frases ativas, com o que muda na cena (o livro sugere três ou mais)");
             for (var k = 0; k <= v.Movimentos.Count; k++)
@@ -250,7 +345,7 @@ namespace TorreDeControle.UI
                 campo.onDeselect.AddListener(Gravar);
             }
 
-            Secao("CONDIÇÕES", FichaVilao.Perigo(v.Condicoes.Count));
+            Secao("CONDIÇÕES", FichaVilao.Perigo(v.Condicoes.Count), AbrirAjudaCondicoes);
             var fila = Estilo.Fila(conteudo, 54, 10);
             foreach (var c in Condicoes.Todas)
             {
@@ -281,12 +376,25 @@ namespace TorreDeControle.UI
 
         // ---------- peças ----------
 
-        void Secao(string nome, string legenda)
+        void AbrirAjudaCondicoes()
+        {
+            if (ajudaCondicoes == null)
+                ajudaCondicoes = PainelAjuda.Criar(transform.parent);
+            ajudaCondicoes.AbrirCondicoesVilao();
+        }
+
+        void Secao(string nome, string legenda, Action ajuda = null)
         {
             var fila = Estilo.Fila(conteudo, 40);
             var t = Estilo.Rotulo(fila, nome, 22, Estilo.Dourado, FontStyles.Bold);
             t.characterSpacing = 5;
-            t.gameObject.AddComponent<LayoutElement>().preferredWidth = 360;
+            t.textWrappingMode = TextWrappingModes.NoWrap; // "FICHA DE VILÃO / OPONENTE" numa linha só
+            t.gameObject.AddComponent<LayoutElement>().preferredWidth = ajuda == null ? 360 : 170;
+            if (ajuda != null)
+            {
+                var b = Estilo.BotaoContorno(fila, "?", 36, Estilo.Dourado, () => ajuda());
+                b.gameObject.AddComponent<Dica>().Configurar("Consultar Vilão na luta e os cinco movimentos de condição.");
+            }
             if (legenda != null)
             {
                 var l = Estilo.Rotulo(fila, legenda, 20, Estilo.TextoSuave, FontStyles.Italic);
@@ -338,6 +446,7 @@ namespace TorreDeControle.UI
                 ? Estilo.Moldura(rect.gameObject, Estilo.Dourado, Estilo.Dourado)
                 : Estilo.Moldura(rect.gameObject, new Color(Estilo.Dourado.r, Estilo.Dourado.g, Estilo.Dourado.b, 0.08f), Estilo.Dourado);
             var botao = rect.gameObject.AddComponent<Button>();
+            SomBotao.Ligar(botao);
             botao.targetGraphic = imagem;
             botao.onClick.AddListener(aoClicar);
             rect.gameObject.AddComponent<Tabulavel>();
