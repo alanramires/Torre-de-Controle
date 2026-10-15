@@ -94,7 +94,8 @@ namespace TorreDeControle.Core.Personagens
         /// <summary>Laboratório (fora de sala): ativas primeiro; cada bloco na ordem que o mestre arrastou.</summary>
         public IReadOnlyList<Personagem> Listar() => Ordenacao.Ordenar(DoLaboratorio, p => p.NomeExibicao);
 
-        IEnumerable<Personagem> DoLaboratorio => personagens.Where(p => p.Sala == null);
+        // Heroínas do laboratório. NPC original (sem sala) mora no laboratório de NPCs, à parte.
+        IEnumerable<Personagem> DoLaboratorio => personagens.Where(p => p.Sala == null && p.Controle == Controle.Jogador);
 
         /// <summary>As cópias que estão (ou estiveram, se inativas) na sala.</summary>
         public IReadOnlyList<Personagem> DaSala(string sala) => personagens.Where(p => p.Sala == sala).ToList();
@@ -107,7 +108,8 @@ namespace TorreDeControle.Core.Personagens
                 return Resultado.Falha("Personagem não encontrada.");
             if (personagem.Sala == null)
             {
-                var bloco = DoLaboratorio.Where(p => personagem.Favorito ? p.Favorito
+                // Laboratório (das heroínas ou de NPCs): favoritos, ativos e inativos são blocos.
+                var bloco = personagens.Where(p => p.Sala == null && p.Controle == personagem.Controle).Where(p => personagem.Favorito ? p.Favorito
                     : !p.Favorito && p.Ativo == personagem.Ativo)
                     .OrderBy(p => p.Ordem)
                     .ThenBy(p => p.NomeExibicao, StringComparer.CurrentCultureIgnoreCase).ToList();
@@ -118,10 +120,8 @@ namespace TorreDeControle.Core.Personagens
                 Gravar();
                 return Resultado.Sucesso();
             }
-            // Na sala, heróis e NPCs são listas separadas.
-            var lista = personagem.Sala == null
-                ? DoLaboratorio
-                : personagens.Where(p => p.Sala == personagem.Sala && p.Controle == personagem.Controle);
+            // Na sala, heróis e NPCs são listas separadas; o laboratório de NPCs é a "sala" null dos NPCs.
+            var lista = personagens.Where(p => p.Sala == personagem.Sala && p.Controle == personagem.Controle);
             Ordenacao.Mover(lista, personagem, indice, p => p.NomeExibicao);
             Gravar();
             return Resultado.Sucesso();

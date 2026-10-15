@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace TorreDeControle.Core.Personagens
 {
     /// <summary>
     /// NPCs (controle do mestre). Mesma entidade da personagem: sem arquétipo nem ciclo de criação;
-    /// no lugar, o perfil PNJ e, se for vilão, a ficha de vilão. Por ora nascem direto na sala.
+    /// no lugar, o perfil PNJ e, se for vilão, a ficha de vilão. Nascem numa sala (ou da ficha de uma
+    /// heroína na sala) ou no laboratório de NPCs (sala null), de onde se copiam para as salas.
     /// </summary>
     public sealed partial class CadastroPersonagens
     {
@@ -18,18 +20,24 @@ namespace TorreDeControle.Core.Personagens
         public IReadOnlyList<Personagem> HeroisDaSala(string sala) =>
             personagens.Where(p => p.Sala == sala && p.Controle == Controle.Jogador).ToList();
 
-        public Resultado CriarNpc(string sala, string nome, Maturidade maturidade, Papel papel)
+        /// <summary>Laboratório de NPCs: os originais, fora de qualquer sala (docs/npc_lab.md).</summary>
+        public IReadOnlyList<Personagem> NpcsDoLaboratorio() => NpcsDaSala(null);
+
+        /// <summary>
+        /// Cria o NPC na sala, ou no laboratório de NPCs com <paramref name="sala"/> null. Basta um dos dois
+        /// nomes: o nome ou o codinome (nome de vilão, se vilão).
+        /// </summary>
+        public Resultado CriarNpc(string sala, string nome, Maturidade maturidade, Papel papel, string codinome = null)
         {
-            if (string.IsNullOrWhiteSpace(sala))
-                return Resultado.Falha("NPC nasce numa sala.");
             var limpo = (nome ?? string.Empty).Trim();
-            if (limpo.Length == 0)
+            var limpoCodinome = (codinome ?? string.Empty).Trim();
+            if (limpo.Length == 0 && limpoCodinome.Length == 0)
                 return Resultado.Falha("Dê um nome ao NPC.");
 
             var npc = new Personagem
             {
                 Id = Guid.NewGuid().ToString("N"),
-                Identidade = new Identidade { Nome = limpo },
+                Identidade = new Identidade { Nome = limpo, Codinome = limpoCodinome },
                 Controle = Controle.Mestre,
                 Maturidade = maturidade,
                 Sala = sala,
@@ -173,8 +181,7 @@ namespace TorreDeControle.Core.Personagens
                 avisos.Add("Sem motivação: é ela que diz o que o NPC faz.");
             if (p.Papel == Papel.Vilao && p.Vilao != null)
             {
-                if (p.Vilao.Geracao == null)
-                    avisos.Add("Vilão sem geração.");
+                // Geração é sabor (época e tom do nome), não falta: não vira aviso.
                 if (p.Vilao.Movimentos.Count == 0)
                     avisos.Add("Vilão sem movimentos de vilão (o livro sugere três ou mais).");
                 if (p.Vilao.Condicoes.Count == 0)
@@ -182,6 +189,45 @@ namespace TorreDeControle.Core.Personagens
             }
             return avisos;
         }
+
+        // ---------- copiar NPC: laboratório → sala, sala → sala (reboot), sala → laboratório ----------
+
+        /// <summary>
+        /// Copia o NPC para a sala <paramref name="destino"/> (null = laboratório de NPCs). A cópia é
+        /// independente e guarda de onde veio (<see cref="Personagem.Origem"/>). Leva o que o NPC é (nome,
+        /// foto, aparência, perfil, papel, maturidade, ficha de vilão, notas); deixa o que aconteceu com ele
+        /// (Influências, vínculo com a heroína; o log da mesa é da sala de origem). Ver docs/npc_lab.md.
+        /// </summary>
+        public Personagem CopiarNpc(string id, string destino, out Resultado resultado)
+        {
+            if (!AcharNpc(id, out var npc, out resultado))
+                return null;
+            var copia = JsonConvert.DeserializeObject<Personagem>(JsonConvert.SerializeObject(npc));
+            Normalizar(copia);
+            copia.Id = Guid.NewGuid().ToString("N");
+            copia.Origem = npc.Id;
+            copia.Sala = destino;
+            copia.Ativo = true;
+            copia.Favorito = false;
+            copia.Ordem = Ordenacao.Fim(personagens.Where(n => n.Sala == destino && n.Controle == Controle.Mestre));
+            copia.Pnj.Vinculo = null;
+            copia.Influencias = new Dictionary<string, EstadoInfluencia>();
+            copia.InfluenciaPorque = new Dictionary<string, string>();
+            copia.InfluenciaPorqueNinguem = string.Empty;
+            personagens.Add(copia);
+            Gravar();
+            resultado = Resultado.Sucesso();
+            return copia;
+        }
+
+        /// <summary>Já há, no destino (null = laboratório), um NPC ativo com o mesmo nome? Só aviso: copiar pode.</summary>
+        public bool NomeRepetidoNoDestino(Personagem npc, string destino) =>
+            personagens.Any(n => n.Id != npc.Id && n.Ativo && n.Sala == destino && n.Controle == Controle.Mestre &&
+                                 string.Equals(n.NomeExibicao, npc.NomeExibicao, StringComparison.CurrentCultureIgnoreCase));
+
+        /// <summary>O NPC de onde esta cópia veio (null se nasceu aqui, ou se a origem não existe mais).</summary>
+        public Personagem OrigemDaCopia(Personagem npc) =>
+            npc?.Origem == null ? null : Buscar(npc.Origem);
 
         // ---------- NPCs que nascem da ficha (nêmesis, Legado, perguntas de histórico) ----------
 

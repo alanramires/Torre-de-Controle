@@ -16,6 +16,16 @@ O que já existe está em "Ponto de partida"; o resto é o plano.
 
 Igual ao laboratório das heroínas: **originais** no laboratório, **instâncias** nas salas.
 
+**Núcleo feito (2026-10-15), tela não:** `CriarNpc(null, …)` cria no laboratório; `NpcsDoLaboratorio()`;
+`CopiarNpc(id, destino)` com destino sala ou null (laboratório); `NomeRepetidoNoDestino`; `OrigemDaCopia`.
+O laboratório das heroínas (`Listar`) deixou de mostrar NPCs sem sala. Testes em `NpcLabTests`.
+
+- **NPC da ficha nasce na sala, nunca no laboratório** (2026-10-15). Com a heroína em novo, fica só o texto
+  na ficha. O NPC é da campanha: a mesma heroína em duas salas dá duas Eclipses independentes. O laboratório
+  de NPCs é a biblioteca do mestre e só recebe NPC **de propósito** ("copiar para… laboratório").
+- **NPCs não entram em `PendenciasParaCarreira`:** as perguntas de histórico já são obrigatórias para concluir
+  a criação; deixar o nome vazio é escolha narrativa.
+
 - Dá para criar um NPC no laboratório antes de ter campanha para ele (a vilã que ainda não tem onde morar).
 - Pôr na sala cria uma instância independente, que guarda de onde veio (`Origem`, como nas heroínas).
 - **Reboot entre campanhas:** copiar um NPC de uma sala para outra também cria uma instância independente,
