@@ -2776,6 +2776,970 @@
           "texto": "As escolhas precisam aparecer no diálogo. Diga o que confessou, inventou ou elogiou."
         }
       ]
+    },
+    {
+      "id": "arquetipo/janus/a-mascara",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Janus",
+      "arquivo": "12-janus-a-mascara.png",
+      "titulo": "A MÁSCARA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Janus · livro pp.134 e 136–137",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/6/movimentos/opcoes/0",
+        "movimentos_basicos.json",
+        "influencia.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "MOVIMENTO INICIAL",
+          "texto": "A Janus começa com A Máscara e escolhe outros 2 movimentos. Você oculta sua identidade civil."
+        },
+        {
+          "titulo": "RÓTULO DA MÁSCARA",
+          "texto": "Escolha o que tenta representar como heroína: Aberração, Perigoso, Salvador ou Superior."
+        },
+        {
+          "titulo": "UMA VEZ POR SESSÃO",
+          "texto": "Afirme sua identidade heroica ou civil por uma ação significativa na história. Troque os valores de Mundano e do Rótulo da máscara."
+        },
+        {
+          "titulo": "REVELAR A IDENTIDADE",
+          "texto": "Quando contar sua identidade secreta a alguém que ainda não sabia, marque potencial."
+        },
+        {
+          "titulo": "NA FICÇÃO",
+          "texto": "Afirmar uma identidade não é apenas vestir ou tirar a máscara: faça uma escolha que mostre quem você é e tenha consequências."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/janus/agora-e-serio",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Janus",
+      "arquivo": "12-janus-agora-e-serio.png",
+      "titulo": "AGORA É SÉRIO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Janus · livro pp.134 e 136–137",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/6/movimentos/opcoes/1",
+        "movimentos_basicos.json",
+        "influencia.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "ASSUMIR UM OBJETIVO",
+          "texto": "Comprometa-se a salvar alguém ou derrotar um inimigo terrível. Marque uma condição."
+        },
+        {
+          "titulo": "BÔNUS",
+          "texto": "Ganhe +1 constante em rolagens que busquem diretamente esse objetivo."
+        },
+        {
+          "titulo": "SEM PROGRESSO",
+          "texto": "No fim de cada cena em que não avançar em direção ao objetivo, marque uma condição. O mestre decide se houve progresso."
+        },
+        {
+          "titulo": "OBJETIVO CUMPRIDO",
+          "texto": "Marque potencial. O compromisso precisa ser mostrado na história, não apenas anunciado para ganhar o bônus."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/janus/eu-sou-o-que-voce-ve",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Janus",
+      "arquivo": "12-janus-eu-sou-o-que-voce-ve.png",
+      "titulo": "EU SOU O QUE VOCÊ VÊ",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Janus · livro pp.134 e 136–137",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/6/movimentos/opcoes/2",
+        "movimentos_basicos.json",
+        "influencia.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "CONVERSAR SOBRE IDENTIDADE",
+          "texto": "Passe um tempo falando com alguém sobre quem você é. Pergunte qual Rótulo essa pessoa tenta atribuir a você."
+        },
+        {
+          "titulo": "RESPOSTA SINCERA",
+          "texto": "Quem interpreta a outra personagem responde honestamente."
+        },
+        {
+          "titulo": "SE ACEITAR",
+          "texto": "Ganhe +1 adiante e escolha marcar potencial OU remover uma condição."
+        },
+        {
+          "titulo": "SE DISCORDAR",
+          "texto": "Você não precisa aceitar essa visão. Se a situação acionar Rejeitar Influência, siga as regras desse movimento."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/janus/discreta",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Janus",
+      "arquivo": "12-janus-discreta.png",
+      "titulo": "DISCRETA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Janus · livro pp.134 e 136–137",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/6/movimentos/opcoes/3",
+        "movimentos_basicos.json",
+        "influencia.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + MUNDANO",
+          "texto": "Use sua identidade civil para enganar alguém, iludir ou escapar de sua atenção."
+        },
+        {
+          "titulo": "7+",
+          "texto": "A pessoa acredita na fachada. Sua identidade heroica não corre risco imediato de ser descoberta por essa tentativa."
+        },
+        {
+          "titulo": "7–9: ESCOLHA 1",
+          "texto": "• A pessoa continua vigiando você.\n• Você deixa uma pista comprometedora.\n• Você precisa passar vergonha para convencer."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. Uma obrigação da sua vida civil aparece para complicar a situação."
+        },
+        {
+          "titulo": "CONSEQUÊNCIAS",
+          "texto": "A pista pode denunciar você mais tarde; a vigilância restringe suas ações; o papelão dá aos outros material para julgá-la."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/janus/vou-te-salvar",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Janus",
+      "arquivo": "12-janus-vou-te-salvar.png",
+      "titulo": "VOU TE SALVAR!",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Janus · livro pp.134 e 136–137",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/6/movimentos/opcoes/4",
+        "movimentos_basicos.json",
+        "influencia.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "PROTEGER UM ENTE QUERIDO",
+          "texto": "Defenda alguém que você ama como se tivesse rolado 12+."
+        },
+        {
+          "titulo": "PAGUE UM PREÇO",
+          "texto": "Escolha revelar sua identidade secreta a alguém que esteja vendo a cena OU marcar uma condição."
+        },
+        {
+          "titulo": "RESOLUÇÃO",
+          "texto": "Use o efeito de Defender correspondente a esse resultado. A proteção tem um custo real na sua vida ou no seu estado emocional."
+        },
+        {
+          "titulo": "SE REVELAR",
+          "texto": "A Máscara também permite marcar potencial quando sua identidade secreta é revelada a alguém novo."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/janus/teia-perigosa",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Janus",
+      "arquivo": "12-janus-teia-perigosa.png",
+      "titulo": "TEIA PERIGOSA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Janus · livro pp.134 e 136–137",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/6/movimentos/opcoes/5",
+        "movimentos_basicos.json",
+        "influencia.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "REVELAR A ARMADILHA",
+          "texto": "Mostre uma armadilha preparada com seus poderes. Role + o Rótulo da máscara."
+        },
+        {
+          "titulo": "7+",
+          "texto": "O oponente cai na armadilha e você ganha uma abertura contra ele."
+        },
+        {
+          "titulo": "10+",
+          "texto": "Ganhe também +1 adiante para ir atrás desse oponente."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. A armadilha provoca uma escalada perigosa que você não pretendia."
+        },
+        {
+          "titulo": "PREPARAÇÃO NA HISTÓRIA",
+          "texto": "Não precisa ter anunciado a armadilha antes. Combine com o mestre como a preparou; ela precisa ser possível na ficção."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/legado/lute-o-bom-combate",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Legado",
+      "arquivo": "13-legado-lute-o-bom-combate.png",
+      "titulo": "LUTE O BOM COMBATE",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Legado · livro pp.140 e 142–143",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/7/movimentos/opcoes/0",
+        "movimentos_basicos.json",
+        "influencia.json",
+        "nucleo.json#/rotulos"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO SE CONTÉM",
+          "texto": "Ao Enfrentar diretamente uma ameaça segurando sua força, você pode usar este movimento."
+        },
+        {
+          "titulo": "TROCA DE RÓTULO",
+          "texto": "Role + Salvador em vez de + Perigoso."
+        },
+        {
+          "titulo": "RESTRIÇÃO",
+          "texto": "Se fizer a troca, não pode escolher a opção de impressionar, surpreender ou amedrontar o adversário."
+        },
+        {
+          "titulo": "RESTANTE DO MOVIMENTO",
+          "texto": "Resolva a troca de golpes e as outras escolhas normalmente. Assustado continua impondo −2 a Enfrentar."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/legado/eu-sei-o-que-sou",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Legado",
+      "arquivo": "13-legado-eu-sei-o-que-sou.png",
+      "titulo": "EU SEI O QUE SOU",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Legado · livro pp.140 e 142–143",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/7/movimentos/opcoes/1",
+        "movimentos_basicos.json",
+        "influencia.json",
+        "nucleo.json#/rotulos"
+      ],
+      "secoes": [
+        {
+          "titulo": "UMA VEZ POR CENA",
+          "texto": "Ao Defender um colega de equipe, você pode aumentar Salvador em 1 e diminuir outro Rótulo em 1."
+        },
+        {
+          "titulo": "TAMBÉM GANHA EQUIPE",
+          "texto": "Se escolher fazer essa mudança, adicione 1 ponto à pilha de Equipe."
+        },
+        {
+          "titulo": "ATÉ NUMA FALHA",
+          "texto": "Esses efeitos são adicionais aos de Defender e valem mesmo quando você falha. A falha ainda marca potencial e traz suas consequências."
+        },
+        {
+          "titulo": "LIMITES",
+          "texto": "Respeite os limites dos Rótulos. Não pode repetir o benefício durante a mesma cena."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/legado/palavras-do-passado",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Legado",
+      "arquivo": "13-legado-palavras-do-passado.png",
+      "titulo": "PALAVRAS DO PASSADO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Legado · livro pp.140 e 142–143",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/7/movimentos/opcoes/2",
+        "movimentos_basicos.json",
+        "influencia.json",
+        "nucleo.json#/rotulos"
+      ],
+      "secoes": [
+        {
+          "titulo": "BUSCAR ORIENTAÇÃO",
+          "texto": "Procure os mais velhos ou alguém do seu legado. Explique um problema que está vivendo e faça uma pergunta sobre ele."
+        },
+        {
+          "titulo": "SEM ROLAGEM PRÓPRIA",
+          "texto": "Receba uma resposta honesta e um conselho concreto sobre o que fazer."
+        },
+        {
+          "titulo": "SEGUIR O CONSELHO",
+          "texto": "Ganhe +1 constante enquanto der ouvidos à orientação para lidar com o problema."
+        },
+        {
+          "titulo": "SEGUIR SEU CAMINHO",
+          "texto": "Se decidir agir por conta própria em vez de seguir a orientação, marque potencial."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/legado/o-legado-importa",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Legado",
+      "arquivo": "13-legado-o-legado-importa.png",
+      "titulo": "O LEGADO IMPORTA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Legado · livro pp.140 e 142–143",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/7/movimentos/opcoes/3",
+        "movimentos_basicos.json",
+        "influencia.json",
+        "nucleo.json#/rotulos"
+      ],
+      "secoes": [
+        {
+          "titulo": "INFLUÊNCIA COM O LEGADO",
+          "texto": "Quando ganhar Influência sobre alguém do seu legado, ou essa pessoa ganhar Influência sobre você, marque potencial e ganhe +1 adiante."
+        },
+        {
+          "titulo": "RÓTULOS MUDADOS",
+          "texto": "Quando alguém do seu legado provocar uma mudança nos seus Rótulos, marque potencial e ganhe +1 adiante."
+        },
+        {
+          "titulo": "RELAÇÕES NA HISTÓRIA",
+          "texto": "O movimento recompensa se envolver com o legado e permitir que essas relações afetem você. Ele não cria Influência ou muda Rótulos por si só."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/legado/nunca-desista-nunca-se-renda",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Legado",
+      "arquivo": "13-legado-nunca-desista-nunca-se-renda.png",
+      "titulo": "NUNCA DESISTA, NUNCA SE RENDA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Legado · livro pp.140 e 142–143",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/7/movimentos/opcoes/4",
+        "movimentos_basicos.json",
+        "influencia.json",
+        "nucleo.json#/rotulos"
+      ],
+      "secoes": [
+        {
+          "titulo": "GOLPE DE ALGUÉM MUITO MAIS FORTE",
+          "texto": "Use este movimento no lugar de Tomar um golpe poderoso. Role + Salvador, não + condições."
+        },
+        {
+          "titulo": "7+: FIQUE DE PÉ E ESCOLHA 1",
+          "texto": "• Ganhar uma abertura contra quem atacou.\n• Inspirar a equipe com sua resistência: +1 na pilha de Equipe.\n• Manter a atenção do agressor em você."
+        },
+        {
+          "titulo": "7–9",
+          "texto": "Além da escolha, marque uma condição."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. Você é derrubado, mas deixa o adversário sem equilíbrio e vulnerável."
+        },
+        {
+          "titulo": "RESULTADOS NORMAIS",
+          "texto": "Aqui rolar alto é melhor, ao contrário do golpe poderoso básico. A abertura e a queda devem acompanhar o que acontece na ficção."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/legado/simbolo-de-autoridade",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Legado",
+      "arquivo": "13-legado-simbolo-de-autoridade.png",
+      "titulo": "SÍMBOLO DE AUTORIDADE",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Legado · livro pp.140 e 142–143",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/7/movimentos/opcoes/5",
+        "movimentos_basicos.json",
+        "influencia.json",
+        "nucleo.json#/rotulos"
+      ],
+      "secoes": [
+        {
+          "titulo": "DAR UMA ORDEM / + SALVADOR",
+          "texto": "Comande um PNJ com base numa autoridade que ele reconhece. Ele não precisa gostar de você, mas precisa entender essa autoridade."
+        },
+        {
+          "titulo": "7+: O PNJ ESCOLHE",
+          "texto": "• Obedecer à ordem.\n• Deixar o caminho livre.\n• Atacar você em desvantagem.\n• Ficar paralisado."
+        },
+        {
+          "titulo": "10+",
+          "texto": "Ganhe também +1 adiante contra ele."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. O PNJ age como quiser e você recebe −1 adiante contra ele."
+        },
+        {
+          "titulo": "ALVO CLARO",
+          "texto": "Diga a quem se dirige. O mestre decide se um grupo é unificado o bastante para ser tratado como um único alvo."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/nova/chamas",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Nova",
+      "arquivo": "14-nova-chamas.png",
+      "titulo": "CHAMAS · RESERVA DE PODER",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Nova · livro pp.146 e 148–149",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/8/extras/0",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "COMO PONTOS DE MAGIA",
+          "texto": "Primeiro você carrega os poderes para gerar Chamas. Depois gasta essa reserva nas faíscas que escolheu, como quem paga o custo de uma magia."
+        },
+        {
+          "titulo": "CARREGAR / + CONDIÇÕES",
+          "texto": "Descreva como reúne poder. Role 2d6 + o número de condições já marcadas, respeitando o teto de +4."
+        },
+        {
+          "titulo": "QUANTO RECEBE",
+          "texto": "10+: 3 Chamas.\n7–9: 3 Chamas e marque 1 condição.\nFalha: 2 Chamas, marque 3 condições e potencial."
+        },
+        {
+          "titulo": "GASTAR E ENCERRAR",
+          "texto": "Escolha 4 faíscas. Cada uso desconta seu custo da reserva; algumas pedem 1 Chama, outras 2 ou um gasto adicional. Todas as Chamas restantes somem no fim da cena."
+        },
+        {
+          "titulo": "CUIDADO",
+          "texto": "Se precisar marcar uma condição e não houver nenhuma livre, você sai de cena. Carregar poderes também pode causar isso."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/nova/tempestade-de-realidade",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Nova",
+      "arquivo": "14-nova-tempestade-de-realidade.png",
+      "titulo": "TEMPESTADE DE REALIDADE",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Nova · livro pp.146 e 148–149",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/0",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "CUSTO: 1 CHAMA",
+          "texto": "Canalize uma rajada destrutiva dos seus poderes."
+        },
+        {
+          "titulo": "ENFRENTAR / + ABERRAÇÃO",
+          "texto": "Role + Aberração em vez de + Perigoso para Enfrentar diretamente a ameaça. Siga os resultados normais desse movimento."
+        },
+        {
+          "titulo": "DANOS COLATERAIS",
+          "texto": "Você causa destruição indesejada, definida pelo mestre. Gaste mais 1 Chama para evitar esse estrago."
+        },
+        {
+          "titulo": "CONDIÇÃO",
+          "texto": "Assustado continua dando −2 a Enfrentar, mesmo com a troca de Rótulo."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/nova/escudo",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Nova",
+      "arquivo": "14-nova-escudo.png",
+      "titulo": "ESCUDO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Nova · livro pp.146 e 148–149",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/1",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "CUSTO: 1 CHAMA",
+          "texto": "Erga uma proteção rápida contra um perigo imediato que ameaça outra pessoa."
+        },
+        {
+          "titulo": "DEFENDER / + ABERRAÇÃO",
+          "texto": "Role + Aberração em vez de + Salvador para Defender."
+        },
+        {
+          "titulo": "EFEITOS NORMAIS",
+          "texto": "A proteção, a escolha de benefício e os custos continuam sendo os de Defender. Inseguro ainda dá −2."
+        },
+        {
+          "titulo": "DEFESA IMEDIATA",
+          "texto": "É uma reação transitória ao perigo. Para erguer uma barreira duradoura com antecedência, consulte Fosso."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/nova/construtos",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Nova",
+      "arquivo": "14-nova-construtos.png",
+      "titulo": "CONSTRUTOS",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Nova · livro pp.146 e 148–149",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/2",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "CUSTO: 1 CHAMA",
+          "texto": "Crie um objeto usando seus poderes, com tamanho máximo equivalente ao de uma pessoa."
+        },
+        {
+          "titulo": "ANIMAR: +1 CHAMA",
+          "texto": "Dê vida ao construto para agir com alguma independência. Ele obedece às suas ordens."
+        },
+        {
+          "titulo": "AÇÕES",
+          "texto": "O mestre determina os resultados. Quando a situação exigir, pode pedir que você faça um movimento por meio do construto."
+        },
+        {
+          "titulo": "DURAÇÃO",
+          "texto": "O objeto se desfaz no fim da cena."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/nova/fosso",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Nova",
+      "arquivo": "14-nova-fosso.png",
+      "titulo": "FOSSO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Nova · livro pp.146 e 148–149",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/3",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "CUSTO: 1 CHAMA",
+          "texto": "Erga uma barreira para conter ameaças."
+        },
+        {
+          "titulo": "MANTER A ATENÇÃO",
+          "texto": "A barreira permanece enquanto você se concentra nela."
+        },
+        {
+          "titulo": "PRESSÃO EXTRA",
+          "texto": "Se inimigos especialmente poderosos atacarem a barreira, o mestre pode exigir mais 1 Chama."
+        },
+        {
+          "titulo": "PREPARAR DEFESA",
+          "texto": "Fosso permite estabelecer proteção duradoura antes do perigo. Não substitui necessariamente a reação imediata de Escudo para salvar alguém."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/nova/adoracao",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Nova",
+      "arquivo": "14-nova-adoracao.png",
+      "titulo": "ADORAÇÃO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Nova · livro pp.146 e 148–149",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/4",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "CUSTO: 1 CHAMA",
+          "texto": "Ao Liberar seus poderes, faça uma demonstração impressionante e deixe a plateia maravilhada, conquistando respeito e atenção."
+        },
+        {
+          "titulo": "EFEITO ADICIONAL",
+          "texto": "O espanto do público se soma ao que você faz ao Liberar poderes."
+        },
+        {
+          "titulo": "EXIBIR-SE",
+          "texto": "Você pode liberar os poderes especificamente para impressionar uma audiência, se isso fizer sentido na ficção."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/nova/movimento",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Nova",
+      "arquivo": "14-nova-movimento.png",
+      "titulo": "MOVIMENTO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Nova · livro pp.146 e 148–149",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/5",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "CUSTO: 1 CHAMA",
+          "texto": "Vá a qualquer lugar que escolher dentro da cena, atravessando ou escapando de barreiras e restrições no caminho."
+        },
+        {
+          "titulo": "MAIS LONGE: +1 CHAMA",
+          "texto": "Com uma segunda Chama, vá a qualquer lugar em que já esteve."
+        },
+        {
+          "titulo": "COMO ACONTECE",
+          "texto": "Pode ser teletransporte, corrida extraordinária ou outro efeito coerente com seus poderes. Descreva o deslocamento."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/nova/impulso",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Nova",
+      "arquivo": "14-nova-impulso.png",
+      "titulo": "IMPULSO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Nova · livro pp.146 e 148–149",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/6",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "CUSTO: 1 CHAMA",
+          "texto": "Use seus poderes para fortalecer o esforço de um colega de equipe."
+        },
+        {
+          "titulo": "AJUDA: +1",
+          "texto": "Dê +1 à rolagem dele, como uma ajuda paga com Equipe."
+        },
+        {
+          "titulo": "OUTRA RESERVA",
+          "texto": "A Chama sai da sua reserva; não é preciso retirar um ponto da pilha de Equipe."
+        },
+        {
+          "titulo": "MOMENTO",
+          "texto": "A ajuda precisa existir na ficção e pode ajustar o resultado depois dos dados, antes da resolução. Respeite o teto do modificador."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/nova/sobrecarga",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Nova",
+      "arquivo": "14-nova-sobrecarga.png",
+      "titulo": "SOBRECARGA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Nova · livro pp.146 e 148–149",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/7",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "CUSTO: 2 CHAMAS",
+          "texto": "Concentre toda a força dos seus poderes para superar um obstáculo, modificar o ambiente ou ampliar seus sentidos."
+        },
+        {
+          "titulo": "10+ EM LIBERAR",
+          "texto": "Resolva Liberar seus poderes como um 10+, sem uma nova rolagem."
+        },
+        {
+          "titulo": "GASTO DIFERENTE",
+          "texto": "Esta faísca custa 2 Chamas de uma vez. Ter apenas 1 na reserva não basta."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/nova/consciencia-elemental",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Nova",
+      "arquivo": "14-nova-consciencia-elemental.png",
+      "titulo": "CONSCIÊNCIA ELEMENTAL",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Nova · livro pp.146 e 148–149",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/8",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "CUSTO: 1 CHAMA + 1 CONDIÇÃO",
+          "texto": "Expanda sua percepção por meio dos poderes e marque uma condição."
+        },
+        {
+          "titulo": "PERGUNTA LIVRE",
+          "texto": "Faça uma pergunta sobre o lugar onde está ou os elementos ao redor. O mestre responde com honestidade."
+        },
+        {
+          "titulo": "ALCANCE",
+          "texto": "Não é conhecimento irrestrito sobre qualquer assunto: a pergunta precisa tratar do cenário em que você se encontra."
+        },
+        {
+          "titulo": "LIMITE EMOCIONAL",
+          "texto": "Se precisar marcar a condição sem ter uma livre, você sai de cena, conforme a regra geral."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/nova/arrebatar",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Nova",
+      "arquivo": "14-nova-arrebatar.png",
+      "titulo": "ARREBATAR",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Nova · livro pp.146 e 148–149",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/9",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "CUSTO: 1 CHAMA",
+          "texto": "Use seus poderes para tomar um objeto de alguém."
+        },
+        {
+          "titulo": "TAMANHO E VISÃO",
+          "texto": "O objeto pode ter até o tamanho de uma pessoa. Quem está com ele precisa estar dentro do seu campo de visão."
+        },
+        {
+          "titulo": "NA FICÇÃO",
+          "texto": "Descreva como seus poderes puxam, deslocam ou arrancam o objeto. Esta faísca não serve para tomar objetos de alvos que você não consegue ver."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/transformado/eu-nao-sou-meu-corpo",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Transformado",
+      "arquivo": "15-transformado-eu-nao-sou-meu-corpo.png",
+      "titulo": "EU NÃO SOU MEU CORPO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Transformado · livro pp.152 e 155",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/9/movimentos/opcoes/0",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "GOLPE FÍSICO PODEROSO",
+          "texto": "Você pode rolar Tomar um golpe poderoso como se tivesse 2 condições a menos marcadas."
+        },
+        {
+          "titulo": "MÍNIMO ZERO",
+          "texto": "Conte as condições, subtraia 2 e pare em zero. Com nenhuma marcada, a base é +0, não −2."
+        },
+        {
+          "titulo": "RISCO EM 10+",
+          "texto": "Se usar o movimento e tirar 10+, a opção é obrigatória: perder o controle de uma forma terrível."
+        },
+        {
+          "titulo": "RESTANTE DO GOLPE",
+          "texto": "Use os resultados normais nas outras faixas. Isto não se aplica a golpes apenas emocionais."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/transformado/nao-humano-o-bastante",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Transformado",
+      "arquivo": "15-transformado-nao-humano-o-bastante.png",
+      "titulo": "NÃO HUMANO O BASTANTE",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Transformado · livro pp.152 e 155",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/9/movimentos/opcoes/1",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "ENFRENTAR DE MODO ATERRORIZANTE",
+          "texto": "Descreva uma ação realmente assustadora ao Enfrentar diretamente a ameaça. O mestre pode pedir detalhes."
+        },
+        {
+          "titulo": "CUSTO: MARCAR UMA CONDIÇÃO",
+          "texto": "Marque uma condição para escolher uma opção adicional da lista de Enfrentar, mesmo numa falha."
+        },
+        {
+          "titulo": "QUANTAS ESCOLHAS",
+          "texto": "10+: escolha 3. 7–9: escolha 2. Falha: escolha 1, marque potencial e receba as consequências da falha."
+        },
+        {
+          "titulo": "LIMITE",
+          "texto": "O custo não desaparece: se precisar marcar e não houver condição livre, você sai de cena."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/transformado/imparavel",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Transformado",
+      "arquivo": "15-transformado-imparavel.png",
+      "titulo": "IMPARÁVEL",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Transformado · livro pp.152 e 155",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/9/movimentos/opcoes/2",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "ABRIR CAMINHO / + PERIGOSO",
+          "texto": "Atravesse o cenário à força para alcançar algo ou escapar de uma situação."
+        },
+        {
+          "titulo": "7+",
+          "texto": "Você consegue avançar, quebrando o que está no caminho."
+        },
+        {
+          "titulo": "7–9: ESCOLHA 1",
+          "texto": "• Marcar uma condição.\n• Deixar alguma coisa para trás.\n• Levar alguma coisa com você."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. Você atravessa, mas o mestre escolhe: deixa destruição pelo caminho OU termina num lugar pior."
+        },
+        {
+          "titulo": "ESCOLHAS REAIS",
+          "texto": "O que fica para trás ou vem junto deve ter importância na cena, não ser apenas um detalhe sem consequência."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/transformado/vou-atras-de-voce",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Transformado",
+      "arquivo": "15-transformado-vou-atras-de-voce.png",
+      "titulo": "VOU ATRÁS DE VOCÊ",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Transformado · livro pp.152 e 155",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/9/movimentos/opcoes/3",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO MARCAR UMA CONDIÇÃO",
+          "texto": "Ganhe +1 adiante contra quem você considera a maior causa daquela condição."
+        },
+        {
+          "titulo": "PRÓXIMO MOVIMENTO CONTRA O ALVO",
+          "texto": "Use o bônus na próxima rolagem contra essa pessoa, seja qual for o movimento aplicável."
+        },
+        {
+          "titulo": "CULPA CLARA",
+          "texto": "Quando for evidente quem você responsabiliza, registre o alvo. Se não estiver claro, não precisa forçar uma resposta nem guardar uma investigação para depois."
+        },
+        {
+          "titulo": "NÃO REMOVE A CONDIÇÃO",
+          "texto": "Ela continua marcada e suas penalidades permanecem. Respeite o limite final do modificador."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/transformado/quem-me-dera-ser",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Transformado",
+      "arquivo": "15-transformado-quem-me-dera-ser.png",
+      "titulo": "QUEM ME DERA SER",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Transformado · livro pp.152 e 155",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/9/movimentos/opcoes/4",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO CONFORTAR OU APOIAR",
+          "texto": "Diga à pessoa o que você mais inveja nela, oferecendo apoio de verdade."
+        },
+        {
+          "titulo": "TROCA DE RÓTULO",
+          "texto": "Você pode rolar + Aberração em vez de + Mundano."
+        },
+        {
+          "titulo": "RESULTADOS NORMAIS",
+          "texto": "Resolva Confortar: o alvo precisa se abrir para receber os benefícios. Em 10+, seu benefício adicional também depende da abertura."
+        },
+        {
+          "titulo": "CONDIÇÃO",
+          "texto": "Irritado ainda impõe −2 a Confortar, mesmo usando Aberração."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/transformado/eu-sou-o-monstro",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Transformado",
+      "arquivo": "15-transformado-eu-sou-o-monstro.png",
+      "titulo": "EU SOU O MONSTRO",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Transformado · livro pp.152 e 155",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/9/movimentos/opcoes/5",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "ASSUSTAR / + ABERRAÇÃO",
+          "texto": "Use sua aparência monstruosa para intimidar ou colocar medo nos outros."
+        },
+        {
+          "titulo": "7+",
+          "texto": "Os alvos ficam desnorteados e vulneráveis a você, ou fogem."
+        },
+        {
+          "titulo": "COMPLICAÇÕES",
+          "texto": "10+: escolha 1. 7–9: escolha 2.\n• Assustar também quem não pretendia.\n• Ferir alguém ou destruir algo que deveria preservar.\n• Sentir-se mais monstruoso: marque uma condição escolhida pelo mestre."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. Os alvos respondem com violência, ódio e paranoia, e você sofre o impacto dessa reação."
+        },
+        {
+          "titulo": "NA FICÇÃO",
+          "texto": "A intimidação precisa ser possível contra esses alvos. O mestre pode apontar situações em que sua forma não provoca esse medo."
+        }
+      ]
     }
   ]
 }

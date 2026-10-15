@@ -3,7 +3,7 @@
 Fonte única dos textos das quatro cartas de panorama, dos oito movimentos básicos,
 das nove cartas PvP, das seis cartas de Influência, das duas de Condições
 das seis de Equipe e sessão, das dez de Movimentos de equipe e dos seis
-movimentos da Bruta e das doze cartas de Vilões (87 ao todo):
+movimentos da Bruta e das doze cartas de Vilões (116 ao todo):
 `Assets/Resources/Ajuda/catalogo.json` (UTF-8, texto próprio).
 As regras executáveis continuam em `Assets/Resources/Regras/`; o catálogo
 editorial não substitui essas regras nem os dados de jogadores, personagens e salas.
@@ -127,3 +127,31 @@ IDs de arquetipos.json. Conferidos com Fichas Exemplo/Forasteira e livro
 (pp.128 e 130–131). Entre dois mundos explicita que a exigência do povo ocorre na falha;
 não exige pagamento em todo contato nem bloqueia novo contato no texto do livro. Nave Kirby inclui as opções da nave.
 O help contextual usa os parâmetros existentes.
+
+
+Janus: seis movimentos em Movimentos de arquétipo, borda vermelha e IDs
+de arquetipos.json. Conferidos com Fichas Exemplo/Janus e livro (pp.134
+e 136–137). A Máscara é inicial obrigatório, mais dois escolhidos; troca
+os valores dos Rótulos uma vez por sessão. Obrigações civis ficam para os extras.
+
+
+Legado: seis movimentos em Movimentos de arquétipo, borda vermelha e IDs
+de arquetipos.json. Conferidos com Fichas Exemplo/Legado e livro (pp.140
+e 142–143). Símbolo de autoridade dá −1 adiante na falha (o PNG antigo
+indicava +1 incorretamente). Nunca desista usa +Salvador e substitui o golpe
+poderoso básico. O módulo do legado fica para os extras.
+
+
+Nova: onze cartas (Chamas + dez faíscas) em Movimentos de arquétipo,
+borda vermelha. Chamas explica a analogia com pontos de magia: carregar,
+formar reserva, pagar custos e perder o restante no fim da cena. Conferidas
+com Fichas Exemplo/Nova e livro (pp.146 e 148–149). Referências apontam
+para extras de Nova, pois ele não escolhe movimentos comuns. IDs de help:
+arquetipo/nova/chamas e arquetipo/nova/<id-da-faisca>.
+
+
+Transformado: seis movimentos em Movimentos de arquétipo, borda vermelha
+e IDs de arquetipos.json. Conferidos com Fichas Exemplo/Transformado e o
+livro (pp.152 e 155). Eu não sou meu corpo reduz a contagem de condições
+em duas, com mínimo zero; Eu sou o monstro exige complicações mesmo no
+sucesso. Galeria e help contextual usam os parâmetros existentes.
