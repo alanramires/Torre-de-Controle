@@ -124,3 +124,6 @@ desktop.ini
 
 # Prévias locais de geradores (ex.: tools/cards) — não versionar
 /tmp/
+
+# Python
+__pycache__/
