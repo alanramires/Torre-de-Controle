@@ -759,7 +759,8 @@
           "titulo": "PALAVRAS QUE AFETAM",
           "texto": "Quem tem Influência pode dizer quem você é ou como o mundo funciona. O mestre indica um Rótulo que sobe e outro que desce; aceite ou rejeite."
         }
-      ]
+      ],
+      "borda": "#68bc88"
     },
     {
       "id": "influencia/usar",
@@ -789,7 +790,8 @@
           "titulo": "DIZER QUEM ALGUÉM É",
           "texto": "Sem Influência, a fala não força a mudança de Rótulos. Se a fala de um PJ acionar Provocar ou Confortar, esses movimentos têm prioridade."
         }
-      ]
+      ],
+      "borda": "#68bc88"
     },
     {
       "id": "influencia/renunciar",
@@ -823,7 +825,8 @@
           "titulo": "DEPOIS",
           "texto": "Você perde a Influência sobre o alvo; precisa ganhá-la novamente para voltar a ter seus benefícios."
         }
-      ]
+      ],
+      "borda": "#68bc88"
     },
     {
       "id": "influencia/rejeitar",
@@ -856,6 +859,561 @@
         {
           "titulo": "LEMBRETE",
           "texto": "Discordar não basta: mostre sua resistência na ficção. Este movimento também pode responder a tentativas de provocar ou confortar."
+        }
+      ],
+      "borda": "#68bc88"
+    },
+    {
+      "id": "condicoes/efeitos",
+      "categoria": "condicoes",
+      "arquivo": "04-condicoes-efeitos.png",
+      "titulo": "CONDIÇÕES",
+      "compacto": false,
+      "origem": "Condições · livro pp.89–91",
+      "regras_ref": [
+        "nucleo.json#/condicoes",
+        "nucleo.json#/rotulos/mudanca",
+        "movimentos_basicos.json",
+        "influencia.json#/movimentos/2"
+      ],
+      "secoes": [
+        {
+          "titulo": "ESTADOS EMOCIONAIS",
+          "texto": "As condições representam pressão emocional. Você decide como interpretar a personagem; conter a emoção não remove a penalidade."
+        },
+        {
+          "titulo": "PENALIDADES ENQUANTO MARCADAS",
+          "texto": "• Irritado: −2 para Confortar ou Perfurar a máscara.\n• Assustado: −2 para Enfrentar.\n• Culpado: −2 para Provocar ou Avaliar.\n• Desesperançoso: −2 para Liberar poderes.\n• Inseguro: −2 para Defender ou Rejeitar Influência."
+        },
+        {
+          "titulo": "MARCAR",
+          "texto": "Escolha uma condição livre, salvo quando o movimento ou o mestre determinar qual. Se precisar marcar outra com todas já marcadas, saia de cena."
+        },
+        {
+          "titulo": "LIMITES",
+          "texto": "O modificador final fica entre −3 e +4. Se uma troca de Rótulos ultrapassar −2 ou +3, nenhum muda: marque uma condição escolhida pelo mestre."
+        }
+      ],
+      "borda": "#efd65b"
+    },
+    {
+      "id": "condicoes/remover",
+      "categoria": "condicoes",
+      "arquivo": "04-condicoes-remover.png",
+      "titulo": "REMOVENDO CONDIÇÕES",
+      "compacto": false,
+      "origem": "Condições · livro pp.89–91",
+      "regras_ref": [
+        "nucleo.json#/condicoes",
+        "nucleo.json#/rotulos/mudanca",
+        "movimentos_basicos.json",
+        "influencia.json#/movimentos/2"
+      ],
+      "secoes": [
+        {
+          "titulo": "AÇÕES PARA ALIVIAR",
+          "texto": "• Irritado: ferir alguém, inclusive emocionalmente, ou quebrar algo importante.\n• Assustado: fugir ou evitar algo difícil.\n• Culpado: pagar um preço por quem sente que decepcionou.\n• Desesperançoso: buscar alívio fácil e imediato.\n• Inseguro: agir imprudentemente sem consultar a equipe."
+        },
+        {
+          "titulo": "NO FIM DA CENA",
+          "texto": "Faça a ação durante a cena; remova a condição só quando ela terminar. A penalidade continua até lá. Várias condições podem sair na mesma cena."
+        },
+        {
+          "titulo": "PELOS MOVIMENTOS",
+          "texto": "Confortar, Defender e Rejeitar Influência também podem remover condições. Nesse caso, siga o resultado e as escolhas do movimento."
+        },
+        {
+          "titulo": "NA FICÇÃO",
+          "texto": "Descreva o que fez e suas consequências. A ação precisa aliviar aquela emoção; não basta anunciar que quer remover o marcador."
+        }
+      ],
+      "borda": "#efd65b"
+    },
+    {
+      "id": "equipe/ajudar",
+      "categoria": "equipe-sessao",
+      "arquivo": "05-equipe-ajudar.png",
+      "titulo": "PONTOS DE EQUIPE",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Equipe e sessão · livro pp.84–88 e 92–93",
+      "regras_ref": [
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "RECURSO COMPARTILHADO",
+          "texto": "A pilha pertence à equipe. Para ajudar, descreva como sua personagem contribui; a ajuda precisa ser possível na ficção."
+        },
+        {
+          "titulo": "DEPOIS DOS DADOS",
+          "texto": "Gaste 1 ponto da pilha para dar +1 à rolagem de um colega, antes de resolver o resultado. Pode mudar a faixa de sucesso."
+        },
+        {
+          "titulo": "LIMITES",
+          "texto": "Cada personagem pode gastar no máximo 1 ponto por rolagem. Vários colegas podem ajudar no mesmo teste; respeite o teto do modificador."
+        },
+        {
+          "titulo": "PNJs ALIADOS",
+          "texto": "Também podem ajudar se fizer sentido na ficção, gastando pontos da pilha em seu nome. O mestre decide se o PNJ contribuiria."
+        }
+      ]
+    },
+    {
+      "id": "equipe/egoista",
+      "categoria": "equipe-sessao",
+      "arquivo": "05-equipe-egoista.png",
+      "titulo": "AGINDO DE FORMA EGOÍSTA",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Equipe e sessão · livro pp.84–88 e 92–93",
+      "regras_ref": [
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO",
+          "texto": "Descreva uma ação que ignore ou insulte seus colegas de equipe. Eles julgam se foram ignorados ou insultados; o mestre pode intensificar a situação."
+        },
+        {
+          "titulo": "CUSTO E EFEITO",
+          "texto": "Gaste 1 ponto da pilha. Aumente um Rótulo e diminua outro, à sua escolha, respeitando os limites."
+        },
+        {
+          "titulo": "APÓS OS DADOS",
+          "texto": "Pode ser usado depois de rolar: recalcule a rolagem com o novo valor do Rótulo usado. Isso pode transformar falha em sucesso ou parcial em forte."
+        },
+        {
+          "titulo": "CONSEQUÊNCIA",
+          "texto": "A vantagem vem de uma atitude egoísta real na história. A mudança de Rótulos permanece."
+        }
+      ]
+    },
+    {
+      "id": "equipe/batalha",
+      "categoria": "equipe-sessao",
+      "arquivo": "05-equipe-batalha.png",
+      "titulo": "ENTRANDO EM BATALHA",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Equipe e sessão · livro pp.84–88 e 92–93",
+      "regras_ref": [
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "COMO EQUIPE",
+          "texto": "Quando mais de um PJ entra junto em confronto com um inimigo perigoso, adicione 2 pontos à pilha. Uma ameaça como um meteoro também pode contar."
+        },
+        {
+          "titulo": "ADICIONE",
+          "texto": "• +1 se o líder tem Influência sobre todos os colegas atuantes.\n• +1 se todos compartilham o objetivo na luta."
+        },
+        {
+          "titulo": "REMOVA",
+          "texto": "• −1 se algum PJ não confia no líder ou na equipe.\n• −1 se a equipe está mal preparada ou desequilibrada, a critério do mestre."
+        },
+        {
+          "titulo": "LIDERANÇA",
+          "texto": "Definam o líder desse confronto; o mestre decide se houver discordância. O líder pode marcar uma condição para evitar perder 1 ponto."
+        }
+      ]
+    },
+    {
+      "id": "equipe/tempo",
+      "categoria": "equipe-sessao",
+      "arquivo": "05-equipe-tempo.png",
+      "titulo": "QUANDO O TEMPO PASSA",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Equipe e sessão · livro pp.84–88 e 92–93",
+      "regras_ref": [
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "SALTO NA HISTÓRIA",
+          "texto": "Quando a história avança por um período significativo e começa uma nova etapa, o mestre esvazia a pilha de Equipe e a redefine para 1 ponto."
+        },
+        {
+          "titulo": "NÃO É UM RELÓGIO",
+          "texto": "Passar minutos ou horas naturalmente não aciona a regra. Encerrar uma cena, por si só, também não redefine a pilha."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "Depois dos acontecimentos de um episódio, a história salta para semanas depois. Esse corte pode acionar a redefinição."
+        },
+        {
+          "titulo": "SESSÃO É OUTRA COISA",
+          "texto": "O início de sessão adiciona 1 ponto; o fim de sessão não esvazia automaticamente a pilha."
+        }
+      ]
+    },
+    {
+      "id": "equipe/arquetipos",
+      "categoria": "equipe-sessao",
+      "arquivo": "05-equipe-arquetipos.png",
+      "titulo": "MOVIMENTOS DE EQUIPE",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Equipe e sessão · livro pp.84–88 e 92–93",
+      "regras_ref": [
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "DOIS GATILHOS",
+          "texto": "Cada arquétipo tem efeitos próprios ao celebrar um triunfo ou compartilhar uma vulnerabilidade ou fraqueza."
+        },
+        {
+          "titulo": "CELEBRAR",
+          "texto": "Compartilhe a alegria de uma vitória de modo significativo: afeto, elogios, festa ou outro gesto. Um cumprimento automático não basta."
+        },
+        {
+          "titulo": "COMPARTILHAR",
+          "texto": "Deixe alguém ver seus medos, desejos, inseguranças ou lembranças vulneráveis. Pode acontecer em palavras ou ações."
+        },
+        {
+          "titulo": "COM QUEM",
+          "texto": "Escolha uma pessoa com quem compartilha o momento, mesmo se houver várias presentes. Pode ser colega ou outra personagem. Use os efeitos da carta do seu arquétipo."
+        }
+      ]
+    },
+    {
+      "id": "equipe/sessao",
+      "categoria": "equipe-sessao",
+      "arquivo": "05-equipe-sessao.png",
+      "titulo": "INÍCIO E FIM DE SESSÃO",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Equipe e sessão · livro pp.84–88 e 92–93",
+      "regras_ref": [
+        "equipe_e_sessao.json"
+      ],
+      "secoes": [
+        {
+          "titulo": "INÍCIO",
+          "texto": "Adicione 1 ponto à pilha de Equipe."
+        },
+        {
+          "titulo": "FIM: CADA PJ ESCOLHE 1",
+          "texto": "Cada jogador explica como sua personagem mudou durante a sessão e escolhe uma das opções abaixo."
+        },
+        {
+          "titulo": "APROXIMOU-SE DA EQUIPE",
+          "texto": "Diga quem fez você se sentir bem. Essa pessoa ganha Influência sobre você; remova uma condição OU marque potencial. Se ela já tinha Influência, muda seus Rótulos sem causar condição."
+        },
+        {
+          "titulo": "MELHOROU SUA AUTOIMAGEM",
+          "texto": "Explique como se vê e por quê. Aumente um Rótulo e diminua outro, à sua escolha."
+        },
+        {
+          "titulo": "AFASTOU-SE DA EQUIPE",
+          "texto": "Explique por que se sente distante. Escolha alguém da equipe que perde a Influência sobre você."
+        }
+      ]
+    },
+    {
+      "id": "equipe/amaldicoada",
+      "categoria": "movimentos-equipe",
+      "arquivo": "05-equipe-amaldicoada.png",
+      "titulo": "EQUIPE · AMALDIÇOADA",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Movimentos de equipe · AMALDIÇOADA",
+      "regras_ref": [
+        "equipe_e_sessao.json#/equipe/movimentos_de_arquetipo",
+        "arquetipos.json#/arquetipos/0"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO CELEBRAR UM TRIUNFO",
+          "texto": "A pessoa ganha Influência sobre você. Gaste 1 ponto da pilha de Equipe para remover uma marca da trilha de Perdição."
+        },
+        {
+          "titulo": "AO COMPARTILHAR VULNERABILIDADE",
+          "texto": "A pessoa ganha Influência sobre você. Pergunte se ela vê esperança para você; a resposta deve ser sincera. Sim: marque potencial OU remova uma marca de Perdição. Não: marque uma condição OU uma marca de Perdição."
+        }
+      ]
+    },
+    {
+      "id": "equipe/bruta",
+      "categoria": "movimentos-equipe",
+      "arquivo": "05-equipe-bruta.png",
+      "titulo": "EQUIPE · BRUTA",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Movimentos de equipe · BRUTA",
+      "regras_ref": [
+        "equipe_e_sessao.json#/equipe/movimentos_de_arquetipo",
+        "arquetipos.json#/arquetipos/1"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO CELEBRAR UM TRIUNFO",
+          "texto": "A pessoa passa a ser seu amor ou rival; marque potencial. Se já era amor ou rival, ganhe Influência sobre ela e marque potencial."
+        },
+        {
+          "titulo": "AO COMPARTILHAR VULNERABILIDADE",
+          "texto": "A pessoa ganha Influência sobre você. Você recebe 2 de controle para ajudá-la como se fossem pontos de Equipe."
+        }
+      ]
+    },
+    {
+      "id": "equipe/delinquente",
+      "categoria": "movimentos-equipe",
+      "arquivo": "05-equipe-delinquente.png",
+      "titulo": "EQUIPE · DELINQUENTE",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Movimentos de equipe · DELINQUENTE",
+      "regras_ref": [
+        "equipe_e_sessao.json#/equipe/movimentos_de_arquetipo",
+        "arquetipos.json#/arquetipos/2"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO CELEBRAR UM TRIUNFO",
+          "texto": "Pergunte se ela acha você legal. Sim: ganhem Influência um sobre o outro. Não: marque uma condição OU trate-a mal. Se for colega de equipe, adicione 1 Equipe em qualquer resposta."
+        },
+        {
+          "titulo": "AO COMPARTILHAR VULNERABILIDADE",
+          "texto": "Ela ganha Influência sobre você e diz como espera que você se comporte. Marque potencial se agir assim. Se for colega de equipe, adicione 1 Equipe, qualquer que seja o resultado."
+        }
+      ]
+    },
+    {
+      "id": "equipe/discipula",
+      "categoria": "movimentos-equipe",
+      "arquivo": "05-equipe-discipula.png",
+      "titulo": "EQUIPE · DISCÍPULA",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Movimentos de equipe · DISCÍPULA",
+      "regras_ref": [
+        "equipe_e_sessao.json#/equipe/movimentos_de_arquetipo",
+        "arquetipos.json#/arquetipos/3"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO CELEBRAR UM TRIUNFO",
+          "texto": "Pergunte se liderou bem ou trabalhou bem em equipe. Sim: sua mentora perde Influência sobre você; marque potencial. Não: a mentora ganha Influência sobre você; ganhe +1 adiante ao usar o Rótulo dela."
+        },
+        {
+          "titulo": "AO COMPARTILHAR VULNERABILIDADE",
+          "texto": "Conte um segredo sobre sua mentora, inclusive seus sentimentos por ela. A pessoa ganha Influência sobre você; adicione 1 Equipe."
+        }
+      ]
+    },
+    {
+      "id": "equipe/farol",
+      "categoria": "movimentos-equipe",
+      "arquivo": "05-equipe-farol.png",
+      "titulo": "EQUIPE · FAROL",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Movimentos de equipe · FAROL",
+      "regras_ref": [
+        "equipe_e_sessao.json#/equipe/movimentos_de_arquetipo",
+        "arquetipos.json#/arquetipos/4"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO CELEBRAR UM TRIUNFO",
+          "texto": "Diga por que a pessoa é incrível e adicione 1 Equipe. Se ela também disser por que você é incrível, adicione outro ponto."
+        },
+        {
+          "titulo": "AO COMPARTILHAR VULNERABILIDADE",
+          "texto": "Pergunte se ela acha que você deveria estar ali. Sim: marque potencial; ela ganha Influência sobre você. Não: marque Irritado e mude seus Rótulos à escolha (um sobe, outro desce)."
+        }
+      ]
+    },
+    {
+      "id": "equipe/forasteira",
+      "categoria": "movimentos-equipe",
+      "arquivo": "05-equipe-forasteira.png",
+      "titulo": "EQUIPE · FORASTEIRA",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Movimentos de equipe · FORASTEIRA",
+      "regras_ref": [
+        "equipe_e_sessao.json#/equipe/movimentos_de_arquetipo",
+        "arquetipos.json#/arquetipos/5"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO CELEBRAR UM TRIUNFO",
+          "texto": "Faça uma grande demonstração de afeto, física ou emocional, para ganhar Influência sobre a pessoa. Ela decide se a demonstração foi grande."
+        },
+        {
+          "titulo": "AO COMPARTILHAR VULNERABILIDADE",
+          "texto": "Ela diz o que você pode fazer para se adaptar melhor à Terra. Ganhe +1 adiante ao agir dessa maneira; marque potencial se o fizer."
+        }
+      ]
+    },
+    {
+      "id": "equipe/janus",
+      "categoria": "movimentos-equipe",
+      "arquivo": "05-equipe-janus.png",
+      "titulo": "EQUIPE · JANUS",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Movimentos de equipe · JANUS",
+      "regras_ref": [
+        "equipe_e_sessao.json#/equipe/movimentos_de_arquetipo",
+        "arquetipos.json#/arquetipos/6"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO CELEBRAR UM TRIUNFO",
+          "texto": "Pergunte se ela vê a pessoa mascarada ou quem está por trás. Mascarada: marque potencial e remova uma condição. Por trás: se revelar sua identidade, ganhe Influência sobre ela."
+        },
+        {
+          "titulo": "AO COMPARTILHAR VULNERABILIDADE",
+          "texto": "Conte um segredo sobre quem realmente é. Ela ganha Influência sobre você. Aumente Mundano e diminua o Rótulo da máscara."
+        }
+      ]
+    },
+    {
+      "id": "equipe/legado",
+      "categoria": "movimentos-equipe",
+      "arquivo": "05-equipe-legado.png",
+      "titulo": "EQUIPE · LEGADO",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Movimentos de equipe · LEGADO",
+      "regras_ref": [
+        "equipe_e_sessao.json#/equipe/movimentos_de_arquetipo",
+        "arquetipos.json#/arquetipos/7"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO CELEBRAR UM TRIUNFO",
+          "texto": "Diga se vê a pessoa como uma igual. Sim: dê a ela Influência sobre você e marque potencial. Não: aumente Superior e diminua outro Rótulo."
+        },
+        {
+          "titulo": "AO COMPARTILHAR VULNERABILIDADE",
+          "texto": "Revele um segredo do seu legado, inclusive seus sentimentos sobre ele. Remova uma condição e dê à pessoa Influência sobre você."
+        }
+      ]
+    },
+    {
+      "id": "equipe/nova",
+      "categoria": "movimentos-equipe",
+      "arquivo": "05-equipe-nova.png",
+      "titulo": "EQUIPE · NOVA",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Movimentos de equipe · NOVA",
+      "regras_ref": [
+        "equipe_e_sessao.json#/equipe/movimentos_de_arquetipo",
+        "arquetipos.json#/arquetipos/8"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO CELEBRAR UM TRIUNFO",
+          "texto": "Pergunte se ela olha para você com medo. Não: ganhe +1 adiante e marque potencial. Sim: aumente Perigoso e diminua Salvador imediatamente."
+        },
+        {
+          "titulo": "AO COMPARTILHAR VULNERABILIDADE",
+          "texto": "Explique como ela poderia impedir você, se fosse necessário. Ela ganha Influência sobre você; remova uma condição."
+        }
+      ]
+    },
+    {
+      "id": "equipe/transformado",
+      "categoria": "movimentos-equipe",
+      "arquivo": "05-equipe-transformado.png",
+      "titulo": "EQUIPE · TRANSFORMADO",
+      "compacto": false,
+      "borda": "#53a9e8",
+      "origem": "Movimentos de equipe · TRANSFORMADO",
+      "regras_ref": [
+        "equipe_e_sessao.json#/equipe/movimentos_de_arquetipo",
+        "arquetipos.json#/arquetipos/9"
+      ],
+      "secoes": [
+        {
+          "titulo": "AO CELEBRAR UM TRIUNFO",
+          "texto": "Se ela tratar você como uma pessoa normal, remova uma condição. Se elogiar seus poderes ou habilidades, marque potencial. Os dois efeitos podem acontecer."
+        },
+        {
+          "titulo": "AO COMPARTILHAR VULNERABILIDADE",
+          "texto": "Pergunte se está perdendo ou ganhando humanidade. Perdendo: marque uma condição e potencial. Ganhando: remova uma condição, aumente Mundano e diminua outro Rótulo."
+        }
+      ]
+    },
+    {
+      "id": "influencia/npcs",
+      "categoria": "influencia",
+      "arquivo": "03-influencia-npcs.png",
+      "titulo": "INFLUÊNCIA E NPCs",
+      "compacto": false,
+      "borda": "#68bc88",
+      "origem": "Influência e movimentos · livro pp.63–83 e 178",
+      "regras_ref": [
+        "influencia.json",
+        "movimentos_basicos.json#/movimentos/2",
+        "movimentos_basicos.json#/movimentos/4",
+        "movimentos_basicos.json#/movimentos/6"
+      ],
+      "secoes": [
+        {
+          "titulo": "ADULTOS",
+          "texto": "NPCs adultos têm Influência sobre os jovens heróis por padrão. Uma PJ pode se livrar dela pelos efeitos das regras; ser adulto não impede perder Influência."
+        },
+        {
+          "titulo": "JOVENS",
+          "texto": "NPCs jovens não recebem Influência automaticamente. Pergunte aos jogadores se a opinião dessa pessoa importa para suas personagens e estabeleçam a relação."
+        },
+        {
+          "titulo": "DOIS SENTIDOS",
+          "texto": "Um NPC ter Influência sobre você não significa que você tenha sobre ele. Cada direção é uma relação independente."
+        },
+        {
+          "titulo": "GANHAR DE NOVO",
+          "texto": "Se você já tem Influência sobre um NPC, ganhar novamente dá +1 adiante contra ele. Sobre uma PJ, ganhar de novo muda os Rótulos dela imediatamente, sem rejeição."
+        },
+        {
+          "titulo": "RELAÇÕES IMPORTANTES",
+          "texto": "Ser irmão, mentora ou rival ajuda a entender a relação, mas confira as instruções de criação e o que foi estabelecido na ficção."
+        }
+      ]
+    },
+    {
+      "id": "influencia/ganhar-perder",
+      "categoria": "influencia",
+      "arquivo": "03-influencia-ganhar-perder.png",
+      "titulo": "GANHAR E PERDER INFLUÊNCIA",
+      "compacto": false,
+      "borda": "#68bc88",
+      "origem": "Influência e movimentos · livro pp.63–83 e 178",
+      "regras_ref": [
+        "influencia.json",
+        "movimentos_basicos.json#/movimentos/2",
+        "movimentos_basicos.json#/movimentos/4",
+        "movimentos_basicos.json#/movimentos/6"
+      ],
+      "secoes": [
+        {
+          "titulo": "DEFENDER",
+          "texto": "Ao proteger alguém com sucesso, uma das escolhas é ganhar Influência sobre quem protegeu."
+        },
+        {
+          "titulo": "PROVOCAR UM NPC",
+          "texto": "Em 7–9, o mestre pode escolher uma reação exagerada do NPC: você ganha Influência sobre ele. Em 10+, fazer o pedido não concede Influência por si só."
+        },
+        {
+          "titulo": "PERFURAR A MÁSCARA",
+          "texto": "Pergunte como ganhar Influência sobre o alvo. Cumprir a resposta concede essa Influência."
+        },
+        {
+          "titulo": "REJEITAR",
+          "texto": "Em 10+, escolha 2 opções; em 7–9, escolha 1. Uma delas cancela a Influência da outra pessoa sobre você e dá +1 adiante contra ela."
+        },
+        {
+          "titulo": "RENUNCIAR",
+          "texto": "Para obter −2 na rolagem do alvo, infligir uma condição ou +1 extra na sua rolagem contra ele, você perde a Influência que tinha sobre essa pessoa."
         }
       ]
     }

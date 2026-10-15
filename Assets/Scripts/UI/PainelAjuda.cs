@@ -13,8 +13,8 @@ namespace TorreDeControle.UI
         string[] arquivos;
         JArray catalogo;
         Texture2D[] panoramas;
-        readonly string[] categorias = { "referencia-rapida", "movimentos-basicos", "pvp", "influencia" };
-        readonly string[] categoriasNomes = { "Visão geral", "Movimentos básicos", "PvP", "Influência" };
+        readonly string[] categorias = { "referencia-rapida", "movimentos-basicos", "pvp", "influencia", "condicoes", "equipe-sessao", "movimentos-equipe" };
+        readonly string[] categoriasNomes = { "Visão geral", "Movimentos básicos", "PvP", "Influência", "Condições", "Equipe e sessão", "Movimentos de equipe" };
         RectTransform[] cortinas;
         Button[] botoesCategoria;
         int categoriaAtual;
@@ -183,7 +183,10 @@ namespace TorreDeControle.UI
                     ? "Fundamentos para consultar durante o jogo."
                     : categoria == 1 ? "Gatilhos, rolagens, escolhas e consequências dos oito movimentos básicos."
                     : categoria == 2 ? "Regras e variantes para ações entre personagens de jogadores."
-                    : "Entender, usar, renunciar e rejeitar Influência.");
+                    : categoria == 3 ? "Entender, usar, renunciar e rejeitar Influência."
+                    : categoria == 4 ? "Penalidades, marcação e formas de remover condições."
+                    : categoria == 5 ? "Pilha de Equipe e início e fim de sessão."
+                    : "Celebração e vulnerabilidade: movimentos de equipe dos dez arquétipos.");
                 botoesCategoria[categoria] = b;
                 var cortinaRect = Estilo.Rect("Assuntos " + categoriasNomes[categoria], listaMenu);
                 var cortina = cortinaRect.gameObject.AddComponent<VerticalLayoutGroup>();

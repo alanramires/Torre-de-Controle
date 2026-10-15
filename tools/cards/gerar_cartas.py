@@ -72,6 +72,7 @@ def cards():
             raise ValueError('Carta sem se??es: ' + item['id'])
         result.append(dict(out=item['arquivo'], title=item['titulo'],
                            compact=item.get('compacto', False), source=item['origem'],
+                           border=item.get('borda', '#dbb65d'),
                            sections=[(section['titulo'], section['texto']) for section in item['secoes']]))
     return result
 
@@ -81,7 +82,7 @@ def render(spec, destination):
     image = Image.new('RGB', SIZE, '#0d172a')
     draw = ImageDraw.Draw(image)
     draw.rounded_rectangle((12, 12, width-13, height-13), radius=28,
-                           fill='#152238', outline='#dbb65d', width=4)
+                           fill='#152238', outline=spec['border'], width=4)
     draw.text((40, 32), 'TORRE DE CONTROLE / REFERÊNCIA', font=font(19, True), fill='#dbb65d')
     title_font = font(34, True)
     title_lines = wrap(spec['title'], title_font, width-80)
