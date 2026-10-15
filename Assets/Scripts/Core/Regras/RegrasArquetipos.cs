@@ -76,6 +76,8 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("nome")] public string Nome { get; set; }
             [JsonProperty("regra")] public string Regra { get; set; }
             [JsonProperty("campos")] public List<CampoExtra> Campos { get; set; } = new List<CampoExtra>();
+            /// <summary>NPCs que a subseção do movimento dá (ex.: o bicho do "Vamos, Sortudo!", a Nave Kirby).</summary>
+            [JsonProperty("npcs")] public List<NpcDoExtra> Npcs { get; set; } = new List<NpcDoExtra>();
         }
 
         public sealed class RegraExtra

@@ -1334,11 +1334,21 @@
             "id": "vamos-sortudo",
             "nome": "Vamos, Sortudo!",
             "regra": "+1 sempre que o bicho puder ajudar; se ele se ferir, é como tomar um golpe poderoso.",
+            "npcs": [
+              { "campo": "bicho", "campo_descricao": "bicho_descricao", "papel": "aliado", "maturidade": "jovem", "vinculo": "bicho (Vamos, Sortudo!)" }
+            ],
             "campos": [
               {
                 "id": "bicho",
                 "tipo": "texto",
-                "rotulo": "Seu bicho: quem é e como é"
+                "rotulo": "Nome do bicho"
+              },
+              {
+                "id": "bicho_descricao",
+                "tipo": "texto",
+                "rotulo": "Quem é e como é",
+                "varias_linhas": true,
+                "opcional": true
               },
               {
                 "id": "movimentos",
@@ -1766,11 +1776,14 @@
             "id": "nave-a-kirby",
             "nome": "Nave Kirby",
             "regra": "Você tem um veículo da sua terra. Pilotando a nave, pode usá-la para liberar seus poderes, enfrentar diretamente ou defender rolando + Superior.",
+            "npcs": [
+              { "campo": "nave", "campo_descricao": "descricao", "papel": "aliado", "maturidade": "jovem", "vinculo": "nave" }
+            ],
             "campos": [
               {
                 "id": "nave",
                 "tipo": "texto",
-                "rotulo": "Nome e visual"
+                "rotulo": "Nome da nave"
               },
               {
                 "id": "forcas",

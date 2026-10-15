@@ -126,6 +126,18 @@ namespace TorreDeControle.UI
             MostrarGaleria();
         }
 
+        /// <summary>Consulta contextual de uma categoria inteira (ex.: "influencia"), só ela no menu.</summary>
+        public void AbrirCategoria(string id)
+        {
+            Abrir(null);
+            var categoria = System.Array.IndexOf(categorias, id);
+            if (categoria < 0)
+                return;
+            for (var k = 0; k < botoesCategoria.Length; k++)
+                botoesCategoria[k].gameObject.SetActive(k == categoria);
+            EscolherCategoria(categoria);
+        }
+
         public void AbrirCondicoesVilao()
         {
             Abrir(null);

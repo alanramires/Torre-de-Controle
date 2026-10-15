@@ -231,6 +231,26 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Bicho_do_vamos_sortudo_vira_npc_aliado_jovem()
+        {
+            const string mov = "mov:vamos-sortudo";
+            var original = FichaPronta.Criada(personagens, "Faísca");
+            Assert.That(personagens.ReabrirCriacao(original.Id).Ok, Is.True);
+            original.Identidade.Arquetipo = "farol"; // atalho de teste
+            Assert.That(personagens.AlternarMovimento(original.Id, "vamos-sortudo").Ok, Is.True);
+            Assert.That(personagens.DefinirTextoDeExtra(original.Id, mov, "bicho", null, "Biscoito").Ok, Is.True);
+            personagens.DefinirTextoDeExtra(original.Id, mov, "bicho_descricao", null, "Um vira-lata caramelo que late para vilões.");
+
+            Concluida(original);
+            var copia = personagens.CopiarParaSala(original.Id, sala.Id, null, false, out _);
+            var bicho = personagens.NpcDaFicha(copia, mov, "bicho");
+            Assert.That(bicho.NomeExibicao, Is.EqualTo("Biscoito"));
+            Assert.That(bicho.Papel, Is.EqualTo(Papel.Aliado));
+            Assert.That(bicho.Maturidade, Is.EqualTo(Maturidade.Jovem)); // bicho não tem Influência de adulto
+            Assert.That(personagens.OrigemDoNpc(bicho).Value.descricao, Is.EqualTo("Um vira-lata caramelo que late para vilões."));
+        }
+
+        [Test]
         public void Npc_criado_pelo_mestre_nao_tem_origem()
         {
             personagens.CriarNpc(sala.Id, "Louva-a-Deus", Maturidade.Adulto, Papel.Aliado);

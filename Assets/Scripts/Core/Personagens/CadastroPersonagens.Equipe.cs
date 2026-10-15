@@ -236,10 +236,12 @@ namespace TorreDeControle.Core.Personagens
             return Resultado.Sucesso();
         }
 
-        static void RetirarDadas(Personagem p)
+        /// <summary>Refazer a Influência inicial mexe só nos colegas: a Influência com NPCs é do jogo.</summary>
+        void RetirarDadas(Personagem p)
         {
             foreach (var c in p.Influencias.Where(kv => kv.Value == EstadoInfluencia.Dada).Select(kv => kv.Key).ToList())
-                p.Influencias.Remove(c);
+                if (Buscar(c)?.Controle != Controle.Mestre)
+                    p.Influencias.Remove(c);
         }
 
         /// <summary>

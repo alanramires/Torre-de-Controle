@@ -665,6 +665,14 @@ namespace TorreDeControle.UI
                     24, Estilo.Texto);
                 linha.textWrappingMode = TextWrappingModes.Normal;
             }
+            // NPCs (marcados pelo mestre na ficha do NPC) e os adultos pelo padrão do livro.
+            foreach (var n in personagens.NpcsAQuemDeuInfluencia(p))
+                Estilo.Rotulo(deu, $"• {n.NomeExibicao} <size=75%><color=#{suaveInfluencia}>(NPC)</color></size>", 24, Estilo.Texto);
+            foreach (var n in personagens.NpcsQuePerderamInfluenciaSobre(p))
+                Estilo.Rotulo(deu, $"• {n.NomeExibicao} (NPC, perdida)", 24, Estilo.TextoApagado);
+            var adultos = personagens.AdultosComInfluenciaPorPadrao(p);
+            if (adultos > 0)
+                Nota(deu, $"E todo adulto da campanha, por padrão ({adultos}).");
 
             // Rosa: a leitura reversa.
             var rosa = new Color(0.95f, 0.55f, 0.85f);
@@ -673,14 +681,19 @@ namespace TorreDeControle.UI
             var tituloReversa = Estilo.Rotulo(reversa, $"{p.NomeExibicao.ToUpperInvariant()} EXERCE INFLUÊNCIA SOBRE", 20, rosa, FontStyles.Bold);
             tituloReversa.textWrappingMode = TextWrappingModes.Normal;
             var deram = personagens.QuemDeuInfluencia(p);
-            if (deram.Count == 0)
+            var npcsSob = personagens.NpcsSobQuemExerce(p);
+            if (deram.Count == 0 && npcsSob.Count == 0)
                 Nota(reversa, "Ninguém ainda (nenhum colega deu Influência a ela).");
             foreach (var c in deram)
                 Estilo.Rotulo(reversa, "• " + c.NomeExibicao, 24, Estilo.Texto);
+            foreach (var n in npcsSob)
+                Estilo.Rotulo(reversa, $"• {n.NomeExibicao} <size=75%><color=#{suaveInfluencia}>(NPC)</color></size>", 24, Estilo.Texto);
             // Pelo estado nas fichas dos colegas: quem deu Influência a ela e, no jogo, tirou.
             foreach (var c in personagens.QuemPerdeuInfluencia(p))
                 Estilo.Rotulo(reversa, "• " + c.NomeExibicao + " (perdida)", 24, Estilo.TextoApagado);
-            Nota(reversa, "Lido das fichas dos colegas.");
+            foreach (var n in personagens.NpcsSobQuemPerdeu(p))
+                Estilo.Rotulo(reversa, $"• {n.NomeExibicao} (NPC, perdida)", 24, Estilo.TextoApagado);
+            Nota(reversa, "Lido das fichas dos colegas e dos NPCs.");
         }
 
 

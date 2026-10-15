@@ -304,6 +304,7 @@ namespace TorreDeControle.UI
             Nota(npc.Maturidade == Maturidade.Adulto
                 ? "Adulto: tem Influência sobre os heróis por padrão; só importa saber quando ganha ou perde."
                 : "Jovem: começa sem Influência sobre os heróis; pergunte aos jogadores se os colegas têm.");
+            Influencias();
 
             if (npc.Papel == Papel.Vilao && npc.Vilao != null)
                 FichaDeVilao();
@@ -375,6 +376,62 @@ namespace TorreDeControle.UI
             }
             campo.onSubmit.AddListener(_ => Gravar());
             campo.onDeselect.AddListener(_ => Gravar());
+        }
+
+        /// <summary>
+        /// Os dois sentidos com as heroínas da campanha, em chips (clicar liga/desliga; desligar fica como
+        /// "perdeu"). Quem marca é o mestre; a jogadora só vê na ficha dela.
+        /// </summary>
+        void Influencias()
+        {
+            if (npc.Sala == null)
+            {
+                Nota("No laboratório não há heroínas: a Influência é marcada na campanha (cópia na sala).");
+                return;
+            }
+            var herois = cadastro.HeroisDaSala(npc.Sala).Where(h => h.Ativo).OrderBy(h => h.NomeExibicao).ToList();
+            if (herois.Count == 0)
+            {
+                Nota("Nenhuma heroína ativa nesta campanha ainda.");
+                return;
+            }
+            var nome = npc.NomeExibicao.ToUpperInvariant();
+            // As mesmas frases da ficha das heroínas: "deu Influência a X" = X tem Influência sobre ele.
+            LinhaDeInfluencia($"{nome} DEU INFLUÊNCIA A", herois, h => (h, npc));
+            LinhaDeInfluencia($"{nome} EXERCE INFLUÊNCIA SOBRE", herois, h => (npc, h));
+        }
+
+        void LinhaDeInfluencia(string titulo, System.Collections.Generic.IReadOnlyList<Personagem> herois,
+            Func<Personagem, (Personagem quem, Personagem sobre)> par)
+        {
+            var t = Estilo.Rotulo(conteudo, titulo, 20, Estilo.TextoSuave, FontStyles.Bold);
+            t.characterSpacing = 4;
+            for (var k = 0; k < herois.Count; k += 4)
+            {
+                var fila = Estilo.Fila(conteudo, 62, 10);
+                foreach (var h in herois.Skip(k).Take(4))
+                {
+                    var (quem, sobre) = par(h);
+                    var tem = cadastro.TemInfluencia(quem, sobre);
+                    var nota = tem && cadastro.InfluenciaPorPadrao(quem, sobre) ? "por ser adulto"
+                        : !tem && cadastro.PerdeuInfluencia(quem, sobre) ? "perdeu"
+                        : null;
+                    var texto = nota == null ? h.NomeExibicao : $"{h.NomeExibicao}\n<size=70%>{nota}</size>";
+                    Chip(fila, texto, tem, () =>
+                    {
+                        var r = cadastro.AlternarInfluencia(quem.Id, sobre.Id);
+                        if (!r.Ok)
+                        {
+                            rodape.color = Estilo.Erro;
+                            rodape.text = r.Erro;
+                            return;
+                        }
+                        Redesenhar();
+                    });
+                }
+                for (var vazio = herois.Count - k; vazio < 4; vazio++)
+                    Estilo.Rect("Vao", fila).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            }
         }
 
         void FichaDeVilao()

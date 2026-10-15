@@ -190,6 +190,78 @@ namespace TorreDeControle.Core.Personagens
             return avisos;
         }
 
+        // ---------- Influência entre PJ e NPC (docs/npc_lab.md) ----------
+
+        /// <summary>
+        /// <paramref name="quem"/> tem Influência sobre <paramref name="sobre"/>? Cada um guarda quem tem
+        /// Influência sobre si (dada ou perdida), como as PJs entre colegas. Sem nada gravado, vale a regra
+        /// do livro: NPC adulto tem Influência sobre as PJs por padrão; o resto, não.
+        /// </summary>
+        public bool TemInfluencia(Personagem quem, Personagem sobre)
+        {
+            if (quem == null || sobre == null)
+                return false;
+            if (sobre.Influencias.TryGetValue(quem.Id, out var estado))
+                return estado == EstadoInfluencia.Dada;
+            return InfluenciaDeAdulto(quem, sobre);
+        }
+
+        /// <summary>A Influência vem só do padrão (adulto sobre PJ), sem nada gravado?</summary>
+        public bool InfluenciaPorPadrao(Personagem quem, Personagem sobre) =>
+            quem != null && sobre != null && !sobre.Influencias.ContainsKey(quem.Id) && InfluenciaDeAdulto(quem, sobre);
+
+        /// <summary>Já teve e perdeu (fica no histórico, como entre colegas).</summary>
+        public bool PerdeuInfluencia(Personagem quem, Personagem sobre) =>
+            quem != null && sobre != null && sobre.Influencias.TryGetValue(quem.Id, out var e) && e == EstadoInfluencia.Perdida;
+
+        // Leitura para a ficha da PJ e a aba Influência da sala (NPCs ativos da mesma campanha).
+
+        IEnumerable<Personagem> NpcsDaCampanhaDe(Personagem p) =>
+            p?.Sala == null ? Enumerable.Empty<Personagem>()
+                : NpcsDaSala(p.Sala).Where(n => n.Ativo);
+
+        /// <summary>NPCs a quem a PJ deu Influência marcada pelo mestre (fora o padrão dos adultos).</summary>
+        public IReadOnlyList<Personagem> NpcsAQuemDeuInfluencia(Personagem p) =>
+            NpcsDaCampanhaDe(p).Where(n => TemInfluencia(n, p) && !InfluenciaPorPadrao(n, p)).ToList();
+
+        /// <summary>Quantos adultos da campanha têm Influência sobre a PJ só pelo padrão do livro.</summary>
+        public int AdultosComInfluenciaPorPadrao(Personagem p) =>
+            NpcsDaCampanhaDe(p).Count(n => InfluenciaPorPadrao(n, p));
+
+        /// <summary>NPCs que tinham Influência sobre a PJ e perderam (inclusive adulto cancelado).</summary>
+        public IReadOnlyList<Personagem> NpcsQuePerderamInfluenciaSobre(Personagem p) =>
+            NpcsDaCampanhaDe(p).Where(n => PerdeuInfluencia(n, p)).ToList();
+
+        /// <summary>NPCs sobre quem a PJ exerce Influência (ex.: a irmã novinha do Legado).</summary>
+        public IReadOnlyList<Personagem> NpcsSobQuemExerce(Personagem p) =>
+            NpcsDaCampanhaDe(p).Where(n => TemInfluencia(p, n)).ToList();
+
+        public IReadOnlyList<Personagem> NpcsSobQuemPerdeu(Personagem p) =>
+            NpcsDaCampanhaDe(p).Where(n => PerdeuInfluencia(p, n)).ToList();
+
+        static bool InfluenciaDeAdulto(Personagem quem, Personagem sobre) =>
+            quem.Controle == Controle.Mestre && quem.Maturidade == Maturidade.Adulto && sobre.Controle == Controle.Jogador;
+
+        /// <summary>
+        /// O mestre liga ou desliga a Influência de um sobre o outro, entre uma PJ e um NPC da mesma sala.
+        /// Desligar grava "perdida" (nada se apaga); ligar grava "dada". Vale para o padrão do adulto também:
+        /// a PJ que se livrou da Influência do adulto fica marcada como perdida.
+        /// </summary>
+        public Resultado AlternarInfluencia(string quemId, string sobreId)
+        {
+            var quem = Buscar(quemId);
+            var sobre = Buscar(sobreId);
+            if (quem == null || sobre == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            if ((quem.Controle == Controle.Mestre) == (sobre.Controle == Controle.Mestre))
+                return Resultado.Falha("Aqui é entre uma PJ e um NPC (NPC com NPC não tem Influência).");
+            if (quem.Sala == null || quem.Sala != sobre.Sala)
+                return Resultado.Falha("Influência é entre quem está na mesma campanha.");
+            sobre.Influencias[quem.Id] = TemInfluencia(quem, sobre) ? EstadoInfluencia.Perdida : EstadoInfluencia.Dada;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
         // ---------- copiar NPC: laboratório → sala, sala → sala (reboot), sala → laboratório ----------
 
         /// <summary>
@@ -242,24 +314,26 @@ namespace TorreDeControle.Core.Personagens
         IEnumerable<(string fonte, string campo, string vaga, Regras.RegrasArquetipos.NpcDoExtra regra, string nome, string descricao, string vinculo, string papel, string maturidade)>
             FontesDeNpc(Personagem p)
         {
-            foreach (var extra in ExtrasDoArquetipo(p))
-            foreach (var regra in extra.Npcs)
+            var secoes = ExtrasDoArquetipo(p).Select(e => (id: e.Id, campos: e.Campos, npcs: e.Npcs))
+                .Concat(MovimentosComSubsecao(p).Select(m => (id: ExtraDoMovimento(m.Id), campos: m.Campos, npcs: m.Npcs)));
+            foreach (var (fonte, campos, npcs) in secoes)
+            foreach (var regra in npcs)
             {
                 if (regra.PorEscolha)
                 {
-                    var opcoes = extra.Campos.FirstOrDefault(c => c.Id == regra.Campo)?.Opcoes;
-                    foreach (var o in Escolhas(p, extra.Id, regra.Campo).Where(regra.DaPessoa))
-                        yield return (extra.Id, regra.Campo, o, regra,
-                            TextoDoExtra(p, extra.Id, regra.Campo, Regras.RegrasArquetipos.CampoExtra.PessoaDaOpcao(o)),
-                            TextoDoExtra(p, extra.Id, regra.Campo, o),
+                    var opcoes = campos.FirstOrDefault(c => c.Id == regra.Campo)?.Opcoes;
+                    foreach (var o in Escolhas(p, fonte, regra.Campo).Where(regra.DaPessoa))
+                        yield return (fonte, regra.Campo, o, regra,
+                            TextoDoExtra(p, fonte, regra.Campo, Regras.RegrasArquetipos.CampoExtra.PessoaDaOpcao(o)),
+                            TextoDoExtra(p, fonte, regra.Campo, o),
                             opcoes?.FirstOrDefault(x => x.Id == o)?.Nome ?? regra.Vinculo,
                             regra.PapelDa(o), regra.MaturidadeDa(o));
                     continue;
                 }
-                var descricao = regra.CampoDescricao != null ? TextoDoExtra(p, extra.Id, regra.CampoDescricao)
-                    : regra.Vaga != null ? TextoDoExtra(p, extra.Id, regra.Campo, Regras.RegrasArquetipos.CampoExtra.DescricaoDaVaga(regra.Vaga))
+                var descricao = regra.CampoDescricao != null ? TextoDoExtra(p, fonte, regra.CampoDescricao)
+                    : regra.Vaga != null ? TextoDoExtra(p, fonte, regra.Campo, Regras.RegrasArquetipos.CampoExtra.DescricaoDaVaga(regra.Vaga))
                     : string.Empty;
-                yield return (extra.Id, regra.Campo, regra.Vaga, regra, TextoDoExtra(p, extra.Id, regra.Campo, regra.Vaga), descricao, regra.Vinculo, regra.Papel, regra.Maturidade);
+                yield return (fonte, regra.Campo, regra.Vaga, regra, TextoDoExtra(p, fonte, regra.Campo, regra.Vaga), descricao, regra.Vinculo, regra.Papel, regra.Maturidade);
             }
             var arquetipo = RegraDoArquetipo(p);
             if (arquetipo == null)
@@ -362,8 +436,9 @@ namespace TorreDeControle.Core.Personagens
         /// </summary>
         public bool ExtraEditavelNaSala(Personagem p, string extra, string campo) =>
             p.Sala != null && p.Status == StatusCriacao.EmAprovacao &&
-            ExtrasDoArquetipo(p).Any(e => e.Id == extra &&
-                                          e.Npcs.Any(r => !r.PorEscolha && (r.Campo == campo || r.CampoDescricao == campo)));
+            ExtrasDoArquetipo(p).Select(e => (e.Id, e.Npcs))
+                .Concat(MovimentosComSubsecao(p).Select(m => (ExtraDoMovimento(m.Id), m.Npcs)))
+                .Any(s => s.Item1 == extra && s.Item2.Any(r => !r.PorEscolha && (r.Campo == campo || r.CampoDescricao == campo)));
 
         /// <summary>
         /// A caixa de pessoa das opções escolhidas (ex.: obrigações do Janus): na criação ou, na sala,
@@ -409,6 +484,7 @@ namespace TorreDeControle.Core.Personagens
             {
                 var dono = Buscar(npc.Pnj.Vinculo.Personagem);
                 var regras = dono == null ? null : ExtrasDoArquetipo(dono).FirstOrDefault(e => e.Id == npc.Pnj.Vinculo.Extra)?.Npcs;
+                // (só extras: o formato sem campo é anterior aos NPCs de movimento)
                 if (regras == null || regras.Count != 1)
                     continue;
                 (npc.Pnj.Vinculo.Campo, npc.Pnj.Vinculo.Vaga) = (regras[0].Campo, regras[0].Vaga);

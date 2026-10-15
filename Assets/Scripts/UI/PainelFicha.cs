@@ -35,6 +35,7 @@ namespace TorreDeControle.UI
         CadastroJogadores jogadores;
         Action aoFechar;
         PainelAjuda ajudaMovimentos;
+        PainelAjuda ajudaInfluencia;
         Aba abaAtual = Aba.Identidade;
 
         TextMeshProUGUI titulo;
@@ -793,8 +794,10 @@ namespace TorreDeControle.UI
                 var vao = Estilo.Rect("Vao", conteudo);
                 vao.gameObject.AddComponent<LayoutElement>().minHeight = 10;
                 Secao(m.Nome.ToUpperInvariant(), m.Regra);
+                var extraDoMovimento = CadastroPersonagens.ExtraDoMovimento(m.Id);
+                // Nome e descrição do NPC (ex.: o bicho, a nave) seguem editáveis na sala, em aprovação.
                 foreach (var c in m.Campos)
-                    CampoDeExtra(CadastroPersonagens.ExtraDoMovimento(m.Id), c, emCriacao);
+                    CampoDeExtra(extraDoMovimento, c, emCriacao || cadastro.ExtraEditavelNaSala(p, extraDoMovimento, c.Id));
             }
 
         }
@@ -2198,7 +2201,7 @@ namespace TorreDeControle.UI
 
             // Influência é Núcleo (sobrevive à troca de arquétipo), mas a inicial se dá aos colegas: na sala.
             var regra = cadastro.RegraDoArquetipo(p);
-            Secao("INFLUÊNCIA", NotaDaSala);
+            Secao("INFLUÊNCIA", NotaDaSala, AbrirAjudaInfluencia, "Consultar as cartas de Influência.");
             var texto = regra?.Influencia?.Texto ?? string.Empty;
             var influencia = Estilo.Rotulo(conteudo, texto, 22, Estilo.TextoApagado, FontStyles.Italic);
             influencia.textWrappingMode = TextWrappingModes.Normal;
@@ -2238,15 +2241,37 @@ namespace TorreDeControle.UI
                     return lista.Count == 0 ? string.Empty
                         : $"   <color=#{apagado}>perdida: {string.Join(", ", lista.Select(id => cadastro.Buscar(id)?.NomeExibicao ?? "?"))}</color>";
                 }
+                // Colegas e NPCs juntos; NPC leva "(NPC)" ao lado. Os adultos que têm Influência só pelo
+                // padrão do livro entram numa contagem, não um por um.
+                string ComNpcs(IEnumerable<string> colegas, IEnumerable<Personagem> npcs, int adultos = 0)
+                {
+                    var nomes = colegas.Select(id => cadastro.Buscar(id)?.NomeExibicao ?? "?")
+                        .Concat(npcs.Select(n => $"{n.NomeExibicao} <size=75%><color=#{suave}>(NPC)</color></size>"))
+                        .ToList();
+                    if (adultos > 0)
+                        nomes.Add($"<color=#{suave}>todo adulto da campanha, por padrão ({adultos})</color>");
+                    return nomes.Count == 0 ? "ninguém ainda" : string.Join(", ", nomes);
+                }
                 var deu = Estilo.Rotulo(conteudo,
-                    $"<color=#{suave}>Deu Influência a:</color>  {Nomes(cadastro.InfluenciaDada(p))}" +
-                    Perdidas(cadastro.InfluenciaPerdida(p)), 22, Estilo.Texto);
+                    $"<color=#{suave}>Deu Influência a:</color>  " +
+                    ComNpcs(cadastro.InfluenciaDada(p), cadastro.NpcsAQuemDeuInfluencia(p), cadastro.AdultosComInfluenciaPorPadrao(p)) +
+                    Perdidas(cadastro.InfluenciaPerdida(p).Concat(cadastro.NpcsQuePerderamInfluenciaSobre(p).Select(n => n.Id))),
+                    22, Estilo.Texto);
                 deu.textWrappingMode = TextWrappingModes.Normal;
                 var recebeu = Estilo.Rotulo(conteudo,
-                    $"<color=#{suave}>{p.NomeExibicao} exerce Influência sobre:</color>  {Nomes(cadastro.QuemDeuInfluencia(p).Select(c => c.Id))}" +
-                    Perdidas(cadastro.QuemPerdeuInfluencia(p).Select(c => c.Id)), 22, Estilo.Texto);
+                    $"<color=#{suave}>{p.NomeExibicao} exerce Influência sobre:</color>  " +
+                    ComNpcs(cadastro.QuemDeuInfluencia(p).Select(c => c.Id), cadastro.NpcsSobQuemExerce(p)) +
+                    Perdidas(cadastro.QuemPerdeuInfluencia(p).Select(c => c.Id).Concat(cadastro.NpcsSobQuemPerdeu(p).Select(n => n.Id))),
+                    22, Estilo.Texto);
                 recebeu.textWrappingMode = TextWrappingModes.Normal;
             }
+        }
+
+        void AbrirAjudaInfluencia()
+        {
+            if (ajudaInfluencia == null)
+                ajudaInfluencia = PainelAjuda.Criar(transform.parent);
+            ajudaInfluencia.AbrirCategoria("influencia");
         }
 
         /// <summary>O help dos movimentos do arquétipo da ficha (o que vale: o da criação concluída, se houver).</summary>
@@ -2257,16 +2282,26 @@ namespace TorreDeControle.UI
             ajudaMovimentos.AbrirMovimentos(cadastro.RegraDoArquetipo(p)?.Id, movimento);
         }
 
-        void Secao(string nome, string legenda, Action ajuda = null)
+        void Secao(string nome, string legenda, Action ajuda = null, string dicaDaAjuda = null)
         {
             var fila = Estilo.Fila(conteudo, 36);
             var t = Estilo.Rotulo(fila, nome, 22, Estilo.Dourado, FontStyles.Bold);
             t.characterSpacing = 5;
-            t.gameObject.AddComponent<LayoutElement>().preferredWidth = 520;
-            if (ajuda != null)
+            if (ajuda == null)
+                t.gameObject.AddComponent<LayoutElement>().preferredWidth = 520;
+            else
             {
+                // O "?" logo depois do título; um vão completa os 520 para a legenda ficar alinhada às outras.
+                var largura = t.GetPreferredValues(nome).x + 4;
+                var lt = t.gameObject.AddComponent<LayoutElement>();
+                lt.preferredWidth = largura;
+                lt.layoutPriority = 2;
                 var botao = Estilo.BotaoContorno(fila, "?", 36, Estilo.Dourado, () => ajuda());
-                botao.gameObject.AddComponent<Dica>().Configurar("Consultar os movimentos deste arquétipo.");
+                botao.gameObject.AddComponent<Dica>().Configurar(dicaDaAjuda ?? "Consultar os movimentos deste arquétipo.");
+                var espaco = fila.GetComponent<HorizontalLayoutGroup>()?.spacing ?? 0;
+                var vao = Estilo.Rect("Vao", fila).gameObject.AddComponent<LayoutElement>();
+                vao.preferredWidth = Mathf.Max(0, 520 - largura - 36 - 2 * espaco);
+                vao.flexibleWidth = 0;
             }
             if (legenda != null)
             {

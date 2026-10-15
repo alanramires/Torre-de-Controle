@@ -147,6 +147,38 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Adulto_tem_influencia_por_padrao_e_o_mestre_liga_e_desliga()
+        {
+            salas.PorPersonagem(halcyon.Id, 0, FichaPronta.Criada(personagens, "Pulsar").Id, false);
+            var pulsar = personagens.Buscar(halcyon.Slots[0].Personagem);
+            personagens.CriarNpc(halcyon.Id, "Rosa Rook", Maturidade.Adulto, Papel.Vilao);
+            personagens.CriarNpc(halcyon.Id, "Marina", Maturidade.Jovem, Papel.Aliado);
+            var rosa = personagens.NpcsDaSala(halcyon.Id).Single(n => n.NomeExibicao == "Rosa Rook");
+            var marina = personagens.NpcsDaSala(halcyon.Id).Single(n => n.NomeExibicao == "Marina");
+
+            // Adulto: tem por padrão, sem nada gravado. Jovem: não.
+            Assert.That(personagens.TemInfluencia(rosa, pulsar), Is.True);
+            Assert.That(personagens.InfluenciaPorPadrao(rosa, pulsar), Is.True);
+            Assert.That(personagens.TemInfluencia(marina, pulsar), Is.False);
+            Assert.That(personagens.TemInfluencia(pulsar, rosa), Is.False);
+
+            // A Pulsar rejeitou e cancelou a da Rosa: fica "perdida", não some.
+            Assert.That(personagens.AlternarInfluencia(rosa.Id, pulsar.Id).Ok, Is.True);
+            Assert.That(personagens.TemInfluencia(rosa, pulsar), Is.False);
+            Assert.That(personagens.PerdeuInfluencia(rosa, pulsar), Is.True);
+
+            // A irmã novinha: a heroína tem Influência sobre ela.
+            Assert.That(personagens.AlternarInfluencia(pulsar.Id, marina.Id).Ok, Is.True);
+            Assert.That(personagens.TemInfluencia(pulsar, marina), Is.True);
+            Assert.That(personagens.InfluenciaPorPadrao(pulsar, marina), Is.False);
+
+            // NPC com NPC não tem; fora da campanha também não.
+            Assert.That(personagens.AlternarInfluencia(rosa.Id, marina.Id).Ok, Is.False);
+            personagens.CriarNpc(novaEra.Id, "Outra", Maturidade.Adulto, Papel.Neutro);
+            Assert.That(personagens.AlternarInfluencia(personagens.NpcsDaSala(novaEra.Id).Single().Id, pulsar.Id).Ok, Is.False);
+        }
+
+        [Test]
         public void Heroina_nao_se_copia_como_npc()
         {
             var heroina = FichaPronta.Criada(personagens, "Pulsar");
