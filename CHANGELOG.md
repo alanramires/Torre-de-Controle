@@ -10,3 +10,4 @@ Versões `vX.Y.Z`: **X** mudança grande de arquitetura · **Y** mudança locali
 | [v0.0.2](docs/relatorio_v0.0.2.md) | 2026-10-13 | Salas, instâncias e o ciclo da ficha |
 | [v0.0.3](docs/relatorio_v0.0.3.md) | 2026-10-14 | Ficha ágil, exportável e corrigível |
 | [v0.0.4](docs/relatorio_v0.0.4.md) | 2026-10-14 | A equipe se forma na sala |
+| [v0.0.5](docs/relatorio_v0.0.5.md) | 2026-10-14 | Personagens criando NPCs automaticamente |
