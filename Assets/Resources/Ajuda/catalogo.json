@@ -2566,6 +2566,216 @@
           "texto": "Não basta estar numa luta controlada. O destaque é sua resistência dramática diante de um perigo maior que você."
         }
       ]
+    },
+    {
+      "id": "arquetipo/forasteira/entre-dois-mundos",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Forasteira",
+      "arquivo": "11-forasteira-entre-dois-mundos.png",
+      "titulo": "ENTRE DOIS MUNDOS",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Forasteira · livro pp.128 e 130–131",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/5/movimentos/opcoes/0",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "CONTATAR SEU POVO / + SUPERIOR",
+          "texto": "Você tem acesso a recursos do seu povo e algum meio de comunicação com ele. Ao fazer contato, role + Superior."
+        },
+        {
+          "titulo": "CONTROLE",
+          "texto": "10+: receba 3. 7–9: receba 2. Falha: marque potencial e receba 1, mas seu povo faz uma exigência desconfortável."
+        },
+        {
+          "titulo": "GASTE 1 POR EFEITO",
+          "texto": "• Obter tecnologia para usar uma habilidade de outro arquétipo uma vez; escolha ao gastar.\n• Perguntar ao mestre sobre a situação atual.\n• Remover uma condição pelo conforto do contato com casa."
+        },
+        {
+          "titulo": "MOMENTO DO USO",
+          "texto": "Tecnologia e informações podem ter vindo da conversa anterior. Para remover a condição pelo contato, você precisa estar falando com seu lar."
+        },
+        {
+          "titulo": "EXIGÊNCIA NA FALHA",
+          "texto": "A exigência desconfortável aparece no resultado de falha. Em 7–9 ou 10+, este movimento não exige uma contrapartida por si só."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/forasteira/tecnologia-alienigena",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Forasteira",
+      "arquivo": "11-forasteira-tecnologia-alienigena.png",
+      "titulo": "TECNOLOGIA ALIENÍGENA",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Forasteira · livro pp.128 e 130–131",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/5/movimentos/opcoes/1",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO / + ABERRAÇÃO",
+          "texto": "Modifique um aparelho humano usando a tecnologia do seu povo. Precisa de um dispositivo humano como base."
+        },
+        {
+          "titulo": "7+",
+          "texto": "Crie um dispositivo capaz de algo impossível. Ele funciona uma vez e depois para."
+        },
+        {
+          "titulo": "10+: ESCOLHA 1",
+          "texto": "Funcionar excepcionalmente bem OU ganhar um uso adicional."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. O aparelho funciona, mas com um efeito colateral indesejado que o mestre revela depois do uso."
+        },
+        {
+          "titulo": "LIMITAÇÕES",
+          "texto": "Em geral, o dispositivo ainda tem limitações. O resultado excepcional garante o efeito desejado, talvez até mais."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/forasteira/costumes-alienigenas",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Forasteira",
+      "arquivo": "11-forasteira-costumes-alienigenas.png",
+      "titulo": "COSTUMES ALIENÍGENAS",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Forasteira · livro pp.128 e 130–131",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/5/movimentos/opcoes/2",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO",
+          "texto": "Despreze ou enfraqueça abertamente um costume importante da Terra para seguir um costume do seu povo."
+        },
+        {
+          "titulo": "EFEITO",
+          "texto": "Aumente Superior em 1 e diminua outro Rótulo em 1. A mudança permanece e respeita os limites dos Rótulos."
+        },
+        {
+          "titulo": "UM COSTUME IMPORTANTE",
+          "texto": "Defina com o mestre. Desafiá-lo precisa gerar consequências ou atrito; se ninguém se importa, provavelmente não aciona o movimento."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/forasteira/nave-a-kirby",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Forasteira",
+      "arquivo": "11-forasteira-nave-a-kirby.png",
+      "titulo": "NAVE KIRBY",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Forasteira · livro pp.128 e 130–131",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/5/movimentos/opcoes/3",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "SEU VEÍCULO",
+          "texto": "Descreva o veículo trazido de seu lar e escolha 2 forças e 2 fraquezas."
+        },
+        {
+          "titulo": "FORÇAS: ESCOLHA 2",
+          "texto": "Velocidade e manobra; camuflagem; armas potentes; regeneração; viagem dimensional; mudança de tamanho; telepatia."
+        },
+        {
+          "titulo": "FRAQUEZAS: ESCOLHA 2",
+          "texto": "Combustível incomum; vulnerabilidade a ___; fácil detecção; lentidão e pouca manobra; ausência de armas; reparo difícil."
+        },
+        {
+          "titulo": "PILOTANDO / + SUPERIOR",
+          "texto": "Use a nave para Liberar poderes, Enfrentar ou Defender rolando + Superior no lugar do Rótulo normal. Siga os efeitos e penalidades do movimento."
+        },
+        {
+          "titulo": "DANOS",
+          "texto": "Tamanho e aparência vêm da ficção. Se a nave for danificada, precisa ser consertada para voltar a funcionar."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/forasteira/o-melhor-deles",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Forasteira",
+      "arquivo": "11-forasteira-o-melhor-deles.png",
+      "titulo": "O MELHOR DELES",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Forasteira · livro pp.128 e 130–131",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/5/movimentos/opcoes/4",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "QUANDO",
+          "texto": "Conforte ou apoie alguém explicando por que essa pessoa representa o melhor que a Terra tem a oferecer."
+        },
+        {
+          "titulo": "TROCA DE RÓTULO",
+          "texto": "Role + Aberração em vez de + Mundano para Confortar ou apoiar."
+        },
+        {
+          "titulo": "MESMOS EFEITOS",
+          "texto": "O alvo ainda decide se abre. Siga as escolhas e benefícios de Confortar, incluindo o benefício seu em 10+ se houver abertura."
+        },
+        {
+          "titulo": "CONDIÇÃO",
+          "texto": "Irritado continua impondo −2 a Confortar, mesmo quando você usa Aberração."
+        }
+      ]
+    },
+    {
+      "id": "arquetipo/forasteira/nao-tao-diferentes-assim",
+      "categoria": "movimentos-arquetipo",
+      "arquetipo": "Forasteira",
+      "arquivo": "11-forasteira-nao-tao-diferentes-assim.png",
+      "titulo": "NÃO TÃO DIFERENTES ASSIM",
+      "compacto": false,
+      "borda": "#d65353",
+      "origem": "Forasteira · livro pp.128 e 130–131",
+      "regras_ref": [
+        "arquetipos.json#/arquetipos/5/movimentos/opcoes/5",
+        "movimentos_basicos.json",
+        "nucleo.json#/condicoes"
+      ],
+      "secoes": [
+        {
+          "titulo": "FALAR DO SEU LAR / + ABERRAÇÃO",
+          "texto": "Converse sobre sua terra e seu povo. Role + Aberração."
+        },
+        {
+          "titulo": "RESULTADO",
+          "texto": "10+: escolha 2. 7–9: escolha 1."
+        },
+        {
+          "titulo": "FAÇA DURANTE A CONVERSA",
+          "texto": "• Admitir uma falha de seu lar: +1 na pilha de Equipe.\n• Mentir sobre seu lar: ganhar Influência sobre a pessoa.\n• Exaltar seu lar: remover uma condição sua."
+        },
+        {
+          "titulo": "6 OU MENOS",
+          "texto": "Marque potencial. Revele um segredo ou vulnerabilidade sua que ainda não contou aos terráqueos; você acaba se expondo mais do que queria."
+        },
+        {
+          "titulo": "NA FICÇÃO",
+          "texto": "As escolhas precisam aparecer no diálogo. Diga o que confessou, inventou ou elogiou."
+        }
+      ]
     }
   ]
 }

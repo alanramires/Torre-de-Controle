@@ -1732,7 +1732,7 @@
                 "tipo": "condicoes",
                 "rotulo": "Exigência do seu povo",
                 "no_jogo": true,
-                "nota": "regra da casa: contate de novo só depois de pagar a exigência pendente (senão vira combo)",
+                "nota": "a exigência desconfortável ocorre na falha; o movimento não determina bloquear novo contato até cumpri-la",
                 "opcoes": [
                   {
                     "id": "exigencia",
