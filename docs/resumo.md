@@ -1,6 +1,6 @@
 # Resumo — onde a Torre está
 
-> Handoff para a próxima conversa. Atualizado no fechamento da **v0.0.6** (2026-10-15).
+> Handoff para a próxima conversa. Atualizado no fechamento da **v0.1.0** (2026-10-15).
 > Se algo aqui contradiz o código, o código manda — e este arquivo precisa de poda.
 
 ## Leitura para retomar
@@ -16,15 +16,21 @@ novo é seu.
 
 ## Estado
 
-- **Versão:** v0.0.6 — *Vilões*. Relatório: `docs/relatorio_v0.0.6.md`.
+- **Versão:** v0.1.0 — *Cartas e Cenário*. Relatório: `docs/relatorio_v0.1.0.md`.
+- **Novo nesta versão:** as **cartas são JSON desenhado pela Unity** (help inteiro e Gestão das cartas com
+  editor que grava nos JSON do projeto) e as campanhas têm **Cenário** (Local / Organização / Outros, aba na
+  sala, exportar/importar). A ficha alimenta o cenário como já alimentava os NPCs.
 - **Onde o Alan chegou:** salas com personagens **em aprovação** (formação, Influência e relacionamentos
   prontos; NPCs nascem da ficha). Agora há o **laboratório de NPCs** (botão Npcs na entrada): originais,
   cópia entre campanhas, exportar/importar, foto, papel "Vilão / Oponente" e a ficha de vilão conferida no
   livro. Exemplos nos dados locais do Alan: Professora, Rosa Rook, Sentinel, Eclipse.
 - **Pendente de decisão do Alan:** a outra IA trocou a regra da casa da Forasteira ("Entre dois mundos")
   pela leitura do livro em `arquetipos.json`; confirmar se a regra da casa sai.
-- **O que organiza o que vem:** regra que gera NPC é **dado** no `arquetipos.json` (`npcs`,
-  `npcs_historico`, `por_escolha` com `opcoes`), não código. Arquétipo novo que gera NPC = configuração.
+- **O que organiza o que vem:** regra que gera NPC ou cenário é **dado** no `arquetipos.json` (`npcs`,
+  `npcs_historico`, `por_escolha` com `opcoes`, `equipe.npc`; `cenario` no lugar de papel; `cenario` nos
+  extras com nome automático e `dica_nome`; `npc_se` + `senao_cenario`), não código.
+- **Regra de mapear:** conferir a pergunta no livro antes de dizer que ela dá NPC ou lugar (o Farol pede
+  *sinais*, não lugar: o mapeamento errado saiu na v0.1.0).
 - **Como o Alan trabalha esta fase:** ele **desenha cada tela** (rascunho colorido) e explica a regra.
   Não adiantar conteúdo nem regra antes do desenho (ele já parou isso duas vezes).
 - **O caminho da ficha**, e cada ação depende de onde ela está (e de onde foi aberta: hierarquia):
@@ -44,21 +50,16 @@ novo é seu.
 
 ## Onde eu parei
 
-- **Help básico (2026-10-14):** gerador próprio em `tools/cards/gerar_cartas.py`,
-  textos unificados em `Assets/Resources/Ajuda/catalogo.json` (schema em `docs/ajuda.md`),
-  instruções em `tools/cards/README.md`. Agora são 116 cartas: quatro panoramas,
-  oito movimentos básicos, nove PvP, seis de Influência, duas de Condições e
-  seis de Equipe e sessão e dez de Movimentos de equipe (categoria principal
-  separada, uma carta por arquétipo), mais seis movimentos da Bruta em
-  Movimentos de arquétipo → Bruta (borda vermelha; Coração ainda pendente), e
-  doze de Vilões (categoria principal, borda vermelha, briefing em
-  `docs/briefing_ajuda_viloes.md`; referências em `Regras/viloes.json`, só consulta).
-  Bordas temáticas:
-  Condições amarela, Influência verde, Equipe azul; miolo preservado. `PainelAjuda` ligado
-  ao botão do Canvas, com menu lateral compacto, cortinas e leitor ampliado.
-  Gera os panoramas `00-*` e as demais cartas em
-  `Assets/img/cards/regras`, com texto próprio e moldura desenhada por código,
-  sem depender do acervo. As cópias em `Resources/Cards/Regras` alimentam a Ajuda.
+- **Cartas:** `Regras/cartas.json` (jogo) + `Ajuda/catalogo.json` (texto do help), desenhadas por
+  `DesenhoDeCarta`; help em `PainelAjuda` (cortina, dois níveis nos arquétipos, filtro); Gestão das cartas
+  = help em modo edição (`PainelEditorDeCarta`, grava via `Infra/ArquivosDoProjeto`, só no Editor).
+  **Não se fabricam mais PNGs de cartas** (decisão no fim deste arquivo). Falta: categorias descobertas pelo
+  catálogo, botão "nova carta" (Adulto), "?" por chip de movimento.
+- **Cenário:** `Cenario.cs`, `CadastroPersonagens.Cenario.cs` (`FontesDeCenario`, sincronização junto com a
+  dos NPCs), `CadastroPersonagens.TrocaCenario.cs`, aba em `PainelSala.SecaoCenario`. Anotados: copiar um
+  elemento para outra campanha; laboratório de cenário (botão "NPCs e cenário", não um sexto botão);
+  cidade acima das campanhas; Legado (linhagem → Organização) e Janus (emprego/escola → Local) em "talvez".
+  "Evento" não é cenário: vai para o log/Diário.
 
 - **Aprovação na campanha** — feitos: formação da equipe, Influência e **relacionamentos** (ficha, aba
   História; sala só leitura; Bruta sincroniza amor/rival com a Influência). **NPCs da ficha** feitos em
@@ -68,9 +69,9 @@ novo é seu.
 - **Laboratório de NPCs** — feito: `CadastroPersonagens.Pnj.cs` (`NpcsDoLaboratorio`, `CopiarNpc`,
   `NomeRepetidoNoDestino`), `CadastroPersonagens.TrocaNpc.cs` (formato `torre-de-controle/npcs`),
   `PainelNpcs.cs` (tela), `PainelNpc.cs` (ficha: foto, papel/maturidade, exportar/importar por cima).
-- **Próximo (decidido, sem código):** Influência PJ↔NPC em `docs/npc_lab.md` (adulto por padrão
-  calculado, só o mestre muda pela mesa, oculta, grade NPC × PJ, de nascença pela regra). E o vilão na mesa:
-  marcar condição na luta, derrotado, lembrete dos movimentos de condição (depende da Área do mestre).
+- **Influência PJ↔NPC** feita (ficha do NPC, ficha da heroína e árvore com "(NPC)"). Falta, de
+  `docs/npc_lab.md`: Influência oculta e a de nascença pela regra. E o vilão na mesa: marcar condição na
+  luta, derrotado, lembrete dos movimentos de condição (depende da Área do mestre).
 - **Help contextual:** `PainelAjuda.TemMovimentos(id)` / `AbrirMovimentos(id, movimento)`; o "?" por chip
   de movimento tem o parâmetro pronto, sem ligação.
 - **Sons:** código versionado (`SonsUI`, `SomBotao`); `Assets/audio` no `.gitignore` até confirmar a origem.
@@ -87,7 +88,7 @@ novo é seu.
   (`implementacao_futura.md`).
 - **Ajuste pontual com motivo** em ficha em carreira (sem reabrir a criação) e **resultado sem rolagem**
   (Sobrecarga 10+, Vou te salvar! 12+) para o rolador: anotados.
-- Testes: `Assets/Tests/EditMode/` — 126 passando no harness dotnet fora da Unity; rodar também no Test
+- Testes: `Assets/Tests/EditMode/` — 142 passando no harness dotnet fora da Unity; rodar também no Test
   Runner da Unity.
 
 ## Armadilhas
@@ -134,6 +135,11 @@ novo é seu.
 | Gravar nos dados com a Unity aberta | a gravação adiada sobrescreve | Unity fechada, ou arquivo na pasta `importar` |
 | Link de foto não aparece | a Unity só desenha jpg/png (outro formato vira 8x8 "?") | aviso + abrir no navegador; aprovar mesmo assim |
 | PDF "baixado" sem texto | impresso por site de download, perdeu a camada de texto | não serve de fonte; conferir no livro |
+| NRE em `AddComponent` depois de `GetComponent ?? ...` | "fake null" da Unity: `??` não vê o objeto destruído/ausente | `TryGetComponent` |
+| NRE em `GetPreferredValues` | TMP em objeto inativo não mede | estimar a largura (`LarguraEstimada`) |
+| Carta nova "não aparece" | Auto Refresh desligado, JSON velho em memória | Ctrl+R antes de procurar bug |
+| Commit levou arquivo de outra frente | `git commit` grava o índice inteiro (havia `D` já staged) | `git status` antes; refazer se ainda não houve push |
+| Mapeamento de NPC/lugar errado | lista pronta sem conferir a pergunta (Farol) | conferir no livro PT-BR e inglês |
 
 ## MVP (do `CLAUDE.md`)
 
@@ -148,8 +154,10 @@ novo é seu.
 | Exportar log para o fórum | falta |
 
 Fora do MVP, já de pé: jogadores; NPCs com ficha de vilão (Neutro/Aliado/Vilão / Oponente), **NPCs que
-nascem da ficha** e o **laboratório de NPCs** (cópia entre campanhas, troca em JSON); relacionamentos; help com 45 cartas; fotos por link com aprovação; retratos; exportar/importar a
-ficha em JSON (troca com outras máquinas).
+nascem da ficha** e o **laboratório de NPCs** (cópia entre campanhas, troca em JSON); Influência PJ↔NPC;
+**Cenário** da campanha; relacionamentos; **help com as cartas desenhadas** e editor de cartas; fotos por
+link com aprovação; retratos; exportar/importar a ficha em JSON (troca com outras máquinas).
+A "mão de cartas" tem base: `CatalogoDeCartas` + `MontadorDeBaralho` no Core, sem tela de mesa.
 
 ## Schema da ficha
 
@@ -160,6 +168,9 @@ ficha em JSON (troca com outras máquinas).
   `pnj.maturidade_a_definir`; NPC com papel `heroi` vira `aliado` ao carregar.
 - v0.0.6: NPC sem sala = original do laboratório de NPCs; troca de NPCs com formato próprio
   (`torre-de-controle/npcs`, versão 1). Foto do NPC usa `foto_heroica`.
+- v0.1.0: `personagens.json` ganha a lista `cenario` (elementos com `sala`, `tipo`, `vinculo`,
+  `descricao_copiada`); `pnj.descricao_copiada`; `equipe_npc_nome`; textos do nome do lugar nos extras com
+  campo `cenario`. Troca de cenário: formato `torre-de-controle/cenario`, versão 1.
 - **Ainda sem campo `versao` nem migração.** Na v0.0.2 o status `criado` deixou de existir; os dados
   locais do Alan foram convertidos à mão (backup em `dados/personagens.antes-dos-status.json`).
   Antes de uma campanha de verdade, criar `versao` + migração.
