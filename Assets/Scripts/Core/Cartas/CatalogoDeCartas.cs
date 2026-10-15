@@ -31,6 +31,11 @@ namespace TorreDeControle.Core.Cartas
         [JsonProperty("regra")] public string Regra { get; set; }
         /// <summary>Id da carta de help que explica esta (Ajuda/catalogo.json), se houver.</summary>
         [JsonProperty("ajuda")] public string Ajuda { get; set; }
+        /// <summary>
+        /// Ícone escolhido à mão (caminho em Resources/Icones, ex.: "Movimentos/defender", "Tokens/equipe"; ou
+        /// "nenhum"). Vazio: o automático (ícone do movimento, moeda do token ou símbolo da categoria).
+        /// </summary>
+        [JsonProperty("icone")] public string Icone { get; set; }
         /// <summary>Rótulo da rolagem, quando o movimento rola um Rótulo fixo.</summary>
         [JsonProperty("rotulo")] public string Rotulo { get; set; }
         /// <summary>Extras: o módulo (cartas + tokens) a que a carta pertence.</summary>

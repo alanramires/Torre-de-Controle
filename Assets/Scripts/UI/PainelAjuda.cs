@@ -21,8 +21,9 @@ namespace TorreDeControle.UI
         // texto é editar JSON. Os PNG (tools/cards) ficam só para exportar/imprimir; aqui não são mais lidos.
         JArray catalogo;
         Texture2D[] panoramas;
-        readonly string[] categorias = { "referencia-rapida", "movimentos-basicos", "pvp", "influencia", "condicoes", "equipe-sessao", "movimentos-equipe", "movimentos-arquetipo", "viloes" };
-        readonly string[] categoriasNomes = { "Visão geral", "Movimentos básicos", "PvP", "Influência", "Condições", "Equipe e sessão", "Movimentos de equipe", "Movimentos de arquétipo", "Vilões" };
+        /// <summary>As categorias do help (a árvore da Biblioteca); o editor de cartas usa para a rota.</summary>
+        public static readonly string[] categorias = { "referencia-rapida", "movimentos-basicos", "pvp", "influencia", "condicoes", "equipe-sessao", "movimentos-equipe", "movimentos-arquetipo", "viloes", "perdicao" };
+        public static readonly string[] categoriasNomes = { "Visão geral", "Movimentos básicos", "PvP", "Influência", "Condições", "Equipe e sessão", "Movimentos de equipe", "Movimentos de arquétipo", "Vilões", "Perdição" };
         string arquetipoAtual;
         bool condicoesVilao;
         bool contextoCondicoesVilao;
@@ -53,16 +54,24 @@ namespace TorreDeControle.UI
             return painel;
         }
 
+        // Aberto filtrado pela ficha (AbrirMovimentos, AbrirCategoria, AbrirCondicoesVilao): clicar numa
+        // categoria sai do filtro e traz a biblioteca inteira de volta.
+        bool filtrado;
+
         public void Abrir(Texture2D[] texturas)
         {
+            DesenhoDeCarta.AtualizarDoProjeto();
             contextoCondicoesVilao = false;
-            var fonte = Resources.Load<TextAsset>("Ajuda/catalogo");
-            if (fonte == null)
+            filtrado = false;
+            if (modoGestao)
+                AlternarGestao(); // abre sempre como help
+            var texto = DesenhoDeCarta.TextoDoHelp(); // com as edições da gestão das cartas
+            if (texto == null)
             {
-                Debug.LogError("[Torre] Cat?logo de ajuda ausente.");
+                Debug.LogError("[Torre] Catálogo de ajuda ausente.");
                 return;
             }
-            catalogo = (JArray)JObject.Parse(fonte.text)["cartas"];
+            catalogo = (JArray)JObject.Parse(texto)["cartas"];
             panoramas = texturas;
             foreach (var botao in botoesCategoria) botao.gameObject.SetActive(true);
             gameObject.SetActive(true);
@@ -92,6 +101,7 @@ namespace TorreDeControle.UI
         public void AbrirMovimentos(string arquetipoId, string movimento = null)
         {
             Abrir(null);
+            filtrado = true;
             grupoAberto = true; // vindo da ficha, a classe já chega aberta
             var prefixo = PrefixoDoArquetipo(arquetipoId);
             catalogo = new JArray(catalogo.Cast<JObject>().Where(c =>
@@ -126,7 +136,7 @@ namespace TorreDeControle.UI
                 var botao = quadro.gameObject.AddComponent<Button>();
                 SomBotao.Ligar(botao);
                 botao.targetGraphic = alvo;
-                botao.onClick.AddListener(() => Ler(escolhido));
+                botao.onClick.AddListener(() => Escolher(escolhido));
                 // A carta é desenhada pela Unity dentro da área (que guarda a proporção das cartas).
                 var imagem = Imagem(quadro);
                 imagem.enabled = false;
@@ -139,6 +149,7 @@ namespace TorreDeControle.UI
         public void AbrirCategoria(string id)
         {
             Abrir(null);
+            filtrado = true;
             var categoria = System.Array.IndexOf(categorias, id);
             if (categoria < 0)
                 return;
@@ -150,6 +161,7 @@ namespace TorreDeControle.UI
         public void AbrirCondicoesVilao()
         {
             Abrir(null);
+            filtrado = true;
             contextoCondicoesVilao = true;
             catalogo = new JArray(catalogo.Cast<JObject>().Where(c =>
                 (string)c["id"] == "viloes/luta" ||
@@ -176,7 +188,8 @@ namespace TorreDeControle.UI
             nomes = entradas.Select(c => (string)c["titulo"]).ToArray();
             ids = entradas.Select(c => (string)c["id"]).ToArray();
             entradasAtuais = entradas;
-            arquivos = entradas.Select(c => ((string)c["arquivo"]).Replace(".png", string.Empty)).ToArray();
+            // Carta nova pode não ter PNG (o help é desenhado): sem "arquivo", fica vazio.
+            arquivos = entradas.Select(c => ((string)c["arquivo"] ?? string.Empty).Replace(".png", string.Empty)).ToArray();
             // Sem carregar PNG: as cartas são desenhadas pelo DesenhoDeCarta.
             cards = new Texture2D[arquivos.Length];
             for (var k = 0; k < cortinas.Length; k++)
@@ -232,7 +245,7 @@ namespace TorreDeControle.UI
             for (var k = 0; k < nomes.Length; k++)
             {
                 var escolhido = k;
-                var b = Estilo.BotaoContorno(paiDosAtalhos, nomes[k], 0, Estilo.TextoSuave, () => Ler(escolhido));
+                var b = Estilo.BotaoContorno(paiDosAtalhos, nomes[k], 0, Estilo.TextoSuave, () => Escolher(escolhido));
                 var tamanho = b.GetComponent<LayoutElement>();
                 tamanho.minHeight = tamanho.preferredHeight = 42;
                 tamanho.flexibleHeight = 0;
@@ -265,8 +278,9 @@ namespace TorreDeControle.UI
             var topo = Estilo.Fila(cartao, 62);
             titulo = Estilo.Rotulo(topo, "AJUDA", 36, Estilo.Dourado, FontStyles.Bold);
             Estilo.ColunaElastica(titulo);
-            // Por enquanto a gestão das cartas do jogo (Regras/cartas.json, desenhadas pela Unity) mora aqui.
-            Estilo.BotaoContorno(topo, "Gestão das cartas", 340, Estilo.Dourado, AbrirGestaoDasCartas);
+            // Gestão das cartas = esta mesma tela em modo de edição: a árvore à esquerda, e clicar numa carta
+            // abre o editor em vez de ampliar.
+            botaoGestao = Estilo.BotaoContorno(topo, "Gestão das cartas", 340, Estilo.Dourado, AlternarGestao);
             Estilo.BotaoContorno(topo, "Voltar", 190, Estilo.TextoSuave, Voltar);
             var corpo = Estilo.Fila(cartao, 0, 24);
             var corpoLayout = corpo.GetComponent<LayoutElement>();
@@ -297,6 +311,13 @@ namespace TorreDeControle.UI
                     {
                         // Cortina: numa carta, clicar na categoria volta para a grade com a lista aberta;
                         // já na grade com a lista aberta, clicar recolhe.
+                        if (filtrado)
+                        {
+                            SairDoFiltro();
+                            EscolherCategoria(escolhida, escolhida == categoriaAtual ? arquetipoAtual : null);
+                            assuntos.gameObject.SetActive(true);
+                            return;
+                        }
                         var recolher = categoriaAtual == escolhida && areaGaleria.gameObject.activeSelf
                             && assuntos.gameObject.activeSelf;
                         // Na mesma categoria, fica na classe em que estava (não volta para a primeira).
@@ -317,7 +338,8 @@ namespace TorreDeControle.UI
                     : categoria == 5 ? "Pilha de Equipe e início e fim de sessão."
                     : categoria == 6 ? "Celebração e vulnerabilidade: movimentos de equipe dos dez arquétipos."
                     : categoria == 7 ? "Movimentos próprios de cada arquétipo, agrupados por classe."
-                    : "Consulta do mestre: criar vilões, conduzir conflitos e reagir às condições.");
+                    : categoria == 8 ? "Consulta do mestre: criar vilões, conduzir conflitos e reagir às condições."
+                    : "Amaldiçoada: Nêmesis, trilha e Sinais de Perdição, Santuário e seus requisitos.");
                 botoesCategoria[categoria] = b;
                 var cortinaRect = Estilo.Rect("Assuntos " + categoriasNomes[categoria], listaMenu);
                 var cortina = cortinaRect.gameObject.AddComponent<VerticalLayoutGroup>();
@@ -387,10 +409,10 @@ namespace TorreDeControle.UI
             DestacarAssunto(-1);
             areaGaleria.gameObject.SetActive(true);
             leitor.gameObject.SetActive(false);
-            titulo.text = "AJUDA · " + categoriasNomes[categoriaAtual].ToUpperInvariant();
+            titulo.text = $"{Prefixo} · " + categoriasNomes[categoriaAtual].ToUpperInvariant();
             if (arquetipoAtual != null) titulo.text += " · " + arquetipoAtual.ToUpperInvariant();
-            if (condicoesVilao) titulo.text = "AJUDA · MOVIMENTOS DE CONDIÇÃO DO VILÃO";
-            pagina.text = "Escolha uma carta para ampliar";
+            if (condicoesVilao) titulo.text = $"{Prefixo} · MOVIMENTOS DE CONDIÇÃO DO VILÃO";
+            pagina.text = modoGestao ? "Clique numa carta para editar" : "Escolha uma carta para ampliar";
             anterior.gameObject.SetActive(false);
             proxima.gameObject.SetActive(false);
         }
@@ -411,7 +433,7 @@ namespace TorreDeControle.UI
                 Destroy(ampliada.transform.GetChild(i).gameObject);
             ampliada.enabled = false;
             DesenhoDeCarta.CriarDaAjuda((RectTransform)ampliada.transform, entradasAtuais[indice], rolavel: true);
-            titulo.text = "AJUDA · " + nomes[indice].ToUpperInvariant();
+            titulo.text = $"{Prefixo} · " + nomes[indice].ToUpperInvariant();
             pagina.text = $"{indice + 1} / {nomes.Length}";
             anterior.gameObject.SetActive(true);
             proxima.gameObject.SetActive(true);
@@ -419,13 +441,71 @@ namespace TorreDeControle.UI
             proxima.interactable = indice < nomes.Length - 1;
         }
 
-        PainelCartas gestaoDasCartas;
+        // ---------- gestão das cartas: o help em modo de edição ----------
 
-        void AbrirGestaoDasCartas()
+        bool modoGestao;
+        Button botaoGestao;
+        PainelEditorDeCarta editor;
+
+        string Prefixo => modoGestao ? "GESTÃO DAS CARTAS" : "AJUDA";
+
+        void AlternarGestao()
         {
-            if (gestaoDasCartas == null)
-                gestaoDasCartas = PainelCartas.Criar(transform.parent);
-            gestaoDasCartas.Abrir(Core.Cartas.CatalogoDeCartas.Carregar(new FonteDeRegrasResources()));
+            DesenhoDeCarta.AtualizarDoProjeto();
+            var textoAtual = DesenhoDeCarta.TextoDoHelp();
+            if (textoAtual != null && !filtrado)
+                catalogo = (JArray)JObject.Parse(textoAtual)["cartas"];
+            modoGestao = !modoGestao;
+            botaoGestao.GetComponentInChildren<TextMeshProUGUI>().text = (modoGestao ? "Sair da gestão" : "Gestão das cartas").ToUpperInvariant();
+            if (!filtrado) EscolherCategoria(categoriaAtual, arquetipoAtual, condicoesVilao);
+            else MostrarGaleria();
+        }
+
+        /// <summary>Clique numa carta (grade ou lista): ampliar, ou editar no modo de gestão.</summary>
+        void Escolher(int k)
+        {
+            if (modoGestao)
+                Editar(k);
+            else
+                Ler(k);
+        }
+
+        void Editar(int k)
+        {
+            var id = ids[k];
+            var carta = DesenhoDeCarta.CatalogoAtual.Todas.FirstOrDefault(c => c.Ajuda == id);
+            if (carta == null)
+            {
+                pagina.text = "Esta carta ainda não tem carta de jogo no catálogo (Regras/cartas.json).";
+                return;
+            }
+            if (editor == null)
+                editor = PainelEditorDeCarta.Criar(transform.parent);
+            editor.Abrir(carta, DepoisDeEditar);
+        }
+
+        /// <summary>Relê o help editado e refaz a categoria (a carta pode ter mudado de rota).</summary>
+        void DepoisDeEditar()
+        {
+            var texto = DesenhoDeCarta.TextoDoHelp();
+            if (texto != null)
+                catalogo = (JArray)JObject.Parse(texto)["cartas"];
+            if (filtrado)
+                SairDoFiltro();
+            EscolherCategoria(categoriaAtual, arquetipoAtual);
+            assuntos.gameObject.SetActive(true);
+        }
+
+        /// <summary>Recarrega o catálogo inteiro e mostra todas as categorias (fim do filtro da ficha).</summary>
+        void SairDoFiltro()
+        {
+            var texto = DesenhoDeCarta.TextoDoHelp();
+            if (texto != null)
+                catalogo = (JArray)JObject.Parse(texto)["cartas"];
+            contextoCondicoesVilao = false;
+            condicoesVilao = false;
+            filtrado = false;
+            foreach (var botao in botoesCategoria) botao.gameObject.SetActive(true);
         }
 
         void Voltar()

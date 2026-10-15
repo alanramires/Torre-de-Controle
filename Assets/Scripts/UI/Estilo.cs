@@ -510,7 +510,7 @@ namespace TorreDeControle.UI
                 t.textWrappingMode = TextWrappingModes.Normal;
                 t.fontSize = 24;
             }
-            var layout = campo.GetComponent<LayoutElement>() ?? campo.gameObject.AddComponent<LayoutElement>();
+            if (!campo.TryGetComponent<LayoutElement>(out var layout)) layout = campo.gameObject.AddComponent<LayoutElement>();
             layout.minHeight = altura;
             layout.preferredHeight = altura;
             campo.gameObject.AddComponent<RepassaRolagem>();
@@ -521,7 +521,7 @@ namespace TorreDeControle.UI
         /// Põe o botão "•••" no fim da caixa (no canto de cima, se for de várias linhas): abre uma mini-tela com área de texto grande.
         /// Salvar escreve no campo e dispara o onDeselect dele (que é quem grava), como se tivesse saído do campo.
         /// </summary>
-        public static void ComExpandir(TMP_InputField campo, string titulo)
+        public static void ComExpandir(TMP_InputField campo, string titulo, TMP_InputField campoExtra = null, string rotuloExtra = null)
         {
             // Só leitura: o ••• abre o texto inteiro para ler, sem editar.
             var soLeitura = !campo.interactable;
@@ -563,7 +563,7 @@ namespace TorreDeControle.UI
                 {
                     campo.text = novo;
                     campo.onDeselect.Invoke(novo);
-                }));
+                }, campoExtra, rotuloExtra));
         }
 
         /// <summary>Mini-tela modal com uma área de texto grande: Cancelar ou Salvar.</summary>
@@ -616,7 +616,12 @@ namespace TorreDeControle.UI
             BotaoContorno(botoes, "Fechar", 220, TextoSuave, () => Object.Destroy(veu.gameObject));
         }
 
-        public static void EditorDeTexto(Transform qualquer, string titulo, string texto, System.Action<string> aoSalvar)
+        /// <param name="campoExtra">
+        /// Um campo de uma linha que acompanha o texto (ex.: o nome do NPC da formação): aparece acima do texto,
+        /// e salvar também o grava (texto + onEndEdit no campo original).
+        /// </param>
+        public static void EditorDeTexto(Transform qualquer, string titulo, string texto, System.Action<string> aoSalvar,
+            TMP_InputField campoExtra = null, string rotuloExtra = null)
         {
             var raiz = (RectTransform)qualquer.GetComponentInParent<Canvas>().rootCanvas.transform;
             var veu = Rect("EditorDeTexto", raiz);
@@ -626,7 +631,8 @@ namespace TorreDeControle.UI
 
             var caixa = Rect("Caixa", veu);
             caixa.anchorMin = caixa.anchorMax = new Vector2(0.5f, 0.5f);
-            caixa.sizeDelta = new Vector2(1100, 620);
+            // Com o campo extra (uma linha a mais), a caixa cresce na mesma medida: os botões não saem dela.
+            caixa.sizeDelta = new Vector2(1100, campoExtra != null ? 620 + 68 : 620);
             Moldura(caixa.gameObject, CaixaOpcoes, Dourado);
             var coluna = caixa.gameObject.AddComponent<VerticalLayoutGroup>();
             coluna.padding = new RectOffset(36, 36, 28, 28);
@@ -637,6 +643,17 @@ namespace TorreDeControle.UI
 
             var t = Rotulo(caixa, titulo, 26, Dourado, FontStyles.Bold);
             t.gameObject.AddComponent<LayoutElement>().minHeight = 36;
+
+            TMP_InputField extra = null;
+            if (campoExtra != null)
+            {
+                var filaExtra = Fila(caixa, 52, 12);
+                var r = Rotulo(filaExtra, rotuloExtra ?? string.Empty, 20, TextoSuave, FontStyles.Italic);
+                r.gameObject.AddComponent<LayoutElement>().preferredWidth = 360;
+                extra = CampoTexto(filaExtra, (campoExtra.placeholder as TMP_Text)?.text ?? string.Empty);
+                extra.text = campoExtra.text;
+                ColunaElastica(extra);
+            }
 
             var area = AreaTexto(caixa, "escreva à vontade", 420);
             area.GetComponent<LayoutElement>().flexibleHeight = 1;
@@ -650,7 +667,13 @@ namespace TorreDeControle.UI
             BotaoPrincipal(botoes, "Salvar", 220, () =>
             {
                 var novo = area.text;
+                var novoExtra = extra?.text;
                 Object.Destroy(veu.gameObject);
+                if (campoExtra != null && novoExtra != campoExtra.text)
+                {
+                    campoExtra.text = novoExtra;
+                    campoExtra.onEndEdit.Invoke(novoExtra);
+                }
                 aoSalvar(novo);
             });
         }

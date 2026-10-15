@@ -34,20 +34,73 @@ namespace TorreDeControle.UI
         {
             textosDoHelp = null;
             cartasDoJogo = null;
+            disco = null;
+            helpEditado = null;
+            cartasEditadas = null;
+        }
+
+        // Textos editados nesta sessão (a gestão das cartas grava os JSON no projeto, mas o Resources da Unity só
+        // os relê depois de reimportar): enquanto houver, valem eles.
+        static string helpEditado;
+        static string cartasEditadas;
+
+        /// <summary>O catalogo.json do help como está agora (editado nesta sessão, ou o do Resources).</summary>
+        public static string TextoDoHelp() =>
+            helpEditado ?? Resources.Load<TextAsset>("Ajuda/catalogo")?.text;
+
+        /// <summary>O cartas.json como está agora (editado nesta sessão, ou o do Resources).</summary>
+        public static string TextoDasCartas() =>
+            cartasEditadas ?? Resources.Load<TextAsset>("Regras/cartas")?.text;
+
+        /// <summary>Depois de gravar uma edição: tudo passa a ler os textos novos.</summary>
+        public static void Recarregar(string help, string cartas)
+        {
+            helpEditado = help;
+            cartasEditadas = cartas;
+            textosDoHelp = null;
+            cartasDoJogo = null;
+        }
+
+        /// <summary>No Editor, inclui alterações externas sem manter a cópia antiga da gestão.</summary>
+        public static void AtualizarDoProjeto()
+        {
+            if (!Application.isEditor) return;
+            var arquivos = new TorreDeControle.Infra.ArquivosDoProjeto(Application.dataPath);
+            if (!arquivos.Disponivel) return;
+            var help = arquivos.Ler("Resources/Ajuda/catalogo.json");
+            var cartas = arquivos.Ler("Resources/Regras/cartas.json");
+            if (help == helpEditado && cartas == cartasEditadas) return;
+            // Valida antes de substituir o estado em memória.
+            JObject.Parse(help);
+            JObject.Parse(cartas);
+            Recarregar(help, cartas);
+        }
+
+        sealed class FonteDeTexto : Core.Regras.IFonteDeRegras
+        {
+            readonly string cartas;
+            public FonteDeTexto(string cartas) => this.cartas = cartas;
+            public string Ler(string nome) => nome == "cartas" ? cartas : null;
         }
 
         static JArray Help()
         {
             if (textosDoHelp == null)
             {
-                var fonte = Resources.Load<TextAsset>("Ajuda/catalogo");
-                textosDoHelp = fonte == null ? new JArray() : (JArray)JObject.Parse(fonte.text)["cartas"];
+                var texto = TextoDoHelp();
+                textosDoHelp = texto == null ? new JArray() : (JArray)JObject.Parse(texto)["cartas"];
             }
             return textosDoHelp;
         }
 
         static CatalogoDeCartas Cartas() =>
-            cartasDoJogo ??= CatalogoDeCartas.Carregar(new FonteDeRegrasResources());
+            cartasDoJogo ??= CatalogoDeCartas.Carregar(new FonteDeTexto(TextoDasCartas()));
+
+        /// <summary>O catálogo de cartas atual (com as edições da sessão).</summary>
+        public static CatalogoDeCartas CatalogoAtual => Cartas();
+
+        /// <summary>A entrada do help com este id (com as edições da sessão), ou null.</summary>
+        public static JObject EntradaDoHelpAtual(string id) => EntradaDoHelp(id);
 
         static JObject EntradaDoHelp(string id) =>
             id == null ? null : Help().Cast<JObject>().FirstOrDefault(c => (string)c["id"] == id);
@@ -73,10 +126,11 @@ namespace TorreDeControle.UI
         /// O texto rola dentro da carta? Na carta ampliada, sim; nas miniaturas, não: a roda do mouse passa para
         /// a grade (a carta inteira se lê ao clicar).
         /// </param>
-        public static RectTransform CriarDaAjuda(RectTransform area, JObject entrada, bool rolavel = false)
+        /// <param name="carta">A carta de jogo a usar (a prévia do editor passa a sua); null: a do catálogo.</param>
+        public static RectTransform CriarDaAjuda(RectTransform area, JObject entrada, bool rolavel = false, Carta carta = null)
         {
             var id = (string)entrada["id"];
-            var carta = Cartas().Todas.FirstOrDefault(c => c.Ajuda == id);
+            carta ??= Cartas().Todas.FirstOrDefault(c => c.Ajuda == id);
             var raiz = Estilo.Rect("Carta desenhada " + id, area);
             raiz.anchorMin = raiz.anchorMax = raiz.pivot = new Vector2(0.5f, 0.5f);
             raiz.sizeDelta = new Vector2(Largura, Altura);
@@ -99,7 +153,9 @@ namespace TorreDeControle.UI
             // [ícone][NOME]
             var titulo = (string)entrada?["titulo"] ?? carta?.Titulo ?? "?";
             var topo = Estilo.Fila(raiz, 46, 8);
-            var icone = carta == null ? null : Icone(carta);
+            // Padrão: o ícone próprio da carta; senão, o símbolo da categoria do help (todas as cartas da
+            // categoria com a mesma cara).
+            var icone = (carta == null ? null : Icone(carta)) ?? IconeDaCategoria((string)entrada?["categoria"]);
             if (icone != null)
                 Simbolo(topo, icone);
             var nome = Estilo.Rotulo(topo, titulo.ToUpperInvariant(), 17, Color.white, FontStyles.Bold);
@@ -138,9 +194,11 @@ namespace TorreDeControle.UI
             // [rodapé de tokens] + origem
             var fichas = carta == null ? new string[0] : Rodape(carta);
             // Carta de um arquétipo: o nome da classe num botãozinho no canto do rodapé.
-            var classe = carta != null && carta.Origem != null && carta.Origem != "todos" && carta.Origem != "mestre"
-                ? Core.Personagens.Arquetipos.Nome(carta.Origem)
-                : (string)entrada?["arquetipo"];
+            // Com carta de jogo, vale a exclusividade dela ("todos"/"mestre": sem selo); sem, a classe do help.
+            var classe = carta == null ? (string)entrada?["arquetipo"]
+                : carta.Origem != null && carta.Origem != "todos" && carta.Origem != "mestre"
+                    ? Core.Personagens.Arquetipos.Nome(carta.Origem)
+                    : null;
             if (fichas.Count > 0 || !string.IsNullOrEmpty(classe))
             {
                 var rodape = Estilo.Fila(raiz, 24, 5);
@@ -173,9 +231,48 @@ namespace TorreDeControle.UI
                 var t = Estilo.Rotulo(faixa, titulo, 12, TituloDaSecao, FontStyles.Bold);
                 t.textWrappingMode = TextWrappingModes.Normal;
             }
-            var c = Estilo.Rotulo(faixa, $"<noparse>{texto}</noparse>", 12, TextoDaSecao);
+            var c = Estilo.Rotulo(faixa, Marcacao(texto), 12, TextoDaSecao);
             c.textWrappingMode = TextWrappingModes.Normal;
         }
+
+        /// <summary>
+        /// A marcação do texto das cartas (editável no JSON): [cor=verde|azul|vermelho|dourado|laranja|#hex]...[/cor]
+        /// e [b]...[/b]. O resto é texto puro (nada de tag do TMP escapa do JSON para a tela).
+        /// </summary>
+        public static string Marcacao(string texto)
+        {
+            if (string.IsNullOrEmpty(texto))
+                return string.Empty;
+            var sb = new System.Text.StringBuilder();
+            var marca = new System.Text.RegularExpressions.Regex(@"\[cor=([^\]]+)\]|\[/cor\]|\[b\]|\[/b\]");
+            var pos = 0;
+            foreach (System.Text.RegularExpressions.Match m in marca.Matches(texto))
+            {
+                if (m.Index > pos)
+                    sb.Append("<noparse>").Append(texto, pos, m.Index - pos).Append("</noparse>");
+                sb.Append(m.Value switch
+                {
+                    "[/cor]" => "</color>",
+                    "[b]" => "<b>",
+                    "[/b]" => "</b>",
+                    _ => $"<color={Cor(m.Groups[1].Value.Trim())}>",
+                });
+                pos = m.Index + m.Length;
+            }
+            if (pos < texto.Length)
+                sb.Append("<noparse>").Append(texto, pos, texto.Length - pos).Append("</noparse>");
+            return sb.ToString();
+        }
+
+        static string Cor(string nome) => nome.ToLowerInvariant() switch
+        {
+            "verde" => "#3E8F52",
+            "azul" => "#2F5FA8",
+            "vermelho" => "#B83A3A",
+            "dourado" => "#A07A24",
+            "laranja" => "#C46A1C",
+            _ => System.Text.RegularExpressions.Regex.IsMatch(nome, "^#[0-9a-fA-F]{6}$") ? nome : "#000000",
+        };
 
         /// <summary>Cor da moldura: a do help; senão, pelo tipo da carta (mesma convenção do help).</summary>
         static Color CorDaBorda(JObject entrada, Carta carta)
@@ -204,6 +301,8 @@ namespace TorreDeControle.UI
         /// </summary>
         static Texture2D Icone(Carta carta)
         {
+            if (!string.IsNullOrEmpty(carta.Icone))
+                return carta.Icone == "nenhum" ? null : Resources.Load<Texture2D>("Icones/" + carta.Icone);
             var nome = carta.Id.Substring(carta.Id.IndexOf('/') + 1);
             if (carta.Tipo == Carta.Pvp)
                 nome = System.Text.RegularExpressions.Regex.Replace(nome, @"^pvp-\d+-", string.Empty);
@@ -220,6 +319,35 @@ namespace TorreDeControle.UI
             return token == null ? null : Resources.Load<Texture2D>("Icones/Tokens/" + token);
         }
 
+        /// <summary>Símbolo de uma categoria do help, para as cartas dela sem ícone próprio.</summary>
+        static Texture2D IconeDaCategoria(string categoria) => categoria switch
+        {
+            "influencia" => Resources.Load<Texture2D>("Icones/Tokens/influencia"),
+            "equipe-sessao" => Resources.Load<Texture2D>("Icones/Tokens/equipe"),
+            "movimentos-equipe" => Resources.Load<Texture2D>("Icones/Tokens/equipe"),
+            _ => null,
+        };
+
+        static Texture2D disco;
+
+        /// <summary>Um disco azul-marinho (gerado uma vez) para preencher moedas de miolo vazio, como a da Influência.</summary>
+        static Texture2D Disco()
+        {
+            if (disco != null)
+                return disco;
+            const int n = 64;
+            disco = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+            var cor = new Color(0.06f, 0.10f, 0.24f);
+            for (var y = 0; y < n; y++)
+            for (var x = 0; x < n; x++)
+            {
+                var d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(n / 2f, n / 2f));
+                disco.SetPixel(x, y, d <= n * 0.40f ? cor : Color.clear);
+            }
+            disco.Apply();
+            return disco;
+        }
+
         static void Simbolo(Transform pai, Texture2D icone)
         {
             var caixa = Estilo.Rect("Simbolo", pai);
@@ -228,6 +356,15 @@ namespace TorreDeControle.UI
             lt.flexibleWidth = 0;
             lt.layoutPriority = 2;
             // A imagem num filho: o objeto da fila é do layout; o ajuste de proporção briga com ele.
+            // Moeda de miolo transparente (Influência): um disco por trás, para não ficar oca.
+            if (icone.name == "influencia")
+            {
+                var fundo = Estilo.Rect("Fundo", caixa);
+                Estilo.Esticar(fundo);
+                var f = fundo.gameObject.AddComponent<RawImage>();
+                f.texture = Disco();
+                f.raycastTarget = false;
+            }
             var miolo = Estilo.Rect("Icone", caixa);
             Estilo.Esticar(miolo);
             var img = miolo.gameObject.AddComponent<RawImage>();
@@ -237,6 +374,13 @@ namespace TorreDeControle.UI
             ajuste.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
             ajuste.aspectRatio = (float)icone.width / Mathf.Max(1, icone.height);
         }
+
+        /// <summary>
+        /// Largura estimada de um texto curto em negrito (pelas letras, não pelo TMP): o TMP não mede texto que
+        /// está numa parte escondida da tela (ex.: a grade, enquanto se lê uma carta ampliada) e quebra.
+        /// </summary>
+        static float LarguraEstimada(string texto, float tamanho, float espacamento = 0) =>
+            (texto?.Length ?? 0) * (tamanho * 0.62f + espacamento);
 
         /// <summary>O selo da classe (ex.: "Bruta"), na cor da borda da carta.</summary>
         static void Selo(Transform pai, string texto, Color cor)
@@ -248,7 +392,7 @@ namespace TorreDeControle.UI
             t.characterSpacing = 2;
             Estilo.Esticar(t.rectTransform);
             var l = selo.gameObject.AddComponent<LayoutElement>();
-            l.preferredWidth = t.GetPreferredValues(texto.ToUpperInvariant()).x + 16;
+            l.preferredWidth = LarguraEstimada(texto.ToUpperInvariant(), 11, 2) + 16;
             l.flexibleWidth = 0;
         }
 
@@ -277,15 +421,26 @@ namespace TorreDeControle.UI
                 h.childControlHeight = true;
                 h.childForceExpandWidth = false;
                 h.childAlignment = TextAnchor.MiddleLeft;
-                var img = Estilo.Rect("Moeda", grupo).gameObject.AddComponent<RawImage>();
+                var caixaMoeda = Estilo.Rect("Moeda", grupo);
+                var li = caixaMoeda.gameObject.AddComponent<LayoutElement>();
+                li.preferredWidth = li.preferredHeight = 22;
+                if (token == "influencia")
+                {
+                    var fundo = Estilo.Rect("Fundo", caixaMoeda);
+                    Estilo.Esticar(fundo);
+                    var f = fundo.gameObject.AddComponent<RawImage>();
+                    f.texture = Disco();
+                    f.raycastTarget = false;
+                }
+                var miolo = Estilo.Rect("Imagem", caixaMoeda);
+                Estilo.Esticar(miolo);
+                var img = miolo.gameObject.AddComponent<RawImage>();
                 img.texture = moeda;
                 img.raycastTarget = false;
-                var li = img.gameObject.AddComponent<LayoutElement>();
-                li.preferredWidth = li.preferredHeight = 22;
                 var nome = Estilo.Rotulo(grupo, rotulo, 10, cor, FontStyles.Bold);
                 nome.textWrappingMode = TextWrappingModes.NoWrap;
                 var lg = grupo.gameObject.AddComponent<LayoutElement>();
-                lg.preferredWidth = 24 + nome.GetPreferredValues(rotulo).x + 4;
+                lg.preferredWidth = 24 + LarguraEstimada(rotulo, 10) + 4;
                 lg.flexibleWidth = 0;
                 return;
             }
@@ -295,7 +450,7 @@ namespace TorreDeControle.UI
             t.alignment = TextAlignmentOptions.Center;
             Estilo.Esticar(t.rectTransform);
             var lc = chip.gameObject.AddComponent<LayoutElement>();
-            lc.preferredWidth = t.GetPreferredValues(rotulo).x + 12;
+            lc.preferredWidth = LarguraEstimada(rotulo, 11) + 12;
             lc.flexibleWidth = 0;
         }
     }
