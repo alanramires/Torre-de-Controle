@@ -131,3 +131,6 @@ __pycache__/
 # Sons da interface: fora até confirmar a origem dos .wav (repo público)
 Assets/audio/
 Assets/audio.meta
+
+# Obsidian (visualizador de md do Alan)
+.obsidian/
