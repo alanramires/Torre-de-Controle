@@ -1218,6 +1218,15 @@
       "rodape": []
     },
     {
+      "id": "mj/movimentos-mj/combinar-pesado-leve",
+      "tipo": "mj",
+      "titulo": "COMBINAR MOVIMENTOS: PESADO E LEVE",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/combinar-pesado-leve",
+      "rodape": []
+    },
+    {
       "id": "mj/movimentos-mj/infligir-condicao",
       "tipo": "mj",
       "titulo": "INFLIGIR UMA CONDIÇÃO",
@@ -1359,6 +1368,24 @@
       "origem": "mestre",
       "regra": "docs/ajuda.md",
       "ajuda": "movimentos-mj/movimento-vilao",
+      "rodape": []
+    },
+    {
+      "id": "mj/equipe/exemplo-ajuda-combate",
+      "tipo": "mj",
+      "titulo": "EXEMPLO: AJUDA EM COMBATE",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "equipe/exemplo-ajuda-combate",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimento/exemplo-ceder-terreno",
+      "tipo": "mj",
+      "titulo": "EXEMPLO: CEDER TERRENO",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimento/exemplo-ceder-terreno",
       "rodape": []
     }
   ]

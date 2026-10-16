@@ -445,6 +445,40 @@
       ]
     },
     {
+      "id": "movimento/exemplo-ceder-terreno",
+      "categoria": "movimentos-basicos",
+      "arquivo": "movimento-exemplo-ceder-terreno.png",
+      "titulo": "EXEMPLO: CEDER TERRENO",
+      "compacto": false,
+      "origem": "Movimentos básicos · Tomar um golpe poderoso · livro pp.76–77 e 189",
+      "regras_ref": [
+        "docs/briefing_ajuda_combinar_movimentos.md",
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Você recua, se contém ou deixa uma abertura. O MJ decide como a oposição a aproveita para fazer algo que você poderia impedir."
+        },
+        {
+          "titulo": "NÃO ESQUEÇA",
+          "texto": "Anote a abertura: “Aurora cedeu terreno”. Na Torre, use um Lembrete no vilão. Faça a consequência acontecer quando a ficção pedir, de preferência logo."
+        },
+        {
+          "titulo": "NA COBRANÇA",
+          "texto": "Concretize a oportunidade antes que Aurora consiga impedi-la. Não exige dano extra nem perda de turno fixa; depende do que a oposição faz e da ficção."
+        },
+        {
+          "titulo": "DEPOIS",
+          "texto": "Devolva os holofotes conforme a cena. Ela age a partir da nova situação; só role se sua ação acionar um movimento."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "Aurora cede terreno. Ocaso derruba a parede e os escombros a prendem, sem feri-la. Depois, ela tenta se soltar; se for um feito incerto e difícil com seus poderes, libera os poderes."
+        }
+      ]
+    },
+    {
       "id": "pvp/regras",
       "categoria": "pvp",
       "arquivo": "02-pvp-regras.png",
@@ -958,6 +992,37 @@
           "texto": "Também podem ajudar se fizer sentido na ficção, gastando pontos da pilha em seu nome. O mestre decide se o PNJ contribuiria."
         }
       ]
+    },
+    {
+      "id": "equipe/exemplo-ajuda-combate",
+      "categoria": "equipe-sessao",
+      "arquivo": "equipe-exemplo-ajuda-combate.png",
+      "titulo": "EXEMPLO: AJUDA EM COMBATE",
+      "compacto": false,
+      "origem": "Equipe · livro pp.84–85 (Toro contra Opala Sangrenta)",
+      "regras_ref": [
+        "docs/briefing_ajuda_combinar_movimentos.md",
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "A CENA",
+          "texto": "A Garça passa pelo Ocaso para cortar o cabo. Ela enfrenta diretamente a ameaça e tira 9."
+        },
+        {
+          "titulo": "QUEM PODE AJUDAR",
+          "texto": "Pulsar está preso sob uma viga do outro lado do galpão e não consegue contribuir. Estrela está junto do Ocaso e pode ajudar."
+        },
+        {
+          "titulo": "A AJUDA",
+          "texto": "Estrela mantém o cabo esticado com telecinese e gasta 1 ponto da pilha. O 9 da Garça vira 10."
+        },
+        {
+          "titulo": "MAIS GENTE",
+          "texto": "Mayane também poderia apontar uma fraqueza útil e gastar outro ponto: +1 na mesma rolagem. Cada colega pode gastar só 1 por jogada e precisa ajudar de verdade."
+        }
+      ],
+      "borda": "#53a9e8"
     },
     {
       "id": "equipe/egoista",
@@ -4222,6 +4287,45 @@
         {
           "titulo": "NO FÓRUM",
           "texto": "Use pausas e posts de costura para movimentar a história. Não há obrigação de impor uma punição por postagem."
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/combinar-pesado-leve",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-combinar-pesado-leve.png",
+      "titulo": "COMBINAR MOVIMENTOS: PESADO E LEVE",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Movimentos do MJ · livro cap. 7, pp.187–189 (a Professora)",
+      "regras_ref": [
+        "docs/briefing_ajuda_combinar_movimentos.md",
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "NA FALHA, BATA FORTE",
+          "texto": "Você pode combinar movimentos, seguindo a ficção. A Professora causa uma condição e um golpe poderoso com um movimento de vilã. Não é obrigatório pesar em toda falha."
+        },
+        {
+          "titulo": "PESADO EM QUEM FALHOU",
+          "texto": "Concretize a consequência. Não se evita retroativamente o efeito; resolva os movimentos que ele acionar."
+        },
+        {
+          "titulo": "LEVE EM QUEM ESTÁ PERTO",
+          "texto": "Neste lance, anuncie o perigo às demais e pergunte o que fazem. Estar perto de quem falhou não basta para impor outra consequência inevitável."
+        },
+        {
+          "titulo": "USE O MOVIMENTO DELE",
+          "texto": "O Ocaso absorve o golpe da Aurora e o devolve. Use os métodos do vilão para dar identidade à consequência."
+        },
+        {
+          "titulo": "NEM TUDO SE INTERCEPTA",
+          "texto": "Rex não consegue defender: o ataque é inesperado e ainda se resolve a falha da colega. Depende do tempo e da ficção; não proíbe toda defesa."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "Aurora falha. Ocaso devolve o golpe: Insegura e golpe poderoso. A energia ameaça uma viga sobre a cabine do vigia: “Mayane, você está na porta. O que faz?”"
         }
       ]
     },

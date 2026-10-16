@@ -208,3 +208,35 @@ IDs de ajuda usam `movimentos-mj/`; IDs de jogo usam `mj/movimentos-mj/`.
 São orientações editoriais: não implementam resolução automática no motor.
 Uma falha contra PJ não exige por si só inverter o movimento; o peso segue
 a ficção. Nenhum PNG foi gerado. Visualização no Play ainda deve ser conferida.
+
+
+## Combinar movimentos: pesado e leve (2026-10-16)
+
+Carta `movimentos-mj/combinar-pesado-leve` logo após `movimentos-mj/quando-usar`,
+mesma borda cinza e seis seções curtas. Segue o briefing aprovado e o exemplo
+da Professora, que começa na p.187; a combinação e a defesa negada estão na p.189.
+A origem preserva a referência pedida pelo briefing. Texto próprio: combinar
+é uma possibilidade, pesado/leves em alvos distintos é orientação para o lance,
+e a impossibilidade de interceptar depende do tempo e da ficção.
+Vínculo de jogo `mj/movimentos-mj/combinar-pesado-leve`, tipo mj, origem mestre.
+Sem PNGs. IDs, posição, seções e vínculo único conferidos; aparência no Play pendente.
+
+
+## Três cartas de exemplos em combate (2026-10-16)
+
+Briefing `briefing_ajuda_combinar_movimentos.md` atualizado e conferido
+individualmente no texto do livro do acervo:
+- Combinar pesado e leve: revisada a carta existente; exemplo pp.187–189,
+  combinação e defesa negada na p.189. Continua após movimentos-mj/quando-usar.
+- Ajuda em combate: equipe/exemplo-ajuda-combate, após equipe/ajudar;
+  pp.84–85. Vários colegas podem ajudar; cada um gasta no máximo um ponto
+  por jogada e precisa poder contribuir na ficção, mesmo à distância.
+- Ceder terreno: movimento/exemplo-ceder-terreno, após movimento/golpe-poderoso;
+  definição pp.76–77 e aplicação na p.189. Corrigida a referência p.59 do briefing.
+  A abertura permite uma ação da oposição; não cria perda de turno fixa,
+  dano adicional obrigatório nem rolagem automática para voltar a agir.
+
+Bordas herdadas das cartas de referência; vínculos tipo mj, origem mestre,
+para acesso também pela Gestão. Textos próprios, seis/quatro/cinco seções,
+sem PNGs. Validados JSONs, IDs, vínculos, posições e preservação das outras
+cartas. Aparência final depende de conferência no Play.
