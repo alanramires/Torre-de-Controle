@@ -263,8 +263,8 @@ namespace TorreDeControle.UI
         /// </summary>
         void SecaoPotencial()
         {
-            subtitulo.text = $"{sala.Nome} · potencial das heroínas na mesa";
-            Secao("POTENCIAL", "cada +1 pede o que aconteceu (vai para o log); 5 de potencial = um avanço", comAjuda: false);
+            subtitulo.text = $"{sala.Nome} · potencial e trilhas das heroínas na mesa";
+            Secao("POTENCIAL", "cada +1 pede o que aconteceu (vai para o log); 5 de potencial = um avanço; trilhas do arquétipo na mesma linha", comAjuda: false);
             var herois = sala.Slots.Where(v => v.Personagem != null).Select(v => personagens.Buscar(v.Personagem))
                 .Where(p => p != null && p.Ativo && p.Status == StatusCriacao.EmCarreira).ToList();
             foreach (var h in herois)
@@ -272,11 +272,34 @@ namespace TorreDeControle.UI
                 var linha = Estilo.Fila(lista, 60, 12);
                 linha.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(14, 14, 6, 6);
                 Estilo.Moldura(linha.gameObject, Estilo.Linha, Estilo.BordaApagada);
-                var nome = Estilo.Rotulo(linha, $"<b>{h.NomeExibicao}</b>  ·  potencial {h.Potencial}", 22, Estilo.Texto);
+                // As trilhas do arquétipo (ex.: a da perdição) entram na mesma linha: o mesmo "o que aconteceu?".
+                var trilhas = personagens.TrilhasDoArquetipo(h);
+                var extras = string.Concat(trilhas.Select(t =>
+                    $"  ·  {NomeCurto(t.nome)} {personagens.Contador(h, t.extra, t.campo)}"));
+                var nome = Estilo.Rotulo(linha, $"<b>{h.NomeExibicao}</b>  ·  potencial {h.Potencial}{extras}", 22, Estilo.Texto);
                 nome.gameObject.AddComponent<LayoutElement>().preferredWidth = 420;
                 var oQue = Estilo.CampoTexto(linha, "o que aconteceu? (obrigatório)");
                 Estilo.ColunaElastica(oQue);
                 var alvo = h;
+                foreach (var t in trilhas)
+                {
+                    var trilha = t;
+                    Estilo.BotaoContorno(linha, "+1 " + NomeCurto(t.nome), 200, Estilo.Erro, () =>
+                    {
+                        if (string.IsNullOrWhiteSpace(oQue.text))
+                        {
+                            Estilo.Confirmar(transform, "Diga o que aconteceu: a marca vai para o log com esse motivo.", "Ok", () => { });
+                            return;
+                        }
+                        var r = mesa.MarcarTrilha(alvo.Id, trilha.extra, trilha.campo, 1, oQue.text);
+                        if (!r.Ok)
+                            Estilo.Confirmar(transform, r.Erro, "Ok", () => { });
+                        else if (personagens.Contador(alvo, trilha.extra, trilha.campo) % trilha.tamanho == 0)
+                            Estilo.Confirmar(transform, $"{alvo.NomeExibicao} fechou {trilha.tamanho} na {trilha.nome.ToLowerInvariant()}: " +
+                                                        "um sinal novo (escolha na ficha, aba Módulos).", "Ok", () => { });
+                        Redesenhar();
+                    });
+                }
                 Estilo.BotaoPrincipal(linha, "+1 potencial", 220, () =>
                 {
                     if (string.IsNullOrWhiteSpace(oQue.text))
@@ -291,6 +314,12 @@ namespace TorreDeControle.UI
                 });
             }
         }
+
+        /// <summary>"Trilha da perdição" → "perdição".</summary>
+        static string NomeCurto(string nome) =>
+            (nome ?? string.Empty).StartsWith("Trilha da ") ? nome.Substring("Trilha da ".Length)
+            : (nome ?? string.Empty).StartsWith("Trilha de ") ? nome.Substring("Trilha de ".Length)
+            : (nome ?? string.Empty).ToLowerInvariant();
 
         void Redesenhar()
         {

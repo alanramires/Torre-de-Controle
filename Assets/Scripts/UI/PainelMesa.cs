@@ -46,6 +46,12 @@ namespace TorreDeControle.UI
 
         Core.Jogadores.CadastroJogadores jogadores;
 
+        /// <summary>O armazenamento dos dados (ligado pela Tela de Entrada): a sala abre a mesa sem passar por ela.</summary>
+        public static IArmazenamento Armazenamento { get; set; }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void LimparEstaticos() => Armazenamento = null; // Play sem domain reload
+
         public void Abrir(Sala salaAberta, CadastroSalas cadastroSalas, CadastroPersonagens cadastroPersonagens,
             Core.Jogadores.CadastroJogadores cadastroJogadores, IArmazenamento armazenamento, Action aoFecharMesa)
         {
@@ -98,6 +104,10 @@ namespace TorreDeControle.UI
             titulo = Estilo.Rotulo(titulos, string.Empty, 38, Estilo.Dourado, FontStyles.Bold);
             titulo.characterSpacing = 6;
             subtitulo = Estilo.Rotulo(titulos, string.Empty, 22, Estilo.TextoSuave);
+            Estilo.BotaoContorno(cabecalho, "Sala", 140, Estilo.Dourado, AbrirSala)
+                .gameObject.AddComponent<Dica>().Configurar("Abrir a sala (vagas, NPCs, cenário, formação). O Voltar de lá traz de volta à mesa.");
+            Estilo.BotaoContorno(cabecalho, "Ajuda", 150, Estilo.Dourado, AbrirAjuda)
+                .gameObject.AddComponent<Dica>().Configurar("Consultar as cartas (movimentos, Equipe, vilões, primeira sessão...).");
             Estilo.BotaoContorno(cabecalho, "Bônus", 170, Estilo.Dourado, () => AbrirBonus(null));
             Estilo.BotaoPrincipal(cabecalho, "Área do mestre", 280, AbrirAreaDoMestre);
             Estilo.BotaoContorno(cabecalho, "Voltar", 190, Estilo.TextoSuave, Fechar);
@@ -111,6 +121,21 @@ namespace TorreDeControle.UI
         }
 
         PainelFicha painelFicha;
+        PainelSala painelSala;
+
+        /// <summary>A sala desta campanha por cima da mesa; o Voltar da sala volta à mesa (redesenhada).</summary>
+        void AbrirSala()
+        {
+            if (painelSala == null)
+                painelSala = PainelSala.Criar(transform.parent);
+            gameObject.SetActive(false);
+            painelSala.Abrir(sala, salas, personagens, jogadores, () =>
+            {
+                gameObject.SetActive(true);
+                transform.SetAsLastSibling();
+                Redesenhar();
+            }, abertaPelaMesa: true);
+        }
         PainelNpc painelNpc;
 
         void AbrirFichaDoNpc(Personagem npc)
@@ -155,7 +180,7 @@ namespace TorreDeControle.UI
                              (foraDaMesa > 0 ? $" · {foraDaMesa} fora (não estão em carreira)" : string.Empty);
 
             // O lado direito é do log (desenho do Alan). As heroínas sentam em cima, embaixo e à esquerda.
-            const float Alto = 236, Lado = 330, Log = 420;
+            const float Alto = 236, Lado = 318, Log = 340;
             var cima = Aresta("Cima", new Vector2(0, 1), new Vector2(1, 1), new Vector2(Lado, -Alto), new Vector2(-Log - 10, 0), true);
             var baixo = Aresta("Baixo", new Vector2(0, 0), new Vector2(1, 0), new Vector2(Lado, 0), new Vector2(-Log - 10, Alto), true);
             var esquerda = Aresta("Esquerda", new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, Alto), new Vector2(Lado, -Alto), false);
@@ -200,8 +225,8 @@ namespace TorreDeControle.UI
             HorizontalOrVerticalLayoutGroup g = horizontal
                 ? r.gameObject.AddComponent<HorizontalLayoutGroup>()
                 : r.gameObject.AddComponent<VerticalLayoutGroup>();
-            g.padding = new RectOffset(10, 10, 10, 10);
-            g.spacing = 12;
+            g.padding = new RectOffset(6, 6, 10, 10);
+            g.spacing = 8;
             g.childAlignment = TextAnchor.MiddleCenter;
             g.childControlWidth = g.childControlHeight = true;
             g.childForceExpandWidth = g.childForceExpandHeight = false;
@@ -211,7 +236,20 @@ namespace TorreDeControle.UI
         /// <summary>O assento: nome e potencial, os cinco Rótulos e as cinco condições (clicar marca/desmarca).</summary>
         void Assento(Transform aresta, Personagem p)
         {
-            var c = Estilo.Rect("Assento " + p.NomeExibicao, aresta);
+            // O assento é o cartão (300) e, à direita, as moedas de Influência que ela guarda (36).
+            var raiz = Estilo.Rect("Assento " + p.NomeExibicao, aresta);
+            var lr = raiz.gameObject.AddComponent<LayoutElement>();
+            lr.minWidth = lr.preferredWidth = 342;
+            lr.minHeight = lr.preferredHeight = 212;
+            lr.flexibleWidth = lr.flexibleHeight = 0;
+            lr.layoutPriority = 2;
+            var hr = raiz.gameObject.AddComponent<HorizontalLayoutGroup>();
+            hr.spacing = 6;
+            hr.childControlWidth = hr.childControlHeight = true;
+            hr.childForceExpandWidth = false;
+            hr.childForceExpandHeight = true;
+
+            var c = Estilo.Rect("Cartao", raiz);
             // Tamanho fixo: sem prioridade 2 o assento herda o "esticável" dos rótulos de dentro e um assento
             // sozinho numa aresta se espalha por ela inteira.
             var le = c.gameObject.AddComponent<LayoutElement>();
@@ -219,6 +257,7 @@ namespace TorreDeControle.UI
             le.minHeight = le.preferredHeight = 212;
             le.flexibleWidth = le.flexibleHeight = 0;
             le.layoutPriority = 2;
+            MoedasDeInfluencia(raiz, p);
             Estilo.Moldura(c.gameObject, Estilo.Cartao, Estilo.Dourado);
             var v = c.gameObject.AddComponent<VerticalLayoutGroup>();
             v.padding = new RectOffset(12, 12, 8, 8);
@@ -296,8 +335,77 @@ namespace TorreDeControle.UI
             Estilo.Rect("Vao", filaB).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
         }
 
+        /// <summary>
+        /// As moedas que ela guarda: uma por colega da mesa sobre quem ela tem Influência (quem recebe a
+        /// Influência tem o poder), com a inicial dele. Mútua (as duas têm) usa a moeda de mão dupla. Só PJ↔PJ:
+        /// NPCs (e o padrão dos adultos) ficam fora da mesa.
+        /// </summary>
+        void MoedasDeInfluencia(Transform raiz, Personagem p)
+        {
+            var coluna = Estilo.Rect("Influencia", raiz);
+            var lc = coluna.gameObject.AddComponent<LayoutElement>();
+            lc.minWidth = lc.preferredWidth = 36;
+            lc.flexibleWidth = 0;
+            var v = coluna.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.spacing = 4;
+            v.padding = new RectOffset(0, 0, 4, 4);
+            v.childAlignment = TextAnchor.UpperCenter;
+            v.childControlWidth = v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+            var moeda = Resources.Load<Texture2D>("Icones/Tokens/influencia");
+            var mutua = Resources.Load<Texture2D>("Icones/Tokens/influencia_mutua");
+            foreach (var colega in NaMesa().Where(o => o != p && personagens.TemInfluencia(p, o)))
+            {
+                var dupla = personagens.TemInfluencia(colega, p);
+                var r = Estilo.Rect("Moeda", coluna);
+                var le = r.gameObject.AddComponent<LayoutElement>();
+                le.minHeight = le.preferredHeight = 34;
+                // O retrato de quem ela influencia no miolo transparente da moeda (o quadrado inscrito no círculo,
+                // ~70% do diâmetro, fica escondido pelo aro); sem foto nem arte, a inicial.
+                // Janela de 22×22 com máscara; a foto preenche a janela (o ajuste de proporção é relativo a ela).
+                var janela = Estilo.Rect("Janela", r);
+                janela.anchorMin = janela.anchorMax = new Vector2(0.5f, 0.5f);
+                janela.sizeDelta = new Vector2(22, 22);
+                janela.gameObject.AddComponent<RectMask2D>();
+                var miolo = Estilo.Rect("Retrato", janela);
+                Estilo.Esticar(miolo);
+                var foto = miolo.gameObject.AddComponent<RawImage>();
+                foto.raycastTarget = false;
+                var ajuste = miolo.gameObject.AddComponent<AspectRatioFitter>();
+                ajuste.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+                var arte = Retratos.Buscar(personagens.RegraDoArquetipo(colega)?.Retrato);
+                var temFoto = !string.IsNullOrWhiteSpace(colega.Identidade.FotoHeroica) &&
+                              colega.Identidade.FotoHeroicaAprovacao != AprovacaoFoto.Recusada;
+                if (temFoto || arte != null)
+                {
+                    var aviso = Estilo.Rotulo(r, string.Empty, 8, Estilo.TextoSuave);
+                    aviso.gameObject.SetActive(false);
+                    r.gameObject.AddComponent<FotoDaWeb>().Mostrar(colega.Identidade.FotoHeroica, foto, ajuste, aviso, temFoto ? null : arte);
+                }
+                else
+                {
+                    foto.enabled = false;
+                    var inicial = Estilo.Rotulo(miolo, colega.NomeExibicao.Substring(0, 1).ToUpperInvariant(), 14, Color.white, FontStyles.Bold);
+                    inicial.alignment = TextAlignmentOptions.Center;
+                    Estilo.Esticar(inicial.rectTransform);
+                    inicial.raycastTarget = false;
+                }
+                var aro = Estilo.Rect("Moeda", r).gameObject.AddComponent<RawImage>();
+                Estilo.Esticar((RectTransform)aro.transform);
+                aro.texture = dupla ? mutua : moeda;
+                aro.raycastTarget = true;
+                r.gameObject.AddComponent<Dica>().Configurar(
+                    $"{p.NomeExibicao} tem Influência sobre {colega.NomeExibicao}" + (dupla ? " (recíproco)." : "."));
+            }
+        }
+
         void TokenDeBonus(Transform pai, BonusDeMesa bonus)
         {
+            if (bonus.Tipo == Mesa.BonusLembrete)
+            {
+                EtiquetaDeLembrete(pai, bonus);
+                return;
+            }
             var r = Estilo.Rect("Bonus", pai);
             var le = r.gameObject.AddComponent<LayoutElement>();
             le.minWidth = le.preferredWidth = 52;
@@ -327,6 +435,26 @@ namespace TorreDeControle.UI
                     () => Aplicar(mesa.RetirarBonus(bonus.Id, null))));
         }
 
+        /// <summary>O lembrete: etiqueta curta (o texto inteiro no mouse); clicar resolve.</summary>
+        void EtiquetaDeLembrete(Transform pai, BonusDeMesa bonus)
+        {
+            var curto = bonus.Contexto.Length > 16 ? bonus.Contexto.Substring(0, 15) + "…" : bonus.Contexto;
+            var b = Estilo.BotaoContorno(pai, curto, 0, Estilo.Azul, () =>
+                Estilo.Confirmar(transform, $"Lembrete: {bonus.Contexto}\nResolver (sai da mesa)?", "Resolver",
+                    () => Aplicar(mesa.RetirarBonus(bonus.Id, null))));
+            b.name = TextoLivre;
+            var le = b.GetComponent<LayoutElement>();
+            le.preferredWidth = 130;
+            le.flexibleWidth = 0;
+            var r = b.GetComponentInChildren<TextMeshProUGUI>();
+            r.fontSize = 13;
+            r.characterSpacing = 0;
+            r.fontStyle = FontStyles.Normal;
+            r.textWrappingMode = TextWrappingModes.NoWrap;
+            r.overflowMode = TextOverflowModes.Ellipsis;
+            b.gameObject.AddComponent<Dica>().Configurar("Lembrete: " + bonus.Contexto + "\nClique para resolver.");
+        }
+
         // ---------- dar bônus ----------
 
         string bonusPara;
@@ -349,7 +477,12 @@ namespace TorreDeControle.UI
         void DesenharBonus(string contextoAtual)
         {
             var herois = NaMesa();
-            var caixa = Caixa("DAR BÔNUS", 640, 1050);
+            var lembrete = bonusTipo == Mesa.BonusLembrete;
+            if (lembrete)
+                herois = herois.Concat(mesa.EmCena()).ToList(); // lembrete também vai no vilão
+            else if (!herois.Any(h => h.Id == bonusPara))
+                bonusPara = herois.FirstOrDefault()?.Id;
+            var caixa = Caixa(lembrete ? "LEMBRETE" : "DAR BÔNUS", lembrete ? 560 : 640, 1050);
             Pergunta(caixa, "Para quem?");
             var filaP = Estilo.Fila(caixa, 48, 8);
             TMP_InputField contexto = null;
@@ -368,6 +501,7 @@ namespace TorreDeControle.UI
                          (Mesa.BonusAdiante, "vale na próxima rolagem que bate com o contexto, e some"),
                          (Mesa.BonusConstante, "vale enquanto o contexto durar"),
                          (Mesa.BonusControle, "um recurso para gastar (ex.: movimentos que pedem controle)"),
+                         (Mesa.BonusLembrete, "tag temporária, sem valor: para não esquecer (ex.: abertura: Aurora cedeu terreno)"),
                      })
             {
                 var t = tipo;
@@ -377,6 +511,8 @@ namespace TorreDeControle.UI
                 b.GetComponent<LayoutElement>().flexibleWidth = 1;
                 b.gameObject.AddComponent<Dica>().Configurar(dica);
             }
+            if (!lembrete)
+            {
             Pergunta(caixa, "Quanto?");
             var filaV = Estilo.Fila(caixa, 48, 8);
             foreach (var v in new[] { -2, -1, 1, 2, 3 })
@@ -387,10 +523,12 @@ namespace TorreDeControle.UI
                     ? Estilo.BotaoPrincipal(filaV, texto, 90, () => { })
                     : Estilo.BotaoContorno(filaV, texto, 90, Estilo.Dourado, () => { bonusValor = valor; DesenharBonus(contexto.text); });
             }
-            Pergunta(caixa, "Gatilho ou contexto (quando vale)");
-            contexto = CampoMotivo(caixa, "ex.: agindo pelas respostas da avaliação; contra o Doutor Ocaso");
+            }
+            Pergunta(caixa, lembrete ? "O que lembrar" : "Gatilho ou contexto (quando vale)");
+            contexto = CampoMotivo(caixa, lembrete ? "ex.: abertura: Aurora cedeu terreno"
+                : "ex.: agindo pelas respostas da avaliação; contra o Doutor Ocaso");
             contexto.text = contextoAtual;
-            Rodape(caixa, "Dar bônus", () =>
+            Rodape(caixa, lembrete ? "Pôr lembrete" : "Dar bônus", () =>
             {
                 var r = mesa.DarBonus(bonusPara, bonusTipo, bonusValor, contexto.text, null);
                 if (!r.Ok)
@@ -412,7 +550,7 @@ namespace TorreDeControle.UI
             var c = Estilo.Rect("Vilao " + v.NomeExibicao, aresta);
             var le = c.gameObject.AddComponent<LayoutElement>();
             le.minWidth = le.preferredWidth = 300;
-            le.minHeight = le.preferredHeight = 176;
+            le.minHeight = le.preferredHeight = 212;
             le.flexibleWidth = le.flexibleHeight = 0;
             le.layoutPriority = 2;
             Estilo.Moldura(c.gameObject, Estilo.Cartao, Estilo.Erro);
@@ -473,9 +611,30 @@ namespace TorreDeControle.UI
             }
             var mov = Estilo.BotaoContorno(c, "Movimentos de vilão", 0, Estilo.Erro, () => AbrirMovimentos(v));
             mov.GetComponent<LayoutElement>().preferredHeight = 36;
+            // Lembretes no vilão (ex.: "abertura: Aurora cedeu terreno"): etiqueta, e o "+" para pôr outro.
+            var filaL = Estilo.Fila(c, 30, 6);
+            filaL.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleLeft;
+            foreach (var b in mesa.BonusDe(v.Id))
+                TokenDeBonus(filaL, b);
+            var mais = Estilo.BotaoContorno(filaL, "+", 30, Estilo.TextoSuave, () =>
+            {
+                bonusTipo = Mesa.BonusLembrete;
+                AbrirBonus(v.Id);
+            });
+            mais.gameObject.AddComponent<Dica>().Configurar("Pôr um lembrete (ex.: abertura: Aurora cedeu terreno).");
+            Estilo.Rect("Vao", filaL).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
         }
 
         PainelAjuda ajudaCondicoes;
+        PainelAjuda ajuda;
+
+        /// <summary>O help inteiro (todas as categorias), por cima da mesa.</summary>
+        void AbrirAjuda()
+        {
+            if (ajuda == null)
+                ajuda = PainelAjuda.Criar(transform.parent);
+            ajuda.Abrir(null);
+        }
 
         void AbrirCartaDeCondicao()
         {
@@ -568,6 +727,11 @@ namespace TorreDeControle.UI
             var lt = Estilo.Rotulo(cabeca, "LOG DA MESA", 20, Estilo.TextoSuave, FontStyles.Bold);
             lt.characterSpacing = 4;
             Estilo.ColunaElastica(lt);
+            // Desfeito por engano: se o último evento é um desfazer (ainda não refeito), dá para refazer.
+            var fim = mesa.Eventos.LastOrDefault();
+            if (fim?.Corrige != null && !mesa.Eventos.Any(e => e.Refaz == fim.Id))
+                Encolher(Estilo.BotaoContorno(cabeca, "Refazer", 120, Estilo.Dourado, () =>
+                    Aplicar(mesa.Refazer(fim.Id, null))));
             var ultimo = mesa.Eventos.LastOrDefault(e => e.Corrige == null && !mesa.Corrigido(e));
             if (ultimo != null)
                 Encolher(Estilo.BotaoContorno(cabeca, "Desfazer último", 170, Estilo.TextoSuave, () =>
@@ -835,7 +999,7 @@ namespace TorreDeControle.UI
             var herois = NaMesa();
             if (herois.Count < 2)
             {
-                Mostrar(Resultado.Falha("Entrar em batalha pede mais de uma heroína na mesa."));
+                Mostrar(Resultado.Falha("Entrar em batalha pede mais de um personagem na mesa."));
                 return;
             }
             batalha.Lider = herois.Any(h => h.Id == batalha.Lider) ? batalha.Lider : herois[0].Id;
@@ -875,7 +1039,7 @@ namespace TorreDeControle.UI
 
             // Quem está na luta: nem sempre é a equipe inteira (já aconteceu de entrarem só 3). Só essas contam
             // como colegas (a Influência da líder é sobre elas) e só elas gastam da pilha.
-            Pergunta(caixa, "Quem está entrando na luta? (pelo menos duas)");
+            Pergunta(caixa, "Quem está entrando na luta? (pelo menos 2)");
             var filaE = Estilo.Fila(caixa, 48, 8);
             foreach (var h in herois)
             {
@@ -924,7 +1088,7 @@ namespace TorreDeControle.UI
             batalha.CondicoesParaEvitar = evitar.ToList();
             if (batalha.Colegas.Count < 2 || batalha.Lider == null)
             {
-                Nota(caixa, "Sozinha não é como equipe: marque pelo menos duas heroínas na luta.");
+                Nota(caixa, "Uma pessoa só não é equipe: marque pelo menos 2 personagens na luta.");
                 var sair = Estilo.Fila(caixa, 56, 12);
                 Estilo.Rect("Vao", sair).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
                 Estilo.BotaoContorno(sair, "Cancelar", 200, Estilo.TextoSuave, FecharBatalha);
@@ -932,12 +1096,12 @@ namespace TorreDeControle.UI
             }
             var (total, linhas, semInfluencia) = mesa.ContarBatalha(batalha);
             Nota(caixa, semInfluencia.Count == 0
-                ? "A líder tem Influência sobre cada colega (lido das fichas): +1."
-                : $"A líder não tem Influência sobre: {string.Join(", ", semInfluencia)} (lido das fichas).");
+                ? "Quem lidera tem Influência sobre cada colega (lido das fichas): +1."
+                : $"Quem lidera não tem Influência sobre: {string.Join(", ", semInfluencia)} (lido das fichas).");
 
-            SimNao(caixa, "Todas têm o mesmo objetivo na luta? (pergunte o da líder; variações leves contam)", batalha.MesmoObjetivo,
+            SimNao(caixa, "Todos têm o mesmo objetivo na luta? (pergunte o de quem lidera; variações leves contam)", batalha.MesmoObjetivo,
                 x => batalha.MesmoObjetivo = x);
-            SimNao(caixa, "Alguém não confia na líder ou na equipe? (cada jogadora decide por si)", batalha.AlguemNaoConfia,
+            SimNao(caixa, "Alguém não confia em quem lidera ou na equipe? (cada jogador decide por si)", batalha.AlguemNaoConfia,
                 x => batalha.AlguemNaoConfia = x);
             SimNao(caixa, "A equipe está mal preparada ou desequilibrada? (o mestre decide, pela ficção)", batalha.MalPreparada,
                 x => batalha.MalPreparada = x);
@@ -946,7 +1110,7 @@ namespace TorreDeControle.UI
             if (perdas > 0)
             {
                 var lider = personagens.Buscar(batalha.Lider);
-                Pergunta(caixa, $"A líder marca condição para não perder ponto? (até {perdas})");
+                Pergunta(caixa, $"Quem lidera marca condição para não perder ponto? (até {perdas})");
                 var filaC = Estilo.Fila(caixa, 44, 6);
                 foreach (var c in Condicoes.Todas)
                 {

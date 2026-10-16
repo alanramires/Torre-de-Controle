@@ -135,6 +135,22 @@ namespace TorreDeControle.Core.Salas
                 motivo, new Mudanca { Campo = CampoCondicao(condicaoSeEstourar), Antes = 0, Depois = 1 });
         }
 
+        /// <summary>
+        /// Marca (ou tira) pontos numa trilha do arquétipo, com o que aconteceu (ex.: perdição por Visões
+        /// sombrias). A cada 5 a ficha rende uma escolha (um sinal novo): a tela avisa.
+        /// </summary>
+        public Resultado MarcarTrilha(string personagem, string extra, string campo, int delta, string motivo)
+        {
+            if (!EmJogo(personagem, out var p, out var erro))
+                return erro;
+            var r = personagens.ValidarContador(p, extra, campo, delta, out var novo);
+            if (!r.Ok)
+                return r;
+            var nome = personagens.TrilhasDoArquetipo(p).FirstOrDefault(t => t.extra == extra && t.campo == campo).nome ?? campo;
+            return Registrar(p, $"{(delta > 0 ? "+" : string.Empty)}{delta} {nome}", motivo,
+                new Mudanca { Campo = "contador:" + extra + "|" + campo, Antes = novo - delta, Depois = novo });
+        }
+
         // ---------- pilha de Equipe (livro pp.84–88) ----------
 
         /// <summary>Soma ou tira pontos da pilha (gastar, ganhar por movimento, ajuste do mestre). Não fica negativa.</summary>
@@ -203,21 +219,21 @@ namespace TorreDeControle.Core.Salas
             if (lider != null && colegas.Count > 0 && semInfluencia.Count == 0)
             {
                 total++;
-                linhas.Add("+1 a líder tem Influência sobre cada colega");
+                linhas.Add("+1 quem lidera tem Influência sobre cada colega");
             }
             if (e.MesmoObjetivo)
             {
                 total++;
-                linhas.Add("+1 todas têm o mesmo objetivo");
+                linhas.Add("+1 todos têm o mesmo objetivo");
             }
             var perdas = (e.AlguemNaoConfia ? 1 : 0) + (e.MalPreparada ? 1 : 0);
             var evitadas = Math.Min(perdas, e.CondicoesParaEvitar.Count);
             if (e.AlguemNaoConfia)
-                linhas.Add("−1 alguém não confia na líder ou na equipe");
+                linhas.Add("−1 alguém não confia em quem lidera ou na equipe");
             if (e.MalPreparada)
                 linhas.Add("−1 equipe mal preparada ou desequilibrada");
             if (evitadas > 0)
-                linhas.Add($"+{evitadas} evitado pela líder (marca {string.Join(", ", e.CondicoesParaEvitar.Take(evitadas).Select(Condicoes.Nome))})");
+                linhas.Add($"+{evitadas} evitado por quem lidera (marca {string.Join(", ", e.CondicoesParaEvitar.Take(evitadas).Select(Condicoes.Nome))})");
             total -= perdas - evitadas;
             return (total, linhas, semInfluencia);
         }
@@ -231,19 +247,19 @@ namespace TorreDeControle.Core.Salas
             if (!EmJogo(e.Lider, out var lider, out var erro))
                 return erro;
             if (e.Colegas.Count(id => id != e.Lider) == 0)
-                return Resultado.Falha("Sozinha não é como equipe: o movimento pede mais de uma heroína.");
+                return Resultado.Falha("Uma pessoa só não é equipe: o movimento pede mais de um personagem.");
             var perdas = (e.AlguemNaoConfia ? 1 : 0) + (e.MalPreparada ? 1 : 0);
             var condicoes = e.CondicoesParaEvitar.Take(perdas).ToList();
             if (condicoes.Any(c => !Condicoes.Todas.Contains(c)) || condicoes.Distinct().Count() != condicoes.Count)
                 return Resultado.Falha("Condições para evitar: escolha condições diferentes.");
             if (condicoes.Any(c => lider.CondicoesMarcadas.Contains(c)))
-                return Resultado.Falha("A líder já tem essa condição marcada: escolha outra.");
+                return Resultado.Falha("Quem lidera já tem essa condição marcada: escolha outra.");
             var (total, linhas, _) = ContarBatalha(e);
             var novo = Math.Max(0, arquivo.Equipe + total);
             var mudancas = new List<Mudanca> { new Mudanca { Campo = CampoEquipe, Antes = arquivo.Equipe, Depois = novo } };
             mudancas.AddRange(condicoes.Select(c => new Mudanca { Campo = CampoCondicao(c), Antes = 0, Depois = 1 }));
             var sinal = total >= 0 ? "+" : string.Empty;
-            return RegistrarDaMesa(lider, $"entrar em batalha (líder {lider.NomeExibicao}): {sinal}{total} Equipe · {string.Join("; ", linhas)}",
+            return RegistrarDaMesa(lider, $"entrar em batalha (lidera: {lider.NomeExibicao}): {sinal}{total} Equipe · {string.Join("; ", linhas)}",
                 motivo, mudancas.ToArray());
         }
 
@@ -252,11 +268,14 @@ namespace TorreDeControle.Core.Salas
         public const string BonusAdiante = "adiante";
         public const string BonusConstante = "constante";
         public const string BonusControle = "controle";
+        /// <summary>Lembrete: uma tag temporária sem valor (ex.: "abertura: Aurora cedeu terreno").</summary>
+        public const string BonusLembrete = "lembrete";
 
         public static string NomeDoBonus(string tipo) => tipo switch
         {
             BonusConstante => "Constante",
             BonusControle => "Controle",
+            BonusLembrete => "Lembrete",
             _ => "Adiante",
         };
 
@@ -271,11 +290,21 @@ namespace TorreDeControle.Core.Salas
         /// </summary>
         public Resultado DarBonus(string personagem, string tipo, int valor, string contexto, string motivo)
         {
-            if (!EmJogo(personagem, out var p, out var erro))
+            var lembrete = tipo == BonusLembrete;
+            Personagem p;
+            if (lembrete && EstaEmCena(personagem))
+                p = personagens.Buscar(personagem); // lembrete também vai no vilão em cena
+            else if (!EmJogo(personagem, out p, out var erro))
                 return erro;
-            if (tipo != BonusAdiante && tipo != BonusConstante && tipo != BonusControle)
+            if (tipo != BonusAdiante && tipo != BonusConstante && tipo != BonusControle && !lembrete)
                 return Resultado.Falha("Tipo de bônus desconhecido.");
-            if (valor == 0)
+            if (lembrete)
+            {
+                valor = 0;
+                if (string.IsNullOrWhiteSpace(contexto))
+                    return Resultado.Falha("Lembrete precisa de texto (ex.: \"abertura: Aurora cedeu terreno\").");
+            }
+            else if (valor == 0)
                 return Resultado.Falha("Bônus de zero não muda nada.");
             var bonus = new BonusDeMesa
             {
@@ -283,7 +312,7 @@ namespace TorreDeControle.Core.Salas
                 Contexto = (contexto ?? string.Empty).Trim(),
             };
             arquivo.Bonus.Add(bonus);
-            return RegistrarDaMesa(p, $"ganhou {NomeDoBonus(tipo)} {Sinal(valor)}" +
+            return RegistrarDaMesa(p, lembrete ? $"lembrete: {bonus.Contexto}" : $"ganhou {NomeDoBonus(tipo)} {Sinal(valor)}" +
                                       (bonus.Contexto.Length > 0 ? $" ({bonus.Contexto})" : string.Empty), motivo,
                 new Mudanca { Campo = CampoDeBonus(bonus.Id), Antes = 0, Depois = 1 });
         }
@@ -296,6 +325,9 @@ namespace TorreDeControle.Core.Salas
                 return Resultado.Falha("Esse bônus já não está na mesa.");
             var p = personagens.Buscar(bonus.Personagem);
             var verbo = bonus.Tipo == BonusConstante ? "acabou" : "usou";
+            if (bonus.Tipo == BonusLembrete)
+                return RegistrarDaMesa(p, $"resolveu o lembrete: {bonus.Contexto}", motivo,
+                    new Mudanca { Campo = CampoDeBonus(bonus.Id), Antes = 1, Depois = 0 });
             return RegistrarDaMesa(p, $"{verbo} {NomeDoBonus(bonus.Tipo)} {Sinal(bonus.Valor)}" +
                                       (bonus.Contexto.Length > 0 ? $" ({bonus.Contexto})" : string.Empty), motivo,
                 new Mudanca { Campo = CampoDeBonus(bonus.Id), Antes = 1, Depois = 0 });
@@ -401,6 +433,40 @@ namespace TorreDeControle.Core.Salas
             return Resultado.Sucesso();
         }
 
+        /// <summary>
+        /// Refaz o que um desfazer (correção) tirou: lança de novo as mudanças do evento original, a partir dos
+        /// valores de agora. É outro evento ("refez: ..."), que também se desfaz.
+        /// </summary>
+        public Resultado Refazer(string correcaoId, string motivo)
+        {
+            var correcao = arquivo.Eventos.FirstOrDefault(e => e.Id == correcaoId);
+            if (correcao?.Corrige == null)
+                return Resultado.Falha("Só se refaz um desfazer.");
+            if (arquivo.Eventos.Any(e => e.Refaz == correcao.Id))
+                return Resultado.Falha("Esse desfazer já foi refeito.");
+            var original = arquivo.Eventos.FirstOrDefault(e => e.Id == correcao.Corrige);
+            if (original == null)
+                return Resultado.Falha("Evento original não encontrado.");
+            var p = original.Personagem == null ? null : personagens.Buscar(original.Personagem);
+            if (p == null && original.Mudancas.Any(m => !DaMesa(m.Campo)))
+                return Resultado.Falha("Personagem não encontrada.");
+            var mudancas = new List<Mudanca>();
+            foreach (var m in original.Mudancas)
+            {
+                var agora = DaMesa(m.Campo) ? ValorDaMesa(m.Campo) : personagens.ValorDeJogo(p, m.Campo);
+                var depois = Limitar(m.Campo, agora + (m.Depois - m.Antes));
+                if (depois != agora)
+                    mudancas.Add(new Mudanca { Campo = m.Campo, Antes = agora, Depois = depois });
+            }
+            var evento = NovoEvento(p, "refez: " + original.Descricao, motivo ?? original.Motivo);
+            evento.Refaz = correcao.Id;
+            evento.Mudancas = mudancas;
+            Aplicar(p, mudancas);
+            arquivo.Eventos.Add(evento);
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
         // ---------- por dentro ----------
 
         /// <summary>Só as instâncias desta sala, em carreira e numa vaga, recebem comando de jogo.</summary>
@@ -490,7 +556,7 @@ namespace TorreDeControle.Core.Salas
 
         static int Limitar(string campo, int valor) =>
             campo.StartsWith("condicao:") || campo.StartsWith("vilao:") || campo.StartsWith("bonus:") ? Math.Max(0, Math.Min(1, valor))
-            : campo == CampoPotencial || campo == CampoEquipe ? Math.Max(0, valor)
+            : campo == CampoPotencial || campo == CampoEquipe || campo.StartsWith("contador:") ? Math.Max(0, valor)
             : valor;
 
         void Gravar()

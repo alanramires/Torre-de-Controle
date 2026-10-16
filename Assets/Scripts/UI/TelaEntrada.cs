@@ -70,6 +70,7 @@ namespace TorreDeControle.UI
             // Junta as gravações (cliques seguidos gravam uma vez); Update pulsa, sair descarrega.
             armazenamento = new ArmazenamentoAdiado(arquivos);
             Troca.Arquivos = new ArquivosDeTroca(arquivos.Pasta);
+            PainelMesa.Armazenamento = armazenamento;
 
             jogadores = CadastroJogadores.Carregar(armazenamento);
             personagens = CadastroPersonagens.Carregar(armazenamento, RegrasArquetipos.Carregar(new FonteDeRegrasResources()));

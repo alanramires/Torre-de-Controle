@@ -68,13 +68,14 @@ namespace TorreDeControle.UI
         }
 
         public void Abrir(Sala salaAberta, CadastroSalas cadastroSalas, CadastroPersonagens cadastroPersonagens,
-            CadastroJogadores cadastroJogadores, Action aoFecharSala)
+            CadastroJogadores cadastroJogadores, Action aoFecharSala, bool abertaPelaMesa = false)
         {
             sala = salaAberta;
             salas = cadastroSalas;
             personagens = cadastroPersonagens;
             jogadores = cadastroJogadores;
             aoFechar = aoFecharSala;
+            pelaMesa = abertaPelaMesa;
             abaAtual = Aba.Vagas;
             escolhida.Clear();
             gameObject.SetActive(true);
@@ -93,6 +94,36 @@ namespace TorreDeControle.UI
             painelMestre.Abrir(sala, salas, personagens, () =>
             {
                 gameObject.SetActive(true);
+                Redesenhar();
+            });
+        }
+
+        bool pelaMesa;
+        PainelMesa painelMesa;
+
+        /// <summary>
+        /// Da sala para a mesa: aberta pela mesa, é só voltar; senão abre a mesa desta campanha por cima, e o
+        /// Voltar da mesa traz de volta à sala.
+        /// </summary>
+        void IrParaMesa()
+        {
+            if (pelaMesa)
+            {
+                Fechar();
+                return;
+            }
+            if (PainelMesa.Armazenamento == null)
+            {
+                mensagem.text = "Mesa indisponível (armazenamento não ligado).";
+                return;
+            }
+            if (painelMesa == null)
+                painelMesa = PainelMesa.Criar(transform.parent);
+            gameObject.SetActive(false);
+            painelMesa.Abrir(sala, salas, personagens, jogadores, PainelMesa.Armazenamento, () =>
+            {
+                gameObject.SetActive(true);
+                transform.SetAsLastSibling();
                 Redesenhar();
             });
         }
@@ -215,6 +246,8 @@ namespace TorreDeControle.UI
             titulo = Estilo.Rotulo(titulos, string.Empty, 44, Estilo.Dourado, FontStyles.Bold);
             titulo.characterSpacing = 6;
             contagem = Estilo.Rotulo(titulos, string.Empty, 24, Estilo.TextoSuave);
+            Estilo.BotaoContorno(cabecalho, "Mesa", 160, Estilo.Dourado, IrParaMesa)
+                .gameObject.AddComponent<Dica>().Configurar("Abrir a mesa de jogo desta campanha.");
             Estilo.BotaoPrincipal(cabecalho, "Área do mestre", 300, AreaDoMestre);
             Estilo.BotaoContorno(cabecalho, "Voltar", 190, Estilo.TextoSuave, Fechar);
 

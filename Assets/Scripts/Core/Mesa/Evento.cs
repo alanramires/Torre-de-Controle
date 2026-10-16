@@ -30,6 +30,8 @@ namespace TorreDeControle.Core.Salas
         [JsonProperty("motivo")] public string Motivo { get; set; } = string.Empty;
         /// <summary>Id do evento que este corrige (desfaz), ou null.</summary>
         [JsonProperty("corrige")] public string Corrige { get; set; }
+        /// <summary>Id do desfazer (correção) que este evento refaz, ou null.</summary>
+        [JsonProperty("refaz")] public string Refaz { get; set; }
     }
 
     /// <summary>

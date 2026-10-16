@@ -329,7 +329,7 @@ namespace TorreDeControle.Core.Salas
                 // Só quantas já estão em carreira ("0/5 prontas", pronta = em carreira): o resto se vê na sala.
                 var emCarreira = herois.Count(p => p.Status == StatusCriacao.EmCarreira);
                 var pronta = herois.Count > 0 && emCarreira == herois.Count;
-                var motivo = herois.Count == 0 ? "sem heroínas nas vagas" : $"{emCarreira}/{herois.Count} prontas";
+                var motivo = herois.Count == 0 ? "sem personagens nas vagas" : $"{emCarreira}/{herois.Count} prontos";
                 lista.Add((s, pronta, motivo));
             }
             return lista.OrderByDescending(x => x.Item1.UltimaMesa ?? string.Empty).ThenByDescending(x => x.Item2).ToList();

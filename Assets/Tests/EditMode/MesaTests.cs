@@ -128,6 +128,50 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Trilha_da_perdicao_marca_pela_mesa_com_motivo_e_desfaz()
+        {
+            heroi.Identidade.Arquetipo = "amaldicoada"; // atalho de teste
+            if (heroi.Foto != null) heroi.Foto.Arquetipo = "amaldicoada";
+            var trilha = personagens.TrilhasDoArquetipo(heroi).Single();
+            Assert.That(trilha.nome, Is.EqualTo("Trilha da perdição"));
+            Assert.That(mesa.MarcarTrilha(heroi.Id, trilha.extra, trilha.campo, 1, "visões sombrias na usina").Ok, Is.True);
+            Assert.That(personagens.Contador(heroi, trilha.extra, trilha.campo), Is.EqualTo(1));
+            Assert.That(mesa.Eventos.Last().Motivo, Is.EqualTo("visões sombrias na usina"));
+            mesa.Corrigir(mesa.Eventos.Last().Id, "engano");
+            Assert.That(personagens.Contador(heroi, trilha.extra, trilha.campo), Is.EqualTo(0));
+            Assert.That(mesa.MarcarTrilha(heroi.Id, trilha.extra, trilha.campo, -1, null).Ok, Is.False, "não fica negativa");
+        }
+
+        [Test]
+        public void Refazer_devolve_o_que_um_desfazer_tirou()
+        {
+            mesa.MudarEquipe(3, null, "questionário");
+            mesa.Corrigir(mesa.Eventos.Last().Id, "engano");
+            Assert.That(mesa.Equipe, Is.EqualTo(0));
+            var desfazer = mesa.Eventos.Last();
+            Assert.That(mesa.Refazer(desfazer.Id, null).Ok, Is.True);
+            Assert.That(mesa.Equipe, Is.EqualTo(3));
+            Assert.That(mesa.Refazer(desfazer.Id, null).Ok, Is.False, "uma vez só");
+            Assert.That(mesa.Corrigir(mesa.Eventos.Last().Id, "de novo").Ok, Is.True, "o refeito também se desfaz");
+            Assert.That(mesa.Equipe, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Lembrete_vai_no_vilao_em_cena_e_resolver_tira()
+        {
+            personagens.CriarNpc(sala.Id, "Doutor Ocaso", Maturidade.Adulto, Papel.Vilao);
+            var ocaso = personagens.NpcsDaSala(sala.Id).Single();
+            Assert.That(mesa.DarBonus(ocaso.Id, Mesa.BonusLembrete, 0, "abertura: Aurora cedeu terreno", null).Ok, Is.False, "fora de cena");
+            mesa.AlternarEmCena(ocaso.Id);
+            Assert.That(mesa.DarBonus(ocaso.Id, Mesa.BonusLembrete, 0, "  ", null).Ok, Is.False, "sem texto");
+            Assert.That(mesa.DarBonus(ocaso.Id, Mesa.BonusLembrete, 0, "abertura: Aurora cedeu terreno", null).Ok, Is.True);
+            var l = mesa.BonusDe(ocaso.Id).Single();
+            Assert.That(mesa.RetirarBonus(l.Id, null).Ok, Is.True);
+            Assert.That(mesa.BonusDe(ocaso.Id), Is.Empty);
+            Assert.That(mesa.Eventos.Last().Descricao, Does.Contain("resolveu o lembrete"));
+        }
+
+        [Test]
         public void Sozinha_nao_entra_em_batalha_como_equipe()
         {
             var e = new Mesa.EntradaEmBatalha { Lider = heroi.Id, Colegas = new[] { heroi.Id } };
@@ -140,7 +184,7 @@ namespace TorreDeControle.Tests
             // O Preparar deixou uma colega em aprovação na sala (a formação pede equipe).
             var (_, pronta, motivo) = salas.ParaAMesa().Single();
             Assert.That(pronta, Is.False);
-            Assert.That(motivo, Does.Contain("prontas"));
+            Assert.That(motivo, Does.Contain("prontos"));
             foreach (var v in sala.Slots.Where(v => v.Personagem != null))
                 personagens.Buscar(v.Personagem).Status = StatusCriacao.EmCarreira; // atalho: aprovadas
             Assert.That(salas.ParaAMesa().Single().pronta, Is.True);

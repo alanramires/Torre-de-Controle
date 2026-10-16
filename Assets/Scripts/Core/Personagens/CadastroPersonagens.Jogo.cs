@@ -42,6 +42,30 @@ namespace TorreDeControle.Core.Personagens
         public int EscolhasPendentesNoJogo(Personagem p, string extra, string campo) =>
             System.Math.Max(0, EscolhasRendidas(p, extra, campo) - EscolhasNoJogo(p, extra, campo).Count);
 
+        /// <summary>As trilhas do arquétipo (ex.: a da perdição da Amaldiçoada), para a mesa marcar com motivo.</summary>
+        public IReadOnlyList<(string extra, string campo, string nome, int tamanho)> TrilhasDoArquetipo(Personagem p) =>
+            ExtrasDoArquetipo(p).SelectMany(e => e.Campos.Where(c => c.Tipo == Campo.Trilha)
+                .Select(c => (e.Id, c.Id, c.Titulo, c.Tamanho > 0 ? c.Tamanho : PontosPorEscolha))).ToList();
+
+        /// <summary>A regra do ajuste de trilha (sem aplicar): a mesa usa para lançar o evento.</summary>
+        internal Resultado ValidarContador(Personagem p, string extra, string campo, int delta, out int novo)
+        {
+            novo = 0;
+            var c = BuscarCampo(p, extra, campo);
+            if (c == null || (c.Tipo != Campo.Trilha && c.Tipo != Campo.Reserva))
+                return Resultado.Falha("Contador desconhecido.");
+            novo = Contador(p, extra, campo) + delta;
+            if (novo < 0)
+                return Resultado.Falha(c.Tipo == Campo.Reserva ? "Sem reserva para gastar." : "A trilha não fica negativa.");
+            if (c.Rende != null)
+            {
+                var partes = c.Rende.Split('|');
+                if (novo / PontosPorEscolha < EscolhasNoJogo(p, partes[0], partes[1]).Count)
+                    return Resultado.Falha("Esses pontos já viraram escolha: desfaça a escolha antes.");
+            }
+            return Resultado.Sucesso();
+        }
+
         /// <summary>Soma ou tira pontos de uma trilha. Não tira o que já virou escolha.</summary>
         public Resultado AjustarContador(string id, string extra, string campo, int delta)
         {

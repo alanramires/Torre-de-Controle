@@ -17,6 +17,8 @@ namespace TorreDeControle.Core.Personagens
                 return p.CondicoesMarcadas.Contains(campo.Substring("condicao:".Length)) ? 1 : 0;
             if (campo.StartsWith("rotulo:"))
                 return RotulosAtuais(p).TryGetValue(campo.Substring("rotulo:".Length), out var v) ? v : 0;
+            if (campo.StartsWith("contador:"))
+                return p.Contadores.TryGetValue(campo.Substring("contador:".Length), out var n) ? n : 0;
             return 0;
         }
 
@@ -36,6 +38,8 @@ namespace TorreDeControle.Core.Personagens
                         p.CondicoesMarcadas.Sort((a, b) => IndiceDaCondicao(a).CompareTo(IndiceDaCondicao(b)));
                     }
                 }
+                else if (m.Campo.StartsWith("contador:"))
+                    p.Contadores[m.Campo.Substring("contador:".Length)] = m.Depois;
                 else if (m.Campo.StartsWith("rotulo:"))
                 {
                     // Primeira mudança de jogo: parte da foto da criação.
