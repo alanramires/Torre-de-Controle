@@ -1,0 +1,143 @@
+{
+  "formato": "torre-de-controle/personagem",
+  "versao": 1,
+  "exportado_em": "2026-10-15T19:35:45",
+  "arquetipo_nome": "Nova",
+  "personagem": {
+    "id": "7d69e72ac45d46aab7257dcd7525082b",
+    "identidade": {
+      "nome": "Alan Nakamura",
+      "codinome": "Pulsar",
+      "jogador": "63cf48c39e6f437ab70129b1819d0706",
+      "arquetipo": "nova",
+      "aparencia": "Tenho 17 anos, 1,82 m de altura, corpo atlético, pele clara, olhos azuis intensos e cabelos prateados, curtos e despenteados. Minha expressão costuma ser séria e confiante, mas sorrio facilmente quando estou entre amigos.\r\n\r\nNo cotidiano, uso jeans, tênis, camisetas escuras e jaquetas esportivas. Gosto de roupas confortáveis e discretas, embora meus cabelos prateados chamem bastante atenção.\r\n\r\nMeu uniforme é preto e branco, ajustado ao corpo, com detalhes azul-elétrico e um núcleo luminoso no centro do peito. Não uso capa. Linhas brilhantes percorrem meus braços e pernas, conduzindo a energia que produzo.\r\n\r\nQuando libero meus poderes, chamas cósmicas azuis envolvem minhas mãos e uma aura luminosa surge ao meu redor. Em momentos de grande intensidade, meus cabelos flutuam e meus olhos parecem duas pequenas estrelas.",
+      "resumo": "Meu nome é Alan Nakamura, mas como herói sou conhecido como Pulsar.\r\n\r\nAté os 16 anos, eu era um adolescente comum. Gostava de videogames, astronomia, tecnologia e histórias de super-heróis. Sonhava em fazer algo extraordinário, mas nunca imaginei que isso aconteceria de verdade.\r\n\r\nDurante uma tempestade eletromagnética, uma descarga de origem desconhecida atingiu o observatório onde eu participava de uma visita escolar. Sobrevivi sem ferimentos, mas meu corpo começou a produzir uma energia impossível de explicar.\r\n\r\nNa primeira manifestação dos meus poderes, destruí acidentalmente parte do laboratório. Ninguém morreu, mas três pessoas ficaram feridas. Desde então, tenho medo de perder o controle novamente.\r\n\r\nDescobri que posso manipular quantidades absurdas de energia cósmica. Sou capaz de enfrentar ameaças gigantescas, mas ainda tenho dificuldade para controlar a intensidade dos meus ataques.\r\n\r\nAdoro meus poderes. Adoro voar pelos céus impulsionado pela própria energia, enfrentar vilões e sentir que posso fazer a diferença. Mas também sei que um único erro pode transformar uma vitória em tragédia.\r\n\r\nEntrei para uma equipe de jovens heróis porque não quero enfrentar essa responsabilidade sozinho. Quero aprender a confiar nos meus amigos e descobrir como usar meus poderes sem colocar as pessoas em perigo.\r\n\r\nMeu maior sonho é ser lembrado como alguém que salvou vidas, não como uma arma que o mundo precisou aprender a temer.",
+      "foto_heroica": "https://i.pinimg.com/736x/ae/c4/08/aec408fd6e05d328ddf1a97180ae86ee.jpg",
+      "foto_civil": "",
+      "foto_heroica_aprovacao": "aguardando",
+      "foto_civil_aprovacao": "aguardando",
+      "respostas_historico": [
+        "Foi aos 16 anos, durante uma excursão escolar a um observatório. Uma tempestade eletromagnética atingiu o prédio e uma descarga azul atravessou meu corpo. Quando acordei, estava flutuando no meio do laboratório, cercado por equipamentos destruídos. Entrei em pânico e liberei uma explosão de energia que abriu um buraco no teto. Nunca vou esquecer o silêncio que veio depois.",
+        "Minha melhor amiga, Júlia Martins. Ela tentou me acalmar quando meus poderes começaram a sair do controle. Estendeu a mão para mim, mas uma descarga de energia a atingiu e a arremessou contra uma parede. Júlia passou duas semanas hospitalizada. Sobreviveu e me perdoou, mas ainda tem uma cicatriz no braço esquerdo. Toda vez que vejo aquela marca, lembro do que sou capaz de fazer.",
+        "Dra. Marina Azevedo, 38 anos, uma física especializada em fenômenos energéticos. Ela desenvolveu sensores que monitoram a energia acumulada no meu corpo e me ensina técnicas de concentração para evitar sobrecargas. Também criou o núcleo estabilizador que uso no peito do uniforme. Marina diz que meus poderes respondem às minhas emoções e que preciso aprender a compreendê-las, não simplesmente reprimi-las.",
+        "Porque, apesar de tudo, eu adoro ser um herói. Adoro a sensação de voar, enfrentar ameaças impossíveis e ouvir alguém dizer que está seguro porque eu cheguei. Já pensei em abandonar tudo depois do acidente com Júlia, mas percebi que esconder meus poderes não apagaria o que aconteceu. Se tenho capacidade de salvar pessoas, quero aprender a fazer isso direito. Não quero que o medo decida quem vou ser.",
+        "Porque eles não me tratam como uma arma ou um experimento científico. São meus amigos. Riem das minhas piadas ruins, reclamam quando faço entradas espalhafatosas e me chamam de volta quando começo a perder o controle. Sei que sou capaz de enfrentar inimigos muito poderosos, mas também sei que não consigo resolver tudo sozinho. Com eles, não preciso fingir que sou invencível. Posso ser apenas Alan."
+      ],
+      "nomes_historico": {
+        "1": "Júlia Martins",
+        "2": "Dra. Marina Azevedo"
+      }
+    },
+    "controle": "jogador",
+    "maturidade": "jovem",
+    "papel": "heroi",
+    "status": "emAprovacao",
+    "ativo": true,
+    "favorito": false,
+    "ordem": 2,
+    "criacao": {
+      "bonus_livre": "salvador",
+      "habilidades": {
+        "escolhidas": [
+          "energias-cosmicas"
+        ],
+        "linha": null,
+        "negadas": [],
+        "vagas": {},
+        "descricoes": {
+          "energias-cosmicas": "Meu corpo funciona como um reator de energia estelar. Consigo absorver, concentrar e liberar energia cósmica na forma de rajadas, explosões e campos de força. Quando uso meus poderes, meus olhos brilham em azul e chamas luminosas envolvem minhas mãos. Quanto mais energia acumulo, mais meu corpo brilha. Se perder o controle, posso liberar uma onda devastadora capaz de destruir tudo ao meu redor."
+        }
+      },
+      "movimentos": [],
+      "extras_escolhas": {
+        "nova/chamas|faiscas": [
+          "escudo",
+          "movimento",
+          "arrebatar",
+          "sobrecarga"
+        ]
+      },
+      "extras_textos": {
+        "nova/chamas|faiscas|escudo": "Projeto barreiras translúcidas de energia azul que podem envolver meu corpo, proteger meus aliados ou bloquear ataques. Quando recebem impactos, brilham como estrelas e produzem ondas luminosas. Quanto maior a barreira, mais difícil é mantê-la estável.",
+        "nova/chamas|faiscas|movimento": "Canalizo energia cósmica pelos pés e pelas mãos, criando propulsão suficiente para voar em alta velocidade. Posso mudar de direção bruscamente, pairar no ar e realizar manobras espetaculares. Quando acelero, deixo um rastro de chamas azuis que lembra a cauda de um cometa.",
+        "nova/chamas|faiscas|arrebatar": "Concentro energia em uma onda gravitacional azulada capaz de deslocar pessoas e objetos violentamente. Posso arrancar um inimigo de sua posição, afastar obstáculos ou puxar alguém para longe do perigo. Preciso controlar cuidadosamente a intensidade para não machucar quem estou tentando salvar.",
+        "nova/chamas|faiscas|sobrecarga": "Libero uma quantidade colossal de energia cósmica, fazendo meu corpo brilhar como uma pequena estrela. Raios azuis escapam pelos meus braços e o ar ao redor vibra com a pressão energética. É minha manifestação mais devastadora e também a mais perigosa. Quando ultrapasso meus limites, corro o risco de perder completamente o controle da descarga."
+      }
+    },
+    "foto": {
+      "aprovada_em": "2026-10-14T00:26:38",
+      "arquetipo": "nova",
+      "rotulos": {
+        "perigoso": 1,
+        "aberracao": 2,
+        "salvador": 1,
+        "superior": 0,
+        "mundano": -1
+      },
+      "habilidades": [
+        {
+          "id": "energias-cosmicas",
+          "nome": "Energias cósmicas",
+          "descricao": "Meu corpo funciona como um reator de energia estelar. Consigo absorver, concentrar e liberar energia cósmica na forma de rajadas, explosões e campos de força. Quando uso meus poderes, meus olhos brilham em azul e chamas luminosas envolvem minhas mãos. Quanto mais energia acumulo, mais meu corpo brilha. Se perder o controle, posso liberar uma onda devastadora capaz de destruir tudo ao meu redor.",
+          "fixa": false
+        }
+      ],
+      "movimentos": [],
+      "extras_escolhas": {
+        "nova/chamas|faiscas": [
+          "escudo",
+          "movimento",
+          "arrebatar",
+          "sobrecarga"
+        ]
+      },
+      "extras_textos": {
+        "nova/chamas|faiscas|escudo": "Projeto barreiras translúcidas de energia azul que podem envolver meu corpo, proteger meus aliados ou bloquear ataques. Quando recebem impactos, brilham como estrelas e produzem ondas luminosas. Quanto maior a barreira, mais difícil é mantê-la estável.",
+        "nova/chamas|faiscas|movimento": "Canalizo energia cósmica pelos pés e pelas mãos, criando propulsão suficiente para voar em alta velocidade. Posso mudar de direção bruscamente, pairar no ar e realizar manobras espetaculares. Quando acelero, deixo um rastro de chamas azuis que lembra a cauda de um cometa.",
+        "nova/chamas|faiscas|arrebatar": "Concentro energia em uma onda gravitacional azulada capaz de deslocar pessoas e objetos violentamente. Posso arrancar um inimigo de sua posição, afastar obstáculos ou puxar alguém para longe do perigo. Preciso controlar cuidadosamente a intensidade para não machucar quem estou tentando salvar.",
+        "nova/chamas|faiscas|sobrecarga": "Libero uma quantidade colossal de energia cósmica, fazendo meu corpo brilhar como uma pequena estrela. Raios azuis escapam pelos meus braços e o ar ao redor vibra com a pressão energética. É minha manifestação mais devastadora e também a mais perigosa. Quando ultrapasso meus limites, corro o risco de perder completamente o controle da descarga."
+      }
+    },
+    "avancos_marcados": [],
+    "obs_movimentos": {},
+    "potencial": 0,
+    "condicoes": [],
+    "rotulos_jogo": null,
+    "contadores": {},
+    "escolhas_de_jogo": {},
+    "textos_de_jogo": {},
+    "itens_de_jogo": {},
+    "cumpridos": {},
+    "origem": "3d1d132bc1854b23b7aeebbed7129bdd",
+    "sala": "c4f61774b7084140a7d166d92230d0ef",
+    "equipe_resposta": "Foi no Instituto Helix, um centro de pesquisas construído sobre uma antiga estação de metrô desativada.\nEstávamos tentando impedir o roubo de um reator experimental quando os criminosos ativaram o equipamento. O reator começou a distorcer a gravidade, arrancando pedaços do prédio e lançando tudo pelos ares.\nEu tentei conter a reação usando meus poderes. Mas perdi o controle.\nMinha descarga de energia destruiu três andares do instituto, derrubou uma passarela e abriu uma cratera que alcançou os túneis subterrâneos.\nConseguimos impedir que o reator explodisse, mas o Instituto Helix ficou praticamente em ruínas.\nE, quando a poeira baixou, percebemos que havia pessoas presas nos escombros.",
+    "equipe_npc_nome": "Instituto Helix",
+    "relacoes": [
+      {
+        "colega": "66abb09aab0d4341b0a719244206b111",
+        "anteriores": [],
+        "porque": "Valentina é uma das poucas pessoas que conseguem acompanhar minhas ideias malucas. Quando não estamos treinando, saímos para comer, jogar fliperama ou testar alguma invenção minha.\nEla vive tentando me lembrar das responsabilidades de um herói, mas também sabe se divertir. E, quando estamos juntos, consigo esquecer por algumas horas a cratera que deixei no Instituto Helix.\nSó temos uma regra: nada de entrar escondidos no depósito do Sentinela Solar outra vez!"
+      },
+      {
+        "colega": "025e97c54b73483fb9f36facd42dc6cb",
+        "anteriores": [],
+        "porque": "Foi durante o incidente Helix.\nQuando tentei conter o reator, liberei energia demais. A onda de choque atingiu Cristina e a arremessou contra uma estrutura metálica.\nEla se levantou mesmo ferida e entrou na sala do reator para fechar aquela fenda.\nNunca consegui esquecer a imagem dela desaparecendo na escuridão.\nDepois que acordou no hospital, tentei pedir desculpas. Ela disse que não precisava, que tinha escolhido ficar.\nMas eu sei que a machuquei.\nDesde então, evito usar meus poderes perto dela quando estou nervoso. Tenho medo de que aconteça novamente."
+      }
+    ],
+    "influencia_comportamento": "fachada_feliz",
+    "influencias": {
+      "66abb09aab0d4341b0a719244206b111": "dada",
+      "1167cefb2c254139976f04587e5ee933": "dada",
+      "6e443d402fd6436785a63105b9372151": "dada",
+      "0defaeb04d82473a8f8ce9f6d0478553": "dada"
+    },
+    "influencia_porque": {
+      "66abb09aab0d4341b0a719244206b111": "ele quer provar que merece estar na equipe, especialmente diante da filha do Sentinela Solar.",
+      "1167cefb2c254139976f04587e5ee933": "foi ela quem transformou o desastre em um gesto de cuidado. Pulsar valoriza muito sua opinião.",
+      "6e443d402fd6436785a63105b9372151": "ele respeita a disciplina de Akemi e quer que ela o considere confiável."
+    },
+    "influencia_porque_ninguem": "",
+    "pnj": null,
+    "vilao": null
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "formato": "torre-de-controle/personagem",
+  "versao": 1,
+  "exportado_em": "2026-10-15T19:35:41",
+  "arquetipo_nome": "Legado",
+  "personagem": {
+    "id": "66abb09aab0d4341b0a719244206b111",
+    "identidade": {
+      "nome": "Valentina Monteiro",
+      "codinome": "Aurora Dourada",
+      "jogador": null,
+      "arquetipo": "legado",
+      "aparencia": "Tenho 16 anos, 1,70 m de altura, pele morena clara, olhos castanhos e longos cabelos castanho-escuros, geralmente presos em um rabo de cavalo alto. Tenho porte atlético, sorriso confiante e uma expressão que minha mãe chama de \"ar de quem sabe tudo\".\r\n\r\nNo cotidiano, uso jeans, tênis, camisetas coloridas e jaquetas esportivas.\r\n\r\nMeu uniforme é branco e dourado, com detalhes vermelhos, botas altas, luvas e uma capa curta vermelha. No peito, carrego o símbolo da família Monteiro: um sol dourado de oito pontas.\r\n\r\nÉ praticamente o mesmo uniforme usado por minha mãe e minha avó, mas fiz algumas modificações escondida. Minha mãe ainda não percebeu.",
+      "resumo": "Meu nome é Valentina Monteiro, mas o mundo me conhece como Aurora Dourada, a terceira heroína a carregar esse título.\r\n\r\nMinha avó, Helena Monteiro, foi uma das maiores heroínas de sua geração. Minha mãe, Beatriz Monteiro, superou seus feitos e se tornou um símbolo mundial de coragem e justiça.\r\n\r\nE agora chegou minha vez.\r\n\r\nDesde pequena fui treinada para ser uma heroína. Aprendi a lutar antes de andar de bicicleta, comecei a voar aos onze anos e passei minha infância ouvindo histórias sobre as façanhas da família.\r\n\r\nTodo mundo espera que eu seja perfeita.\r\n\r\nMinha mãe controla meus treinamentos, minha avó vive contando como as coisas eram melhores antigamente e a imprensa adora comparar nossas conquistas.\r\n\r\nEntrei para uma equipe de jovens heróis porque quero descobrir quem sou longe da sombra da minha família.\r\n\r\nQuero provar que mereço o nome Aurora Dourada. Mas, secretamente, sonho com o dia em que as pessoas vão parar de dizer \"ela é filha da Aurora\" e começar a dizer \"essa é a Valentina\".",
+      "foto_heroica": "https://www.dropbox.com/scl/fi/kw3j7bra3xrw900lvwgfo/aurora.png?rlkey=qaxxctcbqsll7lv1hryj5zkec&dl=1",
+      "foto_civil": "https://i.pinimg.com/736x/f7/55/65/f755652d6e2142f04aa361536d093f68.jpg",
+      "foto_heroica_aprovacao": "aprovada",
+      "foto_civil_aprovacao": "aprovada",
+      "respostas_historico": [
+        "No meu aniversário de 16 anos. Durante uma cerimônia transmitida pela televisão, minha mãe colocou sobre meus ombros a capa vermelha que pertenceu à minha avó. Recebi o título de Aurora Dourada diante de milhares de pessoas. Sorri para as câmeras, mas estava apavorada. Naquela noite, minha mãe disse que eu finalmente estava pronta. Eu não tinha tanta certeza.",
+        "Há trinta anos, minha avó impediu que uma estação espacial descontrolada caísse sobre uma cidade. Ela sustentou a estrutura enquanto milhares de pessoas eram evacuadas. Quase morreu no processo. O acontecimento ficou conhecido como o Milagre da Aurora e transformou nossa família em um símbolo mundial de heroísmo. Existe até uma estátua dela na praça central.",
+        "Como uma família de heroínas praticamente perfeitas. Minha avó é uma lenda viva, minha mãe é considerada uma das maiores protetoras do planeta e eu sou a promessa da nova geração. Temos fãs, documentários e até brinquedos com nossos uniformes. Mas também existem pessoas que nos consideram arrogantes e privilegiadas. A imprensa acompanha cada erro meu esperando descobrir se sou digna do sobrenome Monteiro.",
+        "Fui criada para acreditar que proteger as pessoas é uma obrigação da nossa família. Nunca me perguntaram se eu queria ser heroína. Simplesmente esperavam que eu fosse. Mas quando salvei uma criança de um incêndio, sem câmeras ou familiares por perto, senti algo diferente. Pela primeira vez, fui heroína porque eu quis. Quero descobrir se consigo fazer a diferença por minhas próprias escolhas, não apenas por carregar um nome famoso.",
+        "Porque meus colegas não precisam me tratar como uma celebridade. Eles discutem comigo, riem dos meus erros e não ficam impressionados quando levanto um caminhão. Às vezes isso me irrita profundamente! Mas é a primeira vez que tenho amigos que enxergam Valentina antes de enxergar Aurora Dourada. Quero conquistar o respeito deles por quem sou, não pelo que minha família representa."
+      ],
+      "nomes_historico": {}
+    },
+    "controle": "jogador",
+    "maturidade": "jovem",
+    "papel": "heroi",
+    "status": "emAprovacao",
+    "ativo": true,
+    "favorito": false,
+    "ordem": 1,
+    "criacao": {
+      "bonus_livre": "superior",
+      "habilidades": {
+        "escolhidas": [],
+        "linha": "classica",
+        "negadas": [
+          "raios-oculares",
+          "supersentidos"
+        ],
+        "vagas": {},
+        "descricoes": {
+          "superforca": "Minha força é hereditária. Consigo levantar carros, arrebentar paredes e enfrentar monstros gigantes com as próprias mãos. Quando fico nervosa, às vezes quebro objetos sem querer. Minha mãe diz que força sem disciplina não vale nada. Odeio quando ela tem razão.",
+          "invulnerabilidade": "Minha pele resiste a balas, explosões e impactos violentos. Quando recebo um golpe muito forte, uma luminosidade dourada percorre meu corpo. Mas não sou invencível: ainda sinto dor, posso ser derrubada e tenho medo de descobrir meus verdadeiros limites.",
+          "voo": "Consigo voar livremente, deixando um discreto rastro dourado no ar. Adoro acelerar entre os prédios e mergulhar das nuvens. Voar é a única coisa que faço sem ouvir minha mãe dizendo como deveria fazer melhor. Lá em cima, sou apenas Valentina."
+        }
+      },
+      "movimentos": [
+        "eu-sei-o-que-sou",
+        "nunca-desista-nunca-se-renda"
+      ],
+      "extras_escolhas": {},
+      "extras_textos": {
+        "legado/membros|membros|ainda-ativo-e-em-destaque#descricao": "Beatriz Monteiro, 39 anos, minha mãe e a segunda Aurora Dourada. É uma das heroínas mais respeitadas do planeta. Exigente, disciplinada e extremamente protetora. Ela me ama, mas parece incapaz de separar o papel de mãe do papel de mentora. Nunca está satisfeita com meus resultados.",
+        "legado/membros|membros|aposentado-e-critico#descricao": "Helena Monteiro, 68 anos, minha avó e a primeira Aurora Dourada. Aposentou-se depois de sofrer ferimentos graves durante uma missão. É uma lenda viva, mas acredita que a nova geração depende demais da tecnologia e trabalha pouco. Vive dizendo que eu preciso aprender humildade antes de merecer a capa.",
+        "legado/membros|membros|proximo-da-linhagem#descricao": "Marina Monteiro, 14 anos, minha irmã mais nova. Ainda não manifestou poderes, mas conhece todos os feitos da família e sonha em se tornar heroína. É inteligente, observadora e minha maior fã. Às vezes tenho a impressão de que ela entende melhor o significado do legado do que eu.",
+        "legado/membros|membros|maior-inimigo-ainda-a-solta#descricao": "Doutor Ocaso, verdadeiro nome Augusto Vilar, 62 anos. Um antigo cientista que desenvolveu uma tecnologia capaz de absorver energia solar. Foi derrotado pela minha avó há trinta anos e retornou para se vingar da família Monteiro. Acredita que destruir a terceira Aurora Dourada será sua vitória definitiva sobre o legado.",
+        "legado/membros|membros|ainda-ativo-e-em-destaque": "Beatriz Monteiro",
+        "legado/membros|membros|aposentado-e-critico": "Helena Monteiro",
+        "legado/membros|membros|proximo-da-linhagem": "Marina Monteiro",
+        "legado/membros|membros|maior-inimigo-ainda-a-solta": "Doutor Ocaso (Augusto Vilar)"
+      }
+    },
+    "foto": {
+      "aprovada_em": "2026-10-13T23:49:00",
+      "arquetipo": "legado",
+      "rotulos": {
+        "perigoso": -1,
+        "aberracao": 0,
+        "salvador": 2,
+        "superior": 1,
+        "mundano": 1
+      },
+      "habilidades": [
+        {
+          "id": "superforca",
+          "nome": "Superforça",
+          "descricao": "Minha força é hereditária. Consigo levantar carros, arrebentar paredes e enfrentar monstros gigantes com as próprias mãos. Quando fico nervosa, às vezes quebro objetos sem querer. Minha mãe diz que força sem disciplina não vale nada. Odeio quando ela tem razão.",
+          "fixa": false
+        },
+        {
+          "id": "invulnerabilidade",
+          "nome": "Invulnerabilidade",
+          "descricao": "Minha pele resiste a balas, explosões e impactos violentos. Quando recebo um golpe muito forte, uma luminosidade dourada percorre meu corpo. Mas não sou invencível: ainda sinto dor, posso ser derrubada e tenho medo de descobrir meus verdadeiros limites.",
+          "fixa": false
+        },
+        {
+          "id": "voo",
+          "nome": "Voo",
+          "descricao": "Consigo voar livremente, deixando um discreto rastro dourado no ar. Adoro acelerar entre os prédios e mergulhar das nuvens. Voar é a única coisa que faço sem ouvir minha mãe dizendo como deveria fazer melhor. Lá em cima, sou apenas Valentina.",
+          "fixa": false
+        }
+      ],
+      "movimentos": [
+        "eu-sei-o-que-sou",
+        "nunca-desista-nunca-se-renda"
+      ],
+      "extras_escolhas": {},
+      "extras_textos": {
+        "legado/membros|membros|ainda-ativo-e-em-destaque#descricao": "Beatriz Monteiro, 39 anos, minha mãe e a segunda Aurora Dourada. É uma das heroínas mais respeitadas do planeta. Exigente, disciplinada e extremamente protetora. Ela me ama, mas parece incapaz de separar o papel de mãe do papel de mentora. Nunca está satisfeita com meus resultados.",
+        "legado/membros|membros|aposentado-e-critico#descricao": "Helena Monteiro, 68 anos, minha avó e a primeira Aurora Dourada. Aposentou-se depois de sofrer ferimentos graves durante uma missão. É uma lenda viva, mas acredita que a nova geração depende demais da tecnologia e trabalha pouco. Vive dizendo que eu preciso aprender humildade antes de merecer a capa.",
+        "legado/membros|membros|proximo-da-linhagem#descricao": "Marina Monteiro, 14 anos, minha irmã mais nova. Ainda não manifestou poderes, mas conhece todos os feitos da família e sonha em se tornar heroína. É inteligente, observadora e minha maior fã. Às vezes tenho a impressão de que ela entende melhor o significado do legado do que eu.",
+        "legado/membros|membros|maior-inimigo-ainda-a-solta#descricao": "Doutor Ocaso, verdadeiro nome Augusto Vilar, 62 anos. Um antigo cientista que desenvolveu uma tecnologia capaz de absorver energia solar. Foi derrotado pela minha avó há trinta anos e retornou para se vingar da família Monteiro. Acredita que destruir a terceira Aurora Dourada será sua vitória definitiva sobre o legado.",
+        "legado/membros|membros|ainda-ativo-e-em-destaque": "Beatriz Monteiro",
+        "legado/membros|membros|aposentado-e-critico": "Helena Monteiro",
+        "legado/membros|membros|proximo-da-linhagem": "Marina Monteiro",
+        "legado/membros|membros|maior-inimigo-ainda-a-solta": "Doutor Ocaso (Augusto Vilar)"
+      }
+    },
+    "avancos_marcados": [],
+    "obs_movimentos": {},
+    "potencial": 0,
+    "condicoes": [],
+    "rotulos_jogo": null,
+    "contadores": {},
+    "escolhas_de_jogo": {},
+    "textos_de_jogo": {},
+    "itens_de_jogo": {},
+    "cumpridos": {},
+    "origem": "01e6af97772b4eb49082a9a3258822b1",
+    "sala": "c4f61774b7084140a7d166d92230d0ef",
+    "equipe_resposta": "Meu pai sempre dizia que um verdadeiro herói não é aquele que vence todas as batalhas. É aquele que permanece quando todos os outros já desistiram.\nNaquele dia, no Instituto Helix, finalmente entendi o que ele queria dizer.\nQuando as equipes de resgate chegaram, encontraram cinco adolescentes cobertos de poeira, exaustos e feridos, tentando ajudar os últimos sobreviventes.\nE então ele apareceu.\nSentinela Solar.\nO maior herói da cidade. Meu pai.\nEu estava apavorada. Não pela destruição, nem pelos ferimentos. Mas porque ele veria o que tínhamos feito. Três andares destruídos, uma passarela caída, uma cratera no meio da cidade...\nAchei que ele fosse nos repreender.\nMas ele passou por mim e se ajoelhou diante de Cristina, que ainda estava inconsciente.\nDepois, olhou para Pulsar, que mal conseguia ficar em pé, para Mayane, que tinha os braços machucados, e para os outros.\nFinalmente, voltou-se para mim.\n“Valentina, você não me disse que tinha encontrado uma equipe.”\nRespondi que não tínhamos uma equipe. Que mal nos conhecíamos.\nEle sorriu.\n“Então é melhor começarem a se conhecer. Porque hoje vocês fizeram algo que muitos heróis experientes não teriam coragem de fazer.”\nMeu pai ajudou a coordenar o resgate e assumiu publicamente a responsabilidade pela supervisão dos cinco jovens envolvidos no incidente.\nNão escondeu os estragos. Não fingiu que tínhamos agido perfeitamente.\nMas, diante dos jornalistas, declarou:\n“A cidade não viu cinco adolescentes destruindo um laboratório. Viu cinco jovens arriscando suas vidas para impedir uma tragédia.”\nPela primeira vez, senti que ele não estava olhando para mim como sua sucessora.\nEstava olhando para nós como heróis.",
+    "equipe_npc_nome": "Sentinela Solar (pai: Arthur Monteiro))",
+    "relacoes": [
+      {
+        "colega": "7d69e72ac45d46aab7257dcd7525082b",
+        "anteriores": [],
+        "porque": "Depois do incidente Helix, Pulsar me convenceu a entrar escondida no depósito de equipamentos confiscados do Sentinela Solar. Queríamos recuperar uma peça do reator para investigar o que realmente havia acontecido.\nDesativamos as câmeras, falsificamos uma autorização e quase conseguimos sair sem sermos vistos.\nAté meu pai aparecer.\nEle não gritou. Apenas olhou para mim e perguntou: “Valentina, desde quando você precisa mentir para fazer a coisa certa?”\nAcho que teria preferido que ele gritasse.\nE o pior? Pulsar ainda teve coragem de dizer que a ideia tinha sido dele. Não era verdade. Eu havia concordado com tudo."
+      },
+      {
+        "colega": "6e443d402fd6436785a63105b9372151",
+        "anteriores": [],
+        "porque": "Meu pai guarda um arquivo confidencial sobre o Instituto Helix. Nele, descobri que o reator experimental utilizava componentes de uma tecnologia que o próprio Sentinela Solar ajudou a recuperar anos atrás.\nNão sei se ele sabia que aquela tecnologia acabaria no laboratório. Mas isso significa que nosso legado pode estar ligado ao desastre.\nContei a Akemi porque ela sabe guardar segredos e não costuma tirar conclusões precipitadas.\nPedi que não investigasse sem mim.\nEla respondeu: “Então é melhor você não demorar.”"
+      }
+    ],
+    "influencia_comportamento": null,
+    "influencias": {
+      "025e97c54b73483fb9f36facd42dc6cb": "dada",
+      "7d69e72ac45d46aab7257dcd7525082b": "dada",
+      "1167cefb2c254139976f04587e5ee933": "dada",
+      "6e443d402fd6436785a63105b9372151": "dada",
+      "0defaeb04d82473a8f8ce9f6d0478553": "dada"
+    },
+    "influencia_porque": {
+      "025e97c54b73483fb9f36facd42dc6cb": "admira a coragem de Cristina ao se sacrificar.",
+      "7d69e72ac45d46aab7257dcd7525082b": "reconhece seu potencial, mesmo depois da destruição no Helix.",
+      "1167cefb2c254139976f04587e5ee933": "confia em sua compaixão e em seu instinto de proteger.",
+      "6e443d402fd6436785a63105b9372151": "respeita sua disciplina e seu compromisso com a equipe."
+    },
+    "influencia_porque_ninguem": "",
+    "pnj": null,
+    "vilao": null
+  }
+}

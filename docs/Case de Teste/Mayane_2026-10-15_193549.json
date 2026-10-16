@@ -1,0 +1,188 @@
+{
+  "formato": "torre-de-controle/personagem",
+  "versao": 1,
+  "exportado_em": "2026-10-15T19:35:49",
+  "arquetipo_nome": "Janus",
+  "personagem": {
+    "id": "1167cefb2c254139976f04587e5ee933",
+    "identidade": {
+      "nome": "Mariana Azevedo",
+      "codinome": "Mayane",
+      "jogador": null,
+      "arquetipo": "janus",
+      "aparencia": "Tenho 19 anos, 1,68 m de altura, pele clara, longos cabelos castanhos e sedosos, olhos castanhos expressivos e um rosto delicado. Meu corpo é curvilíneo, com seios volumosos, cintura fina, quadris arredondados e pernas fortes. Apesar da aparência delicada, tenho uma constituição física extraordinariamente resistente.\r\n\r\nNo cotidiano, gosto de vestidos leves, blusas delicadas, saias e roupas confortáveis em tons claros. Costumo usar os cabelos soltos e maquiagem discreta. Tenho um sorriso acolhedor, uma voz suave e o hábito de inclinar a cabeça quando escuto alguém com atenção.\r\n\r\nMeu uniforme heroico é um leotard branco ajustado ao corpo, com gola delicada, luvas brancas, botas brancas de cano alto e uma pequena máscara branca que protege minha identidade. Uso uma gargantilha preta e brincos de diamante. Não tenho capa.\r\n\r\nQuando utilizo meus poderes, uma aura branca e luminosa envolve meu corpo. Meus olhos brilham suavemente quando percebo presenças sobrenaturais.\r\n\r\nSou carinhosa, educada e um pouco tímida. Fico facilmente envergonhada quando recebo elogios, mas minha expressão muda completamente quando alguém ameaça as pessoas que amo.",
+      "resumo": "Meu nome é Mariana Azevedo, tenho 19 anos e sou estudante de enfermagem. Mas, quando coloco minha máscara branca, torno-me Mayane, uma jovem heroína que protege as pessoas enquanto tenta preservar sua vida normal.\r\n\r\nCresci em uma família simples e amorosa. Desde pequena, sempre fui aquela garota que cuidava dos colegas machucados, consolava os amigos tristes e tentava resolver os problemas de todo mundo.\r\n\r\nAos 17 anos, durante um acidente em um laboratório universitário, fui exposta a uma energia experimental desconhecida. Meu corpo desenvolveu força, agilidade e resistência extraordinárias, além da capacidade de absorver energia e perceber fenômenos sobrenaturais.\r\n\r\nNo começo, escondi meus poderes. Tinha medo de ser tratada como uma aberração ou de colocar minha família em perigo.\r\n\r\nTudo mudou quando presenciei um incêndio em um prédio residencial. Entrei para salvar uma criança presa entre os escombros e descobri que minha força poderia fazer a diferença entre a vida e a morte.\r\n\r\nDesde então, atuo secretamente como Mayane.\r\n\r\nDurante o dia, estudo, trabalho meio período em uma clínica e ajudo minha família. À noite, patrulho a cidade e enfrenta ameaças que a polícia comum não consegue controlar.\r\n\r\nMinha maior dificuldade não é enfrentar vilões. É encontrar tempo para estudar, trabalhar, manter minhas amizades e ainda salvar pessoas.\r\n\r\nSou teimosa e tenho dificuldade em pedir ajuda. Frequentemente coloco as necessidades dos outros acima das minhas, mesmo quando estou cansada ou machucada.\r\n\r\nEntrei para uma equipe de jovens heróis porque quero proteger mais pessoas, mas também porque desejo encontrar amigos que compreendam minha vida dupla.\r\n\r\nMeu maior medo é que alguém descubra minha identidade e machuque minha família.\r\n\r\nMeu maior sonho é terminar a faculdade, trabalhar cuidando de pessoas e, quem sabe, construir uma família.\r\n\r\nNão quero ser a heroína mais poderosa do mundo.\r\n\r\nQuero apenas que, quando alguém estiver com medo, possa olhar para mim e sentir que tudo vai ficar bem.",
+      "foto_heroica": "https://i.pinimg.com/736x/1d/25/9a/1d259a268d593355d2413e41eb883011.jpg",
+      "foto_civil": "",
+      "foto_heroica_aprovacao": "aguardando",
+      "foto_civil_aprovacao": "aguardando",
+      "respostas_historico": [
+        "Eu tinha 17 anos. Um incêndio tomou conta de um prédio residencial perto da minha casa, e ouvi uma menininha chorando no terceiro andar. Os bombeiros ainda não tinham conseguido entrar.\r\n\r\nCorri para casa, vesti uma roupa branca que tinha adaptado para esconder minha aparência e coloquei uma pequena máscara sobre os olhos. Não queria que ninguém reconhecesse Mariana Azevedo usando poderes que eu mesma ainda não compreendia.\r\n\r\nEntrei no prédio, atravessei as chamas e consegui tirar a menina dos escombros. Quando ela me abraçou e perguntou meu nome, respondi, quase sem pensar: \"Mayane\".\r\n\r\nFoi a primeira vez que alguém me chamou de heroína. E a primeira vez que percebi que minha máscara poderia proteger não apenas meu rosto, mas também as pessoas que amo.",
+        "Porque tenho uma família, amigos, professores e pacientes que não escolheram participar da minha vida de heroína.\r\n\r\nMinha mãe se preocupa quando chego tarde. Meu irmão mais novo me procura quando precisa de ajuda com a escola. Na clínica onde trabalho, existem pessoas que confiam em mim como Mariana, não como Mayane.\r\n\r\nTenho medo de que algum vilão descubra quem sou e use essas pessoas contra mim.\r\n\r\nMas existe outro motivo, que tenho vergonha de admitir: gosto de ser Mariana. Gosto de estudar, cozinhar, abraçar minha família e sonhar com um futuro tranquilo. Não quero que a heroína engula completamente a garota que existe por trás da máscara.",
+        "Minha melhor amiga, Camila Ferreira, de 19 anos.\r\n\r\nNós nos conhecemos desde a infância. Camila descobriu meu segredo quando apareci em sua casa, ainda usando parte do uniforme, depois de uma patrulha em que fiquei ferida. Tentei inventar uma desculpa, mas ela reconheceu minha voz imediatamente.\r\n\r\nCamila chorou, me abraçou e depois passou quase meia hora brigando comigo por ter escondido aquilo dela.\r\n\r\nDesde então, ela me ajuda a inventar desculpas quando desapareço, guarda um uniforme reserva e me lembra dos compromissos que esqueço.\r\n\r\nÉ a única pessoa fora da equipe que conhece toda a verdade. E também a única que tem coragem de me dizer: \"Mariana, você não precisa salvar o mundo inteiro sozinha.\"",
+        "Minha mãe, Lúcia Azevedo, de 44 anos.\r\n\r\nEla admira os heróis que trabalham com responsabilidade, mas detesta a Mayane. Acha que sou uma vigilante imprudente, uma garota mascarada que se coloca em perigo e acaba incentivando outras pessoas a fazerem o mesmo.\r\n\r\nSempre que aparece alguma notícia sobre minhas batalhas, mamãe comenta que aquela menina deveria estar estudando, trabalhando ou cuidando da própria família, em vez de arriscar a vida nas ruas.\r\n\r\nO pior é que muitas vezes concordo com ela.\r\n\r\nFico quietinha, ouvindo minha própria mãe criticar a heroína que sou. Às vezes tenho vontade de contar tudo, abraçá-la e pedir que tenha orgulho de mim.\r\n\r\nMas tenho medo de que ela nunca mais consiga dormir tranquila.",
+        "Porque, quando estou com eles, não preciso escolher entre Mariana e Mayane.\r\n\r\nMinha equipe conhece minha força, minhas inseguranças, minha teimosia e meu hábito de tentar proteger todo mundo. Eles sabem que posso enfrentar um vilão muito mais forte do que eu e, cinco minutos depois, ficar preocupada porque esqueci de responder uma mensagem da minha mãe.\r\n\r\nGosto de cuidar deles. Levo lanches, verifico se estão machucados e tento animá-los quando alguma missão termina mal. Às vezes exagero e acabo agindo como uma mãe preocupada.\r\n\r\nMas eles também cuidam de mim.\r\n\r\nQuando estou exausta, insistem para que eu descanse. Quando me culpo por não conseguir salvar alguém, lembram que fiz tudo o que podia.\r\n\r\nCom eles, estou aprendendo uma coisa muito difícil: aceitar ajuda não me torna menos heroína.\r\n\r\nTalvez seja isso que uma família de verdade faça."
+      ],
+      "nomes_historico": {
+        "2": "Camila Ferreira",
+        "3": "Lúcia Azevedo"
+      }
+    },
+    "controle": "jogador",
+    "maturidade": "jovem",
+    "papel": "heroi",
+    "status": "emAprovacao",
+    "ativo": true,
+    "favorito": false,
+    "ordem": 3,
+    "criacao": {
+      "bonus_livre": "salvador",
+      "habilidades": {
+        "escolhidas": [
+          "absorcao-de-energia",
+          "sentidos-sobrenaturais"
+        ],
+        "linha": null,
+        "negadas": [],
+        "vagas": {},
+        "descricoes": {
+          "forca": "Possuo força sobre-humana, suficiente para levantar veículos, arrombar portas reforçadas e enfrentar inimigos muito maiores do que eu. Minha força aumenta quando preciso proteger alguém, mas não sou invencível. Posso ser dominada por adversários mais poderosos.",
+          "agilidade": "Meu corpo possui reflexos extraordinários. Consigo realizar saltos acrobáticos, esquivar de ataques e me movimentar com precisão mesmo em espaços apertados. Meu estilo de combate é elegante e fluido, combinando movimentos de ginástica com técnicas de defesa pessoal.",
+          "resistencia": "Meu corpo suporta impactos, quedas e esforços que feririam gravemente uma pessoa comum. Consigo continuar lutando mesmo depois de receber golpes muito fortes. Entretanto, ainda sinto dor, fico exausta e posso perder a consciência. Minha resistência não me torna imune ao sofrimento.",
+          "absorcao-de-energia": "Consigo absorver energia de ataques direcionados contra mim, fazendo uma luminosidade branca percorrer meu corpo. Posso utilizar parte dessa energia para fortalecer temporariamente minhas defesas ou dissipá-la em uma explosão luminosa. Entretanto, minha capacidade de absorção possui limites: energia demais pode me sobrecarregar, provocando dor, tremores e perda de controle.",
+          "sentidos-sobrenaturais": "Consigo perceber campos energéticos, presenças ocultas e alterações sobrenaturais no ambiente. Quando me concentro, meus olhos adquirem um brilho branco suave e consigo sentir pessoas em perigo mesmo sem enxergá-las. Entretanto, ambientes com muita energia ou emoções intensas podem sobrecarregar meus sentidos, deixando-me desorientada."
+        }
+      },
+      "movimentos": [
+        "vou-te-salvar",
+        "discreta"
+      ],
+      "extras_escolhas": {
+        "mov:a-mascara|rotulo": [
+          "salvador"
+        ],
+        "janus/identidade-secreta|obrigacoes": [
+          "emprego-estagio",
+          "escola-estudos",
+          "casa-cuidar-de-alguem"
+        ]
+      },
+      "extras_textos": {
+        "janus/identidade-secreta|obrigacoes|emprego-estagio": "Como estudante de enfermagem, Mariana faz estágio em uma clínica. Tem horários, pacientes e uma supervisora exigente. Não pode simplesmente desaparecer quando surge um vilão.",
+        "janus/identidade-secreta|obrigacoes|escola-estudos": "Precisa manter boas notas, entregar trabalhos e estudar para as provas. Imagine ter uma avaliação de anatomia na manhã seguinte a uma batalha!",
+        "janus/identidade-secreta|obrigacoes|casa-cuidar-de-alguem": "Mariana ajuda a cuidar do irmão mais novo, que depende dela quando a mãe está trabalhando. É uma responsabilidade que não pode abandonar sem consequências.",
+        "janus/identidade-secreta|obrigacoes|casa-cuidar-de-alguem#pessoa": "Roberto Azevedo",
+        "janus/identidade-secreta|obrigacoes|emprego-estagio#pessoa": "Enfermeira Karen"
+      }
+    },
+    "foto": {
+      "aprovada_em": "2026-10-14T00:52:31",
+      "arquetipo": "janus",
+      "rotulos": {
+        "perigoso": 0,
+        "aberracao": -1,
+        "salvador": 1,
+        "superior": 0,
+        "mundano": 3
+      },
+      "habilidades": [
+        {
+          "id": "forca",
+          "nome": "Força",
+          "descricao": "Possuo força sobre-humana, suficiente para levantar veículos, arrombar portas reforçadas e enfrentar inimigos muito maiores do que eu. Minha força aumenta quando preciso proteger alguém, mas não sou invencível. Posso ser dominada por adversários mais poderosos.",
+          "fixa": true
+        },
+        {
+          "id": "agilidade",
+          "nome": "Agilidade",
+          "descricao": "Meu corpo possui reflexos extraordinários. Consigo realizar saltos acrobáticos, esquivar de ataques e me movimentar com precisão mesmo em espaços apertados. Meu estilo de combate é elegante e fluido, combinando movimentos de ginástica com técnicas de defesa pessoal.",
+          "fixa": true
+        },
+        {
+          "id": "resistencia",
+          "nome": "Resistência",
+          "descricao": "Meu corpo suporta impactos, quedas e esforços que feririam gravemente uma pessoa comum. Consigo continuar lutando mesmo depois de receber golpes muito fortes. Entretanto, ainda sinto dor, fico exausta e posso perder a consciência. Minha resistência não me torna imune ao sofrimento.",
+          "fixa": true
+        },
+        {
+          "id": "absorcao-de-energia",
+          "nome": "Absorção de energia",
+          "descricao": "Consigo absorver energia de ataques direcionados contra mim, fazendo uma luminosidade branca percorrer meu corpo. Posso utilizar parte dessa energia para fortalecer temporariamente minhas defesas ou dissipá-la em uma explosão luminosa. Entretanto, minha capacidade de absorção possui limites: energia demais pode me sobrecarregar, provocando dor, tremores e perda de controle.",
+          "fixa": false
+        },
+        {
+          "id": "sentidos-sobrenaturais",
+          "nome": "Sentidos sobrenaturais",
+          "descricao": "Consigo perceber campos energéticos, presenças ocultas e alterações sobrenaturais no ambiente. Quando me concentro, meus olhos adquirem um brilho branco suave e consigo sentir pessoas em perigo mesmo sem enxergá-las. Entretanto, ambientes com muita energia ou emoções intensas podem sobrecarregar meus sentidos, deixando-me desorientada.",
+          "fixa": false
+        }
+      ],
+      "movimentos": [
+        "a-mascara",
+        "vou-te-salvar",
+        "discreta"
+      ],
+      "extras_escolhas": {
+        "mov:a-mascara|rotulo": [
+          "salvador"
+        ],
+        "janus/identidade-secreta|obrigacoes": [
+          "emprego-estagio",
+          "escola-estudos",
+          "casa-cuidar-de-alguem"
+        ]
+      },
+      "extras_textos": {
+        "janus/identidade-secreta|obrigacoes|emprego-estagio": "Como estudante de enfermagem, Mariana faz estágio em uma clínica. Tem horários, pacientes e uma supervisora exigente. Não pode simplesmente desaparecer quando surge um vilão.",
+        "janus/identidade-secreta|obrigacoes|escola-estudos": "Precisa manter boas notas, entregar trabalhos e estudar para as provas. Imagine ter uma avaliação de anatomia na manhã seguinte a uma batalha!",
+        "janus/identidade-secreta|obrigacoes|casa-cuidar-de-alguem": "Mariana ajuda a cuidar do irmão mais novo, que depende dela quando a mãe está trabalhando. É uma responsabilidade que não pode abandonar sem consequências.",
+        "janus/identidade-secreta|obrigacoes|casa-cuidar-de-alguem#pessoa": "Roberto Azevedo",
+        "janus/identidade-secreta|obrigacoes|emprego-estagio#pessoa": "Enfermeira Karen"
+      }
+    },
+    "avancos_marcados": [],
+    "obs_movimentos": {
+      "a-mascara": "Quando visto meu uniforme branco e coloco a máscara, deixo de ser a Mariana que se preocupa com provas, trabalho e compromissos familiares. Como Mayane, sinto que posso enfrentar qualquer perigo para proteger alguém. Minha máscara representa a coragem de colocar a segurança dos outros acima dos meus próprios medos.",
+      "discreta": "Como Mariana, sou uma universitária doce, educada e aparentemente inofensiva. Ninguém imagina que aquela garota gentil, que trabalha numa clínica e se preocupa com os estudos, seja uma super-heroína.\r\n\r\nAprendi a usar essa aparência comum para passar despercebida, ouvir conversas e conseguir informações sem despertar suspeitas. Às vezes finjo ingenuidade ou distração para convencer alguém de que não represento ameaça alguma.\r\n\r\nMinha maior vantagem é justamente ser subestimada. Afinal, quem desconfiaria que aquela moça sorridente é capaz de levantar um automóvel?",
+      "vou-te-salvar": "Não consigo ignorar alguém em perigo. Quando vejo uma pessoa ameaçada, meu primeiro impulso é protegê-la, mesmo que isso signifique receber o golpe em seu lugar. Às vezes ajo antes de pensar, porque a possibilidade de perder alguém me assusta mais do que me machucar."
+    },
+    "potencial": 0,
+    "condicoes": [],
+    "rotulos_jogo": null,
+    "contadores": {},
+    "escolhas_de_jogo": {},
+    "textos_de_jogo": {},
+    "itens_de_jogo": {},
+    "cumpridos": {},
+    "origem": "93c5a362fe40408c8123d03dfc38b411",
+    "sala": "c4f61774b7084140a7d166d92230d0ef",
+    "equipe_resposta": "Quando o Instituto Helix começou a desabar, ouvimos alguém pedindo socorro nos túneis subterrâneos.\nEra a Dra. Helena Voss, uma cientista que havia denunciado os experimentos ilegais do instituto. Ela estava tentando desligar o reator quando os criminosos a prenderam na sala de controle.\nEu fui atrás dela enquanto os outros tentavam conter a destruição. A passagem estava desmoronando, e precisei me colocar entre Helena e uma viga que caiu do teto.\nConseguimos sair segundos antes de o túnel desabar.\nSó depois descobrimos que Helena era a única pessoa que conhecia o protocolo de desligamento definitivo do reator. Sem ela, o equipamento poderia voltar a entrar em colapso e ameaçar bairros inteiros.\nMas, para mim, havia algo ainda mais importante: ela tinha uma filha pequena esperando em casa.\nQuando a menina correu para abraçar a mãe, entendi que não tínhamos salvado apenas uma cientista. Tínhamos devolvido uma mãe à sua família.\nFoi naquele momento que olhei para os outros quatro e pensei: talvez seja isso que significa ser uma heroína.",
+    "equipe_npc_nome": "Dra. Helena Voss",
+    "relacoes": [
+      {
+        "colega": "6e443d402fd6436785a63105b9372151",
+        "anteriores": [],
+        "porque": "Conheci Akemi antes de saber que ela era a Garça Escarlate. Frequentávamos o mesmo centro comunitário: eu ajudava crianças com as tarefas escolares e ela participava das atividades de artes marciais.\nÀs vezes, ficávamos conversando depois das aulas. Eu achava Akemi séria demais para alguém da nossa idade, mas gostava da maneira como tratava as crianças.\nQuando nos encontramos no Instituto Helix, usando nossos uniformes de heroínas, quase não acreditei!\nEla reconheceu minha voz antes que eu percebesse quem estava por trás da máscara dela.\nDesde então, é uma das poucas pessoas da equipe que conhecem a Mariana antes da Mayane."
+      },
+      {
+        "colega": "7d69e72ac45d46aab7257dcd7525082b",
+        "anteriores": [],
+        "porque": "Depois do incidente Helix, Pulsar ficou curioso sobre minha vida fora das missões. Ele perguntou meu nome verdadeiro, onde eu estudava e por que nunca aparecia sem máscara.\nEu desconversei.\nNão era falta de confiança nele. Gosto do Pulsar, mas sei como ele pode ser impulsivo. Tenho medo de que, numa tentativa de me ajudar, acabe colocando minha família em perigo.\nQuando ele insistiu, respondi:\n“Você conhece a Mayane. Por enquanto, precisa ser suficiente.”\nEle pareceu magoado, e isso me deixou triste.\nMas tenho um irmão mais novo esperando por mim em casa. Não posso arriscar a segurança dele."
+      }
+    ],
+    "influencia_comportamento": null,
+    "influencias": {
+      "66abb09aab0d4341b0a719244206b111": "dada",
+      "6e443d402fd6436785a63105b9372151": "dada",
+      "0defaeb04d82473a8f8ce9f6d0478553": "dada",
+      "81c66bcdd8c141868c6cc1ee85cef4f8": "dada"
+    },
+    "influencia_porque": {
+      "66abb09aab0d4341b0a719244206b111": "Valentina cresceu no mundo dos super-heróis. Conhece os protocolos, as responsabilidades e o peso de representar um legado. Mayane admira essa segurança e gostaria de aprender com ela.",
+      "6e443d402fd6436785a63105b9372151": "Akemi demonstra disciplina, autocontrole e preparo. Durante o incidente Helix, Mayane percebeu que coragem não basta: também é preciso saber agir sob pressão. E Akemi parece dominar isso."
+    },
+    "influencia_porque_ninguem": "",
+    "pnj": null,
+    "vilao": null
+  }
+}

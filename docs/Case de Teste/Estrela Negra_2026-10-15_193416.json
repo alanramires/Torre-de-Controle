@@ -1,0 +1,182 @@
+{
+  "formato": "torre-de-controle/personagem",
+  "versao": 1,
+  "exportado_em": "2026-10-15T19:34:16",
+  "arquetipo_nome": "Amaldiçoada",
+  "personagem": {
+    "id": "025e97c54b73483fb9f36facd42dc6cb",
+    "identidade": {
+      "nome": "Cristina",
+      "codinome": "Estrela Negra",
+      "jogador": null,
+      "arquetipo": "amaldicoada",
+      "aparencia": "Tenho 17 anos, pele morena clara, olhos violetas e cabelos prateados, curtos e despenteados. Sou magra, de estatura mediana, e tenho olheiras discretas por dormir pouco.\r\n\r\nNo cotidiano, uso roupas escuras, jaquetas largas e botas.\r\n\r\nMeu uniforme é azul-escuro com detalhes dourados, gola alta e uma pequena estrela negra no peito. Não uso capa. Quando meus poderes se manifestam, meus cabelos flutuam como se eu estivesse debaixo d'água.",
+      "resumo": "Meu nome é Cristina. Eu era uma adolescente comum até encontrar um estranho fragmento de meteorito durante uma excursão escolar.\r\n\r\nNaquela noite, ouvi uma voz me chamando pelo nome. Quando acordei, minha mãe não se lembrava de quem eu era.\r\n\r\nDescobri que posso controlar objetos, alterar memórias e absorver a energia vital das pessoas. Mas meus poderes têm um preço: algo dentro de mim está despertando, e tenho a sensação de que meu tempo está acabando.\r\n\r\nAdotei o nome Estrela Negra porque foi assim que a voz me chamou.\r\n\r\nQuero ser uma heroína. Quero encontrar uma maneira de recuperar as lembranças da minha mãe. E, acima de tudo, quero provar que não sou o monstro que meus poderes parecem querer transformar em realidade.",
+      "foto_heroica": "https://i.pinimg.com/736x/e7/70/ba/e770ba4f624c26f88da008542480a277.jpg",
+      "foto_civil": "",
+      "foto_heroica_aprovacao": "aprovada",
+      "foto_civil_aprovacao": "aguardando",
+      "respostas_historico": [
+        "Três semanas depois de encontrar o meteorito. Comecei a ter apagões e acordar em lugares desconhecidos. Um médico descobriu que minhas células estavam sendo lentamente substituídas por uma matéria que não existe na Terra. Segundo ele, em menos de um ano, Cristina deixará de existir. Não sei o que vai ocupar meu lugar.",
+        "Encontrei um observatório abandonado nas montanhas, onde o meteorito havia sido estudado décadas atrás. Transformei o laboratório subterrâneo em meu esconderijo. Há computadores antigos, equipamentos científicos e um telescópio enorme. É o único lugar onde a voz dentro da minha cabeça fica em silêncio.",
+        "Porque ele está procurando por mim. Chama-se Eclipse, uma criatura que chegou à Terra no mesmo meteorito. Ele diz que somos duas metades da mesma entidade e que, quando minha transformação terminar, seremos um só. Já destruiu um laboratório inteiro tentando me capturar. Se eu não o impedir, outras pessoas vão morrer por minha causa.",
+        "Dra. Helena Vasconcelos, uma astrofísica que estudou o meteorito antes do meu nascimento. Ela conhece a verdadeira origem de Eclipse e acredita que existe uma maneira de separar nossas essências. Mas desapareceu há seis meses. Suas últimas anotações estão escondidas no meu santuário.",
+        "Porque são as únicas pessoas que ainda me tratam como Cristina, e não como uma bomba prestes a explodir. Eles sabem o que posso me tornar, mas continuam ao meu lado. Quando estou com eles, consigo esquecer por alguns instantes que estou morrendo. Quero protegê-los, mesmo que isso signifique nunca descobrir como me salvar."
+      ],
+      "nomes_historico": {}
+    },
+    "controle": "jogador",
+    "maturidade": "jovem",
+    "papel": "heroi",
+    "status": "emAprovacao",
+    "ativo": true,
+    "favorito": false,
+    "ordem": 0,
+    "criacao": {
+      "bonus_livre": "mundano",
+      "habilidades": {
+        "escolhidas": [
+          "telecinese",
+          "manipulacao-de-memoria",
+          "absorcao-de-vitalidade"
+        ],
+        "linha": null,
+        "negadas": [],
+        "vagas": {},
+        "descricoes": {
+          "telecinese": "Quando uso meus poderes, meus olhos brilham em violeta e pequenos objetos começam a flutuar ao meu redor. Consigo erguer, arremessar e esmagar coisas apenas com o pensamento. Quando perco o controle emocional, tudo à minha volta começa a tremer.",
+          "manipulacao-de-memoria": "Preciso olhar nos olhos da pessoa para entrar em suas lembranças. Posso apagar acontecimentos, alterar detalhes ou fazer alguém recordar coisas que nunca aconteceram. Às vezes, absorvo fragmentos dessas memórias e tenho dificuldade para distinguir o que realmente vivi.",
+          "absorcao-de-vitalidade": "Ao tocar alguém, posso drenar sua energia vital. Veios luminosos violetas percorrem minha pele enquanto a vítima enfraquece. A sensação é perigosamente reconfortante, como respirar depois de quase morrer afogada. Tenho medo de um dia não conseguir parar."
+        }
+      },
+      "movimentos": [],
+      "extras_escolhas": {
+        "amaldicoada/perdicao|gatilhos": [
+          "exagerar-nos-poderes",
+          "assustar-quem-voce-ama"
+        ],
+        "amaldicoada/santuario|caracteristicas": [
+          "computador-poderoso",
+          "sistema-de-contencao",
+          "equipamento-medico"
+        ],
+        "amaldicoada/sinais|sinais": [
+          "visoes-sombrias"
+        ],
+        "amaldicoada/santuario|desvantagens": [
+          "dificil-de-acessar",
+          "ligado-a-sua-perdicao"
+        ]
+      },
+      "extras_textos": {
+        "amaldicoada/nemesis|descricao": "uma entidade extraterrestre nascida do mesmo meteorito que me concedeu meus poderes. Ele acredita que somos duas metades de um único ser e pretende me absorver para recuperar sua forma original. É poderoso, paciente e conhece meus pensamentos mais sombrios.",
+        "amaldicoada/santuario|caracteristicas|sistema-de-contencao": "Uma câmara especial onde Cristina pode se isolar quando seus poderes saem do controle.",
+        "amaldicoada/santuario|caracteristicas|computador-poderoso": "O laboratório do observatório possui um sistema capaz de analisar os dados do meteorito.",
+        "amaldicoada/santuario|caracteristicas|equipamento-medico": "Instrumentos deixados pelos cientistas que estudaram a entidade extraterrestre, usados para monitorar sua transformação.",
+        "amaldicoada/santuario|desvantagens|dificil-de-acessar": "O observatório fica nas montanhas, longe da cidade, e seu laboratório está escondido no subsolo.",
+        "amaldicoada/santuario|desvantagens|ligado-a-sua-perdicao": "O observatório foi construído sobre um fragmento do meteorito. Embora o local silencie a voz de Eclipse, a energia que emana dali também alimenta a transformação de Cristina.",
+        "amaldicoada/nemesis|nome": "Eclipse",
+        "amaldicoada/santuario|cenario|0": "Oeron Observatory"
+      }
+    },
+    "foto": {
+      "aprovada_em": "2026-10-13T23:28:16",
+      "arquetipo": "amaldicoada",
+      "rotulos": {
+        "perigoso": 1,
+        "aberracao": 1,
+        "salvador": 1,
+        "superior": -1,
+        "mundano": 1
+      },
+      "habilidades": [
+        {
+          "id": "telecinese",
+          "nome": "Telecinese",
+          "descricao": "Quando uso meus poderes, meus olhos brilham em violeta e pequenos objetos começam a flutuar ao meu redor. Consigo erguer, arremessar e esmagar coisas apenas com o pensamento. Quando perco o controle emocional, tudo à minha volta começa a tremer.",
+          "fixa": false
+        },
+        {
+          "id": "manipulacao-de-memoria",
+          "nome": "Manipulação de memória",
+          "descricao": "Preciso olhar nos olhos da pessoa para entrar em suas lembranças. Posso apagar acontecimentos, alterar detalhes ou fazer alguém recordar coisas que nunca aconteceram. Às vezes, absorvo fragmentos dessas memórias e tenho dificuldade para distinguir o que realmente vivi.",
+          "fixa": false
+        },
+        {
+          "id": "absorcao-de-vitalidade",
+          "nome": "Absorção de vitalidade",
+          "descricao": "Ao tocar alguém, posso drenar sua energia vital. Veios luminosos violetas percorrem minha pele enquanto a vítima enfraquece. A sensação é perigosamente reconfortante, como respirar depois de quase morrer afogada. Tenho medo de um dia não conseguir parar.",
+          "fixa": false
+        }
+      ],
+      "movimentos": [],
+      "extras_escolhas": {
+        "amaldicoada/perdicao|gatilhos": [
+          "exagerar-nos-poderes",
+          "assustar-quem-voce-ama"
+        ],
+        "amaldicoada/santuario|caracteristicas": [
+          "computador-poderoso",
+          "sistema-de-contencao",
+          "equipamento-medico"
+        ],
+        "amaldicoada/sinais|sinais": [
+          "visoes-sombrias"
+        ],
+        "amaldicoada/santuario|desvantagens": [
+          "dificil-de-acessar",
+          "ligado-a-sua-perdicao"
+        ]
+      },
+      "extras_textos": {
+        "amaldicoada/nemesis|descricao": "uma entidade extraterrestre nascida do mesmo meteorito que me concedeu meus poderes. Ele acredita que somos duas metades de um único ser e pretende me absorver para recuperar sua forma original. É poderoso, paciente e conhece meus pensamentos mais sombrios.",
+        "amaldicoada/santuario|caracteristicas|sistema-de-contencao": "Uma câmara especial onde Cristina pode se isolar quando seus poderes saem do controle.",
+        "amaldicoada/santuario|caracteristicas|computador-poderoso": "O laboratório do observatório possui um sistema capaz de analisar os dados do meteorito.",
+        "amaldicoada/santuario|caracteristicas|equipamento-medico": "Instrumentos deixados pelos cientistas que estudaram a entidade extraterrestre, usados para monitorar sua transformação.",
+        "amaldicoada/santuario|desvantagens|dificil-de-acessar": "O observatório fica nas montanhas, longe da cidade, e seu laboratório está escondido no subsolo.",
+        "amaldicoada/santuario|desvantagens|ligado-a-sua-perdicao": "O observatório foi construído sobre um fragmento do meteorito. Embora o local silencie a voz de Eclipse, a energia que emana dali também alimenta a transformação de Cristina.",
+        "amaldicoada/nemesis|nome": "Eclipse",
+        "amaldicoada/santuario|cenario|0": "Oeron Observatory"
+      }
+    },
+    "avancos_marcados": [],
+    "obs_movimentos": {},
+    "potencial": 0,
+    "condicoes": [],
+    "rotulos_jogo": null,
+    "contadores": {},
+    "escolhas_de_jogo": {},
+    "textos_de_jogo": {},
+    "itens_de_jogo": {},
+    "cumpridos": {},
+    "origem": "b869c027955d44c5bf86f934b9269a26",
+    "sala": "c4f61774b7084140a7d166d92230d0ef",
+    "equipe_resposta": "Quando Mayane conseguiu tirar a Dra. Helena Voss dos escombros, achei que tínhamos vencido.\nMas o reator continuava funcionando.\nPulsar havia conseguido impedir a explosão, porém alguma coisa estava se formando dentro daquela máquina. Uma espécie de fenda escura, que parecia engolir a luz ao redor.\nEu reconheci aquela energia. Era parecida demais com a força que carrego dentro de mim.\nE ela estava crescendo.\nEntrei na sala do reator sozinha. Sabia que meus poderes poderiam absorver aquela energia, mas também sabia que haveria consequências.\nQuando toquei o núcleo, ouvi uma voz.\n“Você pode fechar a porta, Cristina. Mas alguém precisa ficar com a chave.”\nAceitei.\nA fenda desapareceu. O reator finalmente se apagou.\nQuando meus amigos me encontraram, eu estava caída no chão, inconsciente.\nAcordei dois dias depois, no hospital. Estava viva, aparentemente inteira. Mas havia uma marca negra sobre meu coração, como uma pequena rachadura na pele.\nDesde aquele dia, às vezes ouço uma voz me chamando pelo nome. E, quando fecho os olhos, consigo enxergar um lugar que não deveria existir.\nO preço da nossa vitória foi que alguma coisa atravessou a fenda comigo.\nNão contei tudo aos outros.\nAinda tenho medo de descobrir o que aceitei naquele dia.",
+    "equipe_npc_nome": "",
+    "relacoes": [
+      {
+        "colega": "1167cefb2c254139976f04587e5ee933",
+        "anteriores": [],
+        "porque": "Porque Mayane foi quem demonstrou preocupação genuína durante sua recuperação. Cristina confiou a ela o segredo da voz que escuta e da marca negra sobre seu coração. Mayane prometeu ajudá-la, mesmo sem saber como."
+      },
+      {
+        "colega": "7d69e72ac45d46aab7257dcd7525082b",
+        "anteriores": [],
+        "porque": "Porque ele me faz rir quando tudo parece escuro. Porque ele se culpa pelo que aconteceu, mas não sabe que foi uma das razões pelas quais eu quis sobreviver. E porque, se o meu tempo estiver acabando, gostaria de descobrir como é beijar alguém que me faz querer ficar."
+      }
+    ],
+    "influencia_comportamento": null,
+    "influencias": {
+      "1167cefb2c254139976f04587e5ee933": "dada",
+      "6e443d402fd6436785a63105b9372151": "dada",
+      "0defaeb04d82473a8f8ce9f6d0478553": "dada"
+    },
+    "influencia_porque": {
+      "1167cefb2c254139976f04587e5ee933": "Porque foi ela quem insistiu que todos visitassem Cristina no hospital. Mayane demonstrou que se importava com a pessoa por trás dos poderes sombrios. Cristina pode fingir indiferença, mas a opinião dela importa.",
+      "6e443d402fd6436785a63105b9372151": "Porque Akemi não tentou controlar Cristina nem tratá-la como um perigo. Simplesmente permaneceu ao seu lado e a convidou para treinar. Cristina respeita essa disciplina e essa lealdade silenciosa."
+    },
+    "influencia_porque_ninguem": "",
+    "pnj": null,
+    "vilao": null
+  }
+}

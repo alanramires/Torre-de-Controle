@@ -1,0 +1,175 @@
+{
+  "formato": "torre-de-controle/personagem",
+  "versao": 1,
+  "exportado_em": "2026-10-15T19:35:57",
+  "arquetipo_nome": "Discípula",
+  "personagem": {
+    "id": "6e443d402fd6436785a63105b9372151",
+    "identidade": {
+      "nome": "Akemi Tanaka",
+      "codinome": "Garça Escarlate",
+      "jogador": null,
+      "arquetipo": "discipula",
+      "aparencia": "Tenho 17 anos, 1,65 m de altura, pele clara, olhos castanho-escuros e longos cabelos negros, geralmente presos em um rabo de cavalo alto. Sou esguia, atlética e tenho músculos definidos pelos anos de treinamento. Meu rosto costuma transmitir uma seriedade que desaparece quando fico envergonhada.\r\n\r\nNo cotidiano, uso roupas confortáveis, tênis, calças esportivas e jaquetas leves. Gosto de roupas discretas e quase nunca uso maquiagem.\r\n\r\nMeu uniforme de Garça Escarlate é vermelho-escuro e preto, com detalhes brancos que lembram penas. Uso botas flexíveis, luvas reforçadas e uma máscara que cobre a região dos olhos. Uma faixa vermelha comprida presa à cintura acompanha meus movimentos durante as acrobacias.\r\n\r\nNo peito, carrego o símbolo de uma garça de asas abertas. Minha mentora diz que escolhi uma cor chamativa demais para alguém treinada em furtividade.",
+      "resumo": "Meu nome é Akemi Tanaka. Quando eu tinha oito anos, fui salva de um sequestro por uma heroína mascarada conhecida como Garça Branca.\r\n\r\nEla descobriu que eu não tinha mais ninguém que pudesse cuidar de mim e acabou se tornando minha guardiã. Seu verdadeiro nome é Sayuri Kuroda, uma antiga vigilante que dedicou a vida a combater organizações criminosas.\r\n\r\nCresci em seu esconderijo, cercada por equipamentos, livros de estratégia e uma rotina rigorosa de treinamento.\r\n\r\nAos 14 anos, comecei a manifestar capacidades físicas extraordinárias. Minha mentora ficou preocupada, mas eu fiquei maravilhada. Pela primeira vez, conseguia realizar movimentos que nem ela era capaz de executar.\r\n\r\nAos 17 anos, adotei o nome Garça Escarlate e comecei a atuar como heroína.\r\n\r\nSayuri acredita que ainda não estou preparada para trabalhar sozinha. Eu acredito que ela tem medo de deixar de ser necessária.\r\n\r\nEntrei para uma equipe de jovens heróis porque quero aprender a tomar minhas próprias decisões, fazer amigos da minha idade e descobrir quem sou longe da supervisão constante da minha mentora.\r\n\r\nAmo Sayuri como uma mãe, mas não quero passar a vida inteira sendo sua sombra.\r\n\r\nQuero que um dia ela olhe para mim e diga que está orgulhosa, não porque me tornei igual a ela, mas porque encontrei meu próprio caminho.",
+      "foto_heroica": "https://i.pinimg.com/1200x/db/f4/3a/dbf43a613701525d4c12c1fd17ffe5fa.jpg",
+      "foto_civil": "",
+      "foto_heroica_aprovacao": "aguardando",
+      "foto_civil_aprovacao": "aguardando",
+      "respostas_historico": [
+        "Eu tinha oito anos quando fui sequestrada por criminosos que procuravam meu pai, um pesquisador desaparecido. Garça Branca invadiu o esconderijo e me resgatou. Lembro dela ajoelhada diante de mim, tirando a máscara e dizendo que tudo ficaria bem. Foi a primeira pessoa em muito tempo que me fez sentir segura. Seu nome verdadeiro era Sayuri Kuroda.",
+        "Aos dez anos, depois de passar dois anos vivendo sob os cuidados de Sayuri. Certa noite, perguntei se poderia aprender a lutar como ela. Eu não queria mais ser aquela menina indefesa que precisava ser resgatada. Sayuri recusou inicialmente, mas insisti durante semanas. Finalmente, ela me entregou um uniforme de treinamento e disse: \"Amanhã, às cinco da manhã.\" Nunca mais dormi até tarde.",
+        "Sayuri percebeu que eu tentaria aprender sozinha, com ou sem sua ajuda. Ela também descobriu que os criminosos responsáveis pelo meu sequestro continuavam procurando minha família. Preferiu me ensinar a me proteger. Só muito tempo depois confessou que enxergava em mim a filha que nunca teve. Acho que também queria alguém para continuar seu trabalho quando ela não pudesse mais lutar.",
+        "Kenji Nakamura, 54 anos, um antigo parceiro de Sayuri e responsável pela manutenção de seus equipamentos. Ele conhece minha identidade secreta desde criança e frequentemente me ajuda a esconder pequenos acidentes dos treinamentos. É um homem bem-humorado que me trata como sobrinha. Também é a única pessoa que consegue discutir com Sayuri sem deixá-la furiosa.",
+        "Passei quase toda a infância treinando, estudando e seguindo ordens. Nunca tive muitos amigos da minha idade. Na equipe, posso ser apenas Akemi, uma garota de 17 anos que comete erros, ri de bobagens e às vezes precisa de ajuda. Meus colegas não esperam que eu seja uma cópia perfeita da Garça Branca. Com eles, estou aprendendo algo que Sayuri nunca conseguiu me ensinar: confiar nas outras pessoas e permitir que elas cuidem de mim."
+      ],
+      "nomes_historico": {}
+    },
+    "controle": "jogador",
+    "maturidade": "jovem",
+    "papel": "heroi",
+    "status": "emAprovacao",
+    "ativo": true,
+    "favorito": false,
+    "ordem": 4,
+    "criacao": {
+      "bonus_livre": "superior",
+      "habilidades": {
+        "escolhidas": [],
+        "linha": null,
+        "negadas": [],
+        "vagas": {
+          "compartilhada": "luta-impossivel",
+          "sua": "fisico-sobre-humano",
+          "mentora": "armas-e-engenhocas"
+        },
+        "descricoes": {
+          "luta-impossivel": "Minha mentora me ensinou a enfrentar adversários muito maiores, mais fortes e numerosos. Nossa técnica combina precisão, antecipação e movimentos que parecem desafiar as possibilidades humanas. Conseguimos lutar contra vários inimigos simultaneamente, usando a força deles contra si mesmos. Mas minha mestra sempre diz que vencer uma luta não significa vencer uma batalha.",
+          "fisico-sobre-humano": "Desde os 14 anos, meu corpo começou a desenvolver capacidades que minha mentora nunca teve. Consigo saltar vários metros, correr sobre paredes por alguns instantes e realizar movimentos acrobáticos em velocidades impressionantes. Minha força e meus reflexos ultrapassam os limites humanos. Minha mentora acredita que sou resultado de uma rara mutação genética, mas nunca investigamos a fundo.",
+          "armas-e-engenhocas": "Garça Branca utiliza equipamentos que ela mesma desenvolveu: bombas de fumaça, cabos de captura, lâminas retráteis não letais e pequenos drones de reconhecimento. Seu uniforme possui sensores e sistemas de proteção. Ela insiste que eu aprenda a utilizar essas ferramentas, mas prefiro confiar nas minhas próprias habilidades físicas. Isso costuma provocar nossas discussões."
+        }
+      },
+      "movimentos": [
+        "atencao-ao-redor",
+        "andei-lendo-os-arquivos",
+        "conversa-ao-pe-do-fogo"
+      ],
+      "extras_escolhas": {
+        "discipula/mentora|incorpora": [
+          "salvador"
+        ],
+        "discipula/mentora|nega": [
+          "superior"
+        ],
+        "discipula/recursos|recursos": [
+          "base-secreta",
+          "equipamento-de-vigilancia",
+          "comunicadores"
+        ]
+      },
+      "extras_textos": {
+        "discipula/mentora|descricao": "Sayuri Kuroda, 46 anos, conhecida como Garça Branca. Uma lendária vigilante especializada em artes marciais, investigação e equipamentos tecnológicos. É minha mãe adotiva e mentora desde a infância. Rigorosa, inteligente e extremamente reservada, acredita que disciplina e preparação são mais importantes do que poderes extraordinários. Ama-me profundamente, mas raramente demonstra seus sentimentos.",
+        "discipula/recursos|recursos|base-secreta": "O esconderijo subterrâneo onde Akemi cresceu e treinou, equipado com salas de combate, alojamentos e uma oficina.",
+        "discipula/recursos|recursos|equipamento-de-vigilancia": "Câmeras, drones e sensores usados pela Garça Branca para monitorar atividades criminosas.",
+        "discipula/recursos|recursos|comunicadores": "Dispositivos criptografados que permitem à Akemi manter contato com Sayuri e compartilhar informações com a equipe.",
+        "discipula/mentora|conflitos": "Ela despreza a arrogância e insiste que ninguém é melhor do que os outros apenas por possuir habilidades extraordinárias.",
+        "discipula/mentora|nome": "Sayuri Kuroda (Garça Branca)"
+      }
+    },
+    "foto": {
+      "aprovada_em": "2026-10-14T00:13:13",
+      "arquetipo": "discipula",
+      "rotulos": {
+        "perigoso": -1,
+        "aberracao": 0,
+        "salvador": 1,
+        "superior": 3,
+        "mundano": 0
+      },
+      "habilidades": [
+        {
+          "id": "luta-impossivel",
+          "nome": "Luta impossível (compartilhada)",
+          "descricao": "Minha mentora me ensinou a enfrentar adversários muito maiores, mais fortes e numerosos. Nossa técnica combina precisão, antecipação e movimentos que parecem desafiar as possibilidades humanas. Conseguimos lutar contra vários inimigos simultaneamente, usando a força deles contra si mesmos. Mas minha mestra sempre diz que vencer uma luta não significa vencer uma batalha.",
+          "fixa": false
+        },
+        {
+          "id": "fisico-sobre-humano",
+          "nome": "Físico sobre-humano (só sua)",
+          "descricao": "Desde os 14 anos, meu corpo começou a desenvolver capacidades que minha mentora nunca teve. Consigo saltar vários metros, correr sobre paredes por alguns instantes e realizar movimentos acrobáticos em velocidades impressionantes. Minha força e meus reflexos ultrapassam os limites humanos. Minha mentora acredita que sou resultado de uma rara mutação genética, mas nunca investigamos a fundo.",
+          "fixa": false
+        },
+        {
+          "id": "armas-e-engenhocas",
+          "nome": "Armas e engenhocas (só da mentora)",
+          "descricao": "Garça Branca utiliza equipamentos que ela mesma desenvolveu: bombas de fumaça, cabos de captura, lâminas retráteis não letais e pequenos drones de reconhecimento. Seu uniforme possui sensores e sistemas de proteção. Ela insiste que eu aprenda a utilizar essas ferramentas, mas prefiro confiar nas minhas próprias habilidades físicas. Isso costuma provocar nossas discussões.",
+          "fixa": false
+        }
+      ],
+      "movimentos": [
+        "atencao-ao-redor",
+        "andei-lendo-os-arquivos",
+        "conversa-ao-pe-do-fogo"
+      ],
+      "extras_escolhas": {
+        "discipula/mentora|incorpora": [
+          "salvador"
+        ],
+        "discipula/mentora|nega": [
+          "superior"
+        ],
+        "discipula/recursos|recursos": [
+          "base-secreta",
+          "equipamento-de-vigilancia",
+          "comunicadores"
+        ]
+      },
+      "extras_textos": {
+        "discipula/mentora|descricao": "Sayuri Kuroda, 46 anos, conhecida como Garça Branca. Uma lendária vigilante especializada em artes marciais, investigação e equipamentos tecnológicos. É minha mãe adotiva e mentora desde a infância. Rigorosa, inteligente e extremamente reservada, acredita que disciplina e preparação são mais importantes do que poderes extraordinários. Ama-me profundamente, mas raramente demonstra seus sentimentos.",
+        "discipula/recursos|recursos|base-secreta": "O esconderijo subterrâneo onde Akemi cresceu e treinou, equipado com salas de combate, alojamentos e uma oficina.",
+        "discipula/recursos|recursos|equipamento-de-vigilancia": "Câmeras, drones e sensores usados pela Garça Branca para monitorar atividades criminosas.",
+        "discipula/recursos|recursos|comunicadores": "Dispositivos criptografados que permitem à Akemi manter contato com Sayuri e compartilhar informações com a equipe.",
+        "discipula/mentora|conflitos": "Ela despreza a arrogância e insiste que ninguém é melhor do que os outros apenas por possuir habilidades extraordinárias.",
+        "discipula/mentora|nome": "Sayuri Kuroda (Garça Branca)"
+      }
+    },
+    "avancos_marcados": [],
+    "obs_movimentos": {
+      "atencao-ao-redor": "Akemi foi treinada para observar o ambiente, identificar ameaças e antecipar perigos.",
+      "conversa-ao-pe-do-fogo": "Quero explorar seu lado mais humano. Apesar da postura séria, Akemi está aprendendo a ouvir e se aproximar dos colegas.",
+      "andei-lendo-os-arquivos": "Cresceu cercada pelos registros de investigações da Garça Branca e conhece muitos dos inimigos de sua mentora."
+    },
+    "potencial": 0,
+    "condicoes": [],
+    "rotulos_jogo": null,
+    "contadores": {},
+    "escolhas_de_jogo": {},
+    "textos_de_jogo": {},
+    "itens_de_jogo": {},
+    "cumpridos": {},
+    "origem": "bd386f84185748abb57e9bb078dbcff7",
+    "sala": "c4f61774b7084140a7d166d92230d0ef",
+    "equipe_resposta": "Meu mestre sempre me ensinou que uma batalha termina quando o inimigo é derrotado.\nNaquele dia, descobri que ele estava errado.\nA batalha no Instituto Helix havia terminado, mas ninguém parecia ter vencido de verdade.\nPulsar não conseguia parar de olhar para a cratera que havia aberto. Mayane perguntava aos médicos se a Dra. Helena Voss estava bem. Aurora tentava responder às perguntas dos jornalistas, enquanto Cristina era levada inconsciente para o hospital.\nE eu?\nEu não sabia o que fazer.\nTínhamos lutado juntos por algumas horas. Mal conhecíamos os nomes uns dos outros. Não havia nenhuma razão para nos encontrarmos novamente.\nMas, quando os paramédicos fecharam as portas da ambulância de Cristina, Mayane perguntou:\n“A gente vai visitá-la, não vai?”\nNinguém respondeu.\nEntão Pulsar disse que iria.\nAurora concordou imediatamente.\nE eu disse que também estaria lá.\nDois dias depois, os quatro estávamos no hospital quando Cristina acordou.\nLevamos flores, chocolates e um cartão que Mayane havia insistido que todos assinassem. Pulsar escreveu um pedido de desculpas tão comprido que ocupou quase todo o espaço.\nCristina olhou para nós e perguntou:\n“Vocês não têm nada melhor para fazer?”\nEu respondi:\n“Temos. Mas decidimos fazer isso primeiro.”\nFoi a primeira vez que vi Cristina sorrir.\nNaquela tarde, criamos um grupo de mensagens chamado Sobreviventes do Helix. Inicialmente, era apenas para acompanhar a recuperação dela e compartilhar notícias sobre a investigação.\nMas as mensagens não pararam.\nMayane começou a organizar encontros. Aurora conseguiu autorização para usarmos uma antiga sala de treinamento do Sentinela Solar. Pulsar apareceu com equipamentos que ele mesmo havia construído. Cristina fingia que não queria participar, mas nunca faltava.\nE eu comecei a preparar nossos treinamentos.\nNão porque meu mestre tivesse ordenado.\nNão porque o Sentinela Solar esperasse isso.\nMas porque, pela primeira vez, eu havia escolhido as pessoas com quem queria lutar.\nQuando nos perguntaram por que continuávamos juntos, respondi:\n“Porque, quando a batalha terminou, nenhum de nós foi embora.”\nFoi assim que nos tornamos uma equipe.",
+    "equipe_npc_nome": "",
+    "relacoes": [
+      {
+        "colega": "1167cefb2c254139976f04587e5ee933",
+        "anteriores": [],
+        "porque": "Antes do incidente Helix, Mariana e eu já nos conhecíamos do centro comunitário. Ela ajudava as crianças com os estudos, enquanto eu participava das atividades de artes marciais.\nCerta noite, encontramos dois criminosos tentando sequestrar uma das crianças que frequentavam o centro. Eu estava patrulhando como Garça Escarlate, e Mariana apareceu como Mayane.\nConseguimos proteger a criança e deter os criminosos.\nDepois disso, acabamos trabalhando juntas em outras duas ocasiões, ajudando pessoas em perigo no bairro.\nNunca combinamos oficialmente uma parceria. Simplesmente acontecia de uma encontrar a outra quando alguém precisava de ajuda.\nQuando nos reencontramos no Instituto Helix, já sabíamos que podíamos confiar uma na outra."
+      },
+      {
+        "colega": "025e97c54b73483fb9f36facd42dc6cb",
+        "anteriores": [],
+        "porque": "Minha mentora soube do que aconteceu no Instituto Helix. Ela ficou especialmente preocupada com a energia que Cristina absorveu ao fechar a fenda.\nDisse que já havia encontrado manifestações semelhantes durante suas missões, mas nunca explicou exatamente o que sabia.\nPediu que eu observasse Cristina, principalmente quando estivesse usando seus poderes ou demonstrasse alterações de comportamento.\n“Não estou pedindo que desconfie dela, Akemi. Estou pedindo que esteja preparada para ajudá-la se algo acontecer.”\nConcordei, mas não contei a Cristina sobre essa conversa.\nDesde então, procuro treinar com ela sempre que possível. Quero entender seus limites e ajudá-la a manter o controle.\nSó espero que, quando descobrir por que comecei a observá-la, Cristina compreenda minhas intenções."
+      }
+    ],
+    "influencia_comportamento": "profissional",
+    "influencias": {
+      "0defaeb04d82473a8f8ce9f6d0478553": "dada"
+    },
+    "influencia_porque": {},
+    "influencia_porque_ninguem": "Akemi foi treinada para manter a disciplina, controlar as emoções e cumprir suas responsabilidades. Ela gosta dos companheiros, mas ainda separa amizade de dever.\nDurante o incidente Helix, ela descobriu o valor de escolher seus próprios aliados. Porém, isso não significa que já esteja preparada para deixar a opinião deles influenciar sua identidade.",
+    "pnj": null,
+    "vilao": null
+  }
+}
