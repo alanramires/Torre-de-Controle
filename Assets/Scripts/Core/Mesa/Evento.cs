@@ -31,4 +31,18 @@ namespace TorreDeControle.Core.Salas
         /// <summary>Id do evento que este corrige (desfaz), ou null.</summary>
         [JsonProperty("corrige")] public string Corrige { get; set; }
     }
+
+    /// <summary>
+    /// Um bônus dado pelo mestre na mesa: adiante, constante ou controle, com valor e o contexto em que vale
+    /// ("agindo pelas respostas da avaliação"). Usar não apaga: desativa (o log aponta para ele).
+    /// </summary>
+    public sealed class BonusDeMesa
+    {
+        [JsonProperty("id")] public string Id { get; set; }
+        [JsonProperty("personagem")] public string Personagem { get; set; }
+        [JsonProperty("tipo")] public string Tipo { get; set; }
+        [JsonProperty("valor")] public int Valor { get; set; }
+        [JsonProperty("contexto")] public string Contexto { get; set; } = string.Empty;
+        [JsonProperty("ativo")] public bool Ativo { get; set; }
+    }
 }

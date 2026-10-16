@@ -513,6 +513,11 @@ namespace TorreDeControle.UI
             if (!campo.TryGetComponent<LayoutElement>(out var layout)) layout = campo.gameObject.AddComponent<LayoutElement>();
             layout.minHeight = altura;
             layout.preferredHeight = altura;
+            // O próprio TMP_InputField também informa altura preferida (a do texto inteiro), com a mesma
+            // prioridade: no empate vence a maior, e a caixa cresceu com o texto. Prioridade 2: a altura é esta,
+            // o texto rola dentro e o ••• abre tudo.
+            layout.layoutPriority = 2;
+            layout.flexibleHeight = 0;
             campo.gameObject.AddComponent<RepassaRolagem>();
             return campo;
         }

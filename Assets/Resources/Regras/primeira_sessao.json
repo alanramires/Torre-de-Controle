@@ -1,0 +1,84 @@
+{
+  "versao": 1,
+  "_sobre": "Roteiro da primeira sessão para a Área do mestre, em palavras nossas. Origem: livro, cap. 8 (A primeira sessão, pp.207-213). O preparo é conferido pela Torre nos dados da sala; o roteiro o mestre marca na sessão (depois, o log da mesa marca sozinho o que puder).",
+  "preparo": [
+    {
+      "id": "fichas",
+      "texto": "Fichas prontas",
+      "dica": "Todas as heroínas da sala aprovadas (em carreira), com as perguntas de histórico aprofundadas em conversa."
+    },
+    {
+      "id": "vilao",
+      "texto": "Vilão ligado a uma heroína",
+      "dica": "Um vilão que os jogadores já criaram (nêmesis, inimigo do legado...) ou que o mestre ligou a pelo menos uma heroína: abertura boa é com vilão que importa."
+    },
+    {
+      "id": "ficha-do-vilao",
+      "texto": "Ficha do vilão",
+      "dica": "Três ou mais movimentos de vilão e as condições que ele aguenta, para a luta andar sem consulta."
+    },
+    {
+      "id": "materia-prima",
+      "texto": "Gente e lugares para reincorporar",
+      "dica": "Os NPCs e o cenário que nasceram das fichas: o civil em perigo e o lugar da luta saem daqui."
+    }
+  ],
+  "roteiro": [
+    {
+      "id": "abertura",
+      "grupo": "abertura",
+      "texto": "Abrir já na luta",
+      "dica": "Quadros da cidade, zoom no vilão causando estrago; cada jogador diz como entra em cena. A ação só engrena com todas em cena."
+    },
+    {
+      "id": "batalha",
+      "grupo": "abertura",
+      "texto": "Entrar em batalha como equipe",
+      "dica": "Com todas em cena, o movimento de equipe e a pilha de Equipe nascem."
+    },
+    { "id": "basico/enfrentar", "grupo": "movimentos", "movimento": "basico/enfrentar" },
+    { "id": "basico/liberar-poderes", "grupo": "movimentos", "movimento": "basico/liberar-poderes" },
+    { "id": "basico/defender", "grupo": "movimentos", "movimento": "basico/defender" },
+    { "id": "basico/avaliar", "grupo": "movimentos", "movimento": "basico/avaliar" },
+    { "id": "basico/provocar", "grupo": "movimentos", "movimento": "basico/provocar" },
+    { "id": "basico/confortar", "grupo": "movimentos", "movimento": "basico/confortar" },
+    { "id": "basico/perfurar-mascara", "grupo": "movimentos", "movimento": "basico/perfurar-mascara" },
+    { "id": "basico/golpe-poderoso", "grupo": "movimentos", "movimento": "basico/golpe-poderoso" },
+    {
+      "id": "mudar-rotulos",
+      "grupo": "mecanicas",
+      "texto": "Mudar Rótulos",
+      "dica": "Alguém com Influência diz quem a heroína é: um Rótulo sobe, outro desce."
+    },
+    {
+      "id": "rejeitar-influencia",
+      "grupo": "mecanicas",
+      "texto": "Rejeitar Influência",
+      "dica": "A heroína recusa o que disseram dela."
+    },
+    {
+      "id": "ganhar-condicao",
+      "grupo": "mecanicas",
+      "texto": "Ganhar uma condição",
+      "dica": "Mostrar o que cada condição pesa nos movimentos."
+    },
+    {
+      "id": "tirar-condicao",
+      "grupo": "mecanicas",
+      "texto": "Tirar uma condição",
+      "dica": "Mostrar como se livra dela."
+    },
+    {
+      "id": "depois-da-luta",
+      "grupo": "depois",
+      "texto": "Cena depois da luta",
+      "dica": "Com pelo menos duas heroínas juntas: heróis adultos criticando, entes queridos comentando, comemorar, confortar."
+    }
+  ],
+  "grupos": {
+    "abertura": "Abertura",
+    "movimentos": "Cada movimento básico, ao menos uma vez",
+    "mecanicas": "Rótulos, Influência e condições",
+    "depois": "Depois da luta"
+  }
+}

@@ -88,18 +88,29 @@ namespace TorreDeControle.Core.Personagens
                 return lido;
             if (envelope.Npcs.Count != 1)
                 return Resultado.Falha($"O arquivo traz {envelope.Npcs.Count} NPCs; por cima de um, só arquivo de um NPC.");
+            Sobrepor(npc, envelope.Npcs[0]);
+            Gravar();
+            return Resultado.Sucesso();
+        }
 
-            var (sala, origem, ativo, favorito, ordem, vinculo) = (npc.Sala, npc.Origem, npc.Ativo, npc.Favorito, npc.Ordem, npc.Pnj.Vinculo);
+        /// <summary>
+        /// Grava o NPC lido por cima do daqui: vem o que ele é; fica o que é desta campanha (id, sala, origem,
+        /// vínculo e ligações com heroínas, Influências, ativo, favorito, ordem).
+        /// </summary>
+        void Sobrepor(Personagem npc, Personagem lido)
+        {
+            var (id, sala, origem, ativo, favorito, ordem) = (npc.Id, npc.Sala, npc.Origem, npc.Ativo, npc.Favorito, npc.Ordem);
+            npc.Pnj ??= new PerfilPnj();
+            var (vinculo, ligacoes) = (npc.Pnj.Vinculo, npc.Pnj.Ligacoes);
             var (influencias, porque, ninguem) = (npc.Influencias, npc.InfluenciaPorque, npc.InfluenciaPorqueNinguem);
-            JsonConvert.PopulateObject(JsonConvert.SerializeObject(envelope.Npcs[0]), npc, Restaurar);
+            JsonConvert.PopulateObject(JsonConvert.SerializeObject(lido), npc, Restaurar);
             Normalizar(npc);
             npc.Id = id;
             (npc.Sala, npc.Origem, npc.Ativo, npc.Favorito, npc.Ordem) = (sala, origem, ativo, favorito, ordem);
             npc.Pnj ??= new PerfilPnj();
             npc.Pnj.Vinculo = vinculo;
+            npc.Pnj.Ligacoes = ligacoes;
             (npc.Influencias, npc.InfluenciaPorque, npc.InfluenciaPorqueNinguem) = (influencias, porque, ninguem);
-            Gravar();
-            return Resultado.Sucesso();
         }
 
         Resultado LerNpcs(string json, out EnvelopeNpcs envelope)
@@ -122,21 +133,35 @@ namespace TorreDeControle.Core.Personagens
             return Resultado.Sucesso();
         }
 
+        public Resultado ImportarNpcs(string json, string destino, out IReadOnlyList<Personagem> novos) =>
+            ImportarNpcs(json, destino, out novos, out _);
+
         /// <summary>
-        /// Traz os NPCs de um JSON de troca para <paramref name="destino"/> (null = laboratório), como
-        /// NPCs novos: id novo, sem Influências, sem vínculo com heroína nem origem (são de outra Torre).
-        /// Ativo e inativo vêm como estavam.
+        /// Traz os NPCs de um JSON de troca para <paramref name="destino"/> (null = laboratório). O que já
+        /// existe ali com o mesmo id (o caminho de volta: exportou, revisou fora, importou) é atualizado por
+        /// cima, guardando o que é da campanha (<see cref="Sobrepor"/>). O resto entra como NPC novo: id novo,
+        /// sem Influências, sem vínculo nem ligação com heroína, sem origem. Ativo e inativo vêm como estavam.
         /// </summary>
-        public Resultado ImportarNpcs(string json, string destino, out IReadOnlyList<Personagem> novos)
+        public Resultado ImportarNpcs(string json, string destino, out IReadOnlyList<Personagem> novos,
+            out IReadOnlyList<Personagem> atualizados)
         {
             novos = Array.Empty<Personagem>();
+            atualizados = Array.Empty<Personagem>();
             var lido = LerNpcs(json, out var envelope);
             if (!lido.Ok)
                 return lido;
 
             var lista = new List<Personagem>();
+            var porCima = new List<Personagem>();
             foreach (var npc in envelope.Npcs)
             {
+                var existente = personagens.FirstOrDefault(n => n.Id == npc.Id && n.Sala == destino && n.Controle == Controle.Mestre);
+                if (existente != null)
+                {
+                    Sobrepor(existente, npc);
+                    porCima.Add(existente);
+                    continue;
+                }
                 Normalizar(npc);
                 npc.Id = Guid.NewGuid().ToString("N");
                 npc.Origem = null;
@@ -144,6 +169,7 @@ namespace TorreDeControle.Core.Personagens
                 npc.Favorito = false;
                 npc.Ordem = Ordenacao.Fim(personagens.Where(n => n.Sala == destino && n.Controle == Controle.Mestre));
                 npc.Pnj.Vinculo = null;
+                npc.Pnj.Ligacoes = new List<LigacaoNpc>();
                 npc.Influencias = new Dictionary<string, EstadoInfluencia>();
                 npc.InfluenciaPorque = new Dictionary<string, string>();
                 npc.InfluenciaPorqueNinguem = string.Empty;
@@ -152,6 +178,7 @@ namespace TorreDeControle.Core.Personagens
             }
             Gravar();
             novos = lista;
+            atualizados = porCima;
             return Resultado.Sucesso();
         }
     }

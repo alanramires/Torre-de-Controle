@@ -1,0 +1,969 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
+using TorreDeControle.Core;
+using TorreDeControle.Core.Armazenamento;
+using TorreDeControle.Core.Personagens;
+using TorreDeControle.Core.Salas;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace TorreDeControle.UI
+{
+    /// <summary>
+    /// A mesa de jogo de uma campanha (primeiro corte, "quadrada e feia" por decisão do Alan): as heroínas em
+    /// carreira sentadas nas quatro arestas, a pilha de Equipe no centro e o log da mesa. Tudo o que muda vira
+    /// evento (Core/Mesa), com desfazer. Rolador, vilão na mesa e post do fórum entram nos próximos cortes.
+    /// </summary>
+    public sealed class PainelMesa : MonoBehaviour
+    {
+        Sala sala;
+        CadastroSalas salas;
+        CadastroPersonagens personagens;
+        Mesa mesa;
+        Action aoFechar;
+
+        TextMeshProUGUI titulo;
+        TextMeshProUGUI subtitulo;
+        TextMeshProUGUI mensagem;
+        RectTransform tabuleiro;
+        RectTransform dialogo;
+        PainelMestre painelMestre;
+
+        static readonly string[] Abrev = { "Irr", "Ass", "Cul", "Des", "Ins" };
+        static readonly string[] AbrevRotulo = { "Per", "Abe", "Sal", "Sup", "Mun" };
+
+        public static PainelMesa Criar(Transform pai)
+        {
+            var veu = Estilo.Rect("PainelMesa", pai);
+            Estilo.Esticar(veu);
+            veu.gameObject.AddComponent<Image>().color = Estilo.Veu;
+            var painel = veu.gameObject.AddComponent<PainelMesa>();
+            painel.Montar(veu);
+            return painel;
+        }
+
+        public void Abrir(Sala salaAberta, CadastroSalas cadastroSalas, CadastroPersonagens cadastroPersonagens,
+            IArmazenamento armazenamento, Action aoFecharMesa)
+        {
+            sala = salaAberta;
+            salas = cadastroSalas;
+            personagens = cadastroPersonagens;
+            aoFechar = aoFecharMesa;
+            mesa = Mesa.Carregar(armazenamento, personagens, sala.Id);
+            salas.MarcarMesaAberta(sala.Id);
+            gameObject.SetActive(true);
+            transform.SetAsLastSibling();
+            Mostrar(null);
+            Redesenhar();
+        }
+
+        void Fechar()
+        {
+            gameObject.SetActive(false);
+            aoFechar?.Invoke();
+        }
+
+        void Mostrar(Resultado? r, string sucesso = null)
+        {
+            var erro = r.HasValue && !r.Value.Ok ? r.Value.Erro : null;
+            mensagem.color = erro != null ? Estilo.Erro : Estilo.TextoSuave;
+            mensagem.text = erro ?? sucesso ?? string.Empty;
+        }
+
+        // ---------- montagem ----------
+
+        void Montar(RectTransform veu)
+        {
+            var cartao = Estilo.Rect("Cartao", veu);
+            cartao.anchorMin = cartao.anchorMax = new Vector2(0.5f, 0.5f);
+            cartao.sizeDelta = new Vector2(1820, 1000);
+            Estilo.Moldura(cartao.gameObject, Estilo.Cartao, Estilo.Borda);
+            var coluna = cartao.gameObject.AddComponent<VerticalLayoutGroup>();
+            coluna.padding = new RectOffset(40, 40, 28, 28);
+            coluna.spacing = 10;
+            coluna.childControlWidth = coluna.childControlHeight = true;
+            coluna.childForceExpandHeight = false;
+
+            var cabecalho = Estilo.Fila(cartao, 72);
+            var titulos = Estilo.Rect("Titulos", cabecalho);
+            titulos.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            var pilha = titulos.gameObject.AddComponent<VerticalLayoutGroup>();
+            pilha.childControlWidth = pilha.childControlHeight = true;
+            pilha.childForceExpandHeight = false;
+            titulo = Estilo.Rotulo(titulos, string.Empty, 38, Estilo.Dourado, FontStyles.Bold);
+            titulo.characterSpacing = 6;
+            subtitulo = Estilo.Rotulo(titulos, string.Empty, 22, Estilo.TextoSuave);
+            Estilo.BotaoContorno(cabecalho, "Bônus", 170, Estilo.Dourado, () => AbrirBonus(null));
+            Estilo.BotaoPrincipal(cabecalho, "Área do mestre", 280, AbrirAreaDoMestre);
+            Estilo.BotaoContorno(cabecalho, "Voltar", 190, Estilo.TextoSuave, Fechar);
+
+            mensagem = Estilo.Rotulo(cartao, string.Empty, 20, Estilo.TextoSuave);
+            mensagem.gameObject.AddComponent<LayoutElement>().minHeight = 26;
+
+            tabuleiro = Estilo.Rect("Tabuleiro", cartao);
+            tabuleiro.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            Estilo.Moldura(tabuleiro.gameObject, Estilo.Linha, Estilo.BordaApagada);
+        }
+
+        void AbrirAreaDoMestre()
+        {
+            if (painelMestre == null)
+                painelMestre = PainelMestre.Criar(transform.parent);
+            gameObject.SetActive(false);
+            painelMestre.Abrir(sala, salas, personagens, () =>
+            {
+                gameObject.SetActive(true);
+                Redesenhar();
+            }, mesa);
+        }
+
+        /// <summary>As heroínas da mesa: as das vagas, ativas e em carreira (só elas recebem comando de jogo).</summary>
+        List<Personagem> NaMesa() =>
+            sala.Slots.Where(v => v.Personagem != null).Select(v => personagens.Buscar(v.Personagem))
+                .Where(p => p != null && p.Ativo && p.Status == StatusCriacao.EmCarreira).ToList();
+
+        void Redesenhar()
+        {
+            for (var i = tabuleiro.childCount - 1; i >= 0; i--)
+                Destroy(tabuleiro.GetChild(i).gameObject);
+            titulo.text = $"MESA · {sala.Nome.ToUpperInvariant()}";
+            var herois = NaMesa();
+            var foraDaMesa = sala.Slots.Count(v => v.Personagem != null) - herois.Count;
+            subtitulo.text = $"rodada {mesa.Rodada} · {herois.Count} na mesa" +
+                             (foraDaMesa > 0 ? $" · {foraDaMesa} fora (não estão em carreira)" : string.Empty);
+
+            // O lado direito é do log (desenho do Alan). As heroínas sentam em cima, embaixo e à esquerda.
+            const float Alto = 236, Lado = 330, Log = 420;
+            var cima = Aresta("Cima", new Vector2(0, 1), new Vector2(1, 1), new Vector2(Lado, -Alto), new Vector2(-Log - 10, 0), true);
+            var baixo = Aresta("Baixo", new Vector2(0, 0), new Vector2(1, 0), new Vector2(Lado, 0), new Vector2(-Log - 10, Alto), true);
+            var esquerda = Aresta("Esquerda", new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, Alto), new Vector2(Lado, -Alto), false);
+            // Cima e baixo alternando até 3 em cada (4 → 2/2, 6 → 3/3); depois a esquerda (7 e 8).
+            // Mais de 8 não cabe com folga neste tamanho de assento: volta a encher em cima e embaixo.
+            var ordem = new[] { cima, baixo, cima, baixo, cima, baixo, esquerda, esquerda };
+            for (var k = 0; k < herois.Count; k++)
+                Assento(k < ordem.Length ? ordem[k] : (k % 2 == 0 ? cima : baixo), herois[k]);
+
+            var centro = Estilo.Rect("Centro", tabuleiro);
+            centro.anchorMin = Vector2.zero;
+            centro.anchorMax = Vector2.one;
+            // Os vilões em cena sentam à esquerda (o outro lado da mesa), depois das heroínas que estiverem lá.
+            foreach (var v in mesa.EmCena())
+                AssentoDeVilao(esquerda, v);
+            // Sem ninguém à esquerda, o centro ocupa esse lado também.
+            var esquerdaVazia = herois.Count <= 6 && mesa.EmCena().Count == 0;
+            esquerda.gameObject.SetActive(!esquerdaVazia);
+            if (esquerdaVazia)
+                foreach (var aresta in new[] { cima, baixo })
+                    aresta.offsetMin = new Vector2(10, aresta.offsetMin.y); // assentos centralizados com o centro
+            centro.offsetMin = new Vector2(esquerdaVazia ? 10 : Lado + 10, Alto + 10);
+            centro.offsetMax = new Vector2(-Log - 20, -Alto - 10);
+            Centro(centro);
+
+            var log = Estilo.Rect("Log", tabuleiro);
+            log.anchorMin = new Vector2(1, 0);
+            log.anchorMax = new Vector2(1, 1);
+            log.offsetMin = new Vector2(-Log, 10);
+            log.offsetMax = new Vector2(-10, -10);
+            LogDaMesa(log);
+            ajustarTextos = true;
+        }
+
+        RectTransform Aresta(string nome, Vector2 min, Vector2 max, Vector2 offMin, Vector2 offMax, bool horizontal)
+        {
+            var r = Estilo.Rect(nome, tabuleiro);
+            r.anchorMin = min;
+            r.anchorMax = max;
+            r.offsetMin = offMin;
+            r.offsetMax = offMax;
+            HorizontalOrVerticalLayoutGroup g = horizontal
+                ? r.gameObject.AddComponent<HorizontalLayoutGroup>()
+                : r.gameObject.AddComponent<VerticalLayoutGroup>();
+            g.padding = new RectOffset(10, 10, 10, 10);
+            g.spacing = 12;
+            g.childAlignment = TextAnchor.MiddleCenter;
+            g.childControlWidth = g.childControlHeight = true;
+            g.childForceExpandWidth = g.childForceExpandHeight = false;
+            return r;
+        }
+
+        /// <summary>O assento: nome e potencial, os cinco Rótulos e as cinco condições (clicar marca/desmarca).</summary>
+        void Assento(Transform aresta, Personagem p)
+        {
+            var c = Estilo.Rect("Assento " + p.NomeExibicao, aresta);
+            // Tamanho fixo: sem prioridade 2 o assento herda o "esticável" dos rótulos de dentro e um assento
+            // sozinho numa aresta se espalha por ela inteira.
+            var le = c.gameObject.AddComponent<LayoutElement>();
+            le.minWidth = le.preferredWidth = 300;
+            le.minHeight = le.preferredHeight = 212;
+            le.flexibleWidth = le.flexibleHeight = 0;
+            le.layoutPriority = 2;
+            Estilo.Moldura(c.gameObject, Estilo.Cartao, Estilo.Dourado);
+            var v = c.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.padding = new RectOffset(12, 12, 8, 8);
+            v.spacing = 6;
+            v.childControlWidth = v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+
+            var topo = Estilo.Fila(c, 52, 8);
+            Retrato(topo, p);
+            var nome = Estilo.Rotulo(topo, p.NomeExibicao, 22, Estilo.Dourado, FontStyles.Bold);
+            nome.textWrappingMode = TextWrappingModes.NoWrap;
+            nome.overflowMode = TextOverflowModes.Ellipsis;
+            Estilo.ColunaElastica(nome);
+            var pot = Estilo.BotaoContorno(topo, $"pot {p.Potencial} +", 100, Estilo.Dourado, () =>
+                Aplicar(mesa.DarPotencial(p.Id, 1, null)));
+            Encolher(pot);
+            pot.gameObject.AddComponent<Dica>().Configurar("Potencial: +1 (falhou numa rolagem, ou o mestre deu).");
+
+            var rotulos = personagens.RotulosAtuais(p);
+            var filaR = Estilo.Fila(c, 40, 4);
+            for (var k = 0; k < Rotulos.Todos.Count; k++)
+            {
+                var id = Rotulos.Todos[k];
+                var valor = rotulos[id];
+                var t = Estilo.Rotulo(filaR, $"<size=70%>{AbrevRotulo[k]}</size>\n{(valor > 0 ? "+" : string.Empty)}{valor}", 20,
+                    Estilo.Texto, FontStyles.Bold);
+                t.alignment = TextAlignmentOptions.Center;
+                t.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+                t.raycastTarget = true;
+                t.gameObject.AddComponent<Dica>().Configurar(Rotulos.Nome(id));
+            }
+
+            var filaC = Estilo.Fila(c, 40, 4);
+            for (var k = 0; k < Condicoes.Todas.Count; k++)
+            {
+                var id = Condicoes.Todas[k];
+                var marcada = p.CondicoesMarcadas.Contains(id);
+                var b = marcada
+                    ? Estilo.BotaoPrincipal(filaC, Abrev[k], 0, () => Aplicar(mesa.AlternarCondicao(p.Id, id, null)))
+                    : Estilo.BotaoContorno(filaC, Abrev[k], 0, Estilo.TextoSuave, () => Aplicar(mesa.AlternarCondicao(p.Id, id, null)));
+                b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                var r = b.GetComponentInChildren<TextMeshProUGUI>();
+                r.fontSize = 16;
+                r.characterSpacing = 0;
+                b.gameObject.AddComponent<Dica>().Configurar(Condicoes.Nome(id) + (marcada ? " (marcada)" : string.Empty));
+            }
+
+            // Os bônus dela, como tokens: o mouse mostra o contexto; clicar usa (ou acaba).
+            var filaB = Estilo.Fila(c, 30, 6);
+            filaB.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleLeft;
+            foreach (var bonus in mesa.BonusDe(p.Id))
+                TokenDeBonus(filaB, bonus);
+            var dar = Estilo.BotaoContorno(filaB, "+", 30, Estilo.TextoSuave, () => AbrirBonus(p.Id));
+            dar.gameObject.AddComponent<Dica>().Configurar("Dar um bônus (adiante, constante, controle).");
+            Estilo.Rect("Vao", filaB).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+        }
+
+        void TokenDeBonus(Transform pai, BonusDeMesa bonus)
+        {
+            var r = Estilo.Rect("Bonus", pai);
+            var le = r.gameObject.AddComponent<LayoutElement>();
+            le.minWidth = le.preferredWidth = 52;
+            le.flexibleWidth = 0;
+            var img = Estilo.Rect("Token", r).gameObject.AddComponent<RawImage>();
+            img.texture = Resources.Load<Texture2D>("Icones/Tokens/" + bonus.Tipo);
+            var it = (RectTransform)img.transform;
+            it.anchorMin = new Vector2(0, 0);
+            it.anchorMax = new Vector2(0, 1);
+            it.pivot = new Vector2(0, 0.5f);
+            it.sizeDelta = new Vector2(28, 0);
+            var v = Estilo.Rotulo(r, (bonus.Valor > 0 ? "+" : string.Empty) + bonus.Valor, 18, Estilo.Texto, FontStyles.Bold);
+            v.alignment = TextAlignmentOptions.MidlineRight;
+            Estilo.Esticar(v.rectTransform);
+            var botao = r.gameObject.AddComponent<Button>();
+            var fundo = r.gameObject.AddComponent<Image>();
+            fundo.color = new Color(1, 1, 1, 0);
+            botao.targetGraphic = fundo;
+            botao.name = TextoLivre;
+            var nome = Mesa.NomeDoBonus(bonus.Tipo);
+            r.gameObject.AddComponent<Dica>().Configurar($"{nome} {v.text}" +
+                (bonus.Contexto.Length > 0 ? $": {bonus.Contexto}" : string.Empty) + "\nClique para usar (ou quando acabar).");
+            botao.onClick.AddListener(() =>
+                Estilo.Confirmar(transform, $"{nome} {v.text}{(bonus.Contexto.Length > 0 ? $" ({bonus.Contexto})" : string.Empty)}:\n" +
+                                            (bonus.Tipo == Mesa.BonusConstante ? "acabou?" : "usar agora?"),
+                    bonus.Tipo == Mesa.BonusConstante ? "Acabou" : "Usar",
+                    () => Aplicar(mesa.RetirarBonus(bonus.Id, null))));
+        }
+
+        // ---------- dar bônus ----------
+
+        string bonusPara;
+        string bonusTipo = Mesa.BonusAdiante;
+        int bonusValor = 1;
+
+        /// <summary>Dar um bônus: para quem, qual (adiante, constante, controle), quanto e em que contexto.</summary>
+        void AbrirBonus(string para)
+        {
+            var herois = NaMesa();
+            if (herois.Count == 0)
+            {
+                Mostrar(Resultado.Falha("Ninguém na mesa."));
+                return;
+            }
+            bonusPara = para ?? (herois.Any(h => h.Id == bonusPara) ? bonusPara : herois[0].Id);
+            DesenharBonus(string.Empty);
+        }
+
+        void DesenharBonus(string contextoAtual)
+        {
+            var herois = NaMesa();
+            var caixa = Caixa("DAR BÔNUS", 640, 1050);
+            Pergunta(caixa, "Para quem?");
+            var filaP = Estilo.Fila(caixa, 48, 8);
+            TMP_InputField contexto = null;
+            foreach (var h in herois)
+            {
+                var id = h.Id;
+                var b = id == bonusPara
+                    ? Estilo.BotaoPrincipal(filaP, h.NomeExibicao, 0, () => { })
+                    : Estilo.BotaoContorno(filaP, h.NomeExibicao, 0, Estilo.Dourado, () => { bonusPara = id; DesenharBonus(contexto.text); });
+                b.GetComponent<LayoutElement>().flexibleWidth = 1;
+            }
+            Pergunta(caixa, "Qual?");
+            var filaT = Estilo.Fila(caixa, 48, 8);
+            foreach (var (tipo, dica) in new[]
+                     {
+                         (Mesa.BonusAdiante, "vale na próxima rolagem que bate com o contexto, e some"),
+                         (Mesa.BonusConstante, "vale enquanto o contexto durar"),
+                         (Mesa.BonusControle, "um recurso para gastar (ex.: movimentos que pedem controle)"),
+                     })
+            {
+                var t = tipo;
+                var b = t == bonusTipo
+                    ? Estilo.BotaoPrincipal(filaT, Mesa.NomeDoBonus(t), 0, () => { })
+                    : Estilo.BotaoContorno(filaT, Mesa.NomeDoBonus(t), 0, Estilo.Dourado, () => { bonusTipo = t; DesenharBonus(contexto.text); });
+                b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                b.gameObject.AddComponent<Dica>().Configurar(dica);
+            }
+            Pergunta(caixa, "Quanto?");
+            var filaV = Estilo.Fila(caixa, 48, 8);
+            foreach (var v in new[] { -2, -1, 1, 2, 3 })
+            {
+                var valor = v;
+                var texto = v > 0 ? "+" + v : v.ToString();
+                var b = v == bonusValor
+                    ? Estilo.BotaoPrincipal(filaV, texto, 90, () => { })
+                    : Estilo.BotaoContorno(filaV, texto, 90, Estilo.Dourado, () => { bonusValor = valor; DesenharBonus(contexto.text); });
+            }
+            Pergunta(caixa, "Gatilho ou contexto (quando vale)");
+            contexto = CampoMotivo(caixa, "ex.: agindo pelas respostas da avaliação; contra o Doutor Ocaso");
+            contexto.text = contextoAtual;
+            Rodape(caixa, "Dar bônus", () =>
+            {
+                var r = mesa.DarBonus(bonusPara, bonusTipo, bonusValor, contexto.text, null);
+                if (!r.Ok)
+                {
+                    Mostrar(r);
+                    return;
+                }
+                FecharBatalha();
+                Aplicar(r);
+            });
+        }
+
+        /// <summary>
+        /// O vilão em cena: retrato e nome, as condições que ele tem (clicar marca na luta e abre a carta da
+        /// condição, porque o livro manda fazer o movimento dela na hora) e os movimentos de vilão.
+        /// </summary>
+        void AssentoDeVilao(Transform aresta, Personagem v)
+        {
+            var c = Estilo.Rect("Vilao " + v.NomeExibicao, aresta);
+            var le = c.gameObject.AddComponent<LayoutElement>();
+            le.minWidth = le.preferredWidth = 300;
+            le.minHeight = le.preferredHeight = 176;
+            le.flexibleWidth = le.flexibleHeight = 0;
+            le.layoutPriority = 2;
+            Estilo.Moldura(c.gameObject, Estilo.Cartao, Estilo.Erro);
+            var vl = c.gameObject.AddComponent<VerticalLayoutGroup>();
+            vl.padding = new RectOffset(12, 12, 8, 8);
+            vl.spacing = 6;
+            vl.childControlWidth = vl.childControlHeight = true;
+            vl.childForceExpandHeight = false;
+
+            var topo = Estilo.Fila(c, 52, 8);
+            Retrato(topo, v);
+            var nome = Estilo.Rotulo(topo, v.NomeExibicao, 22, Estilo.Erro, FontStyles.Bold);
+            nome.textWrappingMode = TextWrappingModes.NoWrap;
+            nome.overflowMode = TextOverflowModes.Ellipsis;
+            Estilo.ColunaElastica(nome);
+
+            var tem = v.Vilao?.Condicoes ?? new List<string>();
+            var marcadas = mesa.CondicoesMarcadasDoVilao(v.Id);
+            var estado = Estilo.Rotulo(c, mesa.NoLimite(v)
+                    ? "no limite: o próximo golpe o derruba"
+                    : $"{marcadas.Count} de {tem.Count} condições", 16,
+                mesa.NoLimite(v) ? Estilo.Erro : Estilo.TextoSuave, FontStyles.Italic);
+            estado.alignment = TextAlignmentOptions.Center;
+
+            var filaC = Estilo.Fila(c, 36, 4);
+            foreach (var cond in tem)
+            {
+                var id = cond;
+                var marcada = marcadas.Contains(cond);
+                var k = Condicoes.Todas.ToList().IndexOf(cond);
+                var rotulo = k >= 0 ? Abrev[k] : cond;
+                var b = marcada
+                    ? Estilo.BotaoPrincipal(filaC, rotulo, 0, () => Aplicar(mesa.AlternarCondicaoDoVilao(v.Id, id, null)))
+                    : Estilo.BotaoContorno(filaC, rotulo, 0, Estilo.TextoSuave, () =>
+                    {
+                        var r = mesa.AlternarCondicaoDoVilao(v.Id, id, null);
+                        Aplicar(r);
+                        if (r.Ok)
+                            AbrirCartaDeCondicao(); // marcou: faça o movimento da condição agora
+                    });
+                b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                b.gameObject.AddComponent<Dica>().Configurar(Condicoes.Nome(cond) + (marcada ? " (marcada na luta)" : string.Empty));
+            }
+            var mov = Estilo.BotaoContorno(c, "Movimentos de vilão", 0, Estilo.Erro, () => AbrirMovimentos(v));
+            mov.GetComponent<LayoutElement>().preferredHeight = 36;
+        }
+
+        PainelAjuda ajudaCondicoes;
+
+        void AbrirCartaDeCondicao()
+        {
+            if (ajudaCondicoes == null)
+                ajudaCondicoes = PainelAjuda.Criar(transform.parent);
+            ajudaCondicoes.AbrirCondicoesVilao();
+        }
+
+        /// <summary>Os movimentos de vilão dele: clicar registra no log qual foi usado.</summary>
+        void AbrirMovimentos(Personagem v)
+        {
+            var movimentos = (v.Vilao?.Movimentos ?? new List<string>()).Where(m => !string.IsNullOrWhiteSpace(m)).ToList();
+            var caixa = Caixa($"{v.NomeExibicao.ToUpperInvariant()} · MOVIMENTOS DE VILÃO", Math.Min(980, 230 + movimentos.Count * 92), 1150);
+            if (movimentos.Count == 0)
+                Nota(caixa, "Sem movimentos na ficha de vilão (escreva na ficha do NPC).");
+            foreach (var m in movimentos)
+            {
+                var texto = m;
+                var b = Estilo.BotaoContorno(caixa, texto, 0, Estilo.Dourado, () =>
+                {
+                    FecharBatalha();
+                    Aplicar(mesa.UsarMovimentoDeVilao(v.Id, texto, null));
+                });
+                b.gameObject.name = TextoLivre; // texto longo: quebra linha, não encolhe
+                var le = b.GetComponent<LayoutElement>();
+                le.minHeight = le.preferredHeight = 80;
+                // Frase longa: quebra em até três linhas, sem caixa alta nem espaçamento, e a fonte encolhe se precisar.
+                var r = b.GetComponentInChildren<TextMeshProUGUI>();
+                r.textWrappingMode = TextWrappingModes.Normal;
+                r.alignment = TextAlignmentOptions.MidlineLeft;
+                r.fontStyle = FontStyles.Normal;
+                r.characterSpacing = 0;
+                r.enableAutoSizing = true;
+                r.fontSizeMin = 14;
+                r.fontSizeMax = 22;
+                r.rectTransform.offsetMin = new Vector2(16, 6);
+                r.rectTransform.offsetMax = new Vector2(-16, -6);
+            }
+            var fim = Estilo.Fila(caixa, 56, 12);
+            Estilo.Rect("Vao", fim).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            Estilo.BotaoContorno(fim, "Fechar", 200, Estilo.TextoSuave, FecharBatalha);
+        }
+
+        /// <summary>O centro: a pilha de Equipe (número e tokens), os comandos dela e o fim do log.</summary>
+        void Centro(RectTransform centro)
+        {
+            Estilo.Moldura(centro.gameObject, Estilo.Campo, Estilo.Azul);
+            var v = centro.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.padding = new RectOffset(20, 20, 14, 14);
+            v.spacing = 10;
+            v.childAlignment = TextAnchor.MiddleCenter;
+            v.childControlWidth = v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+
+            // A pilha fica à vista na mesa; mexer nela é pelo "Gerir pilha" (uma telinha).
+            var topo = Estilo.Fila(centro, 70, 14);
+            var t = Estilo.Rotulo(topo, "PILHA DE EQUIPE", 24, Estilo.Azul, FontStyles.Bold);
+            t.characterSpacing = 5;
+            t.gameObject.AddComponent<LayoutElement>().preferredWidth = 260;
+            var n = Estilo.Rotulo(topo, mesa.Equipe.ToString(), 60, Estilo.Texto, FontStyles.Bold);
+            n.gameObject.AddComponent<LayoutElement>().preferredWidth = 90;
+            var gerir = Estilo.BotaoPrincipal(topo, "Gerir pilha", 220, AbrirGestaoDaPilha);
+            Encolher(gerir);
+            Estilo.Rect("Vao", topo).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+
+            var token = Resources.Load<Texture2D>("Icones/Tokens/equipe");
+            var fichas = Estilo.Fila(centro, 64, 6);
+            fichas.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
+            for (var k = 0; k < Math.Min(mesa.Equipe, 12); k++)
+            {
+                var img = Estilo.Rect("Token", fichas).gameObject.AddComponent<RawImage>();
+                img.texture = token;
+                var li = img.gameObject.AddComponent<LayoutElement>();
+                li.preferredWidth = li.preferredHeight = 60;
+            }
+            if (mesa.Equipe == 0)
+                Estilo.Rotulo(fichas, "pilha vazia", 20, Estilo.TextoApagado, FontStyles.Italic);
+        }
+
+        /// <summary>O log da mesa, no lado direito: do mais novo ao mais antigo, com desfazer o último.</summary>
+        void LogDaMesa(RectTransform log)
+        {
+            Estilo.Moldura(log.gameObject, Estilo.Campo, Estilo.BordaApagada);
+            var v = log.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.padding = new RectOffset(14, 14, 12, 12);
+            v.spacing = 8;
+            v.childControlWidth = v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+            var cabeca = Estilo.Fila(log, 36, 8);
+            var lt = Estilo.Rotulo(cabeca, "LOG DA MESA", 20, Estilo.TextoSuave, FontStyles.Bold);
+            lt.characterSpacing = 4;
+            Estilo.ColunaElastica(lt);
+            var ultimo = mesa.Eventos.LastOrDefault(e => e.Corrige == null && !mesa.Corrigido(e));
+            if (ultimo != null)
+                Encolher(Estilo.BotaoContorno(cabeca, "Desfazer último", 170, Estilo.TextoSuave, () =>
+                    Aplicar(mesa.Corrigir(ultimo.Id, "desfeito na mesa"))));
+            var lista = Estilo.ListaRolavel(log, 6);
+            var suave = ColorUtility.ToHtmlStringRGB(Estilo.TextoApagado);
+            foreach (var e in mesa.Eventos.AsEnumerable().Reverse())
+            {
+                var quem = e.Personagem == null ? "Mesa" : personagens.Buscar(e.Personagem)?.NomeExibicao ?? "?";
+                var riscado = mesa.Corrigido(e);
+                var motivo = string.IsNullOrWhiteSpace(e.Motivo) ? string.Empty : $"\n<size=85%><i><color=#{suave}>{e.Motivo}</color></i></size>";
+                var linha = Estilo.Rotulo(lista,
+                    $"<color=#{suave}>r{e.Rodada}</color>  <b>{quem}</b>: " + (riscado ? $"<s>{e.Descricao}</s>" : e.Descricao) + motivo,
+                    17, riscado ? Estilo.TextoApagado : Estilo.Texto);
+                linha.textWrappingMode = TextWrappingModes.Normal;
+            }
+            if (mesa.Eventos.Count == 0)
+                Estilo.Rotulo(lista, "Nada ainda. Início de sessão: +1 na pilha (Gerir pilha → Passagem do tempo).", 17,
+                    Estilo.TextoApagado, FontStyles.Italic).textWrappingMode = TextWrappingModes.Normal;
+        }
+
+        /// <summary>
+        /// Gerir a pilha (telinha): ajuste rápido +1/−1 com motivo opcional, e as três ações do livro, cada uma
+        /// na sua caixa: usar a pilha, o questionário (entrar em batalha) e a passagem do tempo.
+        /// </summary>
+        void AbrirGestaoDaPilha()
+        {
+            var caixa = Caixa($"GERIR PILHA  ·  {mesa.Equipe} ponto{(mesa.Equipe == 1 ? "" : "s")}", 520);
+            Pergunta(caixa, "Ajuste rápido (o mestre corrigindo, ou um movimento que deu/tirou ponto)");
+            var filaA = Estilo.Fila(caixa, 52, 10);
+            var motivo = Estilo.CampoTexto(filaA, "motivo (opcional)");
+            Estilo.ColunaElastica(motivo);
+            Estilo.BotaoContorno(filaA, "−1", 90, Estilo.Dourado, () => Ajustar(-1, motivo.text));
+            Estilo.BotaoContorno(filaA, "+1", 90, Estilo.Dourado, () => Ajustar(1, motivo.text));
+
+            Pergunta(caixa, "Ações do livro");
+            var filaB = Estilo.Fila(caixa, 60, 10);
+            foreach (var (texto, dica, acao) in new (string, string, UnityEngine.Events.UnityAction)[]
+                     {
+                         ("Usar pilha", "Gastar pontos: ajudar, agir de forma egoísta, ou movimento que usa mais de um (ex.: Farol).", AbrirUso),
+                         ("Questionário", "Entrar em batalha como equipe: a conta soma ao que já está na pilha.", AbrirBatalha),
+                         ("Passagem do tempo", "Início da sessão (+1) ou o tempo passa (volta para 1).", AbrirTempo),
+                     })
+            {
+                var b = Estilo.BotaoPrincipal(filaB, texto, 0, acao);
+                b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                Encolher(b);
+                b.gameObject.AddComponent<Dica>().Configurar(dica);
+            }
+            var fim = Estilo.Fila(caixa, 56, 12);
+            Estilo.Rect("Vao", fim).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            Estilo.BotaoContorno(fim, "Fechar", 200, Estilo.TextoSuave, FecharBatalha);
+        }
+
+        void Ajustar(int delta, string motivo)
+        {
+            var r = mesa.MudarEquipe(delta, delta > 0 ? "+1 Equipe" : "−1 Equipe", motivo);
+            Aplicar(r);
+            if (r.Ok)
+                AbrirGestaoDaPilha(); // a telinha fica aberta, com o número novo
+        }
+
+        bool ajustarTextos;
+        const string TextoLivre = "TextoLivre";
+
+        /// <summary>
+        /// Depois de montar (mesa ou caixa), todo botão do painel ganha o texto numa linha que encolhe até
+        /// caber: nome comprido ("Garça Escarlate", "Passagem do tempo") não vaza para fora.
+        /// </summary>
+        void LateUpdate()
+        {
+            if (!ajustarTextos)
+                return;
+            ajustarTextos = false;
+            foreach (var b in GetComponentsInChildren<Button>(true))
+                if (b.name != TextoLivre)
+                    Encolher(b);
+        }
+
+        /// <summary>Rótulo do botão numa linha só: a fonte encolhe até caber.</summary>
+        static void Encolher(Button b)
+        {
+            var r = b.GetComponentInChildren<TextMeshProUGUI>();
+            r.textWrappingMode = TextWrappingModes.NoWrap;
+            r.enableAutoSizing = true;
+            r.fontSizeMin = 12;
+            r.fontSizeMax = 22;
+            r.characterSpacing = 1;
+            r.rectTransform.offsetMin = new Vector2(6, 0);
+            r.rectTransform.offsetMax = new Vector2(-6, 0);
+        }
+
+        /// <summary>O retrato ao lado do nome: a foto heroica (se não foi recusada) ou a arte do arquétipo.</summary>
+        void Retrato(Transform pai, Personagem p)
+        {
+            var moldura = Estilo.Rect("Retrato", pai);
+            var lm = moldura.gameObject.AddComponent<LayoutElement>();
+            lm.minWidth = lm.preferredWidth = 52;
+            lm.flexibleWidth = 0;
+            lm.layoutPriority = 2;
+            Estilo.Moldura(moldura.gameObject, Estilo.Campo, Estilo.Dourado);
+            var miolo = Estilo.Rect("Imagem", moldura);
+            Estilo.Esticar(miolo);
+            miolo.offsetMin = new Vector2(2, 2);
+            miolo.offsetMax = new Vector2(-2, -2);
+            var imagem = miolo.gameObject.AddComponent<RawImage>();
+            imagem.raycastTarget = false;
+            var ajuste = miolo.gameObject.AddComponent<AspectRatioFitter>();
+            ajuste.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            moldura.gameObject.AddComponent<RectMask2D>();
+            var aviso = Estilo.Rotulo(moldura, string.Empty, 10, Estilo.TextoSuave);
+            aviso.gameObject.SetActive(false);
+            var i = p.Identidade;
+            var arte = Retratos.Buscar(personagens.RegraDoArquetipo(p)?.Retrato);
+            var temFoto = !string.IsNullOrWhiteSpace(i.FotoHeroica) && i.FotoHeroicaAprovacao != AprovacaoFoto.Recusada;
+            if (temFoto || arte != null)
+            {
+                moldura.gameObject.AddComponent<FotoDaWeb>().Mostrar(i.FotoHeroica, imagem, ajuste, aviso, temFoto ? null : arte);
+                return;
+            }
+            // Sem foto nem arte (NPC sem link): a inicial, em vez de um quadrado branco.
+            imagem.enabled = false;
+            var inicial = Estilo.Rotulo(moldura, string.IsNullOrEmpty(p.NomeExibicao) ? "?" : p.NomeExibicao.Substring(0, 1).ToUpperInvariant(),
+                30, p.Controle == Controle.Mestre ? Estilo.Erro : Estilo.Dourado, FontStyles.Bold);
+            inicial.alignment = TextAlignmentOptions.Center;
+            Estilo.Esticar(inicial.rectTransform);
+        }
+
+        // ---------- caixas de diálogo (usar a pilha, passagem do tempo) ----------
+
+        RectTransform Caixa(string titulo, float altura, float largura = 900)
+        {
+            FecharBatalha();
+            dialogo = Estilo.Rect("Dialogo", transform);
+            Estilo.Esticar(dialogo);
+            dialogo.gameObject.AddComponent<Image>().color = Estilo.Veu;
+            var caixa = Estilo.Rect("Caixa", dialogo);
+            caixa.anchorMin = caixa.anchorMax = new Vector2(0.5f, 0.5f);
+            caixa.sizeDelta = new Vector2(largura, altura);
+            Estilo.Moldura(caixa.gameObject, Estilo.Cartao, Estilo.Azul);
+            var v = caixa.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.padding = new RectOffset(36, 36, 28, 28);
+            v.spacing = 12;
+            v.childControlWidth = v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+            Estilo.Rotulo(caixa, titulo, 28, Estilo.Azul, FontStyles.Bold).characterSpacing = 5;
+            ajustarTextos = true;
+            return caixa;
+        }
+
+        TMP_InputField CampoMotivo(Transform caixa, string dica)
+        {
+            var campo = Estilo.CampoTexto(caixa, dica);
+            var l = campo.gameObject.AddComponent<LayoutElement>();
+            l.minHeight = l.preferredHeight = 52;
+            return campo;
+        }
+
+        void Rodape(Transform caixa, string confirmar, UnityEngine.Events.UnityAction acao)
+        {
+            var fim = Estilo.Fila(caixa, 56, 12);
+            Estilo.Rect("Vao", fim).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            Estilo.BotaoContorno(fim, "Cancelar", 200, Estilo.TextoSuave, FecharBatalha);
+            Estilo.BotaoPrincipal(fim, confirmar, 240, acao);
+        }
+
+        int usoQuantidade = 1;
+        string usoQuem;
+
+        void AbrirUso()
+        {
+            if (mesa.Equipe == 0)
+            {
+                Mostrar(Resultado.Falha("A pilha de Equipe está vazia."));
+                return;
+            }
+            usoQuantidade = Math.Min(Math.Max(1, usoQuantidade), mesa.Equipe);
+            DesenharUso(string.Empty);
+        }
+
+        void DesenharUso(string motivoAtual)
+        {
+            var caixa = Caixa($"USAR A PILHA  ·  {mesa.Equipe} disponíve{(mesa.Equipe == 1 ? "l" : "is")}", 560);
+            Pergunta(caixa, "Quantos pontos?");
+            var filaQ = Estilo.Fila(caixa, 48, 8);
+            for (var n = 1; n <= Math.Min(mesa.Equipe, 6); n++)
+            {
+                var alvo = n;
+                var b = n == usoQuantidade
+                    ? Estilo.BotaoPrincipal(filaQ, n.ToString(), 80, () => { })
+                    : Estilo.BotaoContorno(filaQ, n.ToString(), 80, Estilo.Dourado, () => { usoQuantidade = alvo; DesenharUso(campoUso.text); });
+            }
+            Pergunta(caixa, "Quem usa? (opcional)");
+            var filaP = Estilo.Fila(caixa, 48, 8);
+            foreach (var h in NaMesa())
+            {
+                var id = h.Id;
+                var b = id == usoQuem
+                    ? Estilo.BotaoPrincipal(filaP, h.NomeExibicao, 0, () => { usoQuem = null; DesenharUso(campoUso.text); })
+                    : Estilo.BotaoContorno(filaP, h.NomeExibicao, 0, Estilo.Dourado, () => { usoQuem = id; DesenharUso(campoUso.text); });
+                b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                Encolher(b);
+            }
+            campoUso = CampoMotivo(caixa, "motivo (ex.: ajudar a Garça a enfrentar; Farol usa 2 no movimento X)");
+            campoUso.text = motivoAtual;
+            Rodape(caixa, $"Usar {usoQuantidade}", () =>
+            {
+                var r = mesa.UsarEquipe(usoQuem, usoQuantidade, campoUso.text);
+                if (!r.Ok)
+                {
+                    Mostrar(r);
+                    return;
+                }
+                FecharBatalha();
+                Aplicar(r);
+            });
+        }
+
+        TMP_InputField campoUso;
+
+        /// <summary>
+        /// Passagem do tempo, em duas regras do livro: início da sessão (+1, soma ao que sobrou) ou o tempo passa
+        /// (salto na história: a pilha volta para 1). Às vezes as duas acontecem juntas: aí são dois cliques.
+        /// </summary>
+        void AbrirTempo()
+        {
+            var caixa = Caixa("PASSAGEM DO TEMPO", 520);
+            Nota(caixa, $"A pilha está com {mesa.Equipe}. Se a sessão nova começa semanas depois na história, " +
+                        "use os dois: primeiro \"o tempo passa\", depois \"início da sessão\".");
+            var campo = CampoMotivo(caixa, "motivo (ex.: sessão 3; \"três semanas depois...\")");
+            var fila = Estilo.Fila(caixa, 64, 12);
+            var inicio = Estilo.BotaoPrincipal(fila, "Início da sessão  (+1)", 0, () =>
+            {
+                FecharBatalha();
+                Aplicar(mesa.InicioDeSessao(campo.text));
+            });
+            inicio.GetComponent<LayoutElement>().flexibleWidth = 1;
+            Encolher(inicio);
+            var passa = Estilo.BotaoContorno(fila, "O tempo passa  (volta para 1)", 0, Estilo.Dourado, () =>
+            {
+                FecharBatalha();
+                Aplicar(mesa.OTempoPassa(campo.text));
+            });
+            passa.GetComponent<LayoutElement>().flexibleWidth = 1;
+            Encolher(passa);
+            var fim = Estilo.Fila(caixa, 56, 12);
+            Estilo.Rect("Vao", fim).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            Estilo.BotaoContorno(fim, "Cancelar", 200, Estilo.TextoSuave, FecharBatalha);
+        }
+
+        void Aplicar(Resultado r)
+        {
+            Mostrar(r);
+            Redesenhar();
+        }
+
+        // ---------- Entrar em batalha (o questionário, livro pp.86–87) ----------
+
+        readonly Mesa.EntradaEmBatalha batalha = new Mesa.EntradaEmBatalha();
+        readonly List<string> evitar = new List<string>();
+        string motivoBatalha = string.Empty;
+
+        void AbrirBatalha()
+        {
+            var herois = NaMesa();
+            if (herois.Count < 2)
+            {
+                Mostrar(Resultado.Falha("Entrar em batalha pede mais de uma heroína na mesa."));
+                return;
+            }
+            batalha.Lider = herois.Any(h => h.Id == batalha.Lider) ? batalha.Lider : herois[0].Id;
+            batalha.Colegas = herois.Select(h => h.Id).ToList();
+            batalha.MesmoObjetivo = batalha.AlguemNaoConfia = batalha.MalPreparada = false;
+            evitar.Clear();
+            DesenharBatalha();
+        }
+
+        void FecharBatalha()
+        {
+            if (dialogo != null)
+                Destroy(dialogo.gameObject);
+            dialogo = null;
+        }
+
+        void DesenharBatalha()
+        {
+            ajustarTextos = true;
+            FecharBatalha();
+            var herois = NaMesa();
+            dialogo = Estilo.Rect("Batalha", transform);
+            Estilo.Esticar(dialogo);
+            dialogo.gameObject.AddComponent<Image>().color = Estilo.Veu;
+            var caixa = Estilo.Rect("Caixa", dialogo);
+            caixa.anchorMin = caixa.anchorMax = new Vector2(0.5f, 0.5f);
+            caixa.sizeDelta = new Vector2(1100, 940);
+            Estilo.Moldura(caixa.gameObject, Estilo.Cartao, Estilo.Azul);
+            var v = caixa.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.padding = new RectOffset(36, 36, 28, 28);
+            v.spacing = 10;
+            v.childControlWidth = v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+
+            Estilo.Rotulo(caixa, "ENTRAR EM BATALHA COMO EQUIPE", 30, Estilo.Azul, FontStyles.Bold).characterSpacing = 5;
+            Nota(caixa, "Na pose antes da luta, ou no instante em que o inimigo aparece. Livro pp.86–87.");
+
+            // Quem está na luta: nem sempre é a equipe inteira (já aconteceu de entrarem só 3). Só essas contam
+            // como colegas (a Influência da líder é sobre elas) e só elas gastam da pilha.
+            Pergunta(caixa, "Quem está entrando na luta? (pelo menos duas)");
+            var filaE = Estilo.Fila(caixa, 48, 8);
+            foreach (var h in herois)
+            {
+                var id = h.Id;
+                var dentro = batalha.Colegas.Contains(id);
+                var b = dentro
+                    ? Estilo.BotaoPrincipal(filaE, h.NomeExibicao, 0, () =>
+                    {
+                        batalha.Colegas = batalha.Colegas.Where(x => x != id).ToList();
+                        if (batalha.Lider == id)
+                            batalha.Lider = batalha.Colegas.FirstOrDefault();
+                        evitar.Clear();
+                        DesenharBatalha();
+                    })
+                    : Estilo.BotaoContorno(filaE, h.NomeExibicao, 0, Estilo.TextoApagado, () =>
+                    {
+                        batalha.Colegas = batalha.Colegas.Append(id).ToList();
+                        batalha.Lider ??= id;
+                        DesenharBatalha();
+                    });
+                b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                Encolher(b);
+            }
+
+            Pergunta(caixa, "Quem lidera?");
+            var filaL = Estilo.Fila(caixa, 48, 8);
+            foreach (var h in herois.Where(h => batalha.Colegas.Contains(h.Id)))
+            {
+                var id = h.Id;
+                var b = id == batalha.Lider
+                    ? Estilo.BotaoPrincipal(filaL, h.NomeExibicao, 0, () => { })
+                    : Estilo.BotaoContorno(filaL, h.NomeExibicao, 0, Estilo.Dourado, () =>
+                    {
+                        batalha.Lider = id;
+                        evitar.Clear();
+                        DesenharBatalha();
+                    });
+                b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                var r = b.GetComponentInChildren<TextMeshProUGUI>();
+                r.enableAutoSizing = true;
+                r.fontSizeMin = 12;
+                r.fontSizeMax = 20;
+                r.textWrappingMode = TextWrappingModes.NoWrap;
+            }
+
+            batalha.CondicoesParaEvitar = evitar.ToList();
+            if (batalha.Colegas.Count < 2 || batalha.Lider == null)
+            {
+                Nota(caixa, "Sozinha não é como equipe: marque pelo menos duas heroínas na luta.");
+                var sair = Estilo.Fila(caixa, 56, 12);
+                Estilo.Rect("Vao", sair).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+                Estilo.BotaoContorno(sair, "Cancelar", 200, Estilo.TextoSuave, FecharBatalha);
+                return;
+            }
+            var (total, linhas, semInfluencia) = mesa.ContarBatalha(batalha);
+            Nota(caixa, semInfluencia.Count == 0
+                ? "A líder tem Influência sobre cada colega (lido das fichas): +1."
+                : $"A líder não tem Influência sobre: {string.Join(", ", semInfluencia)} (lido das fichas).");
+
+            SimNao(caixa, "Todas têm o mesmo objetivo na luta? (pergunte o da líder; variações leves contam)", batalha.MesmoObjetivo,
+                x => batalha.MesmoObjetivo = x);
+            SimNao(caixa, "Alguém não confia na líder ou na equipe? (cada jogadora decide por si)", batalha.AlguemNaoConfia,
+                x => batalha.AlguemNaoConfia = x);
+            SimNao(caixa, "A equipe está mal preparada ou desequilibrada? (o mestre decide, pela ficção)", batalha.MalPreparada,
+                x => batalha.MalPreparada = x);
+
+            var perdas = (batalha.AlguemNaoConfia ? 1 : 0) + (batalha.MalPreparada ? 1 : 0);
+            if (perdas > 0)
+            {
+                var lider = personagens.Buscar(batalha.Lider);
+                Pergunta(caixa, $"A líder marca condição para não perder ponto? (até {perdas})");
+                var filaC = Estilo.Fila(caixa, 44, 6);
+                foreach (var c in Condicoes.Todas)
+                {
+                    var id = c;
+                    var ja = lider.CondicoesMarcadas.Contains(c);
+                    var escolhida = evitar.Contains(c);
+                    var b = escolhida
+                        ? Estilo.BotaoPrincipal(filaC, Condicoes.Nome(c), 0, () => { evitar.Remove(id); DesenharBatalha(); })
+                        : Estilo.BotaoContorno(filaC, Condicoes.Nome(c), 0, ja ? Estilo.TextoApagado : Estilo.Dourado, () =>
+                        {
+                            if (ja || evitar.Count >= perdas)
+                                return;
+                            evitar.Add(id);
+                            DesenharBatalha();
+                        });
+                    b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                    b.GetComponentInChildren<TextMeshProUGUI>().fontSize = 16;
+                }
+            }
+
+            var conta = Estilo.Rotulo(caixa, string.Join("\n", linhas), 20, Estilo.TextoSuave);
+            conta.textWrappingMode = TextWrappingModes.Normal;
+            var sinal = total >= 0 ? "+" : string.Empty;
+            Estilo.Rotulo(caixa, $"PILHA: {mesa.Equipe} {sinal}{total} = {Math.Max(0, mesa.Equipe + total)}", 30, Estilo.Texto, FontStyles.Bold);
+
+            var campoMotivo = CampoMotivo(caixa, "motivo (ex.: usina Halcyon Sul contra o Doutor Ocaso)");
+            campoMotivo.text = motivoBatalha;
+            campoMotivo.onValueChanged.AddListener(t => motivoBatalha = t);
+            var fim = Estilo.Fila(caixa, 56, 12);
+            Estilo.Rect("Vao", fim).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            Estilo.BotaoContorno(fim, "Cancelar", 200, Estilo.TextoSuave, FecharBatalha);
+            Estilo.BotaoPrincipal(fim, "Confirmar", 240, () =>
+            {
+                var r = mesa.EntrarEmBatalha(batalha, motivoBatalha);
+                if (!r.Ok)
+                {
+                    Mostrar(r);
+                    return;
+                }
+                FecharBatalha();
+                Aplicar(r);
+            });
+        }
+
+        void SimNao(Transform pai, string pergunta, bool valor, Action<bool> definir)
+        {
+            var fila = Estilo.Fila(pai, 48, 10);
+            var t = Estilo.Rotulo(fila, pergunta, 20, Estilo.Texto);
+            t.textWrappingMode = TextWrappingModes.Normal;
+            Estilo.ColunaElastica(t);
+            foreach (var (texto, sim) in new[] { ("Sim", true), ("Não", false) })
+            {
+                var alvo = sim;
+                if (sim == valor)
+                    Estilo.BotaoPrincipal(fila, texto, 110, () => { });
+                else
+                    Estilo.BotaoContorno(fila, texto, 110, Estilo.Dourado, () =>
+                    {
+                        definir(alvo);
+                        evitar.Clear();
+                        DesenharBatalha();
+                    });
+            }
+        }
+
+        static void Pergunta(Transform pai, string texto) =>
+            Estilo.Rotulo(pai, texto, 20, Estilo.Dourado, FontStyles.Bold);
+
+        static void Nota(Transform pai, string texto)
+        {
+            var n = Estilo.Rotulo(pai, texto, 18, Estilo.TextoSuave, FontStyles.Italic);
+            n.textWrappingMode = TextWrappingModes.Normal;
+        }
+    }
+}

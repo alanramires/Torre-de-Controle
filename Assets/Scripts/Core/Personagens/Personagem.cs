@@ -266,5 +266,16 @@ namespace TorreDeControle.Core.Personagens
         [JsonIgnore]
         public string NomeExibicao =>
             string.IsNullOrWhiteSpace(Identidade.Codinome) ? Identidade.Nome : Identidade.Codinome;
+
+        /// <summary>
+        /// Só para mostrar: "Doutor Ocaso (Augusto Vilar)" quando há codinome e nome. O dado continua separado
+        /// (o codinome é o nome de vilão; o nome, o real); nada grava isso.
+        /// </summary>
+        [JsonIgnore]
+        public string NomeCompleto =>
+            string.IsNullOrWhiteSpace(Identidade.Codinome) || string.IsNullOrWhiteSpace(Identidade.Nome) ||
+            Identidade.Codinome.Contains(Identidade.Nome)
+                ? NomeExibicao
+                : $"{Identidade.Codinome} ({Identidade.Nome})";
     }
 }

@@ -110,6 +110,27 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Lista_revisada_volta_por_cima_dos_mesmos_npcs_sem_duplicar()
+        {
+            personagens.CriarNpc(halcyon.Id, "Doutor Ocaso", Maturidade.Adulto, Papel.Vilao);
+            var ocaso = personagens.NpcsDaSala(halcyon.Id).Single();
+            ocaso.Pnj.Vinculo = new VinculoNpc { Personagem = "aurora", Extra = "legado/membros", Campo = "membros" };
+            var json = personagens.ExportarNpcs(halcyon.Id, "Campanha Halcyon City");
+
+            // Revisado fora da Torre (outra IA, editor de texto): mesmo id, campos novos.
+            var revisado = json.Replace("\"motivacao\": \"\"", "\"motivacao\": \"apagar a luz da cidade\"");
+            Assert.That(personagens.ImportarNpcs(revisado, halcyon.Id, out var novos, out var atualizados).Ok, Is.True);
+            Assert.That((novos.Count, atualizados.Count), Is.EqualTo((0, 1)));
+            Assert.That(personagens.NpcsDaSala(halcyon.Id).Count, Is.EqualTo(1));
+            Assert.That(ocaso.Pnj.Motivacao, Is.EqualTo("apagar a luz da cidade"));
+            Assert.That(ocaso.Pnj.Vinculo.Extra, Is.EqualTo("legado/membros")); // o laço com a heroína fica
+
+            // Em outro destino o mesmo arquivo continua criando cópias novas.
+            Assert.That(personagens.ImportarNpcs(revisado, null, out var noLab, out _).Ok, Is.True);
+            Assert.That(noLab.Single().Id, Is.Not.EqualTo(ocaso.Id));
+        }
+
+        [Test]
         public void Importar_npcs_recusa_json_de_personagem()
         {
             var heroina = FichaPronta.Criada(personagens, "Pulsar");

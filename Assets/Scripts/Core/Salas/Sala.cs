@@ -43,5 +43,15 @@ namespace TorreDeControle.Core.Salas
         [JsonProperty("slots")] public List<Slot> Slots { get; set; } = new List<Slot>();
         /// <summary>A formação da equipe, na ordem em que as respostas chegaram.</summary>
         [JsonProperty("formacao_equipe")] public List<EnvioDeEquipe> FormacaoEquipe { get; set; } = new List<EnvioDeEquipe>();
+        /// <summary>Itens do roteiro da primeira sessão que o mestre já marcou (ids de primeira_sessao.json).</summary>
+        [JsonProperty("primeira_sessao")] public List<string> PrimeiraSessao { get; set; } = new List<string>();
+        /// <summary>Anotações do mestre sobre a formação da equipe (inimigos, consequências, NPCs relevantes). Opcional.</summary>
+        [JsonProperty("anotacoes_formacao")] public string AnotacoesFormacao { get; set; } = string.Empty;
+        /// <summary>Anotações do mestre sobre os NPCs da campanha (aba NPCs). Opcional.</summary>
+        [JsonProperty("anotacoes_npcs")] public string AnotacoesNpcs { get; set; } = string.Empty;
+        /// <summary>A trama da campanha (Área do mestre): o que está acontecendo, planos, ganchos. Opcional.</summary>
+        [JsonProperty("trama")] public string Trama { get; set; } = string.Empty;
+        /// <summary>Quando a mesa desta sala foi aberta pela última vez (ordena a lista de "Entrar na sala").</summary>
+        [JsonProperty("ultima_mesa")] public string UltimaMesa { get; set; }
     }
 }

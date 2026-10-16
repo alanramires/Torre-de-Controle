@@ -1,3 +1,4 @@
+using System.Linq;
 using TorreDeControle.Core.Jogadores;
 using TorreDeControle.Core.Personagens;
 using TorreDeControle.Core.Regras;
@@ -19,6 +20,8 @@ namespace TorreDeControle.UI
         [SerializeField] Button botaoSalas;
         [Tooltip("Laboratório de NPCs (docs/npc_lab.md): originais, NPCs das campanhas e copiar entre elas.")]
         [SerializeField] Button botaoNpcs;
+        /// <summary>"Entrar na sala": a mesa de jogo da campanha (direto, se só uma estiver pronta).</summary>
+        [SerializeField] Button botaoMesa;
         [Header("Sons da interface")]
         [SerializeField] AudioClip somCursor;
         [SerializeField] AudioClip somConfirmar;
@@ -39,6 +42,7 @@ namespace TorreDeControle.UI
         PainelSalas painelSalas;
         PainelAjuda painelAjuda;
         PainelNpcs painelNpcs;
+        PainelMesa painelMesa;
 
         ArmazenamentoAdiado armazenamento;
 
@@ -77,6 +81,7 @@ namespace TorreDeControle.UI
             Ligar(botaoPersonagens, nameof(botaoPersonagens), AbrirPersonagens);
             Ligar(botaoSalas, nameof(botaoSalas), AbrirSalas);
             Ligar(botaoNpcs, nameof(botaoNpcs), AbrirNpcs);
+            Ligar(botaoMesa, nameof(botaoMesa), EntrarNaSala);
             Ligar(botaoAjuda, nameof(botaoAjuda), AbrirAjuda);
         }
 
@@ -114,6 +119,38 @@ namespace TorreDeControle.UI
             if (painelNpcs == null)
                 painelNpcs = PainelNpcs.Criar(transform);
             painelNpcs.Abrir(personagens, salas);
+        }
+
+        /// <summary>
+        /// Uma campanha pronta (todas em carreira) e nenhuma outra: entra direto. Senão, a lista das ativas
+        /// (a última jogada em cima); as não prontas aparecem apagadas, com o motivo, e entram mesmo assim.
+        /// </summary>
+        void EntrarNaSala()
+        {
+            var opcoes = salas.ParaAMesa();
+            if (opcoes.Count == 1 && opcoes[0].pronta)
+            {
+                AbrirMesa(opcoes[0].sala);
+                return;
+            }
+            if (opcoes.Count == 0)
+            {
+                Estilo.Confirmar(transform, "Nenhuma campanha ativa. Crie uma em Salas.", "Ok", () => { });
+                return;
+            }
+            Estilo.Escolher(transform, "Entrar na sala", opcoes.Select(o =>
+            {
+                var sala = o.sala;
+                var texto = o.pronta ? sala.Nome : $"{sala.Nome}  <size=75%>({o.motivo})</size>\n<size=65%>entrar mesmo assim</size>";
+                return (texto, (UnityEngine.Events.UnityAction)(() => AbrirMesa(sala)), !o.pronta);
+            }).ToArray());
+        }
+
+        void AbrirMesa(TorreDeControle.Core.Salas.Sala sala)
+        {
+            if (painelMesa == null)
+                painelMesa = PainelMesa.Criar(transform);
+            painelMesa.Abrir(sala, salas, personagens, armazenamento, null);
         }
 
         void AbrirAjuda()

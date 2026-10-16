@@ -61,10 +61,48 @@ namespace TorreDeControle.Core.Personagens
                 return Resultado.Falha("Dê pelo menos um nome ou um codinome.");
             if (n == p.Identidade.Nome && c == p.Identidade.Codinome)
                 return Resultado.Sucesso();
+            // Nasceu da ficha de uma heroína: o nome pelo qual a mesa o conhece (codinome, se vilão) mora lá.
+            // Mudar aqui muda lá também, senão a sincronização desfaria a troca.
+            var daFicha = p.Papel == Papel.Vilao ? c : n;
+            var antes = p.Papel == Papel.Vilao ? p.Identidade.Codinome : p.Identidade.Nome;
+            if (OrigemDoNpc(p) != null && daFicha != antes)
+            {
+                if (daFicha.Length == 0)
+                    return Resultado.Falha(p.Papel == Papel.Vilao
+                        ? "O nome de vilão vem da ficha da heroína: para tirá-lo, apague lá."
+                        : "O nome vem da ficha da heroína: para tirá-lo, apague lá.");
+                DevolverNomeAFicha(p, daFicha);
+            }
             p.Identidade.Nome = n;
             p.Identidade.Codinome = c;
             Gravar();
             return Resultado.Sucesso();
+        }
+
+        /// <summary>
+        /// Escreve o nome novo do NPC no lugar da ficha de onde ele nasceu (extra, pessoa de opção, pergunta
+        /// de histórico ou formação), na criação e na foto. É o mestre corrigindo: vale em qualquer status.
+        /// </summary>
+        void DevolverNomeAFicha(Personagem npc, string nome)
+        {
+            var v = npc.Pnj.Vinculo;
+            var dono = Buscar(v.Personagem);
+            var fonte = FontesDeNpc(dono).FirstOrDefault(f => f.fonte == v.Extra && f.campo == v.Campo && f.vaga == v.Vaga);
+            if (fonte.regra == null)
+                return;
+            if (v.Extra == FonteHistorico)
+                dono.Identidade.NomesHistorico[v.Campo] = nome;
+            else if (v.Extra == FonteFormacao)
+                dono.EquipeNpcNome = nome;
+            else
+            {
+                var chave = fonte.regra.PorEscolha
+                    ? ChaveExtra(v.Extra, v.Campo, Regras.RegrasArquetipos.CampoExtra.PessoaDaOpcao(v.Vaga))
+                    : ChaveExtra(v.Extra, v.Campo, v.Vaga);
+                dono.Criacao.ExtrasTextos[chave] = nome;
+                if (dono.Foto != null)
+                    dono.Foto.ExtrasTextos[chave] = nome;
+            }
         }
 
         public Resultado DefinirPerfilPnj(string id, string modoDeAgir, string motivacao)
@@ -283,6 +321,7 @@ namespace TorreDeControle.Core.Personagens
             copia.Favorito = false;
             copia.Ordem = Ordenacao.Fim(personagens.Where(n => n.Sala == destino && n.Controle == Controle.Mestre));
             copia.Pnj.Vinculo = null;
+            copia.Pnj.Ligacoes = new List<LigacaoNpc>(); // ligações são com heroínas de lá
             copia.Influencias = new Dictionary<string, EstadoInfluencia>();
             copia.InfluenciaPorque = new Dictionary<string, string>();
             copia.InfluenciaPorqueNinguem = string.Empty;

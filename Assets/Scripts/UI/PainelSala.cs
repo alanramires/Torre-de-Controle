@@ -30,6 +30,7 @@ namespace TorreDeControle.UI
         Action aoFechar;
         PainelFicha painelFicha;
         PainelNpc painelNpc;
+        PainelMestre painelMestre;
 
         string npcNome = string.Empty;
         Maturidade npcMaturidade = Maturidade.Adulto;
@@ -83,8 +84,18 @@ namespace TorreDeControle.UI
         }
 
         /// <summary>O painel de controle do mestre (rodadas, potencial, condições, Rótulos, log). Em construção.</summary>
-        void AreaDoMestre() =>
-            mensagem.text = "Área do mestre: em construção (rodadas, potencial, condições, Rótulos e o log da campanha).";
+        void AreaDoMestre()
+        {
+            if (painelMestre == null)
+                painelMestre = PainelMestre.Criar(transform.parent);
+            // A sala sai de cena enquanto a área do mestre está aberta (senão aparece por trás).
+            gameObject.SetActive(false);
+            painelMestre.Abrir(sala, salas, personagens, () =>
+            {
+                gameObject.SetActive(true);
+                Redesenhar();
+            });
+        }
 
         void Fechar()
         {
@@ -265,9 +276,9 @@ namespace TorreDeControle.UI
                             (sala.Ativo ? string.Empty : " · sala inativa");
 
             var daAprovacao = abaAtual == Aba.Equipe || abaAtual == Aba.Influencia || abaAtual == Aba.Relacionamentos;
-            if (daAprovacao && EmAprovacao().Count == 0)
+            if (daAprovacao && NaEquipe().Count == 0)
             {
-                abaAtual = Aba.Vagas; // essas abas só existem com alguém em aprovação
+                abaAtual = Aba.Vagas; // essas abas só existem com alguém em aprovação ou em carreira
                 daAprovacao = false;
             }
             MontarAbas();
@@ -317,8 +328,8 @@ namespace TorreDeControle.UI
             {
                 (Aba.Vagas, "Vagas"), (Aba.Npcs, $"NPCs · {npcs}"), (Aba.Cenario, $"Cenário · {lugares}"),
             };
-            // Formação da equipe: aparece com ao menos uma personagem em aprovação nas vagas.
-            var emAprovacao = EmAprovacao().Count;
+            // Formação da equipe: aparece com ao menos uma personagem em aprovação ou em carreira nas vagas.
+            var emAprovacao = NaEquipe().Count;
             if (emAprovacao > 0)
             {
                 lista.Add((Aba.Equipe, $"Formação da equipe · {emAprovacao}"));
@@ -352,11 +363,18 @@ namespace TorreDeControle.UI
         // ---------- formação da equipe (segunda etapa, na campanha) ----------
 
         /// <summary>As personagens das vagas em aprovação, na ordem das vagas.</summary>
-        List<Personagem> EmAprovacao() =>
+        /// <summary>
+        /// As personagens das vagas em aprovação ou em carreira, na ordem das vagas: as abas da equipe
+        /// (formação, Influência, relacionamentos) continuam para leitura depois de aprovar; editar a
+        /// formação é só em aprovação.
+        /// </summary>
+        List<Personagem> NaEquipe() =>
             sala.Slots
                 .Where(s => s.Personagem != null)
                 .Select(s => personagens.Buscar(s.Personagem))
-                .Where(p => p != null && p.Ativo && p.Status == StatusCriacao.EmAprovacao)
+                .Where(p => p != null && p.Ativo &&
+                            (p.Status == StatusCriacao.EmAprovacao || p.Status == StatusCriacao.EmCarreira ||
+                             p.Status == StatusCriacao.EmRevisao))
                 .ToList();
 
         /// <summary>Personagem selecionada na formação da equipe (a que vai responder).</summary>
@@ -369,7 +387,7 @@ namespace TorreDeControle.UI
         /// </summary>
         void SecaoEquipe()
         {
-            var candidatas = EmAprovacao();
+            var candidatas = NaEquipe();
             if (candidatas.All(c => c.Id != equipeSelecionada))
                 equipeSelecionada = (candidatas.FirstOrDefault(c => salas.PosicaoNaFormacao(sala, c.Id) == 0)
                                      ?? candidatas.First()).Id;
@@ -405,6 +423,7 @@ namespace TorreDeControle.UI
                 rotulo.rectTransform.offsetMax = new Vector2(-10, 0);
             }
 
+
             // Direita: a pergunta e o enviar (em cima); a formação (embaixo).
             var direita = Coluna(bloco, -1, 12);
 
@@ -420,6 +439,11 @@ namespace TorreDeControle.UI
             resposta.text = sala.FormacaoEquipe.FirstOrDefault(e => e.Personagem == selecionada.Id)?.Texto
                             ?? selecionada.EquipeResposta;
             Estilo.ColunaElastica(resposta);
+            // Em carreira a formação é história: só leitura (o ••• ainda abre o texto inteiro).
+            // Em revisão também: a resposta continua na formação, e volta a ser editável quando ela voltar a "em aprovação".
+            var emCarreira = selecionada.Status != StatusCriacao.EmAprovacao;
+            if (emCarreira)
+                resposta.interactable = false;
             TMP_InputField nomeNpc = null;
             // Formação que dá NPC (ex.: o herói que o Legado impressionou): nome opcional; a resposta é a descrição.
             if (personagens.FormacaoDaNpc(selecionada))
@@ -431,6 +455,8 @@ namespace TorreDeControle.UI
                 nomeNpc = Estilo.CampoTexto(filaNpc, $"nome (opcional): vira {(cria == "NPC" ? "NPC" : "cenário")} da sala");
                 nomeNpc.text = selecionada.EquipeNpcNome;
                 Estilo.ColunaElastica(nomeNpc);
+                if (emCarreira)
+                    nomeNpc.interactable = false;
                 var alvoNpc = selecionada;
                 nomeNpc.onEndEdit.AddListener(t =>
                 {
@@ -445,6 +471,12 @@ namespace TorreDeControle.UI
             // O nome no botão evita responder pela personagem errada.
             var jaEnviou = salas.PosicaoNaFormacao(sala, selecionada.Id) > 0;
             var botoes = Coluna(fila, 260, 8);
+            if (emCarreira)
+                Nota(botoes, selecionada.Status == StatusCriacao.EmRevisao
+                    ? "Em revisão: só leitura até voltar a \"em aprovação\"."
+                    : "Em carreira: só leitura.");
+            else
+            {
             var enviar = Estilo.BotaoPrincipal(botoes, $"{(jaEnviou ? "Reenviar" : "Enviar")} como\n{selecionada.NomeExibicao}",
                 0, () =>
                 {
@@ -486,6 +518,7 @@ namespace TorreDeControle.UI
                             Redesenhar();
                         }));
                 desfazer.GetComponent<LayoutElement>().preferredHeight = 42;
+            }
             }
 
             // A formação da equipe: só leitura, na ordem de chegada.
@@ -549,7 +582,7 @@ namespace TorreDeControle.UI
         /// </summary>
         void SecaoRelacionamentos()
         {
-            var candidatas = EmAprovacao();
+            var candidatas = NaEquipe();
             if (candidatas.All(c => c.Id != equipeSelecionada))
                 equipeSelecionada = candidatas.First().Id;
             var p = candidatas.First(c => c.Id == equipeSelecionada);
@@ -572,6 +605,7 @@ namespace TorreDeControle.UI
                     });
                 AjustarBotaoDeLista(botao);
             }
+            TrocaDeVinculos(coluna);
 
             // Meio: as frases dela.
             var centro = Caixa(Coluna(bloco, -1, 0), Estilo.Azul);
@@ -631,7 +665,7 @@ namespace TorreDeControle.UI
         /// </summary>
         void SecaoInfluencia()
         {
-            var candidatas = EmAprovacao();
+            var candidatas = NaEquipe();
             if (candidatas.All(c => c.Id != equipeSelecionada))
                 equipeSelecionada = (candidatas.FirstOrDefault(c => !personagens.InfluenciaConfirmada(c)) ?? candidatas.First()).Id;
             var p = candidatas.First(c => c.Id == equipeSelecionada);
@@ -654,6 +688,7 @@ namespace TorreDeControle.UI
                     });
                 AjustarBotaoDeLista(botao);
             }
+            TrocaDeVinculos(coluna);
 
             // Centro: a regra (azul) e, embaixo, escolher (vermelho) | deu (verde).
             var centro = Coluna(bloco, -1, 12);
@@ -883,6 +918,7 @@ namespace TorreDeControle.UI
 
         void SecaoNpcs()
         {
+
             var titulos = Estilo.Fila(lista, 30);
             titulos.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(10, 10, 0, 0);
             Estilo.VaoDaAlca(titulos);
@@ -905,6 +941,15 @@ namespace TorreDeControle.UI
             Estilo.ListaSuspensa(novo, LarguraPerfil, OpcoesPapel(), npcPapel.ToString(),
                 id => npcPapel = (Papel)Enum.Parse(typeof(Papel), id));
             Estilo.BotaoPrincipal(novo, "Criar NPC", LarguraBotao * 2 + 14, CriarNpc);
+
+            // Os NPCs desta campanha vão e voltam em JSON (o mesmo id volta por cima, como no laboratório).
+            var troca = Estilo.Fila(lista, 50);
+            troca.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(10, 10, 0, 0);
+            var dica = Estilo.Rotulo(troca, "Revisar fora ou levar a outra Torre: exporte aqui, importe de volta (o mesmo NPC atualiza por cima).",
+                18, Estilo.TextoApagado, FontStyles.Italic);
+            Estilo.ColunaElastica(dica);
+            Estilo.BotaoContorno(troca, "Exportar", LarguraBotao, Estilo.Dourado, ExportarNpcs);
+            Estilo.BotaoContorno(troca, "Importar", LarguraBotao, Estilo.Dourado, ImportarNpcs);
 
             var npcs = personagens.NpcsDaSala(sala.Id);
             foreach (var (ativo, titulo) in new[] { (true, "NPCS"), (false, "NPCS INATIVOS") })
@@ -938,8 +983,12 @@ namespace TorreDeControle.UI
 
             var motivacao = npc.Pnj?.Motivacao;
             var origem = personagens.OrigemDoNpc(npc);
-            var texto = $"<b>{npc.NomeExibicao}</b>" +
-                        (origem is { } o ? $"  <size=80%><color=#{ColorUtility.ToHtmlStringRGB(Estilo.Dourado)}>{o.dono.NomeExibicao} · {o.vinculo}</color></size>" : string.Empty) +
+            // O laço: da ficha (dona · vínculo) ou do mestre (Ligado a: heroína · como).
+            var laco = origem is { } o ? $"{o.dono.NomeExibicao} · {o.vinculo}"
+                : string.Join(", ", personagens.LigacoesDoNpc(npc).Select(l =>
+                    string.IsNullOrWhiteSpace(l.como) ? l.heroi.NomeExibicao : $"{l.heroi.NomeExibicao} · {l.como}"));
+            var texto = $"<b>{npc.NomeCompleto}</b>" +
+                        (laco.Length > 0 ? $"  <size=80%><color=#{ColorUtility.ToHtmlStringRGB(Estilo.Dourado)}>{laco}</color></size>" : string.Empty) +
                         (string.IsNullOrWhiteSpace(motivacao) ? string.Empty : $"  <i><color=#9AA3B5>quer {motivacao}</color></i>");
             var nome = Estilo.Rotulo(linha, texto, 24, npc.Ativo ? Estilo.Texto : Estilo.TextoApagado);
             nome.textWrappingMode = TextWrappingModes.NoWrap;
@@ -1077,6 +1126,127 @@ namespace TorreDeControle.UI
             }
             nome.onEndEdit.AddListener(Gravar);
             descricao.onDeselect.AddListener(Gravar);
+        }
+
+        /// <summary>
+        /// Embaixo da lista (abas Influência e Relacionamentos): exportar e importar os dois juntos, para revisar
+        /// fora e trazer de volta. Importar só mexe nesses campos das heroínas desta campanha.
+        /// </summary>
+        void TrocaDeVinculos(Transform coluna)
+        {
+            Estilo.Rect("Vao", coluna).gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            var r = Estilo.Rotulo(coluna, "Influência e relacionamentos", 16, Estilo.TextoSuave, FontStyles.Italic);
+            r.alignment = TextAlignmentOptions.Center;
+            var fila = Estilo.Fila(coluna, 44, 8);
+            Estilo.BotaoContorno(fila, "Exportar", 0, Estilo.Dourado, ExportarVinculos)
+                .GetComponent<LayoutElement>().flexibleWidth = 1;
+            Estilo.BotaoContorno(fila, "Importar", 0, Estilo.Dourado, ImportarVinculos)
+                .GetComponent<LayoutElement>().flexibleWidth = 1;
+        }
+
+        void ExportarVinculos()
+        {
+            var origem = "Campanha " + sala.Nome;
+            var json = personagens.ExportarVinculos(NaEquipe(), origem);
+            if (Troca.Arquivos == null)
+                return;
+            string caminho;
+            try
+            {
+                caminho = Troca.Arquivos.Exportar("Influência e relacionamentos - " + origem, json);
+            }
+            catch (Exception e)
+            {
+                Mostrar(Resultado.Falha("Não deu para exportar: " + e.Message));
+                return;
+            }
+            GUIUtility.systemCopyBuffer = json;
+            Estilo.Confirmar(transform,
+                $"Influência e relacionamentos exportados ({origem}) em\n<size=80%>{caminho}</size>\nO JSON também foi copiado (Ctrl+V para colar).",
+                "Abrir a pasta",
+                () => Application.OpenURL("file:///" + Troca.Arquivos.PastaExportacoes.Replace('\\', '/')));
+        }
+
+        void ImportarVinculos()
+        {
+            if (Troca.Arquivos == null)
+                return;
+            var opcoes = new List<(string, UnityEngine.Events.UnityAction, bool)>();
+            foreach (var caminho in Troca.Importaveis(CadastroPersonagens.FormatoDeTrocaVinculos))
+            {
+                var arquivo = caminho;
+                opcoes.Add((System.IO.Path.GetFileName(arquivo), () => ImportarVinculosDe(Troca.Arquivos.Ler(arquivo)), false));
+            }
+            opcoes.Add(("Colar da área de transferência", () => ImportarVinculosDe(GUIUtility.systemCopyBuffer), false));
+            opcoes.Add(("Abrir a pasta de importar", () =>
+                Application.OpenURL("file:///" + Troca.Arquivos.PastaImportar.Replace('\\', '/')), true));
+            Estilo.Escolher(transform, $"Importar Influência e relacionamentos para {sala.Nome}", opcoes.ToArray());
+        }
+
+        void ImportarVinculosDe(string json) =>
+            Estilo.Confirmar(transform, $"Substituir a Influência e os relacionamentos das heroínas de {sala.Nome} pelos do arquivo?",
+                "Substituir", () =>
+                {
+                    var r = personagens.ImportarVinculos(json, NaEquipe(), out var n);
+                    Redesenhar();
+                    Mostrar(r, $"{n} heroína{(n == 1 ? "" : "s")} atualizada{(n == 1 ? "" : "s")}.");
+                });
+
+        void ExportarNpcs()
+        {
+            var origem = "Campanha " + sala.Nome;
+            var json = personagens.ExportarNpcs(sala.Id, origem);
+            if (json == null)
+            {
+                Mostrar(Resultado.Falha("Nenhum NPC para exportar."));
+                return;
+            }
+            if (Troca.Arquivos == null)
+                return;
+            string caminho;
+            try
+            {
+                caminho = Troca.Arquivos.Exportar("NPCs - " + origem, json);
+            }
+            catch (Exception e)
+            {
+                Mostrar(Resultado.Falha("Não deu para exportar: " + e.Message));
+                return;
+            }
+            GUIUtility.systemCopyBuffer = json;
+            Estilo.Confirmar(transform,
+                $"NPCs exportados ({origem}) em\n<size=80%>{caminho}</size>\nO JSON também foi copiado (Ctrl+V para colar).",
+                "Abrir a pasta",
+                () => Application.OpenURL("file:///" + Troca.Arquivos.PastaExportacoes.Replace('\\', '/')));
+        }
+
+        /// <summary>Um dos .json de NPCs em dados/importar, ou a área de transferência; entra nesta campanha.</summary>
+        void ImportarNpcs()
+        {
+            if (Troca.Arquivos == null)
+                return;
+            var opcoes = new List<(string, UnityEngine.Events.UnityAction, bool)>();
+            foreach (var caminho in Troca.Importaveis(CadastroPersonagens.FormatoDeTrocaNpcs))
+            {
+                var arquivo = caminho;
+                opcoes.Add((System.IO.Path.GetFileName(arquivo), () => ImportarNpcsDe(Troca.Arquivos.Ler(arquivo)), false));
+            }
+            opcoes.Add(("Colar da área de transferência", () => ImportarNpcsDe(GUIUtility.systemCopyBuffer), false));
+            opcoes.Add(("Abrir a pasta de importar", () =>
+                Application.OpenURL("file:///" + Troca.Arquivos.PastaImportar.Replace('\\', '/')), true));
+            Estilo.Escolher(transform, $"Importar NPCs para {sala.Nome}", opcoes.ToArray());
+        }
+
+        void ImportarNpcsDe(string json)
+        {
+            var resultado = personagens.ImportarNpcs(json, sala.Id, out var novos, out var atualizados);
+            Redesenhar();
+            var partes = new List<string>();
+            if (atualizados.Count > 0)
+                partes.Add($"{atualizados.Count} atualizado{(atualizados.Count == 1 ? "" : "s")} por cima");
+            if (novos.Count > 0 || partes.Count == 0)
+                partes.Add($"{novos.Count} novo{(novos.Count == 1 ? "" : "s")}");
+            Mostrar(resultado, $"NPCs: {string.Join(", ", partes)}.");
         }
 
         void ExportarCenario()

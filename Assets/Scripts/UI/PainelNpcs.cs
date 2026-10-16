@@ -211,8 +211,14 @@ namespace TorreDeControle.UI
 
         void ImportarPara(string json, string destino, string nomeDoDestino)
         {
-            var resultado = cadastro.ImportarNpcs(json, destino, out var novos);
-            Mostrar(resultado, resultado.Ok ? $"{novos.Count} NPC{(novos.Count == 1 ? "" : "s")} importado{(novos.Count == 1 ? "" : "s")} para {nomeDoDestino}." : null);
+            var resultado = cadastro.ImportarNpcs(json, destino, out var novos, out var atualizados);
+            // Mesmo id já no destino = o caminho de volta (exportou, revisou, importou): atualiza por cima.
+            var partes = new List<string>();
+            if (atualizados.Count > 0)
+                partes.Add($"{atualizados.Count} atualizado{(atualizados.Count == 1 ? "" : "s")} por cima");
+            if (novos.Count > 0 || partes.Count == 0)
+                partes.Add($"{novos.Count} novo{(novos.Count == 1 ? "" : "s")}");
+            Mostrar(resultado, resultado.Ok ? $"NPCs em {nomeDoDestino}: {string.Join(", ", partes)}." : null);
             Redesenhar();
         }
 
@@ -416,7 +422,7 @@ namespace TorreDeControle.UI
             var de = cadastro.OrigemDoNpc(npc) is { } o ? $"{o.dono.NomeExibicao} · {o.vinculo}"
                 : cadastro.OrigemDaCopia(npc) is { } origem ? $"reboot de {origem.NomeExibicao}{OndeEsta(origem)}"
                 : null;
-            var texto = $"<b>{npc.NomeExibicao}</b>" +
+            var texto = $"<b>{npc.NomeCompleto}</b>" +
                         (de == null ? string.Empty : $"  <size=80%><color=#{dourado}>{de}</color></size>");
             var rotulo = Estilo.Rotulo(linha, texto, 24, npc.Ativo ? Estilo.Texto : Estilo.TextoApagado);
             rotulo.textWrappingMode = TextWrappingModes.NoWrap;

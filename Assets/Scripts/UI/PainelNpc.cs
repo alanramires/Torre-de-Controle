@@ -213,7 +213,7 @@ namespace TorreDeControle.UI
 
         void Cabecalho()
         {
-            titulo.text = npc.NomeExibicao.ToUpperInvariant();
+            titulo.text = npc.NomeCompleto.ToUpperInvariant();
             var maturidade = npc.Maturidade == Maturidade.Adulto ? "adulto" : "jovem";
             var papel = NomeDoPapel(npc.Papel).ToLowerInvariant();
             var origem = cadastro.OrigemDoNpc(npc);
@@ -235,7 +235,8 @@ namespace TorreDeControle.UI
             {
                 Secao($"{origem.dono.NomeExibicao.ToUpperInvariant()} · {origem.vinculo.ToUpperInvariant()}", null);
                 Nota("Nasceu da ficha dela. O texto dela foi copiado para as Notas (lá embaixo), e daqui em diante " +
-                     "são suas: editar as Notas não mexe na história dela, e o contrário também. O nome continua vindo de lá.");
+                     "são suas: editar as Notas não mexe na história dela, e o contrário também. O nome é o mesmo dos dois lados: " +
+                     "mudar aqui muda na ficha dela.");
                 Vao();
             }
             Secao("IDENTIDADE", "clique na foto para abrir o link");
@@ -313,6 +314,14 @@ namespace TorreDeControle.UI
             Estilo.ComExpandir(notas, "Notas");
             aparencia.onDeselect.AddListener(_ => cadastro.AlterarTextos(npc.Id, aparencia.text, notas.text));
             notas.onDeselect.AddListener(_ => cadastro.AlterarTextos(npc.Id, aparencia.text, notas.text));
+
+            // "Ligado a" é coisa de vilão (o da primeira sessão, livro cap. 8): aliado e neutro não mostram.
+            // Trocar o papel não apaga as ligações; elas voltam se ele virar vilão de novo.
+            if (npc.Papel == Papel.Vilao)
+            {
+                Secao("LIGADO A", "heroínas da campanha ligadas a este vilão, e como");
+                Ligacoes();
+            }
 
             Secao("INFLUÊNCIA", null);
             Nota(npc.Maturidade == Maturidade.Adulto
@@ -413,6 +422,66 @@ namespace TorreDeControle.UI
             // As mesmas frases da ficha das heroínas: "deu Influência a X" = X tem Influência sobre ele.
             LinhaDeInfluencia($"{nome} DEU INFLUÊNCIA A", herois, h => (h, npc));
             LinhaDeInfluencia($"{nome} EXERCE INFLUÊNCIA SOBRE", herois, h => (npc, h));
+        }
+
+        /// <summary>
+        /// "Ligado a": chips das heroínas da campanha (clicar liga/desliga) e, para cada ligada, uma linha de
+        /// "como". Quem nasceu da ficha já vem ligado à dona (o laço aparece no topo); aqui entram as outras.
+        /// </summary>
+        void Ligacoes()
+        {
+            if (npc.Sala == null)
+            {
+                Nota("No laboratório não há heroínas: ligue na campanha (cópia na sala).");
+                return;
+            }
+            var herois = cadastro.HeroisDaSala(npc.Sala).Where(h => h.Ativo).OrderBy(h => h.NomeExibicao).ToList();
+            if (herois.Count == 0)
+            {
+                Nota("Nenhuma heroína ativa nesta campanha ainda.");
+                return;
+            }
+            var ligadas = cadastro.LigacoesDoNpc(npc);
+            for (var k = 0; k < herois.Count; k += 4)
+            {
+                var fila = Estilo.Fila(conteudo, 62, 10);
+                foreach (var h in herois.Skip(k).Take(4))
+                {
+                    var heroi = h;
+                    Chip(fila, h.NomeExibicao, ligadas.Any(l => l.heroi == h), () =>
+                    {
+                        var r = cadastro.AlternarLigacao(npc.Id, heroi.Id);
+                        if (!r.Ok)
+                        {
+                            rodape.color = Estilo.Erro;
+                            rodape.text = r.Erro;
+                            return;
+                        }
+                        Redesenhar();
+                    });
+                }
+                for (var vazio = herois.Count - k; vazio < 4; vazio++)
+                    Estilo.Rect("Vao", fila).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            }
+            foreach (var (heroi, como) in ligadas)
+            {
+                var fila = Estilo.Fila(conteudo, 52, 12);
+                var r = Estilo.Rotulo(fila, heroi.NomeExibicao, 20, Estilo.TextoSuave, FontStyles.Bold);
+                r.textWrappingMode = TextWrappingModes.NoWrap;
+                r.overflowMode = TextOverflowModes.Ellipsis;
+                var lr = r.gameObject.AddComponent<LayoutElement>();
+                lr.preferredWidth = 260;
+                lr.flexibleWidth = 0;
+                var campo = Estilo.CampoTexto(fila, "como? ex.: destruiu o laboratório onde ela foi criada");
+                campo.text = como;
+                Estilo.ColunaElastica(campo);
+                var alvo = heroi;
+                void Gravar(string t) => cadastro.DescreverLigacao(npc.Id, alvo.Id, t);
+                campo.onSubmit.AddListener(Gravar);
+                campo.onDeselect.AddListener(Gravar);
+            }
+            if (ligadas.Count == 0 && cadastro.OrigemDoNpc(npc) == null)
+                Nota("Sem ligação, este NPC não conta como \"vilão ligado a uma heroína\" na primeira sessão (Área do mestre).");
         }
 
         void LinhaDeInfluencia(string titulo, System.Collections.Generic.IReadOnlyList<Personagem> herois,

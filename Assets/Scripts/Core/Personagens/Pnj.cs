@@ -72,6 +72,15 @@ namespace TorreDeControle.Core.Personagens
         /// história narrada e as Notas são do mestre; uma não mexe na outra.
         /// </summary>
         [JsonProperty("descricao_copiada")] public bool DescricaoCopiada { get; set; }
+        /// <summary>Heroínas da campanha a que o mestre ligou este NPC ("Ligado a"), cada uma com o como.</summary>
+        [JsonProperty("ligacoes")] public List<LigacaoNpc> Ligacoes { get; set; } = new List<LigacaoNpc>();
+    }
+
+    /// <summary>Uma ligação feita pelo mestre: a heroína (instância na sala) e, em uma linha, como.</summary>
+    public sealed class LigacaoNpc
+    {
+        [JsonProperty("personagem")] public string Personagem { get; set; }
+        [JsonProperty("como")] public string Como { get; set; } = string.Empty;
     }
 
     /// <summary>De quem o NPC é (a instância na sala) e de qual extra ele nasceu.</summary>

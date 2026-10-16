@@ -296,6 +296,146 @@ namespace TorreDeControle.Core.Salas
 
         static string Limpar(string nome) => (nome ?? string.Empty).Trim();
 
+        /// <summary>
+        /// Marca ou desmarca um item do roteiro da primeira sessão (o mestre, durante a sessão). Não é evento
+        /// de jogo: é a lista de conferência dele, e desmarcar não precisa de correção.
+        /// </summary>
+        public Resultado AlternarItemDaPrimeiraSessao(string salaId, string item)
+        {
+            var sala = Buscar(salaId);
+            if (sala == null)
+                return Resultado.Falha("Sala não encontrada.");
+            if (string.IsNullOrWhiteSpace(item))
+                return Resultado.Falha("Item sem id.");
+            sala.PrimeiraSessao ??= new List<string>();
+            if (!sala.PrimeiraSessao.Remove(item))
+                sala.PrimeiraSessao.Add(item);
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>
+        /// As campanhas ativas para "Entrar na sala": pronta = todas as heroínas das vagas em carreira (e ao
+        /// menos uma). As outras vêm com o motivo ("Mayane em aprovação"), para entrar mesmo assim. A última
+        /// jogada primeiro, depois as prontas.
+        /// </summary>
+        public IReadOnlyList<(Sala sala, bool pronta, string motivo)> ParaAMesa()
+        {
+            var lista = new List<(Sala, bool, string)>();
+            foreach (var s in salas.Where(s => s.Ativo))
+            {
+                var herois = s.Slots.Where(v => v.Personagem != null).Select(v => personagens.Buscar(v.Personagem))
+                    .Where(p => p != null && p.Ativo).ToList();
+                // Só quantas já estão em carreira ("0/5 prontas", pronta = em carreira): o resto se vê na sala.
+                var emCarreira = herois.Count(p => p.Status == StatusCriacao.EmCarreira);
+                var pronta = herois.Count > 0 && emCarreira == herois.Count;
+                var motivo = herois.Count == 0 ? "sem heroínas nas vagas" : $"{emCarreira}/{herois.Count} prontas";
+                lista.Add((s, pronta, motivo));
+            }
+            return lista.OrderByDescending(x => x.Item1.UltimaMesa ?? string.Empty).ThenByDescending(x => x.Item2).ToList();
+        }
+
+
+        /// <summary>Lembra quando a mesa da sala foi aberta (a lista de "Entrar na sala" sugere a última).</summary>
+        public void MarcarMesaAberta(string salaId)
+        {
+            var sala = Buscar(salaId);
+            if (sala == null)
+                return;
+            sala.UltimaMesa = DateTime.Now.ToString("s");
+            Gravar();
+        }
+
+        public enum Anotacao { Formacao, Npcs, Trama }
+
+        /// <summary>
+        /// As anotações do mestre na sala (formação da equipe, NPCs, trama): texto livre, opcional, em qualquer
+        /// status. Cada uma mora ao lado do que descreve.
+        /// </summary>
+        public Resultado DefinirAnotacao(string salaId, Anotacao qual, string texto)
+        {
+            var sala = Buscar(salaId);
+            if (sala == null)
+                return Resultado.Falha("Sala não encontrada.");
+            var limpo = (texto ?? string.Empty).Trim();
+            if (limpo == (LerAnotacao(sala, qual) ?? string.Empty))
+                return Resultado.Sucesso();
+            switch (qual)
+            {
+                case Anotacao.Formacao: sala.AnotacoesFormacao = limpo; break;
+                case Anotacao.Npcs: sala.AnotacoesNpcs = limpo; break;
+                default: sala.Trama = limpo; break;
+            }
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        public const string FormatoDeTrocaAnotacoes = "torre-de-controle/anotacoes";
+
+        sealed class EnvelopeAnotacoes
+        {
+            [JsonProperty("formato")] public string Formato { get; set; }
+            [JsonProperty("versao")] public int Versao { get; set; } = 1;
+            [JsonProperty("exportado_em")] public string ExportadoEm { get; set; }
+            [JsonProperty("origem")] public string Origem { get; set; }
+            [JsonProperty("formacao")] public string Formacao { get; set; }
+            [JsonProperty("npcs")] public string Npcs { get; set; }
+            [JsonProperty("trama")] public string Trama { get; set; }
+        }
+
+        /// <summary>As três anotações do mestre da sala num JSON próprio (para revisar fora ou levar a outra campanha).</summary>
+        public string ExportarAnotacoes(string salaId)
+        {
+            var sala = Buscar(salaId);
+            if (sala == null)
+                return null;
+            return JsonConvert.SerializeObject(new EnvelopeAnotacoes
+            {
+                Formato = FormatoDeTrocaAnotacoes,
+                ExportadoEm = DateTime.Now.ToString("s"),
+                Origem = "Campanha " + sala.Nome,
+                Formacao = sala.AnotacoesFormacao ?? string.Empty,
+                Npcs = sala.AnotacoesNpcs ?? string.Empty,
+                Trama = sala.Trama ?? string.Empty,
+            }, Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Traz as anotações de um JSON de troca por cima das desta sala. Campo ausente no arquivo (null)
+        /// fica como está; presente (mesmo vazio) substitui.
+        /// </summary>
+        public Resultado ImportarAnotacoes(string salaId, string json)
+        {
+            var sala = Buscar(salaId);
+            if (sala == null)
+                return Resultado.Falha("Sala não encontrada.");
+            EnvelopeAnotacoes lido;
+            try
+            {
+                lido = JsonConvert.DeserializeObject<EnvelopeAnotacoes>(json ?? string.Empty);
+            }
+            catch (JsonException)
+            {
+                lido = null;
+            }
+            if (lido?.Formato != FormatoDeTrocaAnotacoes)
+                return Resultado.Falha("Isso não é um JSON de anotações da Torre.");
+            if (lido.Versao > 1)
+                return Resultado.Falha("Exportado por uma Torre mais nova: atualize esta antes de importar.");
+            if (lido.Formacao != null) sala.AnotacoesFormacao = lido.Formacao.Trim();
+            if (lido.Npcs != null) sala.AnotacoesNpcs = lido.Npcs.Trim();
+            if (lido.Trama != null) sala.Trama = lido.Trama.Trim();
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        public static string LerAnotacao(Sala sala, Anotacao qual) => qual switch
+        {
+            Anotacao.Formacao => sala.AnotacoesFormacao,
+            Anotacao.Npcs => sala.AnotacoesNpcs,
+            _ => sala.Trama,
+        } ?? string.Empty;
+
         void Gravar()
         {
             var arquivo = new Arquivo { Versao = VersaoArquivo, Salas = salas };
