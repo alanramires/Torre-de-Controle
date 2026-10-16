@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
@@ -22,8 +22,8 @@ namespace TorreDeControle.UI
         JArray catalogo;
         Texture2D[] panoramas;
         /// <summary>As categorias do help (a árvore da Biblioteca); o editor de cartas usa para a rota.</summary>
-        public static readonly string[] categorias = { "referencia-rapida", "movimentos-basicos", "pvp", "influencia", "condicoes", "equipe-sessao", "movimentos-equipe", "movimentos-arquetipo", "viloes", "perdicao" };
-        public static readonly string[] categoriasNomes = { "Visão geral", "Movimentos básicos", "PvP", "Influência", "Condições", "Equipe e sessão", "Movimentos de equipe", "Movimentos de arquétipo", "Vilões", "Perdição" };
+        public static readonly string[] categorias = { "referencia-rapida", "movimentos-basicos", "pvp", "influencia", "condicoes", "equipe-sessao", "movimentos-equipe", "movimentos-arquetipo", "viloes", "perdicao", "primeira-sessao", "movimentos-mj" };
+        public static readonly string[] categoriasNomes = { "Visão geral", "Movimentos básicos", "PvP", "Influência", "Condições", "Equipe e sessão", "Movimentos de equipe", "Movimentos de arquétipo", "Vilões", "Perdição", "Primeira sessão", "Movimentos do MJ" };
         string arquetipoAtual;
         bool condicoesVilao;
         bool contextoCondicoesVilao;
@@ -339,7 +339,8 @@ namespace TorreDeControle.UI
                     : categoria == 6 ? "Celebração e vulnerabilidade: movimentos de equipe dos dez arquétipos."
                     : categoria == 7 ? "Movimentos próprios de cada arquétipo, agrupados por classe."
                     : categoria == 8 ? "Consulta do mestre: criar vilões, conduzir conflitos e reagir às condições."
-                    : "Amaldiçoada: Nêmesis, trilha e Sinais de Perdição, Santuário e seus requisitos.");
+                    : categoria == 9 ? "Amaldiçoada: Nêmesis, trilha e Sinais de Perdição, Santuário e seus requisitos."
+                    : "Roteiro do mestre: preparação, abertura, primeira luta e cenas depois do confronto.");
                 botoesCategoria[categoria] = b;
                 var cortinaRect = Estilo.Rect("Assuntos " + categoriasNomes[categoria], listaMenu);
                 var cortina = cortinaRect.gameObject.AddComponent<VerticalLayoutGroup>();

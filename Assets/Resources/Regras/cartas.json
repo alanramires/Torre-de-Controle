@@ -1153,6 +1153,213 @@
       "regra": "arquetipos.json#amaldicoada/santuario",
       "modulo": "amaldicoada/santuario",
       "ajuda": "perdicao/invocar-santuario"
+    },
+    {
+      "id": "mj/primeira-sessao/antes",
+      "tipo": "mj",
+      "titulo": "ANTES DA LUTA",
+      "origem": "mestre",
+      "regra": "primeira_sessao.json",
+      "ajuda": "primeira-sessao/antes",
+      "rodape": []
+    },
+    {
+      "id": "mj/primeira-sessao/cidade",
+      "tipo": "mj",
+      "titulo": "A CIDADE EM QUADROS",
+      "origem": "mestre",
+      "regra": "primeira_sessao.json",
+      "ajuda": "primeira-sessao/cidade",
+      "rodape": []
+    },
+    {
+      "id": "mj/primeira-sessao/vilao",
+      "tipo": "mj",
+      "titulo": "O VILÃO EM AÇÃO",
+      "origem": "mestre",
+      "regra": "primeira_sessao.json",
+      "ajuda": "primeira-sessao/vilao",
+      "rodape": []
+    },
+    {
+      "id": "mj/primeira-sessao/entrada",
+      "tipo": "mj",
+      "titulo": "COMO VOCÊ ENTRA?",
+      "origem": "mestre",
+      "regra": "primeira_sessao.json",
+      "ajuda": "primeira-sessao/entrada",
+      "rodape": []
+    },
+    {
+      "id": "mj/primeira-sessao/luta",
+      "tipo": "mj",
+      "titulo": "A PRIMEIRA LUTA",
+      "origem": "mestre",
+      "regra": "primeira_sessao.json",
+      "ajuda": "primeira-sessao/luta",
+      "rodape": []
+    },
+    {
+      "id": "mj/primeira-sessao/depois",
+      "tipo": "mj",
+      "titulo": "DEPOIS DA LUTA",
+      "origem": "mestre",
+      "regra": "primeira_sessao.json",
+      "ajuda": "primeira-sessao/depois",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/quando-usar",
+      "tipo": "mj",
+      "titulo": "QUANDO O MJ FAZ UM MOVIMENTO",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/quando-usar",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/infligir-condicao",
+      "tipo": "mj",
+      "titulo": "INFLIGIR UMA CONDIÇÃO",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/infligir-condicao",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/ganhar-influencia",
+      "tipo": "mj",
+      "titulo": "GANHAR INFLUÊNCIA SOBRE ALGUÉM",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/ganhar-influencia",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/juntar-grupo",
+      "tipo": "mj",
+      "titulo": "JUNTAR O GRUPO",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/juntar-grupo",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/capturar-alguem",
+      "tipo": "mj",
+      "titulo": "CAPTURAR ALGUÉM",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/capturar-alguem",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/inocentes-em-perigo",
+      "tipo": "mj",
+      "titulo": "COLOCAR INOCENTES EM PERIGO",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/inocentes-em-perigo",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/custos-danos-colaterais",
+      "tipo": "mj",
+      "titulo": "MOSTRAR OS CUSTOS DOS DANOS COLATERAIS",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/custos-danos-colaterais",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/revelar-futuro",
+      "tipo": "mj",
+      "titulo": "REVELAR O FUTURO, SUTIL OU DIRETAMENTE",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/revelar-futuro",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/ameacas-entre-quadrinhos",
+      "tipo": "mj",
+      "titulo": "ANUNCIAR AMEAÇAS ESPREITANDO ENTRE OS QUADRINHOS",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/ameacas-entre-quadrinhos",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/preco-vitoria",
+      "tipo": "mj",
+      "titulo": "COBRAR UM PREÇO PELA VITÓRIA",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/preco-vitoria",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/virar-movimentos",
+      "tipo": "mj",
+      "titulo": "VIRAR OS MOVIMENTOS CONTRA OS HERÓIS",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/virar-movimentos",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/consequencias",
+      "tipo": "mj",
+      "titulo": "DEFINIR AS POSSÍVEIS CONSEQUÊNCIAS E ESPERAR RESPOSTA",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/consequencias",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/identidade",
+      "tipo": "mj",
+      "titulo": "DETERMINAR QUEM AS PERSONAGENS SÃO OU DEVERIAM SER",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/identidade",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/conclusoes-precipitadas",
+      "tipo": "mj",
+      "titulo": "FAZER UMA PNJ TOMAR DECISÕES PRECIPITADAS E TIRAR CONCLUSÕES DIFÍCEIS",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/conclusoes-precipitadas",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/desvantagens",
+      "tipo": "mj",
+      "titulo": "ACIONAR AS DESVANTAGENS DAS HABILIDADES E DOS RELACIONAMENTOS",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/desvantagens",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/movimento-arquetipo",
+      "tipo": "mj",
+      "titulo": "FAZER UM MOVIMENTO DE ARQUÉTIPO",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/movimento-arquetipo",
+      "rodape": []
+    },
+    {
+      "id": "mj/movimentos-mj/movimento-vilao",
+      "tipo": "mj",
+      "titulo": "FAZER UM MOVIMENTO DE VILÃO",
+      "origem": "mestre",
+      "regra": "docs/ajuda.md",
+      "ajuda": "movimentos-mj/movimento-vilao",
+      "rodape": []
     }
   ]
 }

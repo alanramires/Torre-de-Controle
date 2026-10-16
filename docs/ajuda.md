@@ -181,3 +181,30 @@ a perdição são caminhos distintos. Requisitos do santuário não são
 condições emocionais. Não foram gerados PNGs de cartas nem novos tokens.
 Validado: IDs únicos, um vínculo de jogo por help, marcação e build UI.
 Conferência visual no Play ainda depende do Alan.
+
+## Primeira sessão (2026-10-15)
+
+Categoria principal `primeira-sessao`, borda verde-água `#3fb8a8`:
+Antes da luta, A cidade em quadros, O vilão em ação, Como você entra?,
+A primeira luta e Depois da luta. IDs estáveis, respectivamente:
+`primeira-sessao/antes`, `/cidade`, `/vilao`, `/entrada`, `/luta`, `/depois`.
+
+Texto próprio conferido com o capítulo 8 do livro (pp.207–213), seguindo
+`briefing_ajuda_primeira_sessao.md`. A entrada pode ter um movimento breve;
+a luta engrena com todas presentes. A carta da luta remete a
+`equipe/batalha` pelo título, sem repetir o questionário da pilha.
+As seis cartas têm vínculo de jogo do tipo `mj` em `Regras/cartas.json`
+para a Gestão das cartas. Sem PNGs. Os botões contextuais da Área do mestre
+ficam para a frente de mecânica, usando os IDs acima.
+
+
+## Movimentos do MJ (2026-10-16)
+
+Categoria `movimentos-mj`, borda cinza: uma referência de quando usar e
+16 movimentos básicos, com movimentos de arquétipo e de vilão separados.
+Texto próprio conferido no livro pp.177–184 e nas cartas antigas do acervo.
+Cada carta tem vínculo `tipo: mj`, origem `mestre`, em Regras/cartas.json.
+IDs de ajuda usam `movimentos-mj/`; IDs de jogo usam `mj/movimentos-mj/`.
+São orientações editoriais: não implementam resolução automática no motor.
+Uma falha contra PJ não exige por si só inverter o movimento; o peso segue
+a ficção. Nenhum PNG foi gerado. Visualização no Play ainda deve ser conferida.

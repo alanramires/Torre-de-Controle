@@ -4035,6 +4035,611 @@
           "texto": "Se o lugar estiver ligado à perdição, usá-lo quase sempre exige uma marca na trilha. Brilho intenso permite ignorar um requisito."
         }
       ]
+    },
+    {
+      "id": "primeira-sessao/antes",
+      "categoria": "primeira-sessao",
+      "titulo": "ANTES DA LUTA",
+      "compacto": false,
+      "borda": "#3fb8a8",
+      "origem": "Primeira sessão · livro cap. 8, pp.207–213",
+      "secoes": [
+        {
+          "titulo": "FICHAS",
+          "texto": "Conversem durante a criação. Aprofunde respostas vagas com perguntas sobre fatos, pessoas e acontecimentos."
+        },
+        {
+          "titulo": "CACE NOMES",
+          "texto": "Anote pessoas e lugares citados nas fichas. Eles dão rosto à cidade e podem voltar nas próximas cenas."
+        },
+        {
+          "titulo": "VILÃO",
+          "texto": "Prepare uma ameaça ligada a pelo menos uma heroína. Se trouxer um vilão pronto, construam essa ligação juntos."
+        }
+      ],
+      "regras_ref": [
+        "primeira_sessao.json"
+      ]
+    },
+    {
+      "id": "primeira-sessao/cidade",
+      "categoria": "primeira-sessao",
+      "titulo": "A CIDADE EM QUADROS",
+      "compacto": false,
+      "borda": "#3fb8a8",
+      "origem": "Primeira sessão · livro cap. 8, pp.207–213",
+      "secoes": [
+        {
+          "titulo": "ABRA LONGE",
+          "texto": "Descreva dois ou três quadros de lugares diferentes da cidade, antes de chegar ao confronto."
+        },
+        {
+          "titulo": "CIDADE DE SUPERS",
+          "texto": "Mostre monumentos de heróis, abrigos e protocolos de emergência. A cidade já aprendeu a conviver com super-humanos."
+        },
+        {
+          "titulo": "ZOOM",
+          "texto": "Aproxime o enquadramento até o lugar da luta. Reaproveite lugares e pessoas apresentados nas fichas."
+        }
+      ],
+      "regras_ref": [
+        "primeira_sessao.json"
+      ]
+    },
+    {
+      "id": "primeira-sessao/vilao",
+      "categoria": "primeira-sessao",
+      "titulo": "O VILÃO EM AÇÃO",
+      "compacto": false,
+      "borda": "#3fb8a8",
+      "origem": "Primeira sessão · livro cap. 8, pp.207–213",
+      "secoes": [
+        {
+          "titulo": "ELE JÁ COMEÇOU",
+          "texto": "Mostre o vilão agindo: causando estragos, criando problemas ou avançando rumo ao próprio objetivo."
+        },
+        {
+          "titulo": "UM MOVIMENTO DELE",
+          "texto": "Use um dos movimentos da ficha do vilão para dar forma à abertura."
+        },
+        {
+          "titulo": "AINDA SEM DADOS",
+          "texto": "Apresente primeiro a ameaça e chame as entradas das heroínas. Evite engrenar a luta antes de reunir a equipe."
+        }
+      ],
+      "regras_ref": [
+        "primeira_sessao.json"
+      ]
+    },
+    {
+      "id": "primeira-sessao/entrada",
+      "categoria": "primeira-sessao",
+      "titulo": "COMO VOCÊ ENTRA?",
+      "compacto": false,
+      "borda": "#3fb8a8",
+      "origem": "Primeira sessão · livro cap. 8, pp.207–213",
+      "secoes": [
+        {
+          "titulo": "UMA POR VEZ",
+          "texto": "Pergunte a cada jogadora como sua heroína chega ao confronto. Dê espaço para todas aparecerem."
+        },
+        {
+          "titulo": "DEIXE SE EXIBIR",
+          "texto": "Convide cada uma a mostrar o que tem de incrível. Guarde as cobranças pessoais para depois da abertura."
+        },
+        {
+          "titulo": "POUCA AÇÃO",
+          "texto": "Se couber, deixe acontecer um movimento breve. Reúna todas em cena antes de acelerar a luta."
+        }
+      ],
+      "regras_ref": [
+        "primeira_sessao.json"
+      ]
+    },
+    {
+      "id": "primeira-sessao/luta",
+      "categoria": "primeira-sessao",
+      "titulo": "A PRIMEIRA LUTA",
+      "compacto": false,
+      "borda": "#3fb8a8",
+      "origem": "Primeira sessão · livro cap. 8, pp.207–213",
+      "secoes": [
+        {
+          "titulo": "ENTRAR EM BATALHA",
+          "texto": "Com todas presentes, acione a entrada em batalha como equipe e prepare a pilha. Consulte a carta [b]Entrando em batalha[/b]."
+        },
+        {
+          "titulo": "ANUNCIE OS MOVIMENTOS",
+          "texto": "Diga qual movimento a ação parece acionar e confirme com a jogadora. Se ela pedir um movimento, pergunte como age na cena."
+        },
+        {
+          "titulo": "SUGIRA QUANDO HESITAREM",
+          "texto": "Ofereça possibilidades em forma de pergunta, partindo dos poderes e da situação. A decisão continua com a jogadora."
+        },
+        {
+          "titulo": "MOSTRE TUDO UMA VEZ",
+          "texto": "Procure apresentar os oito movimentos básicos, inclusive tomar um golpe poderoso; mudanças de Rótulos, rejeição de Influência e ganhar e remover condições."
+        },
+        {
+          "titulo": "NÃO GASTE A SESSÃO NISSO",
+          "texto": "Reserve tempo para o depois. O vilão tem objetivos próprios e pode tentar escapar quando o confronto sair do controle."
+        }
+      ],
+      "regras_ref": [
+        "primeira_sessao.json",
+        "equipe_e_sessao.json"
+      ]
+    },
+    {
+      "id": "primeira-sessao/depois",
+      "categoria": "primeira-sessao",
+      "titulo": "DEPOIS DA LUTA",
+      "compacto": false,
+      "borda": "#3fb8a8",
+      "origem": "Primeira sessão · livro cap. 8, pp.207–213",
+      "secoes": [
+        {
+          "titulo": "CENAS EM DUPLA OU MAIS",
+          "texto": "Mantenha pelo menos duas heroínas nas cenas seguintes. A bronca da mentora pode acontecer diante de uma colega."
+        },
+        {
+          "titulo": "QUEM APARECE",
+          "texto": "Traga adultos com críticas e pessoas queridas com reações. Dê tempo para comemorar, revelar vulnerabilidades e confortar umas às outras."
+        },
+        {
+          "titulo": "AGORA SIM O DRAMA",
+          "texto": "Retome as relações das fichas: quem descobriu a saída de madrugada? Deixe as heroínas responderem e interagirem entre si."
+        }
+      ],
+      "regras_ref": [
+        "primeira_sessao.json"
+      ]
+    },
+    {
+      "id": "movimentos-mj/quando-usar",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-quando-usar.png",
+      "titulo": "QUANDO O MJ FAZ UM MOVIMENTO",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "GATILHOS",
+          "texto": "Faça um movimento numa pausa da conversa, após uma falha ou diante de uma oportunidade de ouro. Siga instruções específicas para a falha quando o movimento do jogador as trouxer."
+        },
+        {
+          "titulo": "LEVE OU PESADO",
+          "texto": "Leve: anuncia ou prepara algo e permite reação. Pesado: concretiza uma consequência. O peso depende da narração; uma falha permite um movimento pesado, mas não o exige."
+        },
+        {
+          "titulo": "NA NARRAÇÃO",
+          "texto": "Siga a ficção e os objetivos e princípios do MJ. Narre o acontecimento, explique os efeitos mecânicos e devolva a ação: “O que você faz?”."
+        },
+        {
+          "titulo": "NO FÓRUM",
+          "texto": "Use pausas e posts de costura para movimentar a história. Não há obrigação de impor uma punição por postagem."
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/infligir-condicao",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-infligir-condicao.png",
+      "titulo": "INFLIGIR UMA CONDIÇÃO",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "A pressão da cena atinge emocionalmente o herói. Peça que marque uma condição; determine qual apenas se a ficção apontar claramente para ela. Caso contrário, deixe a escolha ao jogador."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Após uma humilhação, um susto, uma perda ou uma falha cujas consequências sejam emocionais. A condição precisa acompanhar o que aconteceu na história."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“Pulsar, a gravação mostra sua descarga atingindo a passarela. Você reconhece a voz de alguém pedindo ajuda. Marque uma condição à sua escolha. O que você faz?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/ganhar-influencia",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-ganhar-influencia.png",
+      "titulo": "GANHAR INFLUÊNCIA SOBRE ALGUÉM",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Uma PNJ passa a ter importância emocional para o herói e ganha Influência sobre ele. Se já tiver Influência, aumenta um Rótulo e diminui outro imediatamente, sem oportunidade de rejeitar essa segunda concessão."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando o herói expõe uma vulnerabilidade, busca aprovação ou descobre que a opinião de alguém o afeta. Adultos começam com Influência sobre os jovens heróis, mas podem tê-la perdido."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“Pulsar, Marina diz que ainda acredita em você, mesmo depois do acidente. Você percebe quanto precisava ouvir isso. Ela ganha Influência sobre você. Se já a tinha, aumente Mundano e diminua Perigoso, respeitando os limites dos Rótulos. O que você faz?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/juntar-grupo",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-juntar-grupo.png",
+      "titulo": "JUNTAR O GRUPO",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Cruze os caminhos dos heróis e conecte suas vidas. Eles não precisam concordar entre si para compartilhar uma situação importante."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando as cenas individuais precisam convergir ou quando uma relação, obrigação ou ameaça pode trazer os personagens ao mesmo lugar. Preserve a continuidade da ficção."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“Você chega ao observatório para encontrar Marina. Na recepção, outro integrante da equipe espera para falar com a mesma pesquisadora. Antes que conversem, o alarme toca. O que vocês fazem?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/capturar-alguem",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-capturar-alguem.png",
+      "titulo": "CAPTURAR ALGUÉM",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Prenda um herói ou alguém importante numa situação perigosa, sem uma saída óbvia. Pode ser um sequestro, um cerco ou um bloqueio do ambiente."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando a ameaça e as ações anteriores sustentarem a captura. Uma captura consumada pode mudar o foco da cena e encerrar uma sequência de trocas de ataques."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“Marina entra no elevador, mas as portas travam e a cabine começa a descer para um setor interditado. O painel externo não responde. O que você faz?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/inocentes-em-perigo",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-inocentes-em-perigo.png",
+      "titulo": "COLOCAR INOCENTES EM PERIGO",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Mostre pessoas concretas ameaçadas pelo conflito e dê aos heróis uma oportunidade de protegê-las."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando ataques, destroços, desabamentos ou planos de vilões colocarem outras pessoas em risco. Apresente o perigo de forma que os jogadores entendam o que está em jogo."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“O carro arremessado gira sobre a avenida. Logo abaixo, passageiros tentam sair de um ônibus com a porta emperrada. O que você faz?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/custos-danos-colaterais",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-custos-danos-colaterais.png",
+      "titulo": "MOSTRAR OS CUSTOS DOS DANOS COLATERAIS",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Dê consequências humanas, materiais e sociais à destruição. Vencer a luta não apaga os prejuízos nem a reação das pessoas afetadas."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Depois de uma ação destrutiva ou quando seus efeitos voltarem à cena. Se alguém tentar mudar a autoimagem de um herói, aplique as regras de Influência quando couberem."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“O vilão foi detido, mas a farmácia sob a passarela ficou interditada. A proprietária mostra as receitas que não poderá atender hoje e pergunta quem vai ajudar os moradores. O que você faz?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/revelar-futuro",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-revelar-futuro.png",
+      "titulo": "REVELAR O FUTURO, SUTIL OU DIRETAMENTE",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Mostre um possível caminho para o herói ou para a cidade: uma visão do amanhã, uma versão futura ou alguém do presente que reflita aquilo em que ele pode se tornar."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando escolhas, ambições ou conflitos de identidade puderem ganhar força diante de um possível futuro. Apresente possibilidades sem fixar o destino do personagem."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“O portal mostra uma cidade intacta e vazia. Acima dela, uma versão mais velha de Pulsar vigia cada rua, sem jamais pousar ou descansar. O que você faz?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/ameacas-entre-quadrinhos",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-ameacas-entre-quadrinhos.png",
+      "titulo": "ANUNCIAR AMEAÇAS ESPREITANDO ENTRE OS QUADRINHOS",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Revele que ameaças continuam agindo fora do foco dos heróis. Mostre sinais, notícias ou consequências do que ocorreu entre as cenas."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando uma ameaça já estabelecida avançar enquanto a equipe cuida de outros problemas. A revelação deve acompanhar a continuidade da história."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“Durante a comemoração, chega uma mensagem de Marina: os componentes recuperados do Helix desapareceram do depósito. A câmera mostra alguém usando uma credencial válida. O que você faz?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/preco-vitoria",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-preco-vitoria.png",
+      "titulo": "COBRAR UM PREÇO PELA VITÓRIA",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Ofereça um caminho para vencer que exija uma concessão difícil. Torne o preço compreensível para que a decisão pertença aos jogadores."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando uma ajuda, um recurso ou um acordo puder resolver o problema, mas quem o oferece quiser algo importante em troca."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“A invasora ergue o estabilizador: ‘Isso fecha a fenda. Eu entrego, mas vocês me deixam sair com os dados do laboratório’. O que vocês fazem?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/virar-movimentos",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-virar-movimentos.png",
+      "titulo": "VIRAR OS MOVIMENTOS CONTRA OS HERÓIS",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Inverta o movimento tentado pelo herói e resolva a resposta como um resultado 10+. Aplique as opções e regras pertinentes ao movimento e a quem participa dele."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando a tentativa do herói o expuser de uma maneira que sustente essa inversão. É uma opção do MJ; uma falha contra outro PJ não a torna obrigatória por si só."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“Pulsar, sua tentativa de provocar uma colega deixa evidente que você quer impressioná-la. Agora ela pode provocar você como se tivesse obtido 10+. O que ela quer que você faça?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/consequencias",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-consequencias.png",
+      "titulo": "DEFINIR AS POSSÍVEIS CONSEQUÊNCIAS E ESPERAR RESPOSTA",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Explique o que acontecerá se o herói seguir determinado caminho e espere a decisão antes de concretizar essa consequência."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando houver um risco previsível, um custo importante ou uma escolha difícil que o jogador precise compreender para decidir."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“Pulsar, sua descarga pode romper a comporta, mas a água atingirá o corredor onde os técnicos estão presos. Você continua ou procura outra saída?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/identidade",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-identidade.png",
+      "titulo": "DETERMINAR QUEM AS PERSONAGENS SÃO OU DEVERIAM SER",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Uma PNJ com Influência tenta definir a identidade do herói ou como ele deve enxergar o mundo. Quando isso provocar uma mudança de Rótulos, anuncie qual sobe e qual desce, permitindo aceitar ou rejeitar a Influência."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando uma fala ou atitude de alguém com Influência pressionar a autoimagem do herói. Nem toda fala de um adulto implica uma mudança de Rótulos."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“Marina encara o uniforme queimado: ‘Você não é um equipamento de combate, Alan. Pare de se tratar como um’. Ela aumenta Mundano e diminui Perigoso. Você aceita ou rejeita a Influência?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/conclusoes-precipitadas",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-conclusoes-precipitadas.png",
+      "titulo": "FAZER UMA PNJ TOMAR DECISÕES PRECIPITADAS E TIRAR CONCLUSÕES DIFÍCEIS",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Uma PNJ interpreta informações incompletas, julga com dureza ou age antes de compreender a situação. Sua decisão coloca a história em movimento."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando preconceitos, emoções, interesses ou pistas parciais sustentarem uma conclusão precipitada e suas consequências."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“A segurança vê vocês saindo do depósito no instante em que o alarme dispara. A chefe ordena que bloqueiem as saídas antes de ouvir qualquer explicação. O que vocês fazem?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/desvantagens",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-desvantagens.png",
+      "titulo": "ACIONAR AS DESVANTAGENS DAS HABILIDADES E DOS RELACIONAMENTOS",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Traga à cena as dificuldades dos poderes e as responsabilidades dos vínculos pessoais. Apoie-se no que já foi estabelecido sobre o personagem."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando uma limitação, obrigação ou relação puder complicar uma escolha. Use o contexto da história para definir a dificuldade, sem inventar uma fraqueza arbitrária."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“Os sensores disparam: a energia acumulada em seu corpo está interferindo no estabilizador. Marina precisa que você se afaste, mas é justamente ali que sua colega ficou presa. O que você faz?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/movimento-arquetipo",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-movimento-arquetipo.png",
+      "titulo": "FAZER UM MOVIMENTO DE ARQUÉTIPO",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Use um dos movimentos de MJ ligados ao arquétipo para pressionar seus temas: identidade, legado, obrigações, poder ou pertencimento. São ferramentas do mestre, distintas dos movimentos comprados pelo personagem."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Sempre que houver ocasião de fazer um movimento de MJ e o tema daquele arquétipo estiver presente. Consulte a lista correspondente no livro."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“Pulsar, a fenda começa a despejar uma energia que os equipamentos não suportam. Marina olha para você: ‘Só você consegue conter isso tempo suficiente para evacuarmos’. O que você faz?”"
+        }
+      ]
+    },
+    {
+      "id": "movimentos-mj/movimento-vilao",
+      "categoria": "movimentos-mj",
+      "arquivo": "mj-movimento-vilao.png",
+      "titulo": "FAZER UM MOVIMENTO DE VILÃO",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR pp.177–184",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "O QUE É",
+          "texto": "Use uma ação própria do vilão para destacar seus métodos e agravar a situação. O movimento deve combinar com suas capacidades e motivação."
+        },
+        {
+          "titulo": "QUANDO USAR",
+          "texto": "Quando houver ocasião de fazer um movimento de MJ e o vilão estiver envolvido na cena. Se ele acabou de marcar uma condição numa luta, consulte também seus movimentos de condição."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "“A ladra de tecnologia ativa seu desvio remoto: as portas blindadas se fecham entre vocês e o estabilizador roubado. Pelo alto-falante, ela oferece abrir uma saída se a deixarem partir. O que vocês fazem?”"
+        }
+      ]
     }
   ]
 }

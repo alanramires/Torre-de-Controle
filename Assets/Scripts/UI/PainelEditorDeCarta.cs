@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -85,6 +85,8 @@ namespace TorreDeControle.UI
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
             MontarFormulario();
+            Canvas.ForceUpdateCanvases();
+            formulario.GetComponentInParent<ScrollRect>().verticalNormalizedPosition = 1;
             Mostrar(null);
             AtualizarPrevia();
         }
@@ -223,8 +225,10 @@ namespace TorreDeControle.UI
         void Montar(RectTransform veu)
         {
             var cartao = Estilo.Rect("Cartao", veu);
-            cartao.anchorMin = cartao.anchorMax = new Vector2(0.5f, 0.5f);
-            cartao.sizeDelta = new Vector2(1600, 940);
+            // O modal acompanha a área útil, inclusive em janelas menores que a referência.
+            Estilo.Esticar(cartao);
+            cartao.offsetMin = new Vector2(24, 24);
+            cartao.offsetMax = new Vector2(-24, -24);
             Estilo.Moldura(cartao.gameObject, Estilo.Cartao, Estilo.Borda);
             var coluna = cartao.gameObject.AddComponent<VerticalLayoutGroup>();
             coluna.padding = new RectOffset(40, 40, 28, 28);
@@ -257,16 +261,23 @@ namespace TorreDeControle.UI
             previa.GetComponent<AspectRatioFitter>().aspectRatio = DesenhoDeCarta.Largura / DesenhoDeCarta.Altura;
 
             // Direita: o formulário.
-            formulario = Estilo.Rect("Formulario", corpo);
-            formulario.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
-            var vf = formulario.gameObject.AddComponent<VerticalLayoutGroup>();
-            vf.spacing = 8;
-            vf.childControlWidth = true;
-            vf.childControlHeight = true;
-            vf.childForceExpandHeight = false;
+            var areaFormulario = Estilo.Rect("AreaFormulario", corpo);
+            var larguraFormulario = areaFormulario.gameObject.AddComponent<LayoutElement>();
+            larguraFormulario.minWidth = 0;
+            larguraFormulario.flexibleWidth = 1;
+            formulario = Estilo.ListaRolavel(areaFormulario, 8);
+            formulario.name = "Formulario";
+            // O formulário cresce dentro do viewport; os benefícios não invadem a legenda.
+            var rolagemFormulario = formulario.GetComponentInParent<ScrollRect>();
+            Estilo.Esticar((RectTransform)rolagemFormulario.transform);
 
             mensagem = Estilo.Rotulo(cartao, string.Empty, 18, Estilo.TextoSuave);
             mensagem.textWrappingMode = TextWrappingModes.Normal;
+            mensagem.richText = false;
+            var alturaMensagem = mensagem.gameObject.AddComponent<LayoutElement>();
+            alturaMensagem.minHeight = alturaMensagem.preferredHeight = 52;
+            alturaMensagem.flexibleHeight = 0;
+            alturaMensagem.layoutPriority = 2;
         }
 
         void MontarFormulario()
