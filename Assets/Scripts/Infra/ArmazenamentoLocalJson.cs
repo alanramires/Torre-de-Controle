@@ -60,6 +60,11 @@ namespace TorreDeControle.Infra
                 return;
             }
             Directory.CreateDirectory(pasta);
+            // Um lote anterior já decidido (diário presente) e não terminado: termina antes de preparar outro.
+            // Sem isso, a nova tentativa reescreveria os ".novo" de que o diário antigo ainda depende. Se terminar
+            // falhar, o erro sobe e este lote nem começa (a fila guarda as pendências).
+            if (File.Exists(Path.Combine(pasta, Diario)))
+                RecuperarLoteInterrompido();
             foreach (var item in itens)
                 File.WriteAllText(Caminho(item.Key) + SufixoNovo, item.Value, new UTF8Encoding(false));
             var diario = Path.Combine(pasta, Diario);
@@ -129,10 +134,18 @@ namespace TorreDeControle.Infra
                 File.Copy(arquivo, Path.Combine(destino, Path.GetFileName(arquivo)), false);
             // Marca de cópia completa: pasta sem este arquivo foi interrompida e não serve para restaurar.
             File.WriteAllText(Path.Combine(destino, "COPIA_COMPLETA.txt"), System.DateTime.Now.ToString("s"));
-            var antigas = Directory.GetDirectories(raiz);
-            System.Array.Sort(antigas);
-            for (var k = 0; k < antigas.Length - CopiasGuardadas; k++)
-                Directory.Delete(antigas[k], true);
+            // Retenção: as últimas cópias **completas**; as interrompidas (sem o marcador) mais antigas que a
+            // última completa saem, e não ocupam o lugar das boas.
+            var todas = Directory.GetDirectories(raiz);
+            System.Array.Sort(todas);
+            var completas = todas.Where(d => File.Exists(Path.Combine(d, "COPIA_COMPLETA.txt"))).ToList();
+            var incompletas = todas.Except(completas).ToList(); // separadas antes de apagar qualquer coisa
+            var ultimaCompleta = completas.Count > 0 ? completas[completas.Count - 1] : null;
+            for (var k = 0; k < completas.Count - CopiasGuardadas; k++)
+                Directory.Delete(completas[k], true);
+            foreach (var d in incompletas)
+                if (ultimaCompleta != null && string.CompareOrdinal(d, ultimaCompleta) < 0)
+                    Directory.Delete(d, true);
         }
 
         string Caminho(string chave) => Path.Combine(pasta, chave + ".json");

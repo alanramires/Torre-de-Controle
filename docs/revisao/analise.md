@@ -217,3 +217,42 @@ A direção das mudanças é adequada: houve correção concreta de dois riscos 
 
 Referências: [fila de gravação](../../Assets/Scripts/Infra/ArmazenamentoAdiado.cs), [backup local](../../Assets/Scripts/Infra/ArmazenamentoLocalJson.cs), [abertura da mesa](../../Assets/Scripts/UI/PainelMesa.cs), [correções](../../Assets/Scripts/Core/Mesa/Mesa.cs), [testes da mesa](../../Assets/Tests/EditMode/MesaTests.cs) e [testes de gravação adiada](../../Assets/Tests/EditMode/GravacaoAdiadaTests.cs).
 
+
+
+## Terceira leitura após as correções — 16/10/2026
+
+Esta seção prevalece sobre os achados anteriores nos pontos corrigidos. Revisão estática: arquivos lidos, sem executar Unity ou testes e sem alterar código.
+
+### Correções confirmadas
+
+- **Refazer parcial corrigido:** agora percorre `correcao.Mudancas` e inverte o que foi efetivamente alterado. Foi acrescentado `Refazer_devolve_so_o_que_a_correcao_tirou_de_fato` em `MesaTests.cs`. O teste foi inspecionado, não executado.
+- **Backup com nova tentativa e aviso:** a sala só entra em `copiadas` após sucesso; a falha é mostrada ao mestre e reabrir permite tentar novamente.
+- **Backups distintos e identificáveis:** nomes recebem sufixo quando já existem; `COPIA_COMPLETA.txt` é escrito após a cópia dos JSONs. Resolvidos os achados de sobrescrita no mesmo segundo e ausência de marcador de conclusão.
+- **Gravação conjunta e recuperação implementadas:** `IGravacaoEmLote` é usado pelo armazenamento adiado. O armazenamento local prepara versões `.novo`, registra diário, substitui os arquivos e remove o diário. `TelaEntrada.Awake` chama a recuperação antes de carregar os cadastros. Isso cobre o caminho normal de interrupção depois de registrar um lote, mas exige o ajuste de nova tentativa abaixo.
+
+### Achado principal — alta prioridade: nova tentativa pode reescrever um lote ainda comprometido
+
+Em `ArmazenamentoLocalJson.GravarLote`, as versões `.novo` são reescritas antes de verificar ou recuperar um diário já existente. `ArmazenamentoAdiado` mantém o lote pendente após erro e permite nova tentativa na mesma execução. A recuperação do diário, porém, está ligada à abertura da aplicação.
+
+Cenário por inspeção:
+
+1. O lote A registra seu diário; uma substituição falha e deixa versões `.novo` ainda necessárias à recuperação.
+2. A aplicação continua e tenta gravar novamente. O novo processamento abre esses mesmos `.novo` para reescrevê-los, enquanto o diário A ainda existe.
+3. Uma segunda interrupção durante essa escrita pode deixar um `.novo` incompleto.
+4. Ao reiniciar, a recuperação confia no diário anterior e pode promover esse arquivo incompleto para o JSON definitivo.
+
+O próprio estágio de preparação pode falhar, preservando um diário antigo associado a versões parcialmente reescritas. Recomenda-se resolver ou isolar o lote comprometido antes de preparar outro e evitar reutilizar seus arquivos de preparação. A recomendação não é remover o mecanismo novo, mas completar a proteção de suas novas tentativas. Não foi feita reprodução executável nesta revisão.
+
+Referências: [GravarLote e recuperação](../../Assets/Scripts/Infra/ArmazenamentoLocalJson.cs), [nova tentativa da fila](../../Assets/Scripts/Infra/ArmazenamentoAdiado.cs) e [recuperação na entrada](../../Assets/Scripts/UI/TelaEntrada.cs).
+
+### Outros pontos pendentes
+
+- **Retenção de backups — média:** a limpeza conta todos os diretórios, inclusive cópias sem `COPIA_COMPLETA.txt`. Várias cópias interrompidas podem consumir a retenção e provocar a remoção de cópias válidas. Recomenda-se reter as últimas 15 cópias completas e tratar incompletas separadamente. O marcador agora existe; a política de retenção ainda não o usa.
+- **Testes da persistência real — média:** a busca em `Assets/Tests` não encontrou testes diretos de lote, recuperação, marcador ou `ArmazenamentoAdiado` de produção. O assembly EditMode referencia Core, não Infra. O teste auxiliar de gravação adiada não cobre esses caminhos. Priorizar falha após cada etapa, nova tentativa sem reiniciar e restauração de cópia completa.
+- **Dependências de correções:** o defeito específico do refazer parcial foi corrigido. Permanece a questão de produto sobre corrigir eventos antigos que compartilham campos com eventos posteriores, particularmente condições booleanas. Recomenda-se prévia ou detecção de conflito.
+- Permanecem as prioridades de fechar uma jogada completa e a exportação da rodada; nenhuma conclusão nova de desempenho ou aparência visual foi feita.
+
+### Avaliação atualizada
+
+As alterações responderam diretamente à revisão anterior e melhoraram a recuperação e o refazimento. A próxima prioridade técnica é proteger o diário e seus arquivos contra novas tentativas na mesma execução e verificar esses caminhos com testes da implementação real. Depois disso, o foco pode voltar ao ciclo completo da jogada.
+
