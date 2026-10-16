@@ -53,15 +53,30 @@ roteiro marca **Avaliar a situação** sozinho, porque o rolador registrou no lo
 ---
 
 
-> **Estrela Negra:** No escuro eu enxergo. Eu só... apareço do lado dele. Sem barulho.
+> **Estrela Negra:** Eu fecho os olhos no escuro e deixo a coisa dentro de mim olhar. Quero uma visão.
+>
+> **Eu:** Visões sombrias, então: marque perdição. O que você vê é verdade, mas cobra.
+
+> *Penso:* isso **não** é enxergar no escuro (a ficha dela diz telecinese, manipular memórias, absorver
+> vitalidade). É um **Sinal da perdição** dela: *Visões sombrias* (marque perdição para ter uma visão da
+> situação). Uso a trilha como recurso de cena, e a cada 5 marcas na trilha ela ganha um sinal novo: a perdição avança porque **ela escolheu** ver.
+
+**[TORRE]** **Área do mestre → Potencial**, linha da Estrela: "o que aconteceu?" = "visões sombrias: a usina", **+1 perdição**. A trilha vai de 0 para **1** (ela começa com 0 pontos e 1 sinal, o das Visões sombrias) e o log registra; ao fechar 5, a Torre lembra do sinal novo.
+
+> **Eu:** Você vê o tanque de capacitores **rachando por dentro**, cheio demais, e ouve uma voz que não é a do Ocaso: *"Deixa explodir. Você aguenta. Elas não."* Quando abre os olhos, está ao lado dele, sem ter andado.
+>
+> *Penso:* a regra não para na visão: depois dela, **ela pergunta uma coisa e eu respondo com honestidade**
+> (carta Visões sombrias). É o preço valendo a pena: informação que ninguém mais tem.
+>
+> **Estrela Negra:** Quem está falando comigo?
+>
+> **Eu:** (com honestidade) Não é o Ocaso, e não é o Eclipse. É a mesma voz do reator do Helix, a que te deu > "a chave". Ela quer o tanque explodindo **perto de você**, porque você absorve o que sobrar.
 >
 > **Pulsar:** As luzes que ele roubou tremem quando eu chego, como se quisessem vir pra mim.
 >
 > **Mayane:** Eu vou direto pro abrigo do vigia. "Ninguém se machuca hoje, tá?"
 
-> *Penso:* todas em cena. Cada uma já me deu um gancho: a Aurora provocou, a Estrela está colada nele, a
-> energia do Pulsar **atrai** a luz roubada (anoto: isso é uma arma contra o Ocaso), e a Mayane escolheu os
-> civis antes da luta. Agora sim, a ação engrena.
+> *Penso:* todas em cena. Cada uma já me deu um gancho: a Aurora provocou, a Estrela pagou perdição por uma visão (e ouviu a voz), a energia do Pulsar **atrai** a luz roubada (anoto: isso é uma arma contra o Ocaso), e a Mayane escolheu os civis antes da luta. Agora sim, a ação engrena.
 
 ---
 
@@ -91,13 +106,9 @@ roteiro marca **Avaliar a situação** sozinho, porque o rolador registrou no lo
 **[TORRE]** Pilha: 1 (início da sessão) + 3 = **4 pontos**. Motivo: "luta inicial contra o Dr. Ocaso".
 Roteiro marca **Entrar em batalha como equipe**.
 
-> *Penso:* a Aurora teve de ceder a liderança contra o **próprio** inimigo, porque quem as outras escutam é
-> a Garça (Influência sobre todas). Não preciso explicar isso: a mesa mostrou. É exatamente o arco dela
-> ("ser a herdeira" não é o mesmo que "ser seguida"). E o "o Ocaso é meu" me diz que ela vai querer agir
-> sozinha: anoto para o **agir de forma egoísta**.
+> *Penso:* a Aurora teve de ceder a liderança contra o **próprio** inimigo, porque quem as outras escutam é a Garça (Influência sobre todas). Não preciso explicar isso: a mesa mostrou. É exatamente o arco dela ("ser a herdeira" não é o mesmo que "ser seguida"). E o "o Ocaso é meu" me diz que ela vai querer agir sozinha: anoto para o **agir de forma egoísta**.
 >
-> E pilha cheia (4) é convite: vou lembrar as jogadoras de que podem **ajudar** (+1 numa rolagem de uma
-> colega) e **agir de forma egoísta** (+1 na própria rolagem, depois do dado, mudando os próprios Rótulos).
+> E pilha cheia (4) é convite: vou lembrar a mesa de que dá para **ajudar** (gastar 1 para dar +1 na rolagem de um colega, depois do dado) e **agir de forma egoísta** (gastar 1 e mudar os próprios Rótulos; se o que sobe for o da rolagem, o resultado sobe).
 
 ---
 
@@ -105,88 +116,126 @@ Roteiro marca **Entrar em batalha como equipe**.
 
 ### Aurora enfrenta (e falha)
 
-> **Aurora:** Eu parto pra cima dele com tudo. Soco na cara.
+> **Aurora:** Eu voo direto nele, como minha mãe faria. Soco na cara.
 
 **[TORRE]** Rolador: **Enfrentar diretamente a ameaça**, Aurora, Perigoso **−1**. Dados 6 → **5**: falha.
 A Torre já aplica: **+1 potencial** para a Aurora (falha marca potencial) e me lembra: "falha = movimento do
 mestre".
 
-> *Penso:* falha é a minha vez, e o Ocaso tem o movimento certinho: *absorver o golpe e devolver como raio
-> em outra pessoa*. Invulnerável é ela; o resto não.
+> *Penso:* falha é a minha vez, e **posso combinar**: o livro faz isso no exemplo da Professora (p.187), que numa falha manda marcar Assustada **e** rolar golpe poderoso, as duas coisas por meio de um movimento da vilã. A regra que eu tiro dali: **pesado em quem falhou, leve em quem está perto.**
 >
-> **Eu:** O punho para a dois centímetros do rosto dele. O visor bebe o impacto como se fosse luz, e ele sorri:
-> *"Força sem disciplina, como sua mãe dizia."* Ele aponta a mão para o abrigo do vigia, e um raio de sol
-> concentrado sai em linha reta. Mayane, você está na frente da porta. O que você faz?
+> - **Na Aurora (pesado):** o movimento do Ocaso *absorver o golpe e devolver*, com **condição** e **golpe  poderoso**. Ela é invulnerável a balas, não a isso: é a força **dela** voltando, e a frase que dói.
+> - **Em volta (leve):** a energia que sobra sai **caótica** e ameaça o cenário e um civil. Não acerta
+>   ninguém ainda: é um perigo anunciado, com "o que você faz?". Quem estiver perto escolhe se entra.
+>
+> Usar o movimento **dele** no lugar de um "tome um golpe" genérico é o ponto: o Ocaso tem um movimento feito para sacanear a Aurora, e é ali que a vingança dele aparece.
+>
+> **Eu:** O soco acerta em cheio, e por um segundo você acha que ganhou. Então sente: a sua força **escorrendo** para dentro do visor dele, como luz entrando num ralo. *"Patético. Força sem disciplina, como sua mãe dizia."* Ele devolve a sua própria força num estouro, e você atravessa o galpão de costas. **Marque Insegura e role para tomar um golpe poderoso.**
 
-**[TORRE]** Log: "Ocaso usa *absorver o golpe e devolver*". (A frase da mãe vem da **ficha** da Aurora: as
-Notas do vilão e a ficha dela na mesma tela me deram isso.)
+**[TORRE]** Cartão do Ocaso: **Movimentos de vilão → Absorver o golpe da Aurora e devolver** (vai para o log). Assento da Aurora: **INS** marcada. Rolador: **Tomar um golpe poderoso**, Aurora, + **1** (agora ela tem uma condição). Dados 6 → **7**: a Torre mostra a lista do 7–9.
 
-### Mayane defende (e paga o preço)
+> **Aurora:** Eu... cedo terreno. Fico no chão um segundo a mais do que devia.
+>
+> *Penso:* "ceder terreno" dá uma oportunidade ao inimigo, igual ao exemplo do livro. Guardo: o Ocaso vai > usar isso daqui a pouco.
+>
+> **Eu:** E o resto da energia não volta para ele: sai **caótica** pelo galpão, ricocheteando nas vigas. Uma delas estala e começa a ceder sobre a cabine onde o vigia se trancou. Mayane, você está na frente da porta.
+>  O que você faz?
 
-> **Mayane:** Eu fico na frente. Abro os braços. O vigia não.
+**[TORRE]** Roteiro marca **Tomar um golpe poderoso** e **Enfrentar diretamente a ameaça**. (A frase da mãe vem da **ficha** da Aurora: as Notas do vilão e a ficha dela na mesma mesa me deram isso.)
 
-**[TORRE]** Rolador: **Defender**, Mayane, Salvador **+1**. Dados 7 → **8**: sucesso parcial. A Torre
+### Mayane defende (e o Pulsar ajuda)
+
+> **Mayane:** Eu fico embaixo da viga. Seguro. O vigia não.
+
+**[TORRE]** Rolador: **Defender**, Mayane, Salvador **+1**. Dados 8 → **9**: sucesso parcial. A Torre
 mostra: o vigia fica seguro; escolha 1 da lista (**+1 na pilha** / ganhar Influência sobre o vigia /
-remover condição) **e** o custo do 7-9 (expor-se ou escalar a situação).
+remover condição) **e** o custo do 7–9 (expor-se ou escalar a situação).
 
-> **Mayane:** +1 na pilha. E eu me exponho, claro.
+> **Pulsar:** Espera! Eu me enfio embaixo dos escombros e puxo o vigia pela gola com uma mão. Gasto um ponto pra ajudar ela!
 >
-> **Eu:** O raio te pega no peito. Tome um golpe poderoso.
+> *Penso:* **ajudar** é assim (p.85): alguém **gasta um ponto da pilha para dar +1 a um companheiro**, depois do dado, e só se der para ajudar na ficção. O Pulsar está ali do lado: vale. A Mayane **não** poderia gastar da pilha para si mesma; o ponto tem de vir de outro (o único jeito de gastar em si é agir de forma egoísta).
+> O 9 vira **10**: sucesso total, **sem custo**. Ela não precisa se expor.
 
-> *Penso:* golpe poderoso é ao contrário dos outros: rola **+ condições marcadas**, e número **alto é ruim**.
-> A Mayane não tem nenhuma condição: a chance de ficar firme é boa. Eu quero mostrar esse movimento
-> porque o roteiro pede, e porque ele ensina que **apanhar** também é escolha dramática.
+**[TORRE]** **Gerir pilha → Usar pilha**: 1 ponto, quem usa: Pulsar, motivo "ajudar a Mayane a segurar a
+viga". Pilha **4 → 3**. Resultado da Mayane: **10**.
 
-**[TORRE]** Pilha **4 → 5**. Rolador: **Tomar um golpe poderoso**, Mayane, + **0** condições. Dados **5**: ela se
-mantém firme e diz como, e **marca potencial**. Roteiro marca **Defender** e **Tomar um golpe poderoso**.
-
-> **Mayane:** Eu caio de joelhos, fumaça saindo do uniforme, e levanto. "É só isso?"
-
-### Garça usa a resposta e pede ajuda
-
-> **Garça:** Eu desço da viga e corto o cabo do tanque, como a resposta da avaliação disse.
-
-> *Penso:* isso é **liberar os poderes**? Não: é físico, é ataque direto contra algo perigoso → **Enfrentar**.
-> Ela tem Perigoso −1, mas o **+1 da avaliação** vale (está agindo pela resposta).
+> **Mayane:** Então: +1 na pilha.
 >
-> **Pulsar:** Eu gasto um ponto da pilha pra ajudar ela! Puxo a luz do tanque pra mim, ele fica sem defesa.
+> **Eu:** A viga para no ar, em cima dos seus braços. O Pulsar arrasta o vigia para fora, e vocês dois ficam um segundo olhando um pro outro, cobertos de pó. Ninguém se machucou.
 
-**[TORRE]** **Gerir pilha → Usar pilha**: 1 ponto, quem usa: Pulsar, motivo "ajudar a Garça". Pilha
-**5 → 4**. Rolador: **Enfrentar**, Garça, Perigoso −1 +1
-(avaliação) +1 (ajuda) = **+1**. Dados 9 → **10**: sucesso forte. Troca de golpes: **o Ocaso marca uma
-condição**, a Garça escolhe as vantagens da lista.
+**[TORRE]** **Gerir pilha → +1** (motivo "Defender: +1 Equipe"). Pilha **3 → 4**. Roteiro marca **Defender**.
+
+> *Penso:* a pilha começou em 4 e continua em 4, mas agora conta uma história: um gastou para o outro e o outro devolveu para a equipe. É o jogo da pilha funcionando.
+
+### Garça usa a resposta (e a Estrela ajuda)
+
+> **Garça:** Eu desço da viga e vou no cabo do tanque, como a resposta da avaliação disse.
+>
+> **Eu:** O cabo sai das costas dele. Para chegar lá, você passa pelo Ocaso.
+
+> *Penso:* isso é **liberar os poderes**? Não: o cabo está **nele**, e ele vai reagir. É confronto com algo de
+> fato perigoso → **Enfrentar diretamente a ameaça** (Perigoso). E a lista do Enfrentar tem a opção certinha: **arrancar algo do oponente**. Ela tem Perigoso −1, mas o **adiante +1 da avaliação** vale: está agindo sobre o tanque.
+>
+> **Pulsar:** Eu ajudo!
+>
+> **Eu:** Você está embaixo dos escombros com o vigia, do outro lado do galpão. Não dá.
+>
+> *Penso:* ajudar pede estar **de fato** em condição de ajudar (p.85). Masks não tem turno, mas a ficção decide quem alcança. Quem está colada no Ocaso é a Estrela (a visão a deixou ao lado dele).
+>
+> **Estrela Negra:** Então eu. Seguro o cabo no ar com a telecinese, esticado, pra ela não errar. Gasto um ponto.
+
+**[TORRE]** **Gerir pilha → Usar pilha**: 1 ponto, quem usa: Estrela Negra, motivo "ajudar a Garça: segura o cabo com telecinese". Pilha **4 → 3**. Rolador: **Enfrentar**, Garça, Perigoso −1 +1 (adiante da avaliação) +1 (ajuda) = **+1**. Dados 9 → **10**: sucesso forte. Clique no **token de adiante** da Garça: **usar** (saido cartão).
+
+> **Garça:** Escolho as duas: arranco o cabo e saio ilesa.
+>
+> **Eu:** Você gira por baixo do braço mecânico, o cabo estica no ar como uma corda de violão, e a lâmina passa. Faísca para todo lado. Ele tenta te agarrar e pega só o vento.
+
+**[TORRE]** Sucesso no Enfrentar é **troca de golpes**: o Ocaso marca uma condição (no cartão dele). Ela escolheu **sair ilesa**, então o troco dele não pega nela.
+
+(PAUSE)
 
 > *Penso:* vilão marcando condição = **golpe que pegou**. Escolho a que bate com a ficção: cortaram a fonte
-> dele na frente da neta da inimiga. **Irritado**. E ao marcar, o livro manda fazer um **movimento daquela
-> condição** antes de devolver a ação: Irritado **exagera**.
+> dele na frente da neta da inimiga. **Irritado**. E ao marcar, o livro manda reagir **na hora**, antes de
+> devolver a ação, com um movimento daquela condição. A carta **Vilão · Irritado** dá o cardápio:
 >
-> **Eu:** O cabo estoura. O Ocaso grita, e pela primeira vez a voz perde a elegância: ele arranca o tanque
-> inteiro da parede e ergue sobre a cabeça. *"Então ninguém fica com o amanhecer!"*
+> - descarregar a raiva sem cuidado;
+> - destruir o cenário;
+> - cortar a negociação;
+> - **mirar um ponto fraco**;
+> - **levar o perigo a outro patamar**.
+>
+> A reação "em geral é leve": **prepara perigo e dá espaço para resposta**, sem desfazer o que a Garça acabou
+> de conquistar (o cabo está cortado e continua cortado). Leve não quer dizer fraca: quer dizer que ninguém
+> sofre **ainda**, mas todo mundo vê o que vai acontecer se não reagir.
+>
+> Ele acabou de perder a fonte de energia. A raiva mais honesta é **destruir o cenário**. E eu tenho um
+> lembrete no cartão dele: **"abertura: Aurora cedeu terreno"**: ela ainda está no chão, onde não estaria se
+> tivesse se levantado. Junto as duas coisas.
+>
+> **Eu:** O cabo estoura, e pela primeira vez a voz dele perde a elegância. Ele soca a coluna de sustentação
+> com toda a luz que ainda tem no visor. A parede do fundo estoura, e o teto vem abaixo em cima de onde você
+> caiu, Aurora. Você ainda está tentando se levantar quando o concreto chega: você some debaixo dos escombros.
+> Inteira (é invulnerável), mas presa. E o tanque de capacitores, sem o cabo, começa a zunir, rachado.
 
-**[TORRE]** Ficha do Ocaso na mesa: **Irritado** marcado (1 de 3). A Torre mostra a carta **Vilão ·
-Irritado** (movimentos de condição) para eu não esquecer o "exagera".
+**[TORRE]** Cartão do Ocaso: **IRR** marcado (1 de 3); a Torre abre as cartas de condição de vilão (é ali que
+está o cardápio acima). Clique no lembrete **"abertura: Aurora cedeu terreno"**: **resolver** (ele usou a
+abertura). Log: "resolveu o lembrete: abertura: Aurora cedeu terreno".
+
+> *Penso:* aqui é o **ceder terreno** cobrando: ela abriu espaço para a oposição fazer algo que ela teria
+> impedido de pé. Por isso **não pergunto o que ela faz**: o desabamento acontece. Ela não leva dano (é
+> invulnerável) nem condição nova, mas fica **fora da luta por enquanto**, presa. Volta a agir na próxima
+> oportunidade que eu der. E não desfiz o que a Garça conquistou: o cabo continua cortado. O perigo novo (o
+> tanque zunindo) eu passo para quem está de pé: o Pulsar, o da energia.
+
+**[TORRE]** Lembrete novo na Aurora: **"presa nos escombros"** (Bônus → Lembrete), para eu não esquecer de dar a
+vez dela depois.
 
 ### Pulsar libera os poderes
 
-> **Pulsar:** Eu absorvo a energia do tanque antes de ele jogar. Toda.
+> **Pulsar:** Eu absorvo a energia do tanque antes de explodir. Toda.
 
-**[TORRE]** Rolador: **Liberar seus poderes**, Pulsar, Aberração **+2**. Dados 4 → **6**: falha.
-
-> **Pulsar:** Espera! Eu ajo de forma egoísta. Ninguém me mandou fazer isso: eu sugo tudo sozinho, e se
-> alguém estiver no caminho, azar.
->
-> **Eu:** (às outras) Foi egoísta o suficiente? Vocês se sentem ignoradas?
->
-> **Mayane:** Ele nem olhou pra gente. Com certeza.
-
-> *Penso:* agir de forma egoísta é **depois** do dado: gasta 1 ponto, +1 na rolagem, e a jogadora **muda os
-> próprios Rótulos** (sobe um, desce outro) para mostrar quem ela está virando. Transformou a falha em 7.
-> Não é sempre que salva: se precisasse de +2, não adiantaria.
-
-**[TORRE]** **Gerir pilha → Usar pilha**: 1 ponto, quem usa: Pulsar, motivo "agiu de forma egoísta". Pilha
-**4 → 3**. Mudar Rótulos do Pulsar: **Aberração +1, Salvador −1** (futuro: a mesa faz isso junto). Resultado
-**7**: parcial. A Torre mostra: consegue, mas escolha **marcar uma condição** ou **o efeito fica
-instável/temporário** (eu digo como).
+**[TORRE]** Rolador: **Liberar seus poderes**, Pulsar, Aberração **+2**. Dados 5 → **7**: parcial. A Torre
+mostra: consegue, mas escolha **marcar uma condição** ou **o efeito fica instável/temporário** (eu digo como).
 
 > **Pulsar:** Instável. Não quero condição.
 >
@@ -195,6 +244,26 @@ instável/temporário** (eu digo como).
 
 > *Penso:* "instável" é o meu gancho para a cena seguinte: o Pulsar está carregado e com medo de machucar
 > alguém de novo (Júlia, o Helix). Isso é ouro para **confortar ou apoiar** depois da luta.
+
+### Aurora sai dos escombros
+
+> *Penso:* agora é a oportunidade dela. O ceder terreno já cobrou o preço; ela pode agir de novo.
+>
+> **Eu:** Aurora, embaixo do concreto você ouve a luta continuando sem você. O que você faz?
+>
+> **Aurora:** Eu empurro tudo pra cima e saio. "Ninguém me enterra."
+
+> *Penso:* erguer o teto inteiro é força além do que ela sabe que consegue → **Liberar os poderes**
+> (Aberração). Ela está Insegura, mas Insegura pesa em Defender e em Rejeitar Influência, não em Liberar.
+
+**[TORRE]** Lembrete **"presa nos escombros"**: **resolver**. Rolador: **Liberar seus poderes**, Aurora,
+Aberração **0**. Dados 8 → **8**: parcial. A Torre mostra: consegue, mas escolha **marcar uma condição** ou
+**o efeito fica instável/temporário** (eu digo como).
+
+> **Aurora:** Instável. Já tô Insegura, não quero outra.
+>
+> **Eu:** O concreto sobe e você sai, coberta de pó. Mas o galpão inteiro range: o que você empurrou não vai
+> ficar no lugar por muito tempo.
 
 ### A Estrela Negra provoca
 
