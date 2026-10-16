@@ -15,3 +15,4 @@ Versões `vX.Y.Z`: **X** mudança grande de arquitetura · **Y** mudança locali
 | [v0.1.0](docs/relatorio_v0.1.0.md) | 2026-10-15 | Cartas e Cenário |
 | [v0.2.0](docs/relatorio_v0.2.0.md) | 2026-10-16 | A mesa |
 | [v0.2.1](docs/relatorio_v0.2.1.md) | 2026-10-16 | Ponto a ponto |
+| [v0.2.2](docs/relatorio_v0.2.2.md) | 2026-10-16 | Confiabilidade |
