@@ -1,6 +1,6 @@
 # Resumo — onde a Torre está
 
-> Handoff para a próxima conversa. Atualizado no fechamento da **v0.1.0** (2026-10-15).
+> Handoff para a próxima conversa. Atualizado no fechamento da **v0.2.0** (2026-10-16).
 > Se algo aqui contradiz o código, o código manda — e este arquivo precisa de poda.
 
 ## Leitura para retomar
@@ -16,10 +16,14 @@ novo é seu.
 
 ## Estado
 
-- **Versão:** v0.1.0 — *Cartas e Cenário*. Relatório: `docs/relatorio_v0.1.0.md`.
-- **Novo nesta versão:** as **cartas são JSON desenhado pela Unity** (help inteiro e Gestão das cartas com
-  editor que grava nos JSON do projeto) e as campanhas têm **Cenário** (Local / Organização / Outros, aba na
-  sala, exportar/importar). A ficha alimenta o cenário como já alimentava os NPCs.
+- **Versão:** v0.2.0 — *A mesa*. Relatório: `docs/relatorio_v0.2.0.md`.
+- **Novo nesta versão:** a **mesa de jogo** ("Entrar na sala" na entrada → `PainelMesa`): assentos, log,
+  pilha de Equipe (Gerir pilha: ±1, usar, questionário de entrar em batalha, passagem do tempo), vilões em
+  cena e bônus (adiante/constante/controle). E a **Área do mestre** (`PainelMestre`): primeira sessão,
+  anotações, vilões em cena, potencial.
+- **O que organiza o que vem:** escrever o **exemplo comentado** antes do código (`docs/exemplo_primeira_luta.md`,
+  blocos [TORRE]) mostrou quais botões a sessão pede. O próximo corte é o **rolador**, o lance seguinte do
+  exemplo. Caso de teste do produto: `docs/Case de Teste/` (Halcyon City).
 - **Onde o Alan chegou:** salas com personagens **em aprovação** (formação, Influência e relacionamentos
   prontos; NPCs nascem da ficha). Agora há o **laboratório de NPCs** (botão Npcs na entrada): originais,
   cópia entre campanhas, exportar/importar, foto, papel "Vilão / Oponente" e a ficha de vilão conferida no
@@ -79,16 +83,20 @@ novo é seu.
   o Alan separa nome e descrição à mão.
 - **Influência no jogo** — `DefinirEstadoDaInfluencia` (dar nova, perder, voltar; só em carreira) está no
   Core, sem tela e sem evento no log: vai para o painel do mestre (a aba Influência da sala).
-- **Área do mestre** — o botão está na sala (`PainelSala.AreaDoMestre`, só avisa "em construção"). O
-  Core está pronto em `Core/Mesa/Mesa.cs` (rodada, eventos, potencial, condições, Rótulos com estouro,
-  corrigir). Falta a tela: cartões das personagens em carreira, comandos com motivo, log da rodada.
+- **Mesa** — `UI/PainelMesa.cs` + `Core/Mesa/Mesa.cs` (eventos com desfazer; pilha, condições de vilão e
+  bônus são da mesa, `mesa_<sala>.json`). Falta: **rolador** (desenho no fim do `exemplo_primeira_luta.md`),
+  Influência mudando Rótulos pela mesa (com Rejeitar), roteiro marcando sozinho pelo log, post BBCode,
+  mudar Rótulos ao agir de forma egoísta (hoje manual).
+- **Área do mestre** — `UI/PainelMestre.cs`: Primeira sessão (`Regras/primeira_sessao.json`,
+  `Core/Salas/PrimeiraSessao.cs`), Anotações (na sala: `AnotacoesFormacao`, `AnotacoesNpcs`, `Trama`),
+  e, abertas pela mesa, Vilões em cena e Potencial. Trama → ganchos e arcos (livro cap. 9) depois.
 - **Validação por arquétipo**, guiada pelo Alan: passaram Farol, Amaldiçoada, Janus, Nova, Forasteira;
   Bruta e Delinquente sem validação; Discípula, Legado e Transformado sem revisão. Esperar o Alan.
 - Anotados para depois: aposentar no 15º avanço; ajuste do mestre em ficha em carreira
   (`implementacao_futura.md`).
 - **Ajuste pontual com motivo** em ficha em carreira (sem reabrir a criação) e **resultado sem rolagem**
   (Sobrecarga 10+, Vou te salvar! 12+) para o rolador: anotados.
-- Testes: `Assets/Tests/EditMode/` — 142 passando no harness dotnet fora da Unity; rodar também no Test
+- Testes: `Assets/Tests/EditMode/` — 160 passando no harness dotnet fora da Unity; rodar também no Test
   Runner da Unity.
 
 ## Armadilhas
@@ -139,18 +147,22 @@ novo é seu.
 | NRE em `GetPreferredValues` | TMP em objeto inativo não mede | estimar a largura (`LarguraEstimada`) |
 | Carta nova "não aparece" | Auto Refresh desligado, JSON velho em memória | Ctrl+R antes de procurar bug |
 | Commit levou arquivo de outra frente | `git commit` grava o índice inteiro (havia `D` já staged) | `git status` antes; refazer se ainda não houve push |
+| Caixa de texto cresce com o texto | `TMP_InputField` também é `ILayoutElement`: empate de prioridade, vence a maior | `LayoutElement.layoutPriority = 2` (`AreaTexto`) |
+| Rótulo vaza do botão | ajuste feito botão a botão, alguns escapam | ajustar todos ao redesenhar (`PainelMesa.LateUpdate`), exceto texto longo marcado |
+| Enum e constante com o mesmo nome | `const string Controle` dentro de `Mesa` esconde o enum `Controle` | prefixar (`BonusControle`) |
+| Pilha "zerando" no questionário | leitura errada da regra | a pilha **soma** sempre; só "o tempo passa" volta para 1 (pp.86–88) |
 | Mapeamento de NPC/lugar errado | lista pronta sem conferir a pergunta (Farol) | conferir no livro PT-BR e inglês |
 
 ## MVP (do `CLAUDE.md`)
 
 | Item | Estado |
 |---|---|
-| Tela de entrada → partida | de pé: Jogadores, Personagens e **Salas** (criar, vagas, NPCs) |
+| Tela de entrada → partida | **de pé**: "Entrar na sala" abre a mesa da campanha pronta (ou lista) |
 | Criar personagem | **de pé** (laboratório e revisão na sala, com pendências) |
-| Mesa com N fichas clicáveis | **Core pronto**, tela falta (só o botão "Área do mestre") |
-| Pilha de Equipe | falta |
+| Mesa com N fichas clicáveis | **de pé**: assentos com Rótulos, condições, potencial, bônus; ficha no clique |
+| Pilha de Equipe | **de pé**: Gerir pilha (±1, usar, questionário, passagem do tempo) |
 | Mão de cartas por jogador | falta |
-| Rolador 2d6 + log | **log pronto no Core**; rolador falta |
+| Rolador 2d6 + log | **log de pé** na mesa; rolador é o próximo corte |
 | Exportar log para o fórum | falta |
 
 Fora do MVP, já de pé: jogadores; NPCs com ficha de vilão (Neutro/Aliado/Vilão / Oponente), **NPCs que
@@ -171,6 +183,9 @@ A "mão de cartas" tem base: `CatalogoDeCartas` + `MontadorDeBaralho` no Core, s
 - v0.1.0: `personagens.json` ganha a lista `cenario` (elementos com `sala`, `tipo`, `vinculo`,
   `descricao_copiada`); `pnj.descricao_copiada`; `equipe_npc_nome`; textos do nome do lugar nos extras com
   campo `cenario`. Troca de cenário: formato `torre-de-controle/cenario`, versão 1.
+- v0.2.0: `mesa_<sala>.json` ganha `equipe`, `em_cena`, `condicoes_de_vilao`, `bonus`; `salas.json` ganha
+  `primeira_sessao`, `anotacoes_formacao`, `anotacoes_npcs`, `trama`, `ultima_mesa`; `pnj.ligacoes`. Trocas
+  novas: `torre-de-controle/anotacoes` e `torre-de-controle/vinculos` (versão 1).
 - **Ainda sem campo `versao` nem migração.** Na v0.0.2 o status `criado` deixou de existir; os dados
   locais do Alan foram convertidos à mão (backup em `dados/personagens.antes-dos-status.json`).
   Antes de uma campanha de verdade, criar `versao` + migração.
