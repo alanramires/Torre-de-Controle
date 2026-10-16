@@ -1,6 +1,6 @@
 # Resumo — onde a Torre está
 
-> Handoff para a próxima conversa. Atualizado no fechamento da **v0.2.0** (2026-10-16).
+> Handoff para a próxima conversa. Atualizado no fechamento da **v0.2.1** (2026-10-16).
 > Se algo aqui contradiz o código, o código manda — e este arquivo precisa de poda.
 
 ## Leitura para retomar
@@ -16,7 +16,9 @@ novo é seu.
 
 ## Estado
 
-- **Versão:** v0.2.0 — *A mesa*. Relatório: `docs/relatorio_v0.2.0.md`.
+- **Versão:** v0.2.1 — *Ponto a ponto*. Relatórios: `docs/relatorio_v0.2.0.md` (a mesa) e
+  `docs/relatorio_v0.2.1.md` (a mesa testada lance a lance: trilhas, Refazer, Lembretes, moedas de Influência,
+  atalhos, e as correções de regra de ajuda, egoísta, ceder terreno e combinar movimentos).
 - **Novo nesta versão:** a **mesa de jogo** ("Entrar na sala" na entrada → `PainelMesa`): assentos, log,
   pilha de Equipe (Gerir pilha: ±1, usar, questionário de entrar em batalha, passagem do tempo), vilões em
   cena e bônus (adiante/constante/controle). E a **Área do mestre** (`PainelMestre`): primeira sessão,
@@ -83,8 +85,11 @@ novo é seu.
   o Alan separa nome e descrição à mão.
 - **Influência no jogo** — `DefinirEstadoDaInfluencia` (dar nova, perder, voltar; só em carreira) está no
   Core, sem tela e sem evento no log: vai para o painel do mestre (a aba Influência da sala).
-- **Mesa** — `UI/PainelMesa.cs` + `Core/Mesa/Mesa.cs` (eventos com desfazer; pilha, condições de vilão e
-  bônus são da mesa, `mesa_<sala>.json`). Falta: **rolador** (desenho no fim do `exemplo_primeira_luta.md`),
+- **Mesa** — `UI/PainelMesa.cs` + `Core/Mesa/Mesa.cs` (eventos com desfazer e refazer; pilha, condições de vilão,
+  bônus e lembretes são da mesa, `mesa_<sala>.json`; trilhas e potencial vão para a ficha). O exemplo
+  `docs/exemplo_primeira_luta.md` é o roteiro de teste: revisado até "Aurora sai dos escombros"; dali em diante
+  (Estrela provoca, depois da luta) falta revisar com o Alan. Falta: **rolador**, com as regras certas de ajuda
+  (1 por colega que alcança), egoísta (a mesa confirma + quais Rótulos mudam) e golpe poderoso,
   Influência mudando Rótulos pela mesa (com Rejeitar), roteiro marcando sozinho pelo log, post BBCode,
   mudar Rótulos ao agir de forma egoísta (hoje manual).
 - **Área do mestre** — `UI/PainelMestre.cs`: Primeira sessão (`Regras/primeira_sessao.json`,
@@ -96,7 +101,7 @@ novo é seu.
   (`implementacao_futura.md`).
 - **Ajuste pontual com motivo** em ficha em carreira (sem reabrir a criação) e **resultado sem rolagem**
   (Sobrecarga 10+, Vou te salvar! 12+) para o rolador: anotados.
-- Testes: `Assets/Tests/EditMode/` — 160 passando no harness dotnet fora da Unity; rodar também no Test
+- Testes: `Assets/Tests/EditMode/` — 163 passando no harness dotnet fora da Unity; rodar também no Test
   Runner da Unity.
 
 ## Armadilhas
@@ -150,6 +155,8 @@ novo é seu.
 | Caixa de texto cresce com o texto | `TMP_InputField` também é `ILayoutElement`: empate de prioridade, vence a maior | `LayoutElement.layoutPriority = 2` (`AreaTexto`) |
 | Rótulo vaza do botão | ajuste feito botão a botão, alguns escapam | ajustar todos ao redesenhar (`PainelMesa.LateUpdate`), exceto texto longo marcado |
 | Enum e constante com o mesmo nome | `const string Controle` dentro de `Mesa` esconde o enum `Controle` | prefixar (`BonusControle`) |
+| Narrar o que a ficha não tem | inventei habilidade ("enxerga no escuro") | ler a ficha antes de narrar; usar o que ela tem (Visões sombrias) |
+| Explicar regra de cabeça | "egoísta = +1", "ajuda de quem está longe" | conferir no livro (p.84–85) antes de escrever o exemplo |
 | Pilha "zerando" no questionário | leitura errada da regra | a pilha **soma** sempre; só "o tempo passa" volta para 1 (pp.86–88) |
 | Mapeamento de NPC/lugar errado | lista pronta sem conferir a pergunta (Farol) | conferir no livro PT-BR e inglês |
 

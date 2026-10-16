@@ -46,7 +46,7 @@ batia com a ficha ou com o livro, o Alan corrigiu (e quase sempre com razão).
 - Inventei habilidade ("no escuro eu enxergo") que não estava na ficha da Estrela Negra.
 - Expliquei o egoísta como "+1" e, depois, forcei um exemplo de egoísta onde a ficção não pedia. O Alan:
   "tenha paciência, a gente vai chegar lá".
-- Puse ajuda do Pulsar quando ele estava preso noutra parte da cena.
+- Pus ajuda do Pulsar quando ele estava preso noutra parte da cena.
 - Levei os textos da tela para o feminino ("heroínas", "a líder", "ela sobre ela"); o Pulsar é ele. Virou
   regra guardada: neutro na Torre, gênero do personagem quando específico.
 - `const string Controle` dentro de `Mesa` escondeu o enum `Controle` (renomeado para `BonusControle`).
