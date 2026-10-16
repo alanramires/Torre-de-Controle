@@ -50,6 +50,9 @@ A Torre mostra as perguntas da lista e "**escolha 2**".
 **[TORRE]** A Garça ganha **+1 enquanto agir pelas respostas** (soma por resposta usada; teto +4). O
 roteiro marca **Avaliar a situação** sozinho, porque o rolador registrou no log.
 
+---
+
+
 > **Estrela Negra:** No escuro eu enxergo. Eu só... apareço do lado dele. Sem barulho.
 >
 > **Pulsar:** As luzes que ele roubou tremem quando eu chego, como se quisessem vir pra mim.
