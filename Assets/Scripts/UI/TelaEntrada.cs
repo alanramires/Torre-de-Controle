@@ -150,7 +150,7 @@ namespace TorreDeControle.UI
         {
             if (painelMesa == null)
                 painelMesa = PainelMesa.Criar(transform);
-            painelMesa.Abrir(sala, salas, personagens, armazenamento, null);
+            painelMesa.Abrir(sala, salas, personagens, jogadores, armazenamento, null);
         }
 
         void AbrirAjuda()

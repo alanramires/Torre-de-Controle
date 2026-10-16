@@ -48,7 +48,7 @@ namespace TorreDeControle.UI
             Mesa mesaAberta = null)
         {
             mesa = mesaAberta;
-            if (mesa == null && aba == Aba.Viloes)
+            if (mesa == null && (aba == Aba.Viloes || aba == Aba.Potencial))
                 aba = Aba.PrimeiraSessao;
             sala = salaAberta;
             salas = cadastroSalas;
@@ -108,7 +108,7 @@ namespace TorreDeControle.UI
         }
 
         RectTransform abas;
-        enum Aba { PrimeiraSessao, Anotacoes, Viloes }
+        enum Aba { PrimeiraSessao, Anotacoes, Viloes, Potencial }
         Aba aba = Aba.PrimeiraSessao;
 
         void MontarAbas()
@@ -117,7 +117,10 @@ namespace TorreDeControle.UI
                 Destroy(abas.GetChild(i).gameObject);
             var lista = new System.Collections.Generic.List<(Aba, string)> { (Aba.PrimeiraSessao, "Primeira sessão"), (Aba.Anotacoes, "Anotações") };
             if (mesa != null)
+            {
                 lista.Add((Aba.Viloes, "Vilões em cena"));
+                lista.Add((Aba.Potencial, "Potencial"));
+            }
             foreach (var (qual, nome) in lista)
             {
                 var alvo = qual;
@@ -254,6 +257,41 @@ namespace TorreDeControle.UI
             }
         }
 
+        /// <summary>
+        /// Dar potencial com o que aconteceu (vai para o log e para a colheita). A falha numa rolagem já marca
+        /// sozinha quando houver o rolador; aqui é o mestre dando por outro motivo (movimento, fim de sessão...).
+        /// </summary>
+        void SecaoPotencial()
+        {
+            subtitulo.text = $"{sala.Nome} · potencial das heroínas na mesa";
+            Secao("POTENCIAL", "cada +1 pede o que aconteceu (vai para o log); 5 de potencial = um avanço", comAjuda: false);
+            var herois = sala.Slots.Where(v => v.Personagem != null).Select(v => personagens.Buscar(v.Personagem))
+                .Where(p => p != null && p.Ativo && p.Status == StatusCriacao.EmCarreira).ToList();
+            foreach (var h in herois)
+            {
+                var linha = Estilo.Fila(lista, 60, 12);
+                linha.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(14, 14, 6, 6);
+                Estilo.Moldura(linha.gameObject, Estilo.Linha, Estilo.BordaApagada);
+                var nome = Estilo.Rotulo(linha, $"<b>{h.NomeExibicao}</b>  ·  potencial {h.Potencial}", 22, Estilo.Texto);
+                nome.gameObject.AddComponent<LayoutElement>().preferredWidth = 420;
+                var oQue = Estilo.CampoTexto(linha, "o que aconteceu? (obrigatório)");
+                Estilo.ColunaElastica(oQue);
+                var alvo = h;
+                Estilo.BotaoPrincipal(linha, "+1 potencial", 220, () =>
+                {
+                    if (string.IsNullOrWhiteSpace(oQue.text))
+                    {
+                        Estilo.Confirmar(transform, "Diga o que aconteceu: o potencial vai para o log com esse motivo.", "Ok", () => { });
+                        return;
+                    }
+                    var r = mesa.DarPotencial(alvo.Id, 1, oQue.text);
+                    if (!r.Ok)
+                        Estilo.Confirmar(transform, r.Erro, "Ok", () => { });
+                    Redesenhar();
+                });
+            }
+        }
+
         void Redesenhar()
         {
             for (var i = lista.childCount - 1; i >= 0; i--)
@@ -267,6 +305,11 @@ namespace TorreDeControle.UI
             if (aba == Aba.Viloes)
             {
                 SecaoViloes();
+                return;
+            }
+            if (aba == Aba.Potencial)
+            {
+                SecaoPotencial();
                 return;
             }
             subtitulo.text = $"{sala.Nome} · a primeira sessão abre já na luta (livro, cap. 8)";

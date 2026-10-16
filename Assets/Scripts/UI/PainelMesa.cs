@@ -44,9 +44,12 @@ namespace TorreDeControle.UI
             return painel;
         }
 
+        Core.Jogadores.CadastroJogadores jogadores;
+
         public void Abrir(Sala salaAberta, CadastroSalas cadastroSalas, CadastroPersonagens cadastroPersonagens,
-            IArmazenamento armazenamento, Action aoFecharMesa)
+            Core.Jogadores.CadastroJogadores cadastroJogadores, IArmazenamento armazenamento, Action aoFecharMesa)
         {
+            jogadores = cadastroJogadores;
             sala = salaAberta;
             salas = cadastroSalas;
             personagens = cadastroPersonagens;
@@ -105,6 +108,23 @@ namespace TorreDeControle.UI
             tabuleiro = Estilo.Rect("Tabuleiro", cartao);
             tabuleiro.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
             Estilo.Moldura(tabuleiro.gameObject, Estilo.Linha, Estilo.BordaApagada);
+        }
+
+        PainelFicha painelFicha;
+        PainelNpc painelNpc;
+
+        void AbrirFichaDoNpc(Personagem npc)
+        {
+            if (painelNpc == null)
+                painelNpc = PainelNpc.Criar(transform.parent);
+            painelNpc.Abrir(npc, personagens, Redesenhar);
+        }
+
+        void AbrirFicha(Personagem p)
+        {
+            if (painelFicha == null)
+                painelFicha = PainelFicha.Criar(transform.parent);
+            painelFicha.Abrir(p, personagens, jogadores, Redesenhar, sala.Nome, abertaPelaSala: true);
         }
 
         void AbrirAreaDoMestre()
@@ -206,16 +226,36 @@ namespace TorreDeControle.UI
             v.childControlWidth = v.childControlHeight = true;
             v.childForceExpandHeight = false;
 
+            // Retrato e nome abrem a ficha (consulta). O potencial só se lê aqui: dar potencial pede o que
+            // aconteceu, e fica na Área do mestre (aba Potencial).
             var topo = Estilo.Fila(c, 52, 8);
-            Retrato(topo, p);
-            var nome = Estilo.Rotulo(topo, p.NomeExibicao, 22, Estilo.Dourado, FontStyles.Bold);
+            var abrir = Estilo.Rect("AbrirFicha", topo);
+            Estilo.ColunaElastica(abrir);
+            var h = abrir.gameObject.AddComponent<HorizontalLayoutGroup>();
+            h.spacing = 8;
+            h.childControlWidth = h.childControlHeight = true;
+            h.childForceExpandWidth = false;
+            h.childAlignment = TextAnchor.MiddleLeft;
+            Retrato(abrir, p);
+            var nome = Estilo.Rotulo(abrir, p.NomeExibicao, 22, Estilo.Dourado, FontStyles.Bold);
             nome.textWrappingMode = TextWrappingModes.NoWrap;
             nome.overflowMode = TextOverflowModes.Ellipsis;
             Estilo.ColunaElastica(nome);
-            var pot = Estilo.BotaoContorno(topo, $"pot {p.Potencial} +", 100, Estilo.Dourado, () =>
-                Aplicar(mesa.DarPotencial(p.Id, 1, null)));
-            Encolher(pot);
-            pot.gameObject.AddComponent<Dica>().Configurar("Potencial: +1 (falhou numa rolagem, ou o mestre deu).");
+            var fundoAbrir = abrir.gameObject.AddComponent<Image>();
+            fundoAbrir.color = new Color(1, 1, 1, 0);
+            var botaoAbrir = abrir.gameObject.AddComponent<Button>();
+            botaoAbrir.targetGraphic = fundoAbrir;
+            botaoAbrir.name = TextoLivre;
+            botaoAbrir.onClick.AddListener(() => AbrirFicha(p));
+            abrir.gameObject.AddComponent<Dica>().Configurar("Abrir a ficha de " + p.NomeExibicao + ".");
+            var pot = Estilo.Rotulo(topo, $"<size=70%>POT</size>\n{p.Potencial}", 20, Estilo.Dourado, FontStyles.Bold);
+            pot.alignment = TextAlignmentOptions.Center;
+            var lp = pot.gameObject.AddComponent<LayoutElement>();
+            lp.minWidth = lp.preferredWidth = 46;
+            lp.flexibleWidth = 0;
+            lp.layoutPriority = 2;
+            pot.raycastTarget = true;
+            pot.gameObject.AddComponent<Dica>().Configurar("Potencial (dar potencial: Área do mestre → Potencial).");
 
             var rotulos = personagens.RotulosAtuais(p);
             var filaR = Estilo.Fila(c, 40, 4);
@@ -382,12 +422,27 @@ namespace TorreDeControle.UI
             vl.childControlWidth = vl.childControlHeight = true;
             vl.childForceExpandHeight = false;
 
+            // Retrato e nome abrem a ficha do NPC (movimentos, condições, notas).
             var topo = Estilo.Fila(c, 52, 8);
-            Retrato(topo, v);
-            var nome = Estilo.Rotulo(topo, v.NomeExibicao, 22, Estilo.Erro, FontStyles.Bold);
+            var abrir = Estilo.Rect("AbrirFicha", topo);
+            Estilo.ColunaElastica(abrir);
+            var h = abrir.gameObject.AddComponent<HorizontalLayoutGroup>();
+            h.spacing = 8;
+            h.childControlWidth = h.childControlHeight = true;
+            h.childForceExpandWidth = false;
+            h.childAlignment = TextAnchor.MiddleLeft;
+            Retrato(abrir, v);
+            var nome = Estilo.Rotulo(abrir, v.NomeExibicao, 22, Estilo.Erro, FontStyles.Bold);
             nome.textWrappingMode = TextWrappingModes.NoWrap;
             nome.overflowMode = TextOverflowModes.Ellipsis;
             Estilo.ColunaElastica(nome);
+            var fundoAbrir = abrir.gameObject.AddComponent<Image>();
+            fundoAbrir.color = new Color(1, 1, 1, 0);
+            var botaoAbrir = abrir.gameObject.AddComponent<Button>();
+            botaoAbrir.targetGraphic = fundoAbrir;
+            botaoAbrir.name = TextoLivre;
+            botaoAbrir.onClick.AddListener(() => AbrirFichaDoNpc(v));
+            abrir.gameObject.AddComponent<Dica>().Configurar("Abrir a ficha de " + v.NomeExibicao + ".");
 
             var tem = v.Vilao?.Condicoes ?? new List<string>();
             var marcadas = mesa.CondicoesMarcadasDoVilao(v.Id);
