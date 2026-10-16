@@ -193,9 +193,10 @@ A "mão de cartas" tem base: `CatalogoDeCartas` + `MontadorDeBaralho` no Core, s
 - v0.2.0: `mesa_<sala>.json` ganha `equipe`, `em_cena`, `condicoes_de_vilao`, `bonus`; `salas.json` ganha
   `primeira_sessao`, `anotacoes_formacao`, `anotacoes_npcs`, `trama`, `ultima_mesa`; `pnj.ligacoes`. Trocas
   novas: `torre-de-controle/anotacoes` e `torre-de-controle/vinculos` (versão 1).
-- **Ainda sem campo `versao` nem migração.** Na v0.0.2 o status `criado` deixou de existir; os dados
+- **Os arquivos têm o campo `versao`, mas ainda não há migração** (o número é gravado; ao carregar, não se
+  converte nem se recusa versão diferente). Na v0.0.2 o status `criado` deixou de existir; os dados
   locais do Alan foram convertidos à mão (backup em `dados/personagens.antes-dos-status.json`).
-  Antes de uma campanha de verdade, criar `versao` + migração.
+  Antes de uma campanha de verdade, criar a migração (converter ou recusar versão diferente ao carregar).
 
 
 Movimentos de arquétipo: Delinquente adicionado com seis cartas de borda vermelha,

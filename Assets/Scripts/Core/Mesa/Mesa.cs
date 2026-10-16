@@ -450,11 +450,12 @@ namespace TorreDeControle.Core.Salas
             var p = original.Personagem == null ? null : personagens.Buscar(original.Personagem);
             if (p == null && original.Mudancas.Any(m => !DaMesa(m.Campo)))
                 return Resultado.Falha("Personagem não encontrada.");
+            // Devolve o que a correção tirou de fato (ela pode ter sido parcial, por limite), não o delta original.
             var mudancas = new List<Mudanca>();
-            foreach (var m in original.Mudancas)
+            foreach (var m in correcao.Mudancas)
             {
                 var agora = DaMesa(m.Campo) ? ValorDaMesa(m.Campo) : personagens.ValorDeJogo(p, m.Campo);
-                var depois = Limitar(m.Campo, agora + (m.Depois - m.Antes));
+                var depois = Limitar(m.Campo, agora - (m.Depois - m.Antes));
                 if (depois != agora)
                     mudancas.Add(new Mudanca { Campo = m.Campo, Antes = agora, Depois = depois });
             }
@@ -557,6 +558,7 @@ namespace TorreDeControle.Core.Salas
         static int Limitar(string campo, int valor) =>
             campo.StartsWith("condicao:") || campo.StartsWith("vilao:") || campo.StartsWith("bonus:") ? Math.Max(0, Math.Min(1, valor))
             : campo == CampoPotencial || campo == CampoEquipe || campo.StartsWith("contador:") ? Math.Max(0, valor)
+            : campo.StartsWith("rotulo:") ? Math.Max(Rotulos.Minimo, Math.Min(Rotulos.Maximo, valor))
             : valor;
 
         void Gravar()

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using TorreDeControle.Core.Armazenamento;
 
 namespace TorreDeControle.Infra
@@ -11,7 +12,7 @@ namespace TorreDeControle.Infra
     /// <see cref="Pulsar"/> é a tela, a cada quadro; ao sair (fechar, perder o foco) chama
     /// <see cref="Descarregar"/> e nada fica para trás.
     /// </summary>
-    public sealed class ArmazenamentoAdiado : IArmazenamento, IGravacaoAdiada
+    public sealed class ArmazenamentoAdiado : IArmazenamento, IGravacaoAdiada, ICopiaDeSeguranca
     {
         readonly IArmazenamento destino;
         readonly long espera;
@@ -49,10 +50,32 @@ namespace TorreDeControle.Infra
         {
             if (pendentes.Count == 0)
                 return;
+            // Cada chave só sai da fila depois de gravada: se uma gravação falhar, ela e as que vinham depois
+            // continuam pendentes (a próxima pulsação tenta de novo) e o erro sobe para quem chamou.
             var lote = new List<KeyValuePair<string, Func<string>>>(pendentes);
-            pendentes.Clear();
+            if (destino is IGravacaoEmLote emLote)
+            {
+                // Tudo o que está pendente (ficha, mesa, salas...) vira uma operação só.
+                var itens = lote.Select(i => new KeyValuePair<string, string>(i.Key, i.Value())).ToList();
+                emLote.GravarLote(itens);
+                foreach (var item in lote)
+                    if (pendentes.TryGetValue(item.Key, out var atual) && atual == item.Value)
+                        pendentes.Remove(item.Key); // se foi reagendada no meio, fica a versão nova
+                return;
+            }
             foreach (var item in lote)
+            {
                 destino.Gravar(item.Key, item.Value());
+                if (pendentes.TryGetValue(item.Key, out var atual) && atual == item.Value)
+                    pendentes.Remove(item.Key); // se foi reagendada no meio, fica a versão nova
+            }
+        }
+
+        /// <summary>Cópia de segurança: grava o pendente primeiro, para a cópia sair com o estado de agora.</summary>
+        public void CopiaDeSeguranca(string rotulo)
+        {
+            Descarregar();
+            (destino as ICopiaDeSeguranca)?.CopiaDeSeguranca(rotulo);
         }
     }
 }

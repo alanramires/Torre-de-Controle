@@ -67,6 +67,9 @@ namespace TorreDeControle.UI
                 SomBotao.Ligar(botao);
             var arquivos = new ArmazenamentoLocalJson(Application.persistentDataPath + "/dados");
             Debug.Log($"[Torre] Dados em: {arquivos.Pasta}");
+            // Uma gravação de várias chaves interrompida (Torre fechada no meio): termina antes de ler.
+            if (arquivos.RecuperarLoteInterrompido())
+                Debug.LogWarning("[Torre] Uma gravação interrompida foi concluída ao abrir.");
             // Junta as gravações (cliques seguidos gravam uma vez); Update pulsa, sair descarrega.
             armazenamento = new ArmazenamentoAdiado(arquivos);
             Troca.Arquivos = new ArquivosDeTroca(arquivos.Pasta);

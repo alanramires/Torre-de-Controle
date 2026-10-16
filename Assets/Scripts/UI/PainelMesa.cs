@@ -49,8 +49,14 @@ namespace TorreDeControle.UI
         /// <summary>O armazenamento dos dados (ligado pela Tela de Entrada): a sala abre a mesa sem passar por ela.</summary>
         public static IArmazenamento Armazenamento { get; set; }
 
+        static readonly HashSet<string> copiadas = new HashSet<string>();
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void LimparEstaticos() => Armazenamento = null; // Play sem domain reload
+        static void LimparEstaticos()
+        {
+            Armazenamento = null; // Play sem domain reload
+            copiadas.Clear();
+        }
 
         public void Abrir(Sala salaAberta, CadastroSalas cadastroSalas, CadastroPersonagens cadastroPersonagens,
             Core.Jogadores.CadastroJogadores cadastroJogadores, IArmazenamento armazenamento, Action aoFecharMesa)
@@ -60,11 +66,26 @@ namespace TorreDeControle.UI
             salas = cadastroSalas;
             personagens = cadastroPersonagens;
             aoFechar = aoFecharMesa;
+            // Antes de qualquer comando de jogo: uma cópia de segurança da campanha (uma por sala por sessão).
+            string falhaDaCopia = null;
+            if (armazenamento is ICopiaDeSeguranca copia && !copiadas.Contains(sala.Id))
+            {
+                try
+                {
+                    copia.CopiaDeSeguranca("mesa " + sala.Nome);
+                    copiadas.Add(sala.Id); // só depois do sucesso: se falhar, a próxima abertura tenta de novo
+                }
+                catch (Exception e)
+                {
+                    falhaDaCopia = "Cópia de segurança falhou (" + e.Message + "): reabra a mesa para tentar de novo.";
+                    Debug.LogWarning("[Torre] " + falhaDaCopia);
+                }
+            }
             mesa = Mesa.Carregar(armazenamento, personagens, sala.Id);
             salas.MarcarMesaAberta(sala.Id);
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
-            Mostrar(null);
+            Mostrar(falhaDaCopia == null ? (Resultado?)null : Resultado.Falha(falhaDaCopia));
             Redesenhar();
         }
 

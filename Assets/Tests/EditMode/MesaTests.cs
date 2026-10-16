@@ -172,6 +172,31 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Desfazer_rotulo_antigo_respeita_o_limite()
+        {
+            var r = mesa.MudarRotulos(heroi.Id, Rotulos.Perigoso, Rotulos.Mundano, "teste", Condicoes.Irritado);
+            Assume.That(r.Ok && mesa.Eventos.Last().Mudancas.Any(m => m.Campo == Mesa.CampoRotulo(Rotulos.Perigoso)));
+            var subiu = mesa.Eventos.Last();
+            heroi.RotulosJogo[Rotulos.Perigoso] = Rotulos.Minimo; // jogadas depois o levaram ao mínimo
+            Assert.That(mesa.Corrigir(subiu.Id, "engano").Ok, Is.True);
+            Assert.That(personagens.RotulosAtuais(heroi)[Rotulos.Perigoso], Is.EqualTo(Rotulos.Minimo), "não passa de −2");
+        }
+
+        [Test]
+        public void Refazer_devolve_so_o_que_a_correcao_tirou_de_fato()
+        {
+            mesa.MudarRotulos(heroi.Id, Rotulos.Perigoso, Rotulos.Mundano, "teste", Condicoes.Irritado);
+            var subiu = mesa.Eventos.Last();
+            Assume.That(subiu.Mudancas.Any(m => m.Campo == Mesa.CampoRotulo(Rotulos.Perigoso)));
+            heroi.RotulosJogo[Rotulos.Perigoso] = Rotulos.Minimo; // depois, o Rótulo foi ao mínimo
+            var mundanoAntes = personagens.RotulosAtuais(heroi)[Rotulos.Mundano];
+            mesa.Corrigir(subiu.Id, "engano");                   // Perigoso não desce (já no −2); Mundano volta +1
+            mesa.Refazer(mesa.Eventos.Last().Id, null);
+            Assert.That(personagens.RotulosAtuais(heroi)[Rotulos.Perigoso], Is.EqualTo(Rotulos.Minimo), "não sobe o que não desceu");
+            Assert.That(personagens.RotulosAtuais(heroi)[Rotulos.Mundano], Is.EqualTo(mundanoAntes));
+        }
+
+        [Test]
         public void Sozinha_nao_entra_em_batalha_como_equipe()
         {
             var e = new Mesa.EntradaEmBatalha { Lider = heroi.Id, Colegas = new[] { heroi.Id } };
