@@ -1,0 +1,5 @@
+{
+    "name": "TorreDeControle.Dados",
+    "references": ["Unity.TextMeshPro", "UnityEngine.UI"],
+    "autoReferenced": true
+}

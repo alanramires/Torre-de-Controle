@@ -2603,6 +2603,47 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1781237051}
   m_CullTransparentMesh: 1
+--- !u!1 &1900020001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1900020002}
+  - component: {fileID: 1900020003}
+  m_Layer: 0
+  m_Name: Rolagem 2D6
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &1900020002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1900020001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!114 &1900020003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1900020001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af831d3f27c34bb08a5c0debf2c184a5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: TorreDeControle.Dados::SobreposicaoDados
+  palcoPrefab: {fileID: 900000001, guid: 875a1df77d4a43df8408a9490692ce22, type: 3}
+  mostrarControlesTemporarios: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2612,3 +2653,4 @@ SceneRoots:
   - {fileID: 88061614}
   - {fileID: 763402402}
   - {fileID: 1759820829}
+  - {fileID: 1900020002}

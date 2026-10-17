@@ -4,6 +4,7 @@
     "references": [
         "TorreDeControle.Core",
         "TorreDeControle.Infra",
+        "TorreDeControle.Dados",
         "Unity.TextMeshPro",
         "UnityEngine.UI",
         "Unity.InputSystem"
