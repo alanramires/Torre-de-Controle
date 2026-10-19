@@ -19,15 +19,15 @@ public class SobreposicaoDados : MonoBehaviour
     private Button botao;
     private RolagemDados rolagem;
     private readonly Vector3 posicaoPalco = new Vector3(1000f, 0f, 0f);
-    private int ultimoResultado;
+    private Resultado2D6? ultimoResultado;
     private float instanteResultado;
     private int largura;
     private int altura;
 
     public bool EmRolagem => rolagem != null && rolagem.EmRolagem;
 
-    /// <summary>Await the sum; modifiers belong to the caller.</summary>
-    public Task<int> Rolar2D6Async() => rolagem.Rolar2D6Async();
+    /// <summary>Await both dice and the sum (only at the end); modifiers belong to the caller.</summary>
+    public Task<Resultado2D6> Rolar2D6Async() => rolagem.Rolar2D6Async();
 
     private void Awake()
     {
@@ -65,7 +65,7 @@ public class SobreposicaoDados : MonoBehaviour
             dado.AguardarArremesso();
     }
 
-    private void GuardarResultado(int valor)
+    private void GuardarResultado(Resultado2D6 valor)
     {
         ultimoResultado = valor;
         instanteResultado = Time.unscaledTime;
@@ -170,7 +170,7 @@ public class SobreposicaoDados : MonoBehaviour
         float opacidade = 0f;
         if (EmRolagem)
             opacidade = 1f;
-        else if (ultimoResultado != 0)
+        else if (ultimoResultado.HasValue)
         {
             float tempoFade = Time.unscaledTime - instanteResultado - segundosExibindoResultado;
             opacidade = 1f - Mathf.Clamp01(tempoFade / Mathf.Max(0.05f, duracaoFade));
@@ -184,7 +184,7 @@ public class SobreposicaoDados : MonoBehaviour
             placar.enabled = opacidade > 0f;
             placar.alpha = opacidade;
             placar.text = EmRolagem ? "Rolando 2d6..."
-                : ultimoResultado == 0 ? "2d6" : "2d6: " + ultimoResultado;
+                : ultimoResultado.HasValue ? "2d6: " + ultimoResultado.Value : "2d6";
         }
     }
 

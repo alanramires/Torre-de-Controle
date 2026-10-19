@@ -4,6 +4,22 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
+/// <summary>O resultado de uma rolagem de 2d6, entregue só quando os dois dados param (sem spoiler).</summary>
+public readonly struct Resultado2D6
+{
+    public readonly int Dado1;
+    public readonly int Dado2;
+    public int Soma => Dado1 + Dado2;
+
+    public Resultado2D6(int dado1, int dado2)
+    {
+        Dado1 = dado1;
+        Dado2 = dado2;
+    }
+
+    public override string ToString() => Dado1 + " + " + Dado2 + " = " + Soma;
+}
+
 public class RolagemDados : MonoBehaviour
 {
     [SerializeField] private ArremessoDado[] dados = new ArremessoDado[2];
@@ -14,17 +30,21 @@ public class RolagemDados : MonoBehaviour
     [SerializeField] private bool mostrarInterfaceTemporaria = true;
     private DadoD6[] leituras;
     private Coroutine lancamento;
-    private TaskCompletionSource<int> conclusao;
+    private TaskCompletionSource<Resultado2D6> conclusao;
+    private Resultado2D6? ultimo;
     private bool lancando;
     private float tempoConfirmacao;
 
     public bool EmRolagem => conclusao != null && !conclusao.Task.IsCompleted;
-    public event Action<int> RolagemConcluida;
+    public event Action<Resultado2D6> RolagemConcluida;
 
     public void DefinirOrigem(Vector3 posicao) => origem = posicao;
 
-    /// <summary>Returns the physical 2d6 sum; the caller applies game modifiers.</summary>
-    public Task<int> Rolar2D6Async()
+    /// <summary>
+    /// Rola os dados físicos e devolve os dois valores e a soma só depois que ambos param; quem chama
+    /// aplica os modificadores do jogo. Durante a rolagem nenhum valor é exposto.
+    /// </summary>
+    public Task<Resultado2D6> Rolar2D6Async()
     {
         if (!isActiveAndEnabled)
             throw new InvalidOperationException("O controlador de dados precisa estar ativo.");
@@ -35,8 +55,8 @@ public class RolagemDados : MonoBehaviour
         return conclusao.Task;
     }
 
-    // Zero means that at least one die is still rolling.
-    public int ResultadoTotal
+    // Zero means that at least one die is still rolling. Private: reading it mid-roll would spoil the result.
+    private int ResultadoTotal
     {
         get
         {
@@ -99,7 +119,8 @@ public class RolagemDados : MonoBehaviour
         if (!enabled || EmRolagem || !PrepararDados())
             return;
 
-        conclusao = new TaskCompletionSource<int>();
+        conclusao = new TaskCompletionSource<Resultado2D6>();
+        ultimo = null;
         tempoConfirmacao = 0f;
         lancando = true;
         if (lancamento != null)
@@ -158,9 +179,10 @@ public class RolagemDados : MonoBehaviour
         tempoConfirmacao += Time.deltaTime;
         if (tempoConfirmacao < 0.25f)
             return;
-        var terminou = conclusao;
-        terminou.TrySetResult(total);
-        RolagemConcluida?.Invoke(total);
+        var resultado = new Resultado2D6(leituras[0].Resultado, leituras[1].Resultado);
+        ultimo = resultado;
+        conclusao.TrySetResult(resultado);
+        RolagemConcluida?.Invoke(resultado);
     }
 
     private void OnDisable()
@@ -177,12 +199,10 @@ public class RolagemDados : MonoBehaviour
         if (!mostrarInterfaceTemporaria)
             return;
         bool pronto = PrepararDados();
-        int total = ResultadoTotal;
-        string parcelas = !pronto ? "" : string.Join(" + ", Array.ConvertAll(leituras,
-            dado => dado.Resultado == 0 ? "..." : dado.Resultado.ToString()));
+        // Values only after the roll is confirmed, never die by die.
         string texto = !pronto ? "Vincule os dados na Mesa > Rolagem Dados"
-            : total == 0 ? "Rolando " + dados.Length + "d6: " + parcelas
-            : parcelas + " = " + total;
+            : EmRolagem ? "Rolando " + dados.Length + "d6..."
+            : ultimo.HasValue ? ultimo.Value.ToString() : dados.Length + "d6";
         float largura = Mathf.Min(640f, Screen.width - 20f);
         GUI.Box(new Rect((Screen.width - largura) / 2f, 20f, largura, 60f), texto);
 

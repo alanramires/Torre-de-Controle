@@ -23,7 +23,8 @@ public class DadoD6 : MonoBehaviour
     private Rigidbody corpo;
     private Material materialPontos;
     private float tempoParado;
-    public int Resultado { get; private set; }
+    // Internal: only RolagemDados reads it, and only reports it once both dice have settled.
+    internal int Resultado { get; private set; }
 
     public void ReiniciarLeitura()
     {
@@ -138,9 +139,7 @@ public class DadoD6 : MonoBehaviour
                 Resultado = i + 1;
             }
         }
-        if (Resultado != 0)
-            Debug.Log("Dado: " + Resultado, this);
-        else
+        if (Resultado == 0)
             Desempatar();
     }
 
