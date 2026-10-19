@@ -2149,15 +2149,35 @@ namespace TorreDeControle.UI
         /// <summary>Joga 2d6: os dados físicos, se estiverem na cena; senão, sorteio. Null se já estão rolando.</summary>
         async Task<(int, int)?> JogarDados()
         {
-            if (mesa.TirarDadoFixo(out var fixo1, out var fixo2))
-                return (fixo1, fixo2); // debug (/fixo): o valor pedido, sem jogar
-            var fisicos = FindFirstObjectByType<SobreposicaoDados>();
-            if (fisicos == null || !fisicos.isActiveAndEnabled)
-                return (sorteio.Next(1, 7), sorteio.Next(1, 7));
-            if (fisicos.EmRolagem)
+            var mesaDaRolagem = mesa;
+            var fisicos = FindAnyObjectByType<SobreposicaoDados>();
+            bool temVisual = fisicos != null && fisicos.isActiveAndEnabled;
+            if (temVisual && fisicos.EmRolagem)
                 return null;
-            var d = await fisicos.Rolar2D6Async();
-            return (d.Dado1, d.Dado2);
+            bool fixo = mesa.TirarDadoFixo(out var fixo1, out var fixo2);
+            if (!temVisual)
+                return fixo ? (fixo1, fixo2) : (sorteio.Next(1, 7), sorteio.Next(1, 7));
+            try
+            {
+                var d = fixo ? await fisicos.Rolar2D6ForcadoAsync(fixo1, fixo2)
+                    : await fisicos.Rolar2D6Async();
+                return (d.Dado1, d.Dado2);
+            }
+            catch (OperationCanceledException)
+            {
+                if (fixo)
+                    mesaDaRolagem.FixarDados(new[] { fixo1 + fixo2 }.Concat(mesaDaRolagem.DadosFixos));
+                return null;
+            }
+            catch (Exception erro)
+            {
+                if (fixo)
+                    mesaDaRolagem.FixarDados(new[] { fixo1 + fixo2 }.Concat(mesaDaRolagem.DadosFixos));
+                Debug.LogException(erro);
+                if (this != null)
+                    Mostrar(Resultado.Falha("Nao foi possivel concluir a animacao dos dados. " + erro.Message));
+                return null;
+            }
         }
 
         /// <summary>

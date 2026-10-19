@@ -13,6 +13,7 @@ public class ArremessoDado : MonoBehaviour
     private AudioSource fonte;
     private static int proximaOrdemAudio;
     private int ordemAudio;
+    internal float VelocidadeMinimaQuique => velocidadeMinimaQuique;
 
     public void AguardarArremesso()
     {
@@ -58,21 +59,48 @@ public class ArremessoDado : MonoBehaviour
         if (dado != null)
             dado.ReiniciarLeitura();
 
-        corpo.linearVelocity = Vector3.zero;
-        corpo.angularVelocity = Vector3.zero;
-        corpo.position = posicaoInicial;
-        corpo.rotation = Random.rotation;
-        corpo.WakeUp();
+        AplicarLancamento(corpo, posicaoInicial);
+    }
 
-        corpo.AddForce(
+    internal static void AplicarLancamento(Rigidbody alvo, Vector3 posicaoInicial)
+    {
+        alvo.linearVelocity = Vector3.zero;
+        alvo.angularVelocity = Vector3.zero;
+        alvo.position = posicaoInicial;
+        alvo.rotation = Random.rotation;
+        alvo.WakeUp();
+        alvo.AddForce(
             new Vector3(Random.Range(-1f, 1f), 6f, 4f),
             ForceMode.Impulse
         );
 
-        corpo.AddTorque(
+        alvo.AddTorque(
             Random.onUnitSphere * 5f,
             ForceMode.Impulse
         );
+    }
+
+    internal void IniciarReproducaoDebug(Vector3 posicao, Quaternion rotacao, bool som)
+    {
+        AguardarArremesso();
+        AplicarPoseDebug(posicao, rotacao);
+        foreach (var visual in GetComponentsInChildren<Renderer>())
+            visual.enabled = true;
+        if (som && somRolagem != null)
+            fonte.PlayOneShot(somRolagem, volume);
+    }
+
+    internal void AplicarPoseDebug(Vector3 posicao, Quaternion rotacao)
+    {
+        corpo.position = posicao;
+        corpo.rotation = rotacao;
+        transform.SetPositionAndRotation(posicao, rotacao);
+    }
+
+    internal void TocarQuiqueDebug()
+    {
+        if (somQuique != null)
+            fonte.PlayOneShot(somQuique, volume);
     }
 
     private void OnCollisionEnter(Collision colisao)

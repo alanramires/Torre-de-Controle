@@ -34,6 +34,7 @@ public class RolagemDados : MonoBehaviour
     private Resultado2D6? ultimo;
     private bool lancando;
     private float tempoConfirmacao;
+    private RolagemDirigidaDebug debugDirigido;
 
     public bool EmRolagem => conclusao != null && !conclusao.Task.IsCompleted;
     public event Action<Resultado2D6> RolagemConcluida;
@@ -53,6 +54,67 @@ public class RolagemDados : MonoBehaviour
         if (!EmRolagem)
             Rolar();
         return conclusao.Task;
+    }
+
+    /// <summary>Debug only: show a recorded physical throw ending at the requested sum.</summary>
+    public Task<Resultado2D6> Rolar2D6ForcadoAsync(int soma)
+    {
+        if (soma < 2 || soma > 12)
+            throw new ArgumentOutOfRangeException(nameof(soma), "2d6 vai de 2 a 12.");
+        int a = UnityEngine.Random.Range(Mathf.Max(1, soma - 6), Mathf.Min(6, soma - 1) + 1);
+        return Rolar2D6ForcadoAsync(a, soma - a);
+    }
+
+    /// <summary>Debug only: preserve the exact pair chosen by the console's fixed-dice queue.</summary>
+    public Task<Resultado2D6> Rolar2D6ForcadoAsync(int dado1, int dado2)
+    {
+        if (dado1 < 1 || dado1 > 6 || dado2 < 1 || dado2 > 6)
+            throw new ArgumentOutOfRangeException(nameof(dado1), "Cada dado vai de 1 a 6.");
+        if (!isActiveAndEnabled || !PrepararDados() || dados.Length != 2)
+            throw new InvalidOperationException("O debug precisa de um controlador ativo com dois dados.");
+        if (EmRolagem)
+            throw new InvalidOperationException("Os dados ainda estao rolando.");
+        conclusao = new TaskCompletionSource<Resultado2D6>();
+        ultimo = null;
+        tempoConfirmacao = 0f;
+        lancando = true;
+        foreach (var dado in dados)
+            dado.AguardarArremesso();
+        lancamento = StartCoroutine(DirigirDebug(dado1, dado2));
+        return conclusao.Task;
+    }
+
+    private IEnumerator DirigirDebug(int dado1, int dado2)
+    {
+        yield return null;
+        if (!TryGetComponent<BoxCollider>(out var mesa))
+        {
+            conclusao.TrySetException(new InvalidOperationException("O debug precisa do collider da mesa."));
+            lancando = false;
+            yield break;
+        }
+        debugDirigido = new RolagemDirigidaDebug();
+        var rotina = debugDirigido.Executar(dados, origem, separacao, mesa, dado1, dado2,
+            erro => conclusao.TrySetException(erro));
+        while (true)
+        {
+            bool proximo;
+            try { proximo = rotina.MoveNext(); }
+            catch (Exception erro)
+            {
+                conclusao.TrySetException(erro);
+                break;
+            }
+            if (!proximo)
+                break;
+            yield return rotina.Current;
+        }
+        debugDirigido.Dispose();
+        debugDirigido = null;
+        lancamento = null;
+        lancando = false;
+        if (EmRolagem && (leituras[0].Resultado != dado1 || leituras[1].Resultado != dado2))
+            conclusao.TrySetException(new InvalidOperationException("A pose final de debug nao corresponde aos dados pedidos."));
     }
 
     // Zero means that at least one die is still rolling. Private: reading it mid-roll would spoil the result.
@@ -191,6 +253,8 @@ public class RolagemDados : MonoBehaviour
             StopCoroutine(lancamento);
         lancamento = null;
         lancando = false;
+        debugDirigido?.Dispose();
+        debugDirigido = null;
         conclusao?.TrySetCanceled();
     }
 

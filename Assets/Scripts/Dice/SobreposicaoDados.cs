@@ -29,6 +29,11 @@ public class SobreposicaoDados : MonoBehaviour
     /// <summary>Await both dice and the sum (only at the end); modifiers belong to the caller.</summary>
     public Task<Resultado2D6> Rolar2D6Async() => rolagem.Rolar2D6Async();
 
+    /// <summary>Debug only; normal game rolls continue using Rolar2D6Async.</summary>
+    public Task<Resultado2D6> Rolar2D6ForcadoAsync(int soma) => rolagem.Rolar2D6ForcadoAsync(soma);
+    public Task<Resultado2D6> Rolar2D6ForcadoAsync(int dado1, int dado2)
+        => rolagem.Rolar2D6ForcadoAsync(dado1, dado2);
+
     private void Awake()
     {
         if (palcoPrefab == null)

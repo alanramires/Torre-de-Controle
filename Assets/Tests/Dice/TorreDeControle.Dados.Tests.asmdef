@@ -1,0 +1,6 @@
+{
+    "name": "TorreDeControle.Dados.Tests",
+    "references": ["TorreDeControle.Dados"],
+    "optionalUnityReferences": ["TestAssemblies"],
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"]
+}

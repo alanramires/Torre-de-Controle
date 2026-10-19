@@ -49,7 +49,7 @@ namespace TorreDeControle.Core.Salas
             ("/cena \"o hospital\"", "marca uma cena nova no log; a pilha fica como está"),
             ("/tempo três semanas depois", "o tempo passa: a pilha volta para 1 (p.88)"),
             ("/salvar", "salva o log visível em texto (dados/exportacoes) e copia para colar"),
-            ("/fixo 8", "debug: a próxima rolagem dá 8 nos dados, sem jogar (/fixo 8 11: as duas próximas; /fixo: limpa)"),
+            ("/fixo 8", "debug: a próxima rolagem dá 8 nos dados, com animação dirigida se disponível (/fixo 8 11: as duas próximas; /fixo: limpa)"),
             ("/reset", "debug: a mesa volta ao início do jogo (rodada 1, pilha 0, potencial 0, sem condições); pede confirmação"),
             ("/clear", "esconde todas as entradas do log (o mesmo que /clearlog; ficam no arquivo e o efeito na mesa continua)"),
             ("/help", "abre esta janela"),

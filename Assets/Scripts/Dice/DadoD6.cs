@@ -129,32 +129,62 @@ public class DadoD6 : MonoBehaviour
         if (tempoParado < 0.5f || Resultado != 0)
             return;
 
-        float melhor = 0.95f;
-        for (int i = 0; i < Normais.Length; i++)
-        {
-            float alinhamento = Vector3.Dot(transform.TransformDirection(Normais[i]), Vector3.up);
-            if (alinhamento > melhor)
-            {
-                melhor = alinhamento;
-                Resultado = i + 1;
-            }
-        }
+        Resultado = LerFaceSuperior(corpo.rotation);
         if (Resultado == 0)
             Desempatar();
     }
 
+    internal static int LerFaceSuperior(Quaternion rotacao)
+    {
+        int valor = 0;
+        float melhor = 0.95f;
+        for (int i = 0; i < Normais.Length; i++)
+        {
+            float alinhamento = Vector3.Dot(rotacao * Normais[i], Vector3.up);
+            if (alinhamento > melhor)
+            {
+                melhor = alinhamento;
+                valor = i + 1;
+            }
+        }
+        return valor;
+    }
+
+    // A cube has 24 equivalent geometric orientations. Pick one before playback:
+    // the entire recorded path stays physically identical, with the requested face up.
+    internal static Quaternion OrientarTrajetoria(int desejado, int simulado)
+    {
+        foreach (var frente in Normais)
+        foreach (var cima in Normais)
+        {
+            if (Mathf.Abs(Vector3.Dot(frente, cima)) > 0.01f)
+                continue;
+            var ajuste = Quaternion.LookRotation(frente, cima);
+            if (Vector3.Dot(ajuste * Normais[desejado - 1], Normais[simulado - 1]) > 0.99f)
+                return ajuste;
+        }
+        throw new System.InvalidOperationException("Nao foi possivel orientar o dado de debug.");
+    }
+
     private void Desempatar()
+    {
+        tempoParado = 0f;
+        DesempatarCorpo(corpo);
+    }
+
+    internal void DesempatarCorpo(Rigidbody alvo)
     {
         // A small physical nudge, independent of mass; never choose a face.
         float angulo = Random.Range(0f, Mathf.PI * 2f);
         var direcao = new Vector3(Mathf.Cos(angulo), 0f, Mathf.Sin(angulo));
-        tempoParado = 0f;
-        corpo.WakeUp();
-        corpo.AddForce((Vector3.up + direcao * 0.2f) * impulsoDesempate,
+        alvo.WakeUp();
+        alvo.AddForce((Vector3.up + direcao * 0.2f) * impulsoDesempate,
             ForceMode.VelocityChange);
-        corpo.AddTorque(Vector3.Cross(Vector3.up, direcao) * giroDesempate,
+        alvo.AddTorque(Vector3.Cross(Vector3.up, direcao) * giroDesempate,
             ForceMode.VelocityChange);
     }
+
+    internal void ConfirmarPoseDebug() => Resultado = LerFaceSuperior(corpo.rotation);
 
     private void OnCollisionEnter(Collision colisao) => AtualizarApoio(colisao);
     private void OnCollisionStay(Collision colisao) => AtualizarApoio(colisao);
