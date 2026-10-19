@@ -402,6 +402,41 @@ namespace TorreDeControle.Core.Salas
             return RegistrarDaMesa(n, "movimento de vilão: " + movimento.Trim(), motivo);
         }
 
+        /// <summary>
+        /// A condição que a troca desta rolagem marcou num vilão e cujo movimento ainda não foi resolvido (livro: quando o
+        /// vilão marca uma condição, ele faz o movimento dela). Null se não há o que resolver. Não abre nada sozinho: o
+        /// MJ resolve na ordem que couber.
+        /// </summary>
+        public (string vilao, string condicao)? CondicaoPedida(Evento e)
+        {
+            var r = e?.Rolagem;
+            if (r?.Troca?.CondicaoDoAlvo == null || r.Troca.AlvoGolpePoderoso || r.Alvo == null || !r.Aceita || e.Oculto || Corrigido(e))
+                return null;
+            if (arquivo.Eventos.Any(x => x.Resolve == e.Id && !x.Oculto && !Corrigido(x)))
+                return null;
+            return (r.Alvo, r.Troca.CondicaoDoAlvo);
+        }
+
+        /// <summary>
+        /// O MJ fez o movimento da condição que a troca marcou no vilão: entra no log ("movimento de condição (Irritado):
+        /// ..."), e a pendência some. Desfazer este evento devolve a pendência.
+        /// </summary>
+        public Resultado ResolverMovimentoDeCondicao(string eventoId, string oQueFez)
+        {
+            var e = arquivo.Eventos.FirstOrDefault(x => x.Id == eventoId);
+            var pedida = CondicaoPedida(e);
+            if (pedida == null)
+                return Resultado.Falha("Não há movimento de condição pendente nessa rolagem.");
+            var (vilao, condicao) = pedida.Value;
+            var texto = (oQueFez ?? string.Empty).Trim();
+            var evento = NovoEvento(personagens.Buscar(vilao),
+                $"movimento de condição ({Condicoes.Nome(condicao)})" + (texto.Length > 0 ? ": " + texto : string.Empty), null);
+            evento.Resolve = e.Id;
+            arquivo.Eventos.Add(evento);
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
         /// <summary>A tela reconhece este texto para pedir a condição do estouro.</summary>
         public const string MensagemDeEstouro = "Estoura o limite dos Rótulos: nenhum muda e a personagem marca uma condição. Qual?";
 
@@ -980,6 +1015,16 @@ namespace TorreDeControle.Core.Salas
                     Subtexto = temAlternativas ? o.Alternativas[escolha.Subopcao.Value] : null,
                 };
 
+                if (escolha.Para != null && movimento.LembreteNaOposicao(o.Id) != null)
+                {
+                    var para = personagens.Buscar(escolha.Para);
+                    if (para == null || para.Sala != sala || (para.Controle == Controle.Mestre && !EstaEmCena(para.Id)))
+                        return $"Em \"{o.Texto}\": quem ganha precisa estar na mesa (heroína ou NPC em cena).";
+                    if (rolou != null && para.Id == rolou.Id)
+                        return $"Em \"{o.Texto}\": quem ganha não é quem rolou.";
+                    gravada.Para = para.Id;
+                }
+
                 var n = movimento.CondicoesQueMarca(o.Id);
                 if (n > 0)
                 {
@@ -1034,6 +1079,20 @@ namespace TorreDeControle.Core.Salas
             if (p != null)
                 novas.AddRange(r.Escolhas.SelectMany(x => x.ComAsDeDentro).SelectMany(x => x.Condicoes ?? new List<string>())
                     .Select(c => new Mudanca { Campo = CampoCondicao(c), Antes = 0, Depois = 1 }));
+            // O lembrete no cartão de quem ganha com a opção ("abertura: Aurora cedeu terreno"), no mesmo evento.
+            foreach (var x in r.Escolhas.SelectMany(x => x.ComAsDeDentro).Where(x => x.Para != null))
+            {
+                var modelo = movimento?.LembreteNaOposicao(x.Opcao);
+                if (modelo == null)
+                    continue;
+                var bonus = new BonusDeMesa
+                {
+                    Id = Guid.NewGuid().ToString("N"), Personagem = x.Para, Tipo = BonusLembrete,
+                    Contexto = modelo.Replace("{quem}", p?.NomeExibicao ?? HeroiGenerico),
+                };
+                arquivo.Bonus.Add(bonus);
+                novas.Add(new Mudanca { Campo = CampoDeBonus(bonus.Id), Antes = 0, Depois = 1 });
+            }
             if (novas.Count > 0)
             {
                 Aplicar(p, novas);
@@ -1195,11 +1254,13 @@ namespace TorreDeControle.Core.Salas
         const string HeroiGenerico = "herói genérico";
 
         /// <summary>"Aguentar a dor [Irritado, Inseguro]", "Duas opções da lista de 7-9: Ceder terreno, ...".</summary>
-        static string TextoDaEscolha(EscolhaDaRolagem x)
+        string TextoDaEscolha(EscolhaDaRolagem x)
         {
             var texto = x.Subtexto == null ? x.Texto : $"{x.Texto} ({x.Subtexto})";
             if (x.Condicoes?.Count > 0)
                 texto += $" [{string.Join(", ", x.Condicoes.Select(Condicoes.Nome))}]";
+            if (x.Para != null)
+                texto += $" [lembrete em {personagens.Buscar(x.Para)?.NomeExibicao ?? "?"}]";
             if (x.Dentro?.Count > 0)
                 texto += " → " + string.Join(" + ", x.Dentro.Select(TextoDaEscolha));
             return texto;

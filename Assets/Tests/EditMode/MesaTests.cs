@@ -756,6 +756,84 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Descontar_num_colega_pede_provocar_ou_influencia_tambem_dentro_da_lista()
+        {
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var golpe = basicos.Todos.First(m => m.Id == "basico/golpe-poderoso");
+            mesa.RolarMovimento(heroi.Id, golpe, null, 5, 6, null); // 11
+            var e = mesa.Eventos.Last();
+            EscolhaDaRolagem Duas(int? sub) => new EscolhaDaRolagem
+            {
+                Opcao = "duas_parcial",
+                Dentro = new List<EscolhaDaRolagem> { new EscolhaDaRolagem { Opcao = "atacar_verbal", Subopcao = sub }, new EscolhaDaRolagem { Opcao = "ceder" } },
+            };
+            Assert.That(mesa.AceitarRolagem(e.Id, golpe, new[] { Duas(null) }).Ok, Is.False, "provocar ou Influência: marque uma");
+            var r = mesa.AceitarRolagem(e.Id, golpe, new[] { Duas(1) });
+            Assert.That(r.Ok, Is.True, r.Erro);
+            Assert.That(e.Descricao, Does.Contain("Descontar num colega (Influência: infligir condição)"));
+            Assert.That(heroi.CondicoesMarcadas, Is.Empty, "por enquanto é só marca narrativa");
+        }
+
+        [Test]
+        public void Ceder_terreno_poe_o_lembrete_da_abertura_em_quem_ganha_e_desfazer_tira()
+        {
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var golpe = basicos.Todos.First(m => m.Id == "basico/golpe-poderoso");
+            Assert.That(golpe.LembreteNaOposicao("ceder"), Is.Not.Null);
+            personagens.CriarNpc(sala.Id, "Doutor Ocaso", Maturidade.Adulto, Papel.Vilao);
+            var ocaso = personagens.NpcsDaSala(sala.Id).Single();
+
+            mesa.RolarMovimento(heroi.Id, golpe, null, 4, 4, null);
+            var e = mesa.Eventos.Last();
+            Assert.That(mesa.AceitarRolagem(e.Id, golpe, new[] { new EscolhaDaRolagem { Opcao = "ceder", Para = ocaso.Id } }).Ok,
+                Is.False, "fora de cena não ganha lembrete");
+            Assert.That(mesa.AceitarRolagem(e.Id, golpe, new[] { new EscolhaDaRolagem { Opcao = "ceder", Para = heroi.Id } }).Ok,
+                Is.False, "quem rolou não ganha a própria abertura");
+            mesa.AlternarEmCena(ocaso.Id);
+            var r = mesa.AceitarRolagem(e.Id, golpe, new[] { new EscolhaDaRolagem { Opcao = "ceder", Para = ocaso.Id } });
+            Assert.That(r.Ok, Is.True, r.Erro);
+            Assert.That(mesa.BonusDe(ocaso.Id).Single().Contexto, Is.EqualTo($"abertura: {heroi.NomeExibicao} cedeu terreno"));
+            Assert.That(e.Descricao, Does.Contain("[lembrete em Doutor Ocaso]"));
+
+            mesa.Corrigir(e.Id, "engano");
+            Assert.That(mesa.BonusDe(ocaso.Id), Is.Empty, "desfazer o golpe tira o lembrete junto");
+
+            // "Ninguém": sem lembrete, o mestre anota à mão.
+            mesa.RolarMovimento(heroi.Id, golpe, null, 4, 4, null);
+            var e2 = mesa.Eventos.Last();
+            Assert.That(mesa.AceitarRolagem(e2.Id, golpe, new[] { new EscolhaDaRolagem { Opcao = "ceder" } }).Ok, Is.True);
+            Assert.That(mesa.BonusDe(ocaso.Id), Is.Empty);
+        }
+
+        [Test]
+        public void Condicao_do_vilao_na_troca_deixa_o_movimento_dela_pendente_ate_resolver()
+        {
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var enfrentar = basicos.Todos.First(m => m.Id == "basico/enfrentar");
+            personagens.CriarNpc(sala.Id, "Doutor Ocaso", Maturidade.Adulto, Papel.Vilao);
+            var ocaso = personagens.NpcsDaSala(sala.Id).Single();
+            personagens.AlternarCondicaoDeVilao(ocaso.Id, "irritado");
+            mesa.AlternarEmCena(ocaso.Id);
+
+            mesa.RolarMovimento(heroi.Id, enfrentar, ocaso.Id, 6, 6, null);
+            var e = mesa.Eventos.Last();
+            Assert.That(mesa.CondicaoPedida(e), Is.Null, "pendente ainda não marcou nada");
+            mesa.AceitarRolagem(e.Id, enfrentar, new[] { new EscolhaDaRolagem { Opcao = "resistir" }, new EscolhaDaRolagem { Opcao = "tirar" } },
+                new TrocaDeGolpes { CondicaoDoAlvo = "irritado" });
+            Assert.That(mesa.CondicaoPedida(e), Is.EqualTo((ocaso.Id, "irritado")));
+
+            Assert.That(mesa.ResolverMovimentoDeCondicao(e.Id, "quebra o lustre em cima da Aurora").Ok, Is.True);
+            var resolvido = mesa.Eventos.Last();
+            Assert.That(resolvido.Personagem, Is.EqualTo(ocaso.Id));
+            Assert.That(resolvido.Descricao, Is.EqualTo("movimento de condição (Irritado): quebra o lustre em cima da Aurora"));
+            Assert.That(mesa.CondicaoPedida(e), Is.Null, "resolvido: o botão some");
+            Assert.That(mesa.ResolverMovimentoDeCondicao(e.Id, null).Ok, Is.False);
+
+            mesa.Corrigir(resolvido.Id, "engano");
+            Assert.That(mesa.CondicaoPedida(e), Is.Not.Null, "desfazer devolve a pendência");
+        }
+
+        [Test]
         public void Condicao_marcada_pesa_menos_dois_so_nos_movimentos_dela()
         {
             var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());

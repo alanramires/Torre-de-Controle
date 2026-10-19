@@ -197,6 +197,12 @@ namespace TorreDeControle.Core.Regras
             }
 
             /// <summary>
+            /// O lembrete que a opção põe no cartão de quem ganha com ela ("abertura: {quem} cedeu terreno"; {quem} é quem
+            /// rolou), ou null se a opção não põe lembrete.
+            /// </summary>
+            public string LembreteNaOposicao(string opcao) => (string)EfeitoDaOpcao(opcao, "lembrete_na_oposicao")?["texto"];
+
+            /// <summary>
             /// A escolha de dentro da opção ("duas opções da lista de 7–9": escolha 2 entre aquelas), ou nenhuma.
             /// </summary>
             public (int n, IReadOnlyList<OpcaoDeEscolha> opcoes) OpcoesDentro(string opcao)
@@ -234,14 +240,14 @@ namespace TorreDeControle.Core.Regras
             }
 
             /// <summary>
-            /// As alternativas dentro de uma opção: "mj_decide" entre efeitos (uma por alternativa) ou "mj_pode"
+            /// As alternativas dentro de uma opção: "mj_decide" ou "quem_rolou_decide" entre efeitos (uma por alternativa) ou "mj_pode"
             /// (sim, com o efeito, ou não). Sem isso, a opção não tem alternativas.
             /// </summary>
             static List<string> Alternativas(JToken efeitos)
             {
                 foreach (var e in (efeitos as JArray)?.OfType<JObject>() ?? Enumerable.Empty<JObject>())
                 {
-                    if ((string)e["op"] == "mj_decide" && e["entre"] is JArray entre)
+                    if (((string)e["op"] == "mj_decide" || (string)e["op"] == "quem_rolou_decide") && e["entre"] is JArray entre)
                         return entre.Select(Descrever).ToList();
                     if ((string)e["op"] == "mj_pode")
                         return new List<string> { "sim: " + Descrever(e["efeitos"]), "não" };

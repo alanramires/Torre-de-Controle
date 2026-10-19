@@ -170,10 +170,14 @@
           "nota": "fora da cena; quem rolou diz como, seguindo a ficção. Volta na cena seguinte com todas as condições ainda marcadas." },
         { "id": "perder_controle", "texto": "Perde o controle de si ou dos poderes; o MJ diz o que acontece", "efeitos": [{ "op": "narrativo", "quem": "mj" }] },
         { "id": "duas_parcial", "texto": "Duas opções da lista de 7-9", "efeitos": [{ "op": "escolher", "n": 2, "opcoes_ref": ["atacar_verbal", "ceder", "aguentar"] }] },
-        { "id": "atacar_verbal", "texto": "Descontar num colega: provocá-lo a agir sem pensar ou aproveitar sua Influência para lhe infligir uma condição", "efeitos": [{ "op": "acionar", "um_de": ["basico/provocar", "influencia/aproveitar:condicao"] }],
-          "nota": "na hora, e só essas duas ações valem. É outro movimento: entra à parte." },
-        { "id": "ceder", "texto": "Ceder terreno: a oposição ganha uma abertura", "efeitos": [{ "op": "narrativo", "quem": "mj" }],
-          "nota": "o MJ decide: em geral a oposição faz um movimento que não conseguiria se quem rolou a detivesse." },
+        { "id": "atacar_verbal", "texto": "Descontar num colega", "efeitos": [{ "op": "quem_rolou_decide", "entre": [
+            [{ "op": "acionar", "movimento": "basico/provocar", "texto": "provocar: agir sem pensar" }],
+            [{ "op": "acionar", "movimento": "influencia/aproveitar:condicao", "texto": "Influência: infligir condição" }]
+          ] }],
+          "nota": "na hora, e só essas duas ações valem: provocá-lo a agir sem pensar, ou aproveitar a Influência sobre ele para lhe infligir uma condição. É outro movimento: entra à parte." },
+        { "id": "ceder", "texto": "Ceder terreno: a oposição ganha uma abertura", "efeitos": [{ "op": "narrativo", "quem": "mj" }, { "op": "lembrete_na_oposicao", "texto": "abertura: {quem} cedeu terreno" }],
+          "nota": "o MJ decide: em geral a oposição faz um movimento que não conseguiria se quem rolou a detivesse.",
+          "_decisao": "Alan, 2026-10-19: a abertura vira lembrete no cartão de quem a ganha (o painel pergunta quem; 'ninguém' deixa à mão). Lembrete é estado, não ação: não dispara nada." },
         { "id": "aguentar", "texto": "Aguentar a dor: marcar duas condições", "efeitos": [{ "op": "marcar_condicao", "quem": "rolou", "escolhe": "rolou", "n": 2 }],
           "nota": "duas condições à escolha de quem rolou. Sem duas livres, marca as que houver e vale a regra do núcleo: precisa marcar e não tem, sai de cena." }
       ],

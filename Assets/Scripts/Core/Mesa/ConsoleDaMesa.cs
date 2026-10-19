@@ -36,7 +36,7 @@ namespace TorreDeControle.Core.Salas
         {
             ("/roll +2", "rola 2d6 + modificador (teto de −3 a +4) e anota no log"),
             ("/eda Aurora vs Ocaso", "deixa o Enfrentar pendente no log: um botão abre o painel já preenchido, na hora que couber"),
-            ("/tgp Mayane \"descobriu a verdade sobre a irmã\"", "deixa o golpe poderoso pendente no log (no físico ou no emocional), com o motivo"),
+            ("/tgp \"Estrela Negra\" \"Doutor Ocaso aproveitou a brecha\"", "deixa o golpe poderoso pendente no log (no físico ou no emocional), com o motivo; nome de uma palavra (ou o primeiro nome, se só um bate) dispensa as aspas"),
             ("/potencial Aurora o soco foi absorvido", "+1 potencial, com o motivo obrigatório"),
             ("/pot Aurora 3", "debug: força o potencial para o valor (também /potencial Aurora 3; com uma heroína só na mesa, /pot 3)"),
             ("/pilha +2 questionário", "soma ou tira da pilha de Equipe (motivo opcional)"),

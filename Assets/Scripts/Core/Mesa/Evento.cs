@@ -39,6 +39,10 @@ namespace TorreDeControle.Core.Salas
         [JsonProperty("editado")] public bool Editado { get; set; }
         /// <summary>Se o evento é uma rolagem de 2d6: os dados, o modificador e as intervenções. Senão, null.</summary>
         [JsonProperty("rolagem", NullValueHandling = NullValueHandling.Ignore)] public RolagemDaMesa Rolagem { get; set; }
+        /// <summary>
+        /// Id da rolagem cuja pendência este evento resolve (o movimento de condição do vilão que a troca marcou), ou null.
+        /// </summary>
+        [JsonProperty("resolve", NullValueHandling = NullValueHandling.Ignore)] public string Resolve { get; set; }
         /// <summary>Se o evento é um pedido de rolagem para depois (/eda, /tgp no console): o que rolar. Senão, null.</summary>
         [JsonProperty("pedido", NullValueHandling = NullValueHandling.Ignore)] public PedidoDeRolagem Pedido { get; set; }
     }
@@ -166,6 +170,11 @@ namespace TorreDeControle.Core.Salas
         [JsonProperty("condicoes", NullValueHandling = NullValueHandling.Ignore)] public List<string> Condicoes { get; set; }
         /// <summary>Quantas condições a opção pedia e não havia livres (precisa marcar e não tem: sai de cena). 0 se nenhuma.</summary>
         [JsonProperty("faltaram_condicoes", DefaultValueHandling = DefaultValueHandling.Ignore)] public int FaltaramCondicoes { get; set; }
+        /// <summary>
+        /// Quem ganha com a opção ("ceder terreno": quem ganha a abertura) e recebe o lembrete no cartão; null = ninguém
+        /// (o mestre anota à mão).
+        /// </summary>
+        [JsonProperty("para", NullValueHandling = NullValueHandling.Ignore)] public string Para { get; set; }
         /// <summary>As escolhas de dentro da opção ("duas opções da lista de 7–9"), ou null.</summary>
         [JsonProperty("dentro", NullValueHandling = NullValueHandling.Ignore)] public List<EscolhaDaRolagem> Dentro { get; set; }
 

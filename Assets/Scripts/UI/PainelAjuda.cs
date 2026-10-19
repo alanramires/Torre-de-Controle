@@ -158,7 +158,8 @@ namespace TorreDeControle.UI
             EscolherCategoria(categoria);
         }
 
-        public void AbrirCondicoesVilao()
+        /// <summary>Os movimentos de condição do vilão; com <paramref name="condicao"/> ("irritado"), já abre a carta dela.</summary>
+        public void AbrirCondicoesVilao(string condicao = null)
         {
             Abrir(null);
             filtrado = true;
@@ -170,6 +171,9 @@ namespace TorreDeControle.UI
             for (var k = 0; k < botoesCategoria.Length; k++)
                 botoesCategoria[k].gameObject.SetActive(k == categoria);
             EscolherCategoria(categoria, somenteCondicoes: true);
+            var carta = condicao == null ? -1 : System.Array.IndexOf(ids, "viloes/condicao-" + condicao);
+            if (carta >= 0)
+                Ler(carta);
         }
 
         void EscolherCategoria(int categoria, string arquetipo = null, bool somenteCondicoes = false)
