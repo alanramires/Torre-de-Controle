@@ -1,4 +1,4 @@
-<Solution>
+﻿<Solution>
   <Project Path="TorreDeControle.UI.csproj" />
   <Project Path="TorreDeControle.Core.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
