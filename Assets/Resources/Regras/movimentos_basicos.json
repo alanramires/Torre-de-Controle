@@ -1,11 +1,12 @@
 {
   "versao": 1,
-  "_sobre": "Movimentos básicos em formato de dados. Texto próprio e resumido; o motor usa 'rolagem' e 'efeitos', a tela usa 'gatilho' e 'texto'. Falha sem 'falha' explícita = rolagem.falha_padrao do nucleo.json.",
+  "_sobre": "Movimentos básicos em formato de dados. 'atalho': o comando do console que deixa a rolagem pendente no log (/eda Aurora vs Ocaso); só os movimentos conferidos ganham atalho. Texto próprio e resumido; o motor usa 'rolagem' e 'efeitos', a tela usa 'gatilho' e 'texto'. Falha sem 'falha' explícita = rolagem.falha_padrao do nucleo.json.",
 
   "movimentos": [
     {
       "id": "basico/enfrentar",
       "nome": "Enfrentar diretamente a ameaça",
+      "atalho": "eda",
       "gatilho": "Partir para a briga contra algo que é de fato perigoso para você.",
       "requisito": "uma ameaça de verdade: quem não é páreo para a personagem (capangas) não aciona o movimento, ela simplesmente vence",
       "rolagem": { "rotulo": "perigoso" },
@@ -154,21 +155,31 @@
     {
       "id": "basico/golpe-poderoso",
       "nome": "Tomar um golpe poderoso",
+      "atalho": "tgp",
       "gatilho": "O MJ manda rolar quando você leva um golpe forte (físico ou emocional). Nunca é escolhido.",
       "rolagem": { "base": "condicoes_marcadas" },
-      "forte": [{ "op": "escolher", "n": 1, "opcoes_ref": ["sair", "perder_controle", "duas_parcial"] }],
-      "parcial": [{ "op": "escolher", "n": 1, "opcoes_ref": ["atacar_verbal", "ceder", "aguentar"] }],
-      "falha": [{ "op": "marcar_potencial", "quem": "rolou" }, { "op": "narrativo", "texto": "Você se mantém firme e diz como." }],
+      "invertido": true,
+      "sem_intervencao": true,
+      "_decisao": "Alan, 2026-10-19: tomar um golpe poderoso não aceita intervenção. O livro não diz com essas palavras, mas nada encaixa: a ajuda da pilha (+1) piora o golpe, o −2 da renúncia de Influência (p.81) viraria ajuda, e Defender é interrupção de PvP contra quem ataca.",
+      "_rolagem": "Soma as condições marcadas de quem toma o golpe (zero = +0), com o teto de +4. Sem 'contra quem': quem rola é quem apanha. Pedido por uma rolagem (a troca do Enfrentar), guarda a origem; pedido pelo MJ (movimento numa falha, golpe emocional), vem sem origem.",
+      "forte": [{ "op": "escolher", "n": 1, "quem_escolhe": "rolou", "opcoes_ref": ["sair", "perder_controle", "duas_parcial"] }],
+      "parcial": [{ "op": "escolher", "n": 1, "quem_escolhe": "rolou", "opcoes_ref": ["atacar_verbal", "ceder", "aguentar"] }],
+      "falha": [{ "op": "marcar_potencial", "quem": "rolou" }, { "op": "narrativo", "texto": "Você se mantém firme e diz como resistiu ao golpe." }],
       "opcoes": [
-        { "id": "sair", "texto": "Afasta-se da situação: foge, desmaia etc.", "efeitos": [{ "op": "sair_de_cena", "quem": "rolou" }] },
+        { "id": "sair", "texto": "Afasta-se da situação: foge, desmaia etc.", "efeitos": [{ "op": "sair_de_cena", "quem": "rolou" }],
+          "nota": "fora da cena; quem rolou diz como, seguindo a ficção. Volta na cena seguinte com todas as condições ainda marcadas." },
         { "id": "perder_controle", "texto": "Perde o controle de si ou dos poderes; o MJ diz o que acontece", "efeitos": [{ "op": "narrativo", "quem": "mj" }] },
         { "id": "duas_parcial", "texto": "Duas opções da lista de 7-9", "efeitos": [{ "op": "escolher", "n": 2, "opcoes_ref": ["atacar_verbal", "ceder", "aguentar"] }] },
-        { "id": "atacar_verbal", "texto": "Descontar num colega: provocá-lo a agir sem pensar ou aproveitar sua Influência para lhe infligir uma condição", "efeitos": [{ "op": "acionar", "um_de": ["basico/provocar", "influencia/aproveitar:condicao"] }] },
-        { "id": "ceder", "texto": "Ceder terreno: a oposição ganha uma abertura", "efeitos": [{ "op": "narrativo", "quem": "mj" }] },
-        { "id": "aguentar", "texto": "Aguentar a dor: marcar duas condições", "efeitos": [{ "op": "marcar_condicao", "quem": "rolou", "n": 2 }] }
+        { "id": "atacar_verbal", "texto": "Descontar num colega: provocá-lo a agir sem pensar ou aproveitar sua Influência para lhe infligir uma condição", "efeitos": [{ "op": "acionar", "um_de": ["basico/provocar", "influencia/aproveitar:condicao"] }],
+          "nota": "na hora, e só essas duas ações valem. É outro movimento: entra à parte." },
+        { "id": "ceder", "texto": "Ceder terreno: a oposição ganha uma abertura", "efeitos": [{ "op": "narrativo", "quem": "mj" }],
+          "nota": "o MJ decide: em geral a oposição faz um movimento que não conseguiria se quem rolou a detivesse." },
+        { "id": "aguentar", "texto": "Aguentar a dor: marcar duas condições", "efeitos": [{ "op": "marcar_condicao", "quem": "rolou", "escolhe": "rolou", "n": 2 }],
+          "nota": "duas condições à escolha de quem rolou. Sem duas livres, marca as que houver e vale a regra do núcleo: precisa marcar e não tem, sai de cena." }
       ],
-      "_nota": "Aqui as faixas são invertidas: rolar alto é pior. Com zero condições rola +0. Teto de +4.",
-      "origem": "livro p.76-77"
+      "_nota": "Aqui as faixas são invertidas: rolar alto é pior. Com zero condições rola +0. Teto de +4. Quem rolou escolhe a opção (o jogador, nos exemplos).",
+      "exemplos": "livro p.78 (Toro x Couraça: Irritada marcada, rola +1 e falha: marca potencial e aguenta; Crepúsculo x Lady Faust: golpe emocional, +0, tira 8 e desconta no Vértice), p.189 (Canção dos Céus tira 7 e cede terreno), p.190-191 (Huma tira 8 e aguenta: Irritado e Inseguro)",
+      "origem": "livro p.76-78"
     }
   ]
 }

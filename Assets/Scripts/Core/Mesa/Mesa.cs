@@ -28,18 +28,23 @@ namespace TorreDeControle.Core.Salas
         readonly CadastroPersonagens personagens;
         readonly string sala;
         readonly Arquivo arquivo;
+        readonly RegrasDeCondicoes regrasDeCondicoes;
 
-        Mesa(IArmazenamento armazenamento, CadastroPersonagens personagens, string sala, Arquivo arquivo)
+        Mesa(IArmazenamento armazenamento, CadastroPersonagens personagens, string sala, Arquivo arquivo,
+            RegrasDeCondicoes regrasDeCondicoes)
         {
             this.armazenamento = armazenamento;
             this.personagens = personagens;
             this.sala = sala;
             this.arquivo = arquivo;
+            this.regrasDeCondicoes = regrasDeCondicoes;
         }
 
         static string Chave(string sala) => "mesa_" + sala;
 
-        public static Mesa Carregar(IArmazenamento armazenamento, CadastroPersonagens personagens, string sala)
+        /// <param name="regrasDeCondicoes">As penalidades das condições (nucleo.json); sem elas, a rolagem soma só o Rótulo.</param>
+        public static Mesa Carregar(IArmazenamento armazenamento, CadastroPersonagens personagens, string sala,
+            RegrasDeCondicoes regrasDeCondicoes = null)
         {
             var texto = armazenamento.Ler(Chave(sala));
             var arquivo = string.IsNullOrWhiteSpace(texto)
@@ -51,7 +56,7 @@ namespace TorreDeControle.Core.Salas
             arquivo.CondicoesDeVilao ??= new Dictionary<string, List<string>>();
             if (arquivo.Rodada < 1)
                 arquivo.Rodada = 1; // sempre há uma rodada corrente
-            return new Mesa(armazenamento, personagens, sala, arquivo);
+            return new Mesa(armazenamento, personagens, sala, arquivo, regrasDeCondicoes);
         }
 
         public int Rodada => arquivo.Rodada;
@@ -469,6 +474,98 @@ namespace TorreDeControle.Core.Salas
             return Resultado.Sucesso();
         }
 
+        // ---------- debug e marcações do mestre ----------
+
+        /// <summary>
+        /// Debug: a mesa volta ao início do jogo, para testar de novo. Esconde o log (fica no arquivo), volta à rodada 1 e
+        /// lança um evento por heroína (potencial 0, sem condições, Rótulos e trilhas da ficha aprovada) e um da mesa
+        /// (pilha 0, bônus e condições de vilão apagados). Cada evento se desfaz como os outros. Avanços marcados e os
+        /// vilões em cena ficam como estão.
+        /// </summary>
+        public Resultado ResetarMesa()
+        {
+            EsconderTudo();
+            arquivo.Rodada = 1;
+            var herois = personagens.HeroisDaSala(sala).Where(p => p.Ativo && p.Status == StatusCriacao.EmCarreira).ToList();
+            foreach (var p in herois)
+            {
+                var mudancas = new List<Mudanca>();
+                if (p.Potencial != 0)
+                    mudancas.Add(new Mudanca { Campo = CampoPotencial, Antes = p.Potencial, Depois = 0 });
+                mudancas.AddRange(p.CondicoesMarcadas.ToList().Select(c => new Mudanca { Campo = CampoCondicao(c), Antes = 1, Depois = 0 }));
+                if (p.Foto != null)
+                {
+                    var atuais = personagens.RotulosAtuais(p);
+                    foreach (var r in Rotulos.Todos)
+                        if (p.Foto.Rotulos.TryGetValue(r, out var inicio) && atuais.TryGetValue(r, out var agora) && agora != inicio)
+                            mudancas.Add(new Mudanca { Campo = CampoRotulo(r), Antes = agora, Depois = inicio });
+                }
+                mudancas.AddRange(p.Contadores.Where(c => c.Value != 0).ToList()
+                    .Select(c => new Mudanca { Campo = "contador:" + c.Key, Antes = c.Value, Depois = 0 }));
+                if (mudancas.Count > 0)
+                    RegistrarDaMesa(p, "reset (debug): a ficha volta ao início do jogo", null, mudancas.ToArray());
+            }
+            var daMesa = new List<Mudanca>();
+            if (arquivo.Equipe != 0)
+                daMesa.Add(new Mudanca { Campo = CampoEquipe, Antes = arquivo.Equipe, Depois = 0 });
+            daMesa.AddRange(arquivo.Bonus.Where(b => b.Ativo).Select(b => new Mudanca { Campo = CampoDeBonus(b.Id), Antes = 1, Depois = 0 }));
+            daMesa.AddRange(arquivo.CondicoesDeVilao.SelectMany(v => v.Value.Select(c => new Mudanca { Campo = CampoDeVilao(v.Key, c), Antes = 1, Depois = 0 })).ToList());
+            RegistrarDaMesa(null, "reset (debug): a mesa volta ao início do jogo (rodada 1, pilha 0)", null, daMesa.ToArray());
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>
+        /// Marca no log o começo de uma cena nova. Não mexe na pilha: ela só volta para 1 quando o tempo passa (p.88,
+        /// <see cref="OTempoPassa"/>). As condições também ficam; o que as tira no fim da cena o mestre desmarca.
+        /// </summary>
+        public void NovaCena(string nome) =>
+            RegistrarDaMesa(null, string.IsNullOrWhiteSpace(nome) ? "nova cena" : $"nova cena: {nome.Trim()}", null);
+
+        /// <summary>O log visível em texto, do mais antigo ao mais novo ("r2  Aurora: ... — motivo"), para salvar.</summary>
+        public string LogEmTexto()
+        {
+            var linhas = Visiveis.Select(e =>
+            {
+                var quem = e.Personagem != null ? personagens.Buscar(e.Personagem)?.NomeExibicao ?? "?"
+                    : e.Rolagem?.Movimento != null ? "Herói genérico" : "Mesa";
+                var motivo = string.IsNullOrWhiteSpace(e.Motivo) ? string.Empty : $"  — {e.Motivo}";
+                return $"r{e.Rodada}  {quem}: {e.Descricao}{motivo}";
+            });
+            return string.Join("\n", linhas);
+        }
+
+        readonly Queue<int> dadosFixos = new Queue<int>();
+
+        /// <summary>
+        /// Debug: as próximas rolagens dão estas somas de 2d6 (2 a 12), na ordem, sem jogar os dados. O modificador soma
+        /// por cima, como numa rolagem normal. Não fica gravado: fechar a mesa limpa. Lista vazia limpa a fila.
+        /// </summary>
+        public Resultado FixarDados(IEnumerable<int> somas)
+        {
+            var lista = somas.ToList();
+            if (lista.Any(s => s < 2 || s > 12))
+                return Resultado.Falha("2d6 vai de 2 a 12.");
+            dadosFixos.Clear();
+            foreach (var s in lista)
+                dadosFixos.Enqueue(s);
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>As somas ainda na fila de dados fixos.</summary>
+        public IReadOnlyList<int> DadosFixos => dadosFixos.ToList();
+
+        /// <summary>Tira a próxima soma fixa, em dois dados (8 = 4 + 4; 11 = 6 + 5). False se a fila está vazia.</summary>
+        public bool TirarDadoFixo(out int dado1, out int dado2)
+        {
+            dado1 = dado2 = 0;
+            if (dadosFixos.Count == 0)
+                return false;
+            var soma = dadosFixos.Dequeue();
+            dado1 = (soma + 1) / 2;
+            dado2 = soma - dado1;
+            return true;
+        }
+
         // ---------- o log editado pelo mestre ----------
 
         /// <summary>Os eventos que o log mostra: os não apagados, do mais antigo ao mais novo.</summary>
@@ -590,12 +687,14 @@ namespace TorreDeControle.Core.Salas
         /// Rola um movimento básico: 2d6 + o Rótulo dele na ficha de quem rola. Sem personagem, é o herói
         /// genérico (+0). O alvo (personagem ou NPC) é opcional. Fica pendente como qualquer rolagem.
         /// Por enquanto só dado + Rótulo: condições, adiante, constante e Influência ainda não entram.
+        /// O golpe poderoso soma as condições marcadas (teto +4), não tem alvo e pode vir com a
+        /// <paramref name="origem"/>: a rolagem que o pediu, que precisa ter pedido golpe para quem rola.
         /// </summary>
         public Resultado RolarMovimento(string personagem, MovimentosBasicos.Movimento movimento, string alvo,
-            int dado1, int dado2, string motivo)
+            int dado1, int dado2, string motivo, string origem = null)
         {
-            if (movimento?.Rotulo == null)
-                return Resultado.Falha("Esse movimento não rola com Rótulo.");
+            if (movimento == null || (movimento.Rotulo == null && !movimento.SomaCondicoes))
+                return Resultado.Falha("Esse movimento não diz o que a rolagem soma.");
             if (dado1 < 1 || dado1 > 6 || dado2 < 1 || dado2 > 6)
                 return Resultado.Falha($"Dados impossíveis: {dado1} e {dado2}.");
             Personagem p = null;
@@ -605,15 +704,114 @@ namespace TorreDeControle.Core.Salas
                 return Resultado.Falha("O alvo não pode ser quem rola.");
             if (movimento.PedeAlvo && alvo == null)
                 return Resultado.Falha(MensagemPedeAlvo(movimento));
+            if (movimento.SomaCondicoes && alvo != null)
+                return Resultado.Falha($"{movimento.Nome} não tem contra quem: rola quem toma o golpe.");
+            if (origem != null)
+            {
+                var pediu = arquivo.Eventos.FirstOrDefault(x => x.Id == origem);
+                if (pediu?.Pedido != null)
+                {
+                    if (!PedidoAberto(pediu))
+                        return Resultado.Falha("Esse pedido já foi rolado (ou desfeito).");
+                    if (pediu.Personagem != personagem || pediu.Pedido.Movimento != movimento.Id || pediu.Pedido.Alvo != alvo)
+                        return Resultado.Falha("A rolagem não bate com o pedido (quem, movimento ou contra quem).");
+                }
+                else if (pediu?.Rolagem == null)
+                    return Resultado.Falha("A rolagem que pediu esta não está no log.");
+                else if (!GolpesPedidos(pediu).Contains(personagem))
+                    return Resultado.Falha($"Essa rolagem não pediu golpe poderoso para {p?.NomeExibicao ?? "o herói genérico"} (ou ele já foi rolado).");
+            }
+            var partes = PartesDoModificador(p, movimento);
             return Lancar(p, new RolagemDaMesa
             {
                 Dados = new[] { dado1, dado2 },
-                Mod = p == null ? 0 : personagens.ValorDeJogo(p, CampoRotulo(movimento.Rotulo)),
+                Mod = partes.Sum(x => x.Valor),
+                Partes = partes.ToList(),
                 Movimento = movimento.Id,
                 NomeDoMovimento = movimento.Nome,
                 Rotulo = movimento.Rotulo,
                 Alvo = alvo,
+                Origem = origem,
             }, motivo);
+        }
+
+        /// <summary>
+        /// De onde vem o modificador de quem rola este movimento, antes do teto: o Rótulo (ou as condições marcadas, no
+        /// golpe poderoso) e −2 por condição marcada que pesa no movimento (nucleo.json, p.89–90). O herói genérico rola
+        /// +0, sem condições. Adiante, constante e Influência ainda não entram.
+        /// </summary>
+        public IReadOnlyList<ParteDoModificador> PartesDoModificador(Personagem p, MovimentosBasicos.Movimento movimento)
+        {
+            var partes = new List<ParteDoModificador>();
+            if (movimento.SomaCondicoes)
+                partes.Add(new ParteDoModificador { Origem = "condicoes", Texto = "condições", Valor = p?.CondicoesMarcadas.Count ?? 0 });
+            else
+                partes.Add(new ParteDoModificador
+                {
+                    Origem = CampoRotulo(movimento.Rotulo),
+                    Texto = Rotulos.Nome(movimento.Rotulo),
+                    Valor = p == null ? 0 : personagens.ValorDeJogo(p, CampoRotulo(movimento.Rotulo)),
+                });
+            if (p == null || regrasDeCondicoes == null)
+                return partes;
+            foreach (var c in Condicoes.Todas.Where(c => p.CondicoesMarcadas.Contains(c) && regrasDeCondicoes.MovimentosAfetados(c).Contains(movimento.Id)))
+                partes.Add(new ParteDoModificador { Origem = CampoCondicao(c), Texto = Condicoes.Nome(c), Valor = regrasDeCondicoes.Penalidade });
+            return partes;
+        }
+
+        /// <summary>"Perigoso +1, Assustado −2" (com "teto" quando a soma passou do limite).</summary>
+        public static string TextoDasPartes(RolagemDaMesa r)
+        {
+            static string Sinal(int n) => n < 0 ? $"−{-n}" : $"+{n}";
+            var texto = string.Join(", ", r.Partes.Select(x => $"{x.Texto} {Sinal(x.Valor)}"));
+            return r.Partes.Sum(x => x.Valor) != r.Mod ? texto + $", teto {Sinal(r.Mod)}" : texto;
+        }
+
+        /// <summary>
+        /// Anota uma rolagem para depois (/eda, /tgp): fica no log como pedido, com botão, até alguém rolar com a origem
+        /// nele. Confere o que a rolagem conferiria: quem está em jogo, contra quem (o Enfrentar pede; o golpe não tem).
+        /// </summary>
+        public Resultado PedirRolagem(string personagem, MovimentosBasicos.Movimento movimento, string alvo, string motivo)
+        {
+            if (movimento == null)
+                return Resultado.Falha("Movimento desconhecido.");
+            if (!EmJogo(personagem, out var p, out var erro))
+                return erro;
+            if (alvo != null && alvo == personagem)
+                return Resultado.Falha("O alvo não pode ser quem rola.");
+            if (movimento.PedeAlvo && alvo == null)
+                return Resultado.Falha(MensagemPedeAlvo(movimento));
+            if (movimento.SomaCondicoes && alvo != null)
+                return Resultado.Falha($"{movimento.Nome} não tem contra quem: rola quem toma o golpe.");
+            var nomeDoAlvo = alvo == null ? string.Empty : " → " + (personagens.Buscar(alvo)?.NomeExibicao ?? alvo);
+            var evento = NovoEvento(p, $"pendente: {movimento.Nome}{nomeDoAlvo}", motivo);
+            evento.Pedido = new PedidoDeRolagem { Movimento = movimento.Id, NomeDoMovimento = movimento.Nome, Alvo = alvo };
+            arquivo.Eventos.Add(evento);
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>O pedido ainda espera a rolagem (não foi rolado, desfeito nem escondido).</summary>
+        public bool PedidoAberto(Evento e) =>
+            e?.Pedido != null && !e.Oculto && !Corrigido(e) &&
+            !arquivo.Eventos.Any(x => x.Rolagem?.Origem == e.Id && !x.Oculto && !Corrigido(x));
+
+        /// <summary>
+        /// Quem esta rolagem aceita mandou tomar um golpe poderoso e ainda não rolou: o retorno da troca para quem rolou
+        /// e, contra PJ, o alvo. Null na lista é o herói genérico. Vazia se a rolagem foi desfeita ou escondida.
+        /// </summary>
+        public IReadOnlyList<string> GolpesPedidos(Evento e)
+        {
+            var r = e?.Rolagem;
+            if (r?.Troca == null || !r.Aceita || e.Oculto || Corrigido(e))
+                return new List<string>();
+            var quem = new List<string>();
+            if (r.Troca.Retorno == TrocaDeGolpes.RetornoGolpePoderoso)
+                quem.Add(e.Personagem);
+            if (r.Troca.AlvoGolpePoderoso && r.Alvo != null)
+                quem.Add(r.Alvo);
+            return quem.Where(id => !arquivo.Eventos.Any(x =>
+                x.Rolagem?.Origem == e.Id && x.Personagem == id && !x.Oculto && !Corrigido(x))).ToList();
         }
 
         /// <summary>A recusa de um movimento que pede alvo, rolado contra ninguém.</summary>
@@ -638,11 +836,13 @@ namespace TorreDeControle.Core.Salas
         /// Alguém intervém numa rolagem pendente. O custo na pilha sai na hora e fica no mesmo evento: desfazer
         /// a rolagem devolve os pontos.
         /// </summary>
-        public Resultado Intervir(string eventoId, Intervencao intervencao)
+        public Resultado Intervir(string eventoId, Intervencao intervencao, MovimentosBasicos.Movimento movimento = null)
         {
             var e = arquivo.Eventos.FirstOrDefault(x => x.Id == eventoId);
             if (e?.Rolagem == null)
                 return Resultado.Falha("Rolagem não encontrada.");
+            if (movimento != null && movimento.Id == e.Rolagem.Movimento && movimento.SemIntervencao)
+                return Resultado.Falha($"{movimento.Nome} não aceita intervenção.");
             if (!Pendente(e))
                 return Resultado.Falha("Essa rolagem já foi aceita (ou desfeita): não aceita mais intervenção.");
             if (intervencao == null || string.IsNullOrWhiteSpace(intervencao.Quem))
@@ -721,26 +921,11 @@ namespace TorreDeControle.Core.Salas
                     return Resultado.Falha(pede == 0
                         ? $"No resultado {RolagemDaMesa.NomeDoTipo(tipo)} não há o que escolher."
                         : $"No resultado {RolagemDaMesa.NomeDoTipo(tipo)}, escolha {pede} (marcou {escolhas.Count}).");
-                foreach (var escolha in escolhas)
-                {
-                    var o = opcoes.FirstOrDefault(x => x.Id == escolha.Opcao);
-                    if (o == null)
-                        return Resultado.Falha("Essa opção não vale neste resultado.");
-                    if (gravadas.Any(g => g.Opcao == o.Id))
-                        return Resultado.Falha($"\"{o.Texto}\" marcada duas vezes.");
-                    var temAlternativas = o.Alternativas.Count > 0;
-                    if (temAlternativas && (escolha.Subopcao == null || escolha.Subopcao < 0 || escolha.Subopcao >= o.Alternativas.Count))
-                        return Resultado.Falha($"Em \"{o.Texto}\", marque uma das alternativas.");
-                    if (temAlternativas && AlvoEhPj(r) && !movimento.AlternativaValeContraPj(o.Id, escolha.Subopcao.Value))
-                        return Resultado.Falha($"Contra PJ, \"{o.Alternativas[escolha.Subopcao.Value]}\" não vale: brigar com colega não enche a pilha.");
-                    gravadas.Add(new EscolhaDaRolagem
-                    {
-                        Opcao = o.Id,
-                        Texto = o.Texto,
-                        Subopcao = temAlternativas ? escolha.Subopcao : null,
-                        Subtexto = temAlternativas ? o.Alternativas[escolha.Subopcao.Value] : null,
-                    });
-                }
+                var rolou = e.Personagem == null ? null : personagens.Buscar(e.Personagem);
+                var usadas = new List<string>(); // condições já tomadas por outra escolha desta rolagem
+                var erroDaEscolha = ConferirEscolhas(r, movimento, opcoes, escolhas, rolou, usadas, gravadas);
+                if (erroDaEscolha != null)
+                    return Resultado.Falha(erroDaEscolha);
             }
             else if (escolhas.Count > 0)
                 return Resultado.Falha("Escolhas pedem o movimento da rolagem.");
@@ -766,10 +951,73 @@ namespace TorreDeControle.Core.Salas
         }
 
         /// <summary>
+        /// Confere as escolhas marcadas contra as opções que valem e grava cada uma com o texto de agora. Opção com
+        /// alternativas pede uma marcada; opção que marca condições pede quais (entre as livres de quem rolou, sem
+        /// repetir as de outra escolha); opção com escolha dentro ("duas da lista de 7–9") confere as de dentro.
+        /// Devolve o erro ou null.
+        /// </summary>
+        string ConferirEscolhas(RolagemDaMesa r, MovimentosBasicos.Movimento movimento,
+            IReadOnlyList<MovimentosBasicos.OpcaoDeEscolha> opcoes, IEnumerable<EscolhaDaRolagem> escolhas, Personagem rolou,
+            List<string> usadas, List<EscolhaDaRolagem> gravadas)
+        {
+            foreach (var escolha in escolhas)
+            {
+                var o = opcoes.FirstOrDefault(x => x.Id == escolha.Opcao);
+                if (o == null)
+                    return "Essa opção não vale neste resultado.";
+                if (gravadas.Any(g => g.Opcao == o.Id))
+                    return $"\"{o.Texto}\" marcada duas vezes.";
+                var temAlternativas = o.Alternativas.Count > 0;
+                if (temAlternativas && (escolha.Subopcao == null || escolha.Subopcao < 0 || escolha.Subopcao >= o.Alternativas.Count))
+                    return $"Em \"{o.Texto}\", marque uma das alternativas.";
+                if (temAlternativas && AlvoEhPj(r) && !movimento.AlternativaValeContraPj(o.Id, escolha.Subopcao.Value))
+                    return $"Contra PJ, \"{o.Alternativas[escolha.Subopcao.Value]}\" não vale: brigar com colega não enche a pilha.";
+                var gravada = new EscolhaDaRolagem
+                {
+                    Opcao = o.Id,
+                    Texto = o.Texto,
+                    Subopcao = temAlternativas ? escolha.Subopcao : null,
+                    Subtexto = temAlternativas ? o.Alternativas[escolha.Subopcao.Value] : null,
+                };
+
+                var n = movimento.CondicoesQueMarca(o.Id);
+                if (n > 0)
+                {
+                    var livres = Condicoes.Todas.Where(c => rolou?.CondicoesMarcadas.Contains(c) != true && !usadas.Contains(c)).ToList();
+                    var marca = (escolha.Condicoes ?? new List<string>()).ToList();
+                    var cabe = Math.Min(n, livres.Count);
+                    if (marca.Distinct().Count() != marca.Count || marca.Any(c => !livres.Contains(c)))
+                        return $"Em \"{o.Texto}\": escolha condições diferentes, entre as que ainda não estão marcadas.";
+                    if (marca.Count != cabe)
+                        return $"Em \"{o.Texto}\", marque {cabe} condiç{(cabe == 1 ? "ão" : "ões")} (marcou {marca.Count}).";
+                    usadas.AddRange(marca);
+                    gravada.Condicoes = marca;
+                    gravada.FaltaramCondicoes = n - cabe;
+                }
+
+                var (nDentro, dentro) = movimento.OpcoesDentro(o.Id);
+                if (dentro.Count > 0)
+                {
+                    var marcadasDentro = escolha.Dentro ?? new List<EscolhaDaRolagem>();
+                    var pedeDentro = Math.Min(nDentro, dentro.Count);
+                    if (marcadasDentro.Count != pedeDentro)
+                        return $"Em \"{o.Texto}\", escolha {pedeDentro} (marcou {marcadasDentro.Count}).";
+                    gravada.Dentro = new List<EscolhaDaRolagem>();
+                    var erro = ConferirEscolhas(r, movimento, dentro, marcadasDentro, rolou, usadas, gravada.Dentro);
+                    if (erro != null)
+                        return erro;
+                }
+                gravadas.Add(gravada);
+            }
+            return null;
+        }
+
+        /// <summary>
         /// O que o aceite muda na mesa, dentro do próprio evento da rolagem (desfazer a rolagem desfaz tudo):
         /// na falha, +1 potencial para quem rolou; na troca, a condição do alvo NPC e a condição do retorno;
-        /// nas escolhas, o que a alternativa marcada dá à pilha (+1 Equipe da oportunidade). O golpe poderoso é
-        /// outra rolagem: fica só no log. O herói genérico não tem ficha: o que seria dele fica só gravado.
+        /// nas escolhas, as condições que elas marcam e o que a alternativa marcada dá à pilha (+1 Equipe da
+        /// oportunidade). O golpe poderoso é outra rolagem, com origem nesta (<see cref="GolpesPedidos"/>).
+        /// O herói genérico não tem ficha: o que seria dele fica só gravado.
         /// </summary>
         void AplicarAceite(Evento e, MovimentosBasicos.Movimento movimento)
         {
@@ -782,6 +1030,10 @@ namespace TorreDeControle.Core.Salas
                 novas.Add(new Mudanca { Campo = CampoDeVilao(r.Alvo, r.Troca.CondicaoDoAlvo), Antes = 0, Depois = 1 });
             if (r.Troca?.Retorno == TrocaDeGolpes.RetornoCondicao && p != null)
                 novas.Add(new Mudanca { Campo = CampoCondicao(r.Troca.CondicaoDeQuemRolou), Antes = 0, Depois = 1 });
+            // As condições que as escolhas mandam marcar ("aguentar a dor", também dentro de "duas da lista de 7–9").
+            if (p != null)
+                novas.AddRange(r.Escolhas.SelectMany(x => x.ComAsDeDentro).SelectMany(x => x.Condicoes ?? new List<string>())
+                    .Select(c => new Mudanca { Campo = CampoCondicao(c), Antes = 0, Depois = 1 }));
             if (novas.Count > 0)
             {
                 Aplicar(p, novas);
@@ -888,9 +1140,20 @@ namespace TorreDeControle.Core.Salas
             if (r.Movimento != null)
             {
                 var alvo = r.Alvo == null ? string.Empty : " → " + (personagens.Buscar(r.Alvo)?.NomeExibicao ?? r.Alvo);
-                texto = $"{r.NomeDoMovimento}{alvo} ({Rotulos.Nome(r.Rotulo)} {(r.Mod < 0 ? "−" : "+")}{Math.Abs(r.Mod)}): " +
+                var soma = r.Partes.Count > 0 ? TextoDasPartes(r)
+                    : $"{(r.Rotulo != null ? Rotulos.Nome(r.Rotulo) : "condições")} {(r.Mod < 0 ? "−" : "+")}{Math.Abs(r.Mod)}";
+                texto = $"{r.NomeDoMovimento}{alvo} ({soma}): " +
                         $"{r.Dados[0]} + {r.Dados[1]}{modTexto} = {r.Inicial} ({RolagemDaMesa.Faixa(r.Inicial)})";
             }
+            var pediu = r.Origem == null ? null : arquivo.Eventos.FirstOrDefault(x => x.Id == r.Origem);
+            if (pediu?.Rolagem != null)
+            {
+                var alvoDeLa = pediu.Rolagem.Alvo == null ? string.Empty : " → " + (personagens.Buscar(pediu.Rolagem.Alvo)?.NomeExibicao ?? pediu.Rolagem.Alvo);
+                var deQuem = pediu.Personagem == null ? HeroiGenerico : personagens.Buscar(pediu.Personagem)?.NomeExibicao ?? "?";
+                texto += $"\n  pedido por: {pediu.Rolagem.NomeDoMovimento ?? "rolagem"} de {deQuem}{alvoDeLa} (r{pediu.Rodada})";
+            }
+            else if (pediu?.Pedido != null)
+                texto += $"\n  pedido no log (r{pediu.Rodada})" + (string.IsNullOrWhiteSpace(pediu.Motivo) ? string.Empty : ": " + pediu.Motivo);
             foreach (var i in r.Intervencoes)
             {
                 var quem = personagens.Buscar(i.Quem)?.NomeExibicao ?? i.Quem;
@@ -905,7 +1168,9 @@ namespace TorreDeControle.Core.Salas
             {
                 texto += r.Tipo == null ? " · aceito" : " · " + RolagemDaMesa.NomeDoTipo(r.Tipo);
                 if (r.Escolhas.Count > 0)
-                    texto += ": " + string.Join(", ", r.Escolhas.Select(x => x.Subtexto == null ? x.Texto : $"{x.Texto} ({x.Subtexto})"));
+                    texto += ": " + string.Join(", ", r.Escolhas.Select(TextoDaEscolha));
+                if (r.Escolhas.SelectMany(x => x.ComAsDeDentro).Any(x => x.FaltaramCondicoes > 0))
+                    texto += "\n  precisa marcar condição e não tem livre: sai de cena";
                 if (r.Troca != null)
                 {
                     var alvo = r.Alvo == null ? null : personagens.Buscar(r.Alvo)?.NomeExibicao ?? r.Alvo;
@@ -915,7 +1180,7 @@ namespace TorreDeControle.Core.Salas
                         : r.Troca.CondicaoDoAlvo != null ? $"{alvo} marca {Condicoes.Nome(r.Troca.CondicaoDoAlvo)}"
                         : $"{alvo} sem condição livre";
                     // Com o nome de quem rolou: "retorno: ileso" sozinho parecia falar do alvo.
-                    var quemRolou = dono?.Personagem == null ? "herói genérico" : personagens.Buscar(dono.Personagem)?.NomeExibicao ?? "quem rolou";
+                    var quemRolou = dono?.Personagem == null ? HeroiGenerico : personagens.Buscar(dono.Personagem)?.NomeExibicao ?? "quem rolou";
                     var retorno = r.Troca.Retorno == TrocaDeGolpes.RetornoIleso ? $"{quemRolou} não recebe retorno (resistiu)"
                         : r.Troca.Retorno == TrocaDeGolpes.RetornoGolpePoderoso ? $"{quemRolou} toma golpe poderoso (role à parte)"
                         : $"{quemRolou} marca {Condicoes.Nome(r.Troca.CondicaoDeQuemRolou)}";
@@ -924,6 +1189,19 @@ namespace TorreDeControle.Core.Salas
                 if (dono != null && dono.Mudancas.Any(m => m.Campo == CampoPotencial))
                     texto += "\n  falha: +1 potencial";
             }
+            return texto;
+        }
+
+        const string HeroiGenerico = "herói genérico";
+
+        /// <summary>"Aguentar a dor [Irritado, Inseguro]", "Duas opções da lista de 7-9: Ceder terreno, ...".</summary>
+        static string TextoDaEscolha(EscolhaDaRolagem x)
+        {
+            var texto = x.Subtexto == null ? x.Texto : $"{x.Texto} ({x.Subtexto})";
+            if (x.Condicoes?.Count > 0)
+                texto += $" [{string.Join(", ", x.Condicoes.Select(Condicoes.Nome))}]";
+            if (x.Dentro?.Count > 0)
+                texto += " → " + string.Join(" + ", x.Dentro.Select(TextoDaEscolha));
             return texto;
         }
 

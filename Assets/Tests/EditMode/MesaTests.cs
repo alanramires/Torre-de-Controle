@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using TorreDeControle.Core.Personagens;
@@ -26,7 +28,7 @@ namespace TorreDeControle.Tests
             salas.PorPersonagem(sala.Id, 0, original.Id, false);
             heroi = personagens.Buscar(sala.Slots[0].Personagem);
             FichaPronta.ParaCarreira(salas, personagens, sala, heroi);
-            mesa = Mesa.Carregar(armazenamento, personagens, sala.Id);
+            mesa = Mesa.Carregar(armazenamento, personagens, sala.Id, TorreDeControle.Core.Regras.RegrasDeCondicoes.Carregar(new RegrasDeTeste()));
         }
 
         Personagem Colega()
@@ -630,6 +632,165 @@ namespace TorreDeControle.Tests
                 new TrocaDeGolpes());
             Assert.That(aceite.Ok, Is.True, aceite.Erro);
             Assert.That(mesa.Equipe, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Golpe_poderoso_soma_condicoes_sem_alvo_e_com_teto()
+        {
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var golpe = basicos.Todos.First(m => m.Id == "basico/golpe-poderoso");
+            Assert.That(golpe.SomaCondicoes && golpe.Invertido, Is.True);
+            Assert.That(basicos.ComRotulo, Has.No.Member(golpe));
+
+            Assert.That(mesa.RolarMovimento(heroi.Id, golpe, null, 3, 4, null).Ok, Is.True);
+            Assert.That(mesa.Eventos.Last().Rolagem.Mod, Is.EqualTo(0), "zero condições: +0");
+            mesa.AlternarCondicao(heroi.Id, "irritado", null);
+            mesa.RolarMovimento(heroi.Id, golpe, null, 3, 4, null);
+            var e = mesa.Eventos.Last();
+            Assert.That(e.Rolagem.Mod, Is.EqualTo(1), "Toro com Irritada rola +1 (p.78)");
+            Assert.That(e.Descricao, Does.StartWith("Tomar um golpe poderoso (condições +1)"));
+            foreach (var c in new[] { "assustado", "culpado", "inseguro", "desesperancoso" })
+                mesa.AlternarCondicao(heroi.Id, c, null);
+            mesa.RolarMovimento(heroi.Id, golpe, null, 3, 4, null);
+            Assert.That(mesa.Eventos.Last().Rolagem.Mod, Is.EqualTo(4), "cinco condições, teto +4");
+
+            Assert.That(mesa.RolarMovimento(heroi.Id, golpe, Colega().Id, 3, 4, null).Ok, Is.False, "o golpe não tem contra quem");
+
+            mesa.MudarEquipe(2, null, null);
+            Assert.That(golpe.SemIntervencao, Is.True);
+            Assert.That(mesa.Intervir(e.Id, new Intervencao { Quem = heroi.Id, DeOnde = Intervencao.DaPilha, Mod = 1, CustoEquipe = 1 }, golpe).Ok,
+                Is.False, "golpe poderoso não aceita intervenção (decisão do Alan)");
+            Assert.That(mesa.Equipe, Is.EqualTo(2), "a recusa não gasta a pilha");
+        }
+
+        [Test]
+        public void Troca_pede_golpe_poderoso_e_a_rolagem_com_origem_cumpre_o_pedido()
+        {
+            var colega = Colega();
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var enfrentar = basicos.Todos.First(m => m.Id == "basico/enfrentar");
+            var golpe = basicos.Todos.First(m => m.Id == "basico/golpe-poderoso");
+            var perigoso = personagens.ValorDeJogo(heroi, Mesa.CampoRotulo(Rotulos.Perigoso));
+
+            // PvP, 9, tirar: os dois tomam golpe poderoso.
+            mesa.RolarMovimento(heroi.Id, enfrentar, colega.Id, 4, 5 - perigoso, null);
+            var e = mesa.Eventos.Last();
+            Assert.That(mesa.GolpesPedidos(e), Is.Empty, "pendente ainda não pede nada");
+            mesa.AceitarRolagem(e.Id, enfrentar, new[] { new EscolhaDaRolagem { Opcao = "tirar" } }, new TrocaDeGolpes());
+            Assert.That(mesa.GolpesPedidos(e), Is.EqualTo(new[] { heroi.Id, colega.Id }));
+
+            Assert.That(mesa.RolarMovimento(heroi.Id, golpe, null, 2, 2, null, origem: e.Id).Ok, Is.True);
+            var g = mesa.Eventos.Last();
+            Assert.That(g.Rolagem.Origem, Is.EqualTo(e.Id));
+            Assert.That(g.Descricao, Does.Contain($"pedido por: Enfrentar diretamente a ameaça de {heroi.NomeExibicao} → {colega.NomeExibicao}"));
+            Assert.That(mesa.GolpesPedidos(e), Is.EqualTo(new[] { colega.Id }), "falta o do alvo");
+            Assert.That(mesa.RolarMovimento(heroi.Id, golpe, null, 2, 2, null, origem: e.Id).Ok, Is.False, "já rolou esse");
+
+            // Desfazer o golpe devolve o pedido.
+            mesa.Corrigir(g.Id, "engano");
+            Assert.That(mesa.GolpesPedidos(e), Is.EqualTo(new[] { heroi.Id, colega.Id }));
+
+            // Resistir: quem rolou não deve golpe; a origem não serve para ele.
+            mesa.RolarMovimento(heroi.Id, enfrentar, colega.Id, 4, 5 - perigoso, null);
+            var e2 = mesa.Eventos.Last();
+            mesa.AceitarRolagem(e2.Id, enfrentar, new[] { new EscolhaDaRolagem { Opcao = "resistir" } }, new TrocaDeGolpes());
+            Assert.That(mesa.GolpesPedidos(e2), Is.EqualTo(new[] { colega.Id }));
+            Assert.That(mesa.RolarMovimento(heroi.Id, golpe, null, 2, 2, null, origem: e2.Id).Ok, Is.False);
+        }
+
+        [Test]
+        public void Aceitar_golpe_poderoso_marca_as_condicoes_escolhidas_e_falha_da_potencial()
+        {
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var golpe = basicos.Todos.First(m => m.Id == "basico/golpe-poderoso");
+
+            // 8 (Huma, p.191): aguentar a dor, duas condições à escolha.
+            mesa.RolarMovimento(heroi.Id, golpe, null, 4, 4, null);
+            var e = mesa.Eventos.Last();
+            var aguentar = new EscolhaDaRolagem { Opcao = "aguentar", Condicoes = new List<string> { "irritado" } };
+            Assert.That(mesa.AceitarRolagem(e.Id, golpe, new[] { aguentar }).Ok, Is.False, "são duas");
+            aguentar.Condicoes = new List<string> { "irritado", "irritado" };
+            Assert.That(mesa.AceitarRolagem(e.Id, golpe, new[] { aguentar }).Ok, Is.False, "diferentes");
+            aguentar.Condicoes = new List<string> { "irritado", "inseguro" };
+            var r = mesa.AceitarRolagem(e.Id, golpe, new[] { aguentar });
+            Assert.That(r.Ok, Is.True, r.Erro);
+            Assert.That(heroi.CondicoesMarcadas, Is.EquivalentTo(new[] { "irritado", "inseguro" }));
+            Assert.That(e.Descricao, Does.Contain("Aguentar a dor: marcar duas condições [Irritado, Inseguro]"));
+            mesa.Corrigir(e.Id, "engano");
+            Assert.That(heroi.CondicoesMarcadas, Is.Empty, "desfazer tira as duas");
+
+            // 10+: duas da lista de 7–9, com o aguentar dentro (condições sem repetir).
+            mesa.RolarMovimento(heroi.Id, golpe, null, 5, 6, null);
+            var forte = mesa.Eventos.Last();
+            var duas = new EscolhaDaRolagem
+            {
+                Opcao = "duas_parcial",
+                Dentro = new List<EscolhaDaRolagem> { new EscolhaDaRolagem { Opcao = "ceder" } },
+            };
+            Assert.That(mesa.AceitarRolagem(forte.Id, golpe, new[] { duas }).Ok, Is.False, "escolha 2 dentro");
+            duas.Dentro.Add(new EscolhaDaRolagem { Opcao = "aguentar", Condicoes = new List<string> { "culpado", "assustado" } });
+            r = mesa.AceitarRolagem(forte.Id, golpe, new[] { duas });
+            Assert.That(r.Ok, Is.True, r.Erro);
+            Assert.That(heroi.CondicoesMarcadas, Is.EquivalentTo(new[] { "culpado", "assustado" }));
+            Assert.That(forte.Rolagem.Escolhas.Single().Dentro.Select(x => x.Opcao), Is.EqualTo(new[] { "ceder", "aguentar" }));
+
+            // Com uma condição livre só, o aguentar marca a que há e a personagem sai de cena.
+            mesa.AlternarCondicao(heroi.Id, "irritado", null);
+            mesa.AlternarCondicao(heroi.Id, "inseguro", null);
+            mesa.RolarMovimento(heroi.Id, golpe, null, 1, 2, null); // 3 + 4 = 7
+            var ultima = mesa.Eventos.Last();
+            Assert.That(ultima.Rolagem.Total, Is.EqualTo(7));
+            r = mesa.AceitarRolagem(ultima.Id, golpe, new[] { new EscolhaDaRolagem { Opcao = "aguentar", Condicoes = new List<string> { "desesperancoso" } } });
+            Assert.That(r.Ok, Is.True, r.Erro);
+            Assert.That(ultima.Rolagem.Escolhas.Single().FaltaramCondicoes, Is.EqualTo(1));
+            Assert.That(ultima.Descricao, Does.Contain("sai de cena"));
+
+            // Falha: se mantém firme, +1 potencial (p.78).
+            foreach (var c in heroi.CondicoesMarcadas.ToList())
+                mesa.AlternarCondicao(heroi.Id, c, null);
+            var potencial = heroi.Potencial;
+            mesa.RolarMovimento(heroi.Id, golpe, null, 1, 2, null);
+            var falha = mesa.Eventos.Last();
+            Assert.That(mesa.AceitarRolagem(falha.Id, golpe, null).Ok, Is.True);
+            Assert.That(heroi.Potencial, Is.EqualTo(potencial + 1));
+        }
+
+        [Test]
+        public void Condicao_marcada_pesa_menos_dois_so_nos_movimentos_dela()
+        {
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var enfrentar = basicos.Todos.First(m => m.Id == "basico/enfrentar");
+            var liberar = basicos.Todos.First(m => m.Id == "basico/liberar-poderes");
+            var golpe = basicos.Todos.First(m => m.Id == "basico/golpe-poderoso");
+            var alvo = Colega();
+            var perigoso = personagens.ValorDeJogo(heroi, Mesa.CampoRotulo(Rotulos.Perigoso));
+            var aberracao = personagens.ValorDeJogo(heroi, Mesa.CampoRotulo(Rotulos.Aberracao));
+            mesa.AlternarCondicao(heroi.Id, "assustado", null);
+            mesa.AlternarCondicao(heroi.Id, "irritado", null);
+
+            mesa.RolarMovimento(heroi.Id, enfrentar, alvo.Id, 3, 4, null);
+            var e = mesa.Eventos.Last();
+            Assert.That(e.Rolagem.Mod, Is.EqualTo(Math.Max(Mesa.TetoMinimo, perigoso - 2)), "Assustado: −2 no Enfrentar; Irritado não pesa");
+            Assert.That(e.Rolagem.Partes.Select(x => x.Origem), Is.EqualTo(new[] { "rotulo:perigoso", "condicao:assustado" }));
+            Assert.That(e.Descricao, Does.Contain("Assustado −2"));
+
+            mesa.RolarMovimento(heroi.Id, liberar, null, 3, 4, null);
+            Assert.That(mesa.Eventos.Last().Rolagem.Mod, Is.EqualTo(aberracao), "nenhuma das duas pesa no liberar");
+
+            mesa.RolarMovimento(heroi.Id, golpe, null, 3, 4, null);
+            Assert.That(mesa.Eventos.Last().Rolagem.Mod, Is.EqualTo(2), "o golpe soma as condições, sem −2");
+        }
+
+        [Test]
+        public void Regras_de_condicoes_dizem_onde_pesam_e_como_saem()
+        {
+            var regras = TorreDeControle.Core.Regras.RegrasDeCondicoes.Carregar(new RegrasDeTeste());
+            Assert.That(regras.Penalidade, Is.EqualTo(-2));
+            Assert.That(regras.MovimentosAfetados("assustado"), Is.EqualTo(new[] { "basico/enfrentar" }));
+            Assert.That(regras.MovimentosAfetados("desesperancoso"), Is.EqualTo(new[] { "basico/liberar-poderes" }));
+            Assert.That(regras.ComoRemover("inseguro"), Does.Contain("sem consultar a equipe"));
+            foreach (var c in Condicoes.Todas)
+                Assert.That(regras.MovimentosAfetados(c), Is.Not.Empty, c);
         }
 
         [Test]

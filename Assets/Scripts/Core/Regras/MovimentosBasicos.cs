@@ -33,6 +33,8 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("id")] public string Id { get; set; }
             [JsonProperty("nome")] public string Nome { get; set; }
             [JsonProperty("gatilho")] public string Gatilho { get; set; }
+            /// <summary>O comando do console que deixa a rolagem pendente no log ("eda", "tgp"), ou null.</summary>
+            [JsonProperty("atalho")] public string Atalho { get; set; }
             [JsonProperty("rolagem")] public RegraDaRolagem Rolagem { get; set; }
             /// <summary>O movimento precisa de "contra quem" (o Enfrentar: sem oponente, é liberar os poderes).</summary>
             [JsonProperty("pede_alvo")] public bool PedeAlvo { get; set; }
@@ -45,8 +47,17 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("opcoes")] public JToken Opcoes { get; set; }
             [JsonProperty("perguntas")] public JToken Perguntas { get; set; }
 
+            /// <summary>As faixas são invertidas: rolar alto é pior (o golpe poderoso).</summary>
+            [JsonProperty("invertido")] public bool Invertido { get; set; }
+
+            /// <summary>A rolagem não aceita intervenção depois do dado (o golpe poderoso).</summary>
+            [JsonProperty("sem_intervencao")] public bool SemIntervencao { get; set; }
+
             /// <summary>O Rótulo que a rolagem soma, ou null (golpe poderoso).</summary>
             [JsonIgnore] public string Rotulo => Rolagem?.Rotulo;
+
+            /// <summary>A rolagem soma as condições marcadas de quem rola, no lugar de um Rótulo (o golpe poderoso).</summary>
+            [JsonIgnore] public bool SomaCondicoes => Rolagem?.Base == "condicoes_marcadas";
 
             /// <summary>
             /// O efeito esperado em linhas para a tela: o que vale em qualquer sucesso, no 10+, no 7–9 e na falha.
@@ -165,9 +176,34 @@ namespace TorreDeControle.Core.Regras
             /// <summary>A opção faz a condição da troca mostrar a nova percepção do alvo ("impressionar").</summary>
             public bool ReflectePercepcao(string opcao) => TemEfeito(opcao, "condicao_da_troca_reflete_percepcao");
 
-            bool TemEfeito(string opcao, string op) =>
-                ((Opcoes as JArray)?.OfType<JObject>().FirstOrDefault(x => (string)x["id"] == opcao)?["efeitos"] as JArray)?
-                .OfType<JObject>().Any(e => (string)e["op"] == op) == true;
+            bool TemEfeito(string opcao, string op) => EfeitoDaOpcao(opcao, op) != null;
+
+            JObject EfeitoDaOpcao(string opcao, string op) =>
+                (OpcaoPorId(opcao)?["efeitos"] as JArray)?.OfType<JObject>().FirstOrDefault(e => (string)e["op"] == op);
+
+            /// <summary>A opção pelo id, nas opções do movimento ou dentro de uma escolha de faixa (inline).</summary>
+            JObject OpcaoPorId(string id) =>
+                (Opcoes as JArray)?.OfType<JObject>().FirstOrDefault(x => (string)x["id"] == id)
+                ?? new[] { Faixa.Forte, Faixa.Parcial }.Select(EscolhaDaFaixa).Where(o => o?["opcoes"] is JArray)
+                    .SelectMany(o => ((JArray)o["opcoes"]).OfType<JObject>()).FirstOrDefault(x => (string)x["id"] == id);
+
+            /// <summary>
+            /// Quantas condições a opção manda quem rolou marcar ("aguentar a dor": 2); 0 se não manda. Quem marca escolhe quais.
+            /// </summary>
+            public int CondicoesQueMarca(string opcao)
+            {
+                var e = EfeitoDaOpcao(opcao, "marcar_condicao");
+                return e != null && (string)e["quem"] == "rolou" ? (int?)e["n"] ?? 1 : 0;
+            }
+
+            /// <summary>
+            /// A escolha de dentro da opção ("duas opções da lista de 7–9": escolha 2 entre aquelas), ou nenhuma.
+            /// </summary>
+            public (int n, IReadOnlyList<OpcaoDeEscolha> opcoes) OpcoesDentro(string opcao)
+            {
+                var e = EfeitoDaOpcao(opcao, "escolher");
+                return e == null ? (0, new List<OpcaoDeEscolha>()) : ((int?)e["n"] ?? 1, OpcoesDe(e));
+            }
 
             /// <summary>Quantas opções o resultado escolhe nesta faixa (Forte = 10+, Parcial = 7–9); 0 se não escolhe.</summary>
             public int EscolhasNo(Faixa faixa) => EscolhaDaFaixa(faixa) is JObject o ? (int?)o["n"] ?? 1 : 0;
@@ -175,8 +211,12 @@ namespace TorreDeControle.Core.Regras
             /// <summary>As opções que o resultado pode escolher nesta faixa, com as alternativas de dentro de cada uma.</summary>
             public IReadOnlyList<OpcaoDeEscolha> OpcoesNo(Faixa faixa)
             {
-                if (!(EscolhaDaFaixa(faixa) is JObject o))
-                    return new List<OpcaoDeEscolha>();
+                return EscolhaDaFaixa(faixa) is JObject o ? OpcoesDe(o) : new List<OpcaoDeEscolha>();
+            }
+
+            /// <summary>As opções de uma escolha (op "escolher"): inline, de uma lista do movimento ou por referência.</summary>
+            IReadOnlyList<OpcaoDeEscolha> OpcoesDe(JObject o)
+            {
                 IEnumerable<JObject> brutas = o["opcoes"] is JArray inline ? inline.OfType<JObject>()
                     : o["lista"] != null ? (Lista((string)o["lista"]) as JArray)?.OfType<JObject>() ?? Enumerable.Empty<JObject>()
                     : o["opcoes_ref"] is JArray refs ? refs.Select(r => (Opcoes as JArray)?.OfType<JObject>().FirstOrDefault(x => (string)x["id"] == (string)r)).Where(x => x != null)

@@ -22,11 +22,11 @@ namespace TorreDeControle.Infra
             PastaImportar = Path.Combine(pastaDados, "importar");
         }
 
-        /// <summary>Grava em exportacoes/&lt;nome&gt;_&lt;data&gt;.json e devolve o caminho.</summary>
-        public string Exportar(string nome, string conteudo)
+        /// <summary>Grava em exportacoes/&lt;nome&gt;_&lt;data&gt;.json (ou outra extensão, como .txt do log) e devolve o caminho.</summary>
+        public string Exportar(string nome, string conteudo, string extensao = ".json")
         {
             Directory.CreateDirectory(PastaExportacoes);
-            var caminho = Path.Combine(PastaExportacoes, $"{NomeDeArquivo(nome)}_{DateTime.Now:yyyy-MM-dd_HHmmss}.json");
+            var caminho = Path.Combine(PastaExportacoes, $"{NomeDeArquivo(nome)}_{DateTime.Now:yyyy-MM-dd_HHmmss}{extensao}");
             File.WriteAllText(caminho, conteudo, new UTF8Encoding(false));
             return caminho;
         }

@@ -39,6 +39,28 @@ namespace TorreDeControle.Core.Salas
         [JsonProperty("editado")] public bool Editado { get; set; }
         /// <summary>Se o evento é uma rolagem de 2d6: os dados, o modificador e as intervenções. Senão, null.</summary>
         [JsonProperty("rolagem", NullValueHandling = NullValueHandling.Ignore)] public RolagemDaMesa Rolagem { get; set; }
+        /// <summary>Se o evento é um pedido de rolagem para depois (/eda, /tgp no console): o que rolar. Senão, null.</summary>
+        [JsonProperty("pedido", NullValueHandling = NullValueHandling.Ignore)] public PedidoDeRolagem Pedido { get; set; }
+    }
+
+    /// <summary>Uma parte do modificador: "rotulo:perigoso" +1, "condicao:assustado" −2, "condicoes" +2 (golpe poderoso).</summary>
+    public sealed class ParteDoModificador
+    {
+        [JsonProperty("origem")] public string Origem { get; set; }
+        /// <summary>O nome como estava ao rolar ("Perigoso", "Assustado").</summary>
+        [JsonProperty("texto")] public string Texto { get; set; }
+        [JsonProperty("valor")] public int Valor { get; set; }
+    }
+
+    /// <summary>
+    /// Uma rolagem anotada para depois: quem rola é a personagem do evento; o motivo é o do evento. Fica como botão no
+    /// log até alguém rolar com a origem apontando para ele (o MJ resolve na ordem que couber).
+    /// </summary>
+    public sealed class PedidoDeRolagem
+    {
+        [JsonProperty("movimento")] public string Movimento { get; set; }
+        [JsonProperty("nome_do_movimento")] public string NomeDoMovimento { get; set; }
+        [JsonProperty("alvo", NullValueHandling = NullValueHandling.Ignore)] public string Alvo { get; set; }
     }
 
     /// <summary>
@@ -51,6 +73,11 @@ namespace TorreDeControle.Core.Salas
         [JsonProperty("dados")] public int[] Dados { get; set; } = new int[2];
         /// <summary>O modificador da rolagem, já dentro do teto.</summary>
         [JsonProperty("mod")] public int Mod { get; set; }
+        /// <summary>
+        /// De onde veio o modificador, antes do teto: o Rótulo (ou as condições, no golpe poderoso) e cada condição marcada
+        /// que pesa no movimento (−2). Vazio na rolagem livre do console e nas rolagens antigas.
+        /// </summary>
+        [JsonProperty("partes")] public List<ParteDoModificador> Partes { get; set; } = new List<ParteDoModificador>();
         [JsonProperty("intervencoes")] public List<Intervencao> Intervencoes { get; set; } = new List<Intervencao>();
         /// <summary>O mestre aceitou: o resultado vale e ninguém mais intervém.</summary>
         [JsonProperty("aceita")] public bool Aceita { get; set; }
@@ -62,6 +89,11 @@ namespace TorreDeControle.Core.Salas
         [JsonProperty("rotulo", NullValueHandling = NullValueHandling.Ignore)] public string Rotulo { get; set; }
         /// <summary>Id da personagem ou do NPC que é o alvo, ou null (ninguém).</summary>
         [JsonProperty("alvo", NullValueHandling = NullValueHandling.Ignore)] public string Alvo { get; set; }
+        /// <summary>
+        /// Id do evento da rolagem que pediu esta (o golpe poderoso da troca do Enfrentar), ou null: pedida pelo MJ
+        /// (movimento numa falha, golpe emocional) ou rolada por conta própria.
+        /// </summary>
+        [JsonProperty("origem", NullValueHandling = NullValueHandling.Ignore)] public string Origem { get; set; }
 
         // Gravados no Aceitar (antes, as intervenções ainda mudam o total). Regra que diz "em um sucesso"
         // lê o resultado; regra do 7–9 lê o tipo. Ninguém recalcula.
@@ -130,6 +162,16 @@ namespace TorreDeControle.Core.Salas
         /// <summary>Índice da alternativa marcada dentro da opção, ou null se a opção não tem alternativas.</summary>
         [JsonProperty("subopcao", NullValueHandling = NullValueHandling.Ignore)] public int? Subopcao { get; set; }
         [JsonProperty("subtexto", NullValueHandling = NullValueHandling.Ignore)] public string Subtexto { get; set; }
+        /// <summary>As condições que a opção marcou em quem rolou ("aguentar a dor": duas, à escolha), ou null.</summary>
+        [JsonProperty("condicoes", NullValueHandling = NullValueHandling.Ignore)] public List<string> Condicoes { get; set; }
+        /// <summary>Quantas condições a opção pedia e não havia livres (precisa marcar e não tem: sai de cena). 0 se nenhuma.</summary>
+        [JsonProperty("faltaram_condicoes", DefaultValueHandling = DefaultValueHandling.Ignore)] public int FaltaramCondicoes { get; set; }
+        /// <summary>As escolhas de dentro da opção ("duas opções da lista de 7–9"), ou null.</summary>
+        [JsonProperty("dentro", NullValueHandling = NullValueHandling.Ignore)] public List<EscolhaDaRolagem> Dentro { get; set; }
+
+        /// <summary>Esta escolha e as de dentro dela.</summary>
+        [JsonIgnore] public IEnumerable<EscolhaDaRolagem> ComAsDeDentro =>
+            new[] { this }.Concat(Dentro?.SelectMany(d => d.ComAsDeDentro) ?? Enumerable.Empty<EscolhaDaRolagem>());
     }
 
     /// <summary>

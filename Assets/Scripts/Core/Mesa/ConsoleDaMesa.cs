@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using TorreDeControle.Core.Personagens;
+using TorreDeControle.Core.Regras;
 
 namespace TorreDeControle.Core.Salas
 {
@@ -17,19 +18,25 @@ namespace TorreDeControle.Core.Salas
         readonly CadastroPersonagens personagens;
         readonly Sala sala;
         readonly Random dados;
+        readonly MovimentosBasicos basicos;
 
-        public ConsoleDaMesa(Mesa mesa, CadastroPersonagens personagens, Sala sala, Random dados = null)
+        /// <param name="basicos">Os movimentos, para os atalhos de pedido (/eda, /tgp); sem eles, os atalhos não valem.</param>
+        public ConsoleDaMesa(Mesa mesa, CadastroPersonagens personagens, Sala sala, Random dados = null,
+            MovimentosBasicos basicos = null)
         {
             this.mesa = mesa;
             this.personagens = personagens;
             this.sala = sala;
             this.dados = dados ?? new Random();
+            this.basicos = basicos;
         }
 
         /// <summary>Os comandos, para a janela de ajuda: exemplo e o que faz.</summary>
         public static readonly IReadOnlyList<(string exemplo, string oQueFaz)> Comandos = new[]
         {
             ("/roll +2", "rola 2d6 + modificador (teto de −3 a +4) e anota no log"),
+            ("/eda Aurora vs Ocaso", "deixa o Enfrentar pendente no log: um botão abre o painel já preenchido, na hora que couber"),
+            ("/tgp Mayane \"descobriu a verdade sobre a irmã\"", "deixa o golpe poderoso pendente no log (no físico ou no emocional), com o motivo"),
             ("/potencial Aurora o soco foi absorvido", "+1 potencial, com o motivo obrigatório"),
             ("/pot Aurora 3", "debug: força o potencial para o valor (também /potencial Aurora 3; com uma heroína só na mesa, /pot 3)"),
             ("/pilha +2 questionário", "soma ou tira da pilha de Equipe (motivo opcional)"),
@@ -38,15 +45,20 @@ namespace TorreDeControle.Core.Salas
             ("/nota a cena vai para o hospital", "anotação livre no log"),
             ("/npc_create \"Seu Valdir\" neutral \"vigia noturno\"", "cria NPC na campanha: ally, neutral ou villain; a nota vai para as Notas"),
             ("/location_create \"Usina Halcyon Sul\" \"galpão destruído\"", "cria um Local no cenário, com a descrição"),
-            ("/rodada", "abre a próxima rodada do log"),
+            ("/rodada", "abre a próxima rodada do log (também /avancar)"),
+            ("/cena \"o hospital\"", "marca uma cena nova no log; a pilha fica como está"),
+            ("/tempo três semanas depois", "o tempo passa: a pilha volta para 1 (p.88)"),
+            ("/salvar", "salva o log visível em texto (dados/exportacoes) e copia para colar"),
+            ("/fixo 8", "debug: a próxima rolagem dá 8 nos dados, sem jogar (/fixo 8 11: as duas próximas; /fixo: limpa)"),
+            ("/reset", "debug: a mesa volta ao início do jogo (rodada 1, pilha 0, potencial 0, sem condições); pede confirmação"),
             ("/clear", "esconde todas as entradas do log (o mesmo que /clearlog; ficam no arquivo e o efeito na mesa continua)"),
             ("/help", "abre esta janela"),
         };
 
         public const string Ajuda =
-            "/roll [mod] · /potencial Nome motivo · /pot [Nome] valor · /pilha +N|-N [motivo] · /cond Nome condição · " +
+            "/roll [mod] · /eda Nome vs Alvo [motivo] · /tgp Nome [motivo] · /potencial Nome motivo · /pot [Nome] valor · /pilha +N|-N [motivo] · /cond Nome condição · " +
             "/lembrete Nome texto · /nota texto · /npc_create \"Nome\" ally|neutral|villain [\"nota\"] · " +
-            "/location_create \"Nome\" [\"nota\"] · /rodada · /clearlog (/clear) · /help";
+            "/location_create \"Nome\" [\"nota\"] · /rodada · /cena [nome] · /tempo [motivo] · /salvar · /fixo [somas] · /reset ·/clearlog (/clear) · /help";
 
         /// <summary>Executa a linha. Devolve o resultado e a mensagem para mostrar (sucesso ou erro).</summary>
         public (bool ok, string mensagem) Executar(string linha)
@@ -69,11 +81,26 @@ namespace TorreDeControle.Core.Salas
                     case "nota": return Nota(args);
                     case "npc_create": case "npc": return CriarNpc(args);
                     case "location_create": case "local": return CriarLocal(args);
-                    case "rodada": mesa.NovaRodada(); return (true, $"Rodada {mesa.Rodada}.");
+                    case "rodada": case "avancar": case "proxima": mesa.NovaRodada(); return (true, $"Rodada {mesa.Rodada}.");
+                    case "cena": case "novacena":
+                        mesa.NovaCena(args.Count > 0 ? string.Join(" ", args) : null);
+                        return (true, $"Cena nova no log. A pilha continua em {mesa.Equipe} (só volta para 1 quando o tempo passa: /tempo).");
+                    case "tempo":
+                        var t = mesa.OTempoPassa(args.Count > 0 ? string.Join(" ", args) : null);
+                        return t.Ok ? (true, "O tempo passa: a pilha volta para 1.") : (false, t.Erro);
+                    case "fixo": case "rollfixo": case "roll_fixo": return Fixar(args);
+                    // Gravar o arquivo é da tela (o Core não toca em disco): aqui só o texto.
+                    case "salvar": case "salvarlog":
+                        return mesa.Visiveis.Count == 0 ? (false, "O log está vazio.") : (true, mesa.LogEmTexto());
+                    case "reset": case "resetar":
+                        mesa.ResetarMesa();
+                        return (true, "Mesa no início do jogo (debug): rodada 1, pilha 0, fichas sem potencial nem condições. O log antigo ficou escondido no arquivo.");
                     case "clearlog": case "clear": case "limparlog":
                         var n = mesa.EsconderTudo();
                         return (true, n == 0 ? "O log já está vazio." : $"{n} entrada{(n == 1 ? "" : "s")} escondida{(n == 1 ? "" : "s")} (ficam no arquivo; o efeito na mesa continua).");
-                    default: return (false, $"Comando desconhecido: /{comando}. Veja /help.");
+                    default:
+                        var movimento = basicos?.Todos.FirstOrDefault(m => m.Atalho != null && m.Atalho == comando);
+                        return movimento != null ? Pedir(movimento, args) : (false, $"Comando desconhecido: /{comando}. Veja /help.");
                 }
             }
             catch (Exception e)
@@ -100,7 +127,26 @@ namespace TorreDeControle.Core.Salas
             return Anotar2D6(Partes(linha).Skip(1).ToList(), dado1, dado2);
         }
 
-        (bool, string) Rolar(List<string> args) => Anotar2D6(args, dados.Next(1, 7), dados.Next(1, 7));
+        (bool, string) Rolar(List<string> args) => mesa.TirarDadoFixo(out var a, out var b)
+            ? Anotar2D6(args, a, b)
+            : Anotar2D6(args, dados.Next(1, 7), dados.Next(1, 7));
+
+        /// <summary>Debug: "/fixo 8 11" = as próximas rolagens dão 8 e depois 11 nos dados; "/fixo" limpa.</summary>
+        (bool, string) Fixar(List<string> args)
+        {
+            var somas = new List<int>();
+            foreach (var a in args)
+            {
+                if (!int.TryParse(a, out var s))
+                    return (false, "Use /fixo 8 (a soma dos 2d6, de 2 a 12; várias = as próximas rolagens, na ordem).");
+                somas.Add(s);
+            }
+            var r = mesa.FixarDados(somas);
+            if (!r.Ok)
+                return (false, r.Erro);
+            return (true, somas.Count == 0 ? "Dados fixos limpos: volta a rolar de verdade."
+                : $"Próxima{(somas.Count == 1 ? "" : "s")} rolage{(somas.Count == 1 ? "m" : "ns")} (debug): {string.Join(", ", somas)} nos dados, + o modificador.");
+        }
 
         /// <summary>Lança a rolagem na mesa (pendente: Intervir/Aceitar no log). O teto vale aqui.</summary>
         (bool, string) Anotar2D6(List<string> args, int a, int b)
@@ -194,6 +240,35 @@ namespace TorreDeControle.Core.Salas
             return r.Ok ? (true, $"Lembrete em {p.NomeExibicao}: {texto}") : (false, r.Erro);
         }
 
+        /// <summary>
+        /// Pedido de rolagem pelo atalho do movimento: "/eda Aurora vs Ocaso [motivo]", "/tgp Mayane [motivo]". Não rola:
+        /// fica no log com um botão, e o MJ rola na ordem que couber.
+        /// </summary>
+        (bool, string) Pedir(MovimentosBasicos.Movimento movimento, List<string> args)
+        {
+            var uso = movimento.SomaCondicoes ? $"/{movimento.Atalho} Nome [motivo]" : $"/{movimento.Atalho} Nome vs Alvo [motivo]";
+            if (args.Count == 0)
+                return (false, "Use " + uso + ".");
+            var (p, erro) = Achar(args[0], incluirViloes: false);
+            if (p == null)
+                return (false, erro);
+            var resto = args.Skip(1).ToList();
+            string alvo = null;
+            if (resto.Count > 0 && Sem(resto[0]) is "vs" or "contra" or "x")
+            {
+                if (resto.Count < 2)
+                    return (false, "Contra quem? Use " + uso + ".");
+                var (a, erroAlvo) = Achar(resto[1], incluirViloes: true);
+                if (a == null)
+                    return (false, erroAlvo);
+                alvo = a.Id;
+                resto = resto.Skip(2).ToList();
+            }
+            var motivo = resto.Count > 0 ? string.Join(" ", resto) : null;
+            var r = mesa.PedirRolagem(p.Id, movimento, alvo, motivo);
+            return r.Ok ? (true, $"{mesa.Eventos.Last().Descricao} ({p.NomeExibicao}): role pelo botão no log.") : (false, r.Erro);
+        }
+
         (bool, string) Nota(List<string> args)
         {
             if (args.Count == 0)
@@ -242,7 +317,10 @@ namespace TorreDeControle.Core.Salas
 
         // ---------- por dentro ----------
 
-        /// <summary>Personagem da mesa (e vilões em cena) pelo começo do nome, sem acento nem maiúscula.</summary>
+        /// <summary>
+        /// Personagem da mesa (e vilões em cena) pelo começo do nome, sem acento nem maiúscula. Se ninguém começa assim,
+        /// vale o começo de qualquer palavra do nome ("Ocaso" acha o Doutor Ocaso).
+        /// </summary>
         (Personagem, string) Achar(string nome, bool incluirViloes)
         {
             var candidatos = sala.Slots.Where(v => v.Personagem != null).Select(v => personagens.Buscar(v.Personagem))
@@ -252,6 +330,9 @@ namespace TorreDeControle.Core.Salas
             var alvo = Sem(nome);
             var achados = candidatos.Where(p => Sem(p.NomeExibicao).StartsWith(alvo) ||
                                                 Sem(p.NomeCompleto).StartsWith(alvo)).Distinct().ToList();
+            if (achados.Count == 0)
+                achados = candidatos.Where(p => (Sem(p.NomeExibicao) + " " + Sem(p.NomeCompleto)).Split(' ')
+                    .Any(palavra => palavra.StartsWith(alvo))).Distinct().ToList();
             if (achados.Count == 1)
                 return (achados[0], null);
             if (achados.Count == 0)
