@@ -1,6 +1,6 @@
 # Resumo — onde a Torre está
 
-> Handoff para a próxima conversa. Atualizado no fechamento da **v0.2.2** (2026-10-16).
+> Handoff para a próxima conversa. Atualizado no fechamento da **v0.3.0** (2026-10-18).
 > Se algo aqui contradiz o código, o código manda — e este arquivo precisa de poda.
 
 ## Leitura para retomar
@@ -10,23 +10,23 @@ cuidados de interpretação e direção dos painéis de ajuda, em palavras próp
 As regras executáveis continuam em `Assets/Resources/Regras/*.json`; consulte também
 `CLAUDE.md`, `regras.md`, `fluxo_de_telas.md` e os achados dos relatórios antes de alterar regras.
 
-**Duas IAs na mesma pasta:** esta (mecânica: regras, fichas, salas, mesa) e outra (imagens: retratos,
-ícones, fotos). Antes de commitar, `git status` e ler o diff do que não é seu; não assumir que arquivo
+**Duas IAs na mesma pasta:** esta (mecânica: regras, fichas, salas, mesa) e outra (cartas de ajuda e os dados
+3D; antes, imagens). O Alan autorizou commitar o trabalho dela, num commit próprio. Antes de commitar, `git status` e ler o diff do que não é seu; não assumir que arquivo
 novo é seu.
 
 ## Estado
 
-- **Versão:** v0.2.2 — *Confiabilidade* (gravação em lote com diário, cópia de segurança, desfazer/refazer
-  seguros; responde a `docs/revisao/analise.md`, a revisão da outra IA). Antes, v0.2.1 — *Ponto a ponto*. Relatórios: `docs/relatorio_v0.2.0.md` (a mesa) e
-  `docs/relatorio_v0.2.1.md` (a mesa testada lance a lance: trilhas, Refazer, Lembretes, moedas de Influência,
-  atalhos, e as correções de regra de ajuda, egoísta, ceder terreno e combinar movimentos).
-- **Novo nesta versão:** a **mesa de jogo** ("Entrar na sala" na entrada → `PainelMesa`): assentos, log,
-  pilha de Equipe (Gerir pilha: ±1, usar, questionário de entrar em batalha, passagem do tempo), vilões em
-  cena e bônus (adiante/constante/controle). E a **Área do mestre** (`PainelMestre`): primeira sessão,
-  anotações, vilões em cena, potencial.
-- **O que organiza o que vem:** escrever o **exemplo comentado** antes do código (`docs/exemplo_primeira_luta.md`,
-  blocos [TORRE]) mostrou quais botões a sessão pede. O próximo corte é o **rolador**, o lance seguinte do
-  exemplo. Caso de teste do produto: `docs/Case de Teste/` (Halcyon City).
+- **Versão:** v0.3.0 — *O primeiro movimento* (`docs/relatorio_v0.3.0.md`). O **Enfrentar diretamente a
+  ameaça** virou um painel completo ("Rolar movimento", ou o "M" no assento): quem rola, contra quem,
+  2d6 + Rótulo nos dados físicos, intervenção (pilha, renúncia, Defender, outro), efeito esperado com as
+  opções e os cartões da troca de golpes, e um Aceitar que aplica na mesa. Antes: v0.2.2 (*Confiabilidade*),
+  v0.2.1 (*Ponto a ponto*), v0.2.0 (*A mesa*).
+- **O que organiza o que vem:** a rolagem é uma **entidade** (`RolagemDaMesa` em `Core/Mesa/Evento.cs`):
+  resultado (sucesso/falha), tipo (total/drawback/falha), escolhas com subopção, troca, intervenções e
+  `aceita_em`. Regra nova entra **no JSON do movimento** (`movimentos_basicos.json`: `trocar_golpes`,
+  `pede_alvo`, `contra_pj`, notas e `_decisao` com página). O próximo movimento usa o mesmo molde.
+- **Como foi feito:** um movimento só, até o fim, lendo cada ocorrência no livro com o Alan. Cada dúvida
+  virou decisão escrita. Achados que desmentiram suposições estão no relatório da v0.3.0.
 - **Onde o Alan chegou:** salas com personagens **em aprovação** (formação, Influência e relacionamentos
   prontos; NPCs nascem da ficha). Agora há o **laboratório de NPCs** (botão Npcs na entrada): originais,
   cópia entre campanhas, exportar/importar, foto, papel "Vilão / Oponente" e a ficha de vilão conferida no
@@ -87,12 +87,22 @@ novo é seu.
 - **Influência no jogo** — `DefinirEstadoDaInfluencia` (dar nova, perder, voltar; só em carreira) está no
   Core, sem tela e sem evento no log: vai para o painel do mestre (a aba Influência da sala).
 - **Mesa** — `UI/PainelMesa.cs` + `Core/Mesa/Mesa.cs` (eventos com desfazer e refazer; pilha, condições de vilão,
-  bônus e lembretes são da mesa, `mesa_<sala>.json`; trilhas e potencial vão para a ficha). O exemplo
-  `docs/exemplo_primeira_luta.md` é o roteiro de teste: revisado até "Aurora sai dos escombros"; dali em diante
-  (Estrela provoca, depois da luta) falta revisar com o Alan. Falta: **rolador**, com as regras certas de ajuda
-  (1 por colega que alcança), egoísta (a mesa confirma + quais Rótulos mudam) e golpe poderoso,
-  Influência mudando Rótulos pela mesa (com Rejeitar), roteiro marcando sozinho pelo log, post BBCode,
-  mudar Rótulos ao agir de forma egoísta (hoje manual).
+  bônus e lembretes são da mesa, `mesa_<sala>.json`; trilhas e potencial vão para a ficha). Console do mestre
+  embaixo do log (`Core/Mesa/ConsoleDaMesa.cs`, `/help`).
+- **Rolador (v0.3.0)** — painel em `PainelMesa.DesenharRolagem` (seções `SecaoDeIntervencao`,
+  `CartoesDaTroca`); regras em `Mesa.RolarMovimento`, `Intervir`, `AceitarRolagem` (`ConferirTroca`,
+  `AplicarAceite`); leitura do JSON em `Core/Regras/MovimentosBasicos.cs` (`EfeitoEsperado`, `OpcoesNo`,
+  `EscolhasNo`, `AnulaRetorno`, `ReflectePercepcao`, `AlternativaValeContraPj`). **Próximo:**
+  1. **tomar um golpe poderoso** no mesmo painel (contra quem vazio, faixas invertidas, soma as condições
+     marcadas), com `origem` apontando para a rolagem que o pediu; hoje fica só no log;
+  2. cartão de **movimentos do MJ na falha** (pode combinar);
+  3. o modificador completo (condições −2, adiante, constante, Influência passiva +1); hoje é só o Rótulo;
+  4. os outros movimentos básicos, um por vez, como o Enfrentar;
+  5. sair de cena (com as 5 condições marcadas, o retorno "condição" fica sem opção).
+
+  O Alan vai testar mais, inclusive PvP. O exemplo `docs/exemplo_primeira_luta.md` continua revisado só até
+  "Aurora sai dos escombros". Falta também: Influência mudando Rótulos pela mesa (com Rejeitar); egoísta
+  mudando Rótulos (hoje à mão); post BBCode; roteiro marcando sozinho pelo log.
 - **Área do mestre** — `UI/PainelMestre.cs`: Primeira sessão (`Regras/primeira_sessao.json`,
   `Core/Salas/PrimeiraSessao.cs`), Anotações (na sala: `AnotacoesFormacao`, `AnotacoesNpcs`, `Trama`),
   e, abertas pela mesa, Vilões em cena e Potencial. Trama → ganchos e arcos (livro cap. 9) depois.
@@ -102,7 +112,7 @@ novo é seu.
   (`implementacao_futura.md`).
 - **Ajuste pontual com motivo** em ficha em carreira (sem reabrir a criação) e **resultado sem rolagem**
   (Sobrecarga 10+, Vou te salvar! 12+) para o rolador: anotados.
-- Testes: `Assets/Tests/EditMode/` — 163 passando no harness dotnet fora da Unity; rodar também no Test
+- Testes: `Assets/Tests/EditMode/` — 184 passando no harness dotnet fora da Unity; rodar também no Test
   Runner da Unity.
 
 ## Armadilhas
@@ -163,6 +173,11 @@ novo é seu.
 | Explicar regra de cabeça | "egoísta = +1", "ajuda de quem está longe" | conferir no livro (p.84–85) antes de escrever o exemplo |
 | Pilha "zerando" no questionário | leitura errada da regra | a pilha **soma** sempre; só "o tempo passa" volta para 1 (pp.86–88) |
 | Mapeamento de NPC/lugar errado | lista pronta sem conferir a pergunta (Farol) | conferir no livro PT-BR e inglês |
+| Exemplo do livro lido pela metade | a p.189 tem duas cenas (Defender da Canção dos Céus, Enfrentar do Rex) | ler a cena inteira antes de concluir uma regra |
+| Pedido entendido como entidade nova | "Herói genérico" virou arquétipo; era opção de "quem rola" | perguntar o lugar na tela antes de criar entidade |
+| Log ambíguo | "retorno: ileso" sem dizer de quem | escrever sempre o nome de quem recebe |
+| Teste antigo quebra com regra nova | rolagem sem alvo, +1 Equipe contra PJ | atualizar o teste para a regra, não a regra para o teste |
+| Dados físicos escondidos | a caixa do painel por cima da sobreposição | fechar a caixa antes de jogar e reabrir com o resultado |
 
 ## MVP (do `CLAUDE.md`)
 
@@ -173,7 +188,7 @@ novo é seu.
 | Mesa com N fichas clicáveis | **de pé**: assentos com Rótulos, condições, potencial, bônus; ficha no clique |
 | Pilha de Equipe | **de pé**: Gerir pilha (±1, usar, questionário, passagem do tempo) |
 | Mão de cartas por jogador | falta |
-| Rolador 2d6 + log | **log de pé** na mesa; rolador é o próximo corte |
+| Rolador 2d6 + log | **de pé para o Enfrentar** (painel, intervenção, aceite que aplica); outros movimentos e golpe poderoso faltam |
 | Exportar log para o fórum | falta |
 
 Fora do MVP, já de pé: jogadores; NPCs com ficha de vilão (Neutro/Aliado/Vilão / Oponente), **NPCs que
@@ -197,6 +212,9 @@ A "mão de cartas" tem base: `CatalogoDeCartas` + `MontadorDeBaralho` no Core, s
 - v0.2.0: `mesa_<sala>.json` ganha `equipe`, `em_cena`, `condicoes_de_vilao`, `bonus`; `salas.json` ganha
   `primeira_sessao`, `anotacoes_formacao`, `anotacoes_npcs`, `trama`, `ultima_mesa`; `pnj.ligacoes`. Trocas
   novas: `torre-de-controle/anotacoes` e `torre-de-controle/vinculos` (versão 1).
+- v0.3.0: eventos de `mesa_<sala>.json` ganham `oculto`, `editado` e `rolagem` (dados, mod, movimento,
+  rotulo, alvo, intervenções, resultado, tipo, escolhas, troca, aceita, aceita_em). Evento antigo sem
+  `rolagem` continua valendo (campo opcional).
 - **Os arquivos têm o campo `versao`, mas ainda não há migração** (o número é gravado; ao carregar, não se
   converte nem se recusa versão diferente). Na v0.0.2 o status `criado` deixou de existir; os dados
   locais do Alan foram convertidos à mão (backup em `dados/personagens.antes-dos-status.json`).
