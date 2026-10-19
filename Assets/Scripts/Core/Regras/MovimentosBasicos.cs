@@ -34,6 +34,8 @@ namespace TorreDeControle.Core.Regras
             [JsonProperty("nome")] public string Nome { get; set; }
             [JsonProperty("gatilho")] public string Gatilho { get; set; }
             [JsonProperty("rolagem")] public RegraDaRolagem Rolagem { get; set; }
+            /// <summary>O movimento precisa de "contra quem" (o Enfrentar: sem oponente, é liberar os poderes).</summary>
+            [JsonProperty("pede_alvo")] public bool PedeAlvo { get; set; }
             /// <summary>O que vale em qualquer sucesso (7+), antes das escolhas.</summary>
             [JsonProperty("sucesso_base")] public JToken SucessoBase { get; set; }
             [JsonProperty("forte")] public JToken Forte { get; set; }
@@ -135,6 +137,27 @@ namespace TorreDeControle.Core.Regras
             JObject TrocaDoSucesso => SucessoBase is JObject o
                 ? ((string)o["op"] == "trocar_golpes" ? o : null)
                 : (SucessoBase as JArray)?.OfType<JObject>().FirstOrDefault(x => (string)x["op"] == "trocar_golpes");
+
+            /// <summary>Quanto a alternativa marcada de uma opção muda a pilha (a oportunidade: +1 Equipe); 0 se não muda.</summary>
+            public int EquipeDaAlternativa(string opcao, int alternativa)
+            {
+                var efeitos = (Opcoes as JArray)?.OfType<JObject>().FirstOrDefault(x => (string)x["id"] == opcao)?["efeitos"] as JArray;
+                var decide = efeitos?.OfType<JObject>().FirstOrDefault(e => (string)e["op"] == "mj_decide");
+                if (!(decide?["entre"] is JArray entre) || alternativa < 0 || alternativa >= entre.Count)
+                    return 0;
+                return ((entre[alternativa] as JArray) ?? new JArray(entre[alternativa])).OfType<JObject>()
+                    .Where(e => (string)e["op"] == "equipe").Sum(e => (int?)e["delta"] ?? 1);
+            }
+
+            /// <summary>
+            /// A alternativa vale contra um alvo PJ? A opção com "contra_pj": "sem_equipe" não dá pontos à pilha
+            /// brigando com colega (a oportunidade: só a chance a um aliado).
+            /// </summary>
+            public bool AlternativaValeContraPj(string opcao, int alternativa)
+            {
+                var o = (Opcoes as JArray)?.OfType<JObject>().FirstOrDefault(x => (string)x["id"] == opcao);
+                return (string)o?["contra_pj"] != "sem_equipe" || EquipeDaAlternativa(opcao, alternativa) == 0;
+            }
 
             /// <summary>A opção deixa quem rolou ileso na troca ("resistir").</summary>
             public bool AnulaRetorno(string opcao) => TemEfeito(opcao, "anular_retorno_da_troca");

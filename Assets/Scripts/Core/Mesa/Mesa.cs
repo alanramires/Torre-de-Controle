@@ -603,6 +603,8 @@ namespace TorreDeControle.Core.Salas
                 return erro;
             if (alvo != null && alvo == personagem)
                 return Resultado.Falha("O alvo não pode ser quem rola.");
+            if (movimento.PedeAlvo && alvo == null)
+                return Resultado.Falha(MensagemPedeAlvo(movimento));
             return Lancar(p, new RolagemDaMesa
             {
                 Dados = new[] { dado1, dado2 },
@@ -613,6 +615,10 @@ namespace TorreDeControle.Core.Salas
                 Alvo = alvo,
             }, motivo);
         }
+
+        /// <summary>A recusa de um movimento que pede alvo, rolado contra ninguém.</summary>
+        public static string MensagemPedeAlvo(MovimentosBasicos.Movimento movimento) =>
+            $"{movimento.Nome} pede contra quem: uma ameaça em cena. Contra o nada (obstáculo, ambiente, sentidos), é liberar os poderes.";
 
         Resultado Lancar(Personagem p, RolagemDaMesa rolagem, string motivo)
         {
@@ -647,13 +653,24 @@ namespace TorreDeControle.Core.Salas
                 return Resultado.Falha($"Uma intervenção vai de {IntervencaoMinima} a +{IntervencaoMaxima}.");
             if (intervencao.CustoEquipe < 0)
                 return Resultado.Falha("Custo negativo na pilha.");
+            // Pilha de Equipe (p.84): quem gasta decide o que é. Outra pessoa = ajuda; quem rola = egoísta. Cada
+            // pessoa gasta 1 ponto por jogada (vários colegas podem ajudar a mesma rolagem).
+            bool DaPilha(string deOnde) => deOnde == Intervencao.DaPilha || deOnde == Intervencao.AjudaDaPilha || deOnde == Intervencao.EgoistaDaPilha;
+            if (DaPilha(intervencao.DeOnde))
+            {
+                if (e.Rolagem.Intervencoes.Any(x => DaPilha(x.DeOnde) && x.Quem == intervencao.Quem))
+                    return Resultado.Falha($"{personagens.Buscar(intervencao.Quem)?.NomeExibicao ?? "Essa pessoa"} já gastou da pilha nesta rolagem: " +
+                                           "cada pessoa gasta 1 ponto por jogada.");
+                intervencao.DeOnde = e.Personagem != null && intervencao.Quem == e.Personagem
+                    ? Intervencao.EgoistaDaPilha : Intervencao.AjudaDaPilha;
+            }
             if (intervencao.CustoEquipe > arquivo.Equipe)
                 return Resultado.Falha($"A pilha tem {arquivo.Equipe} ponto{(arquivo.Equipe == 1 ? "" : "s")}.");
             intervencao.Detalhe = (intervencao.Detalhe ?? string.Empty).Trim();
             if (intervencao.CustoEquipe > 0)
                 MudarEquipeDaRolagem(e, -intervencao.CustoEquipe);
             e.Rolagem.Intervencoes.Add(intervencao);
-            e.Descricao = TextoDaRolagem(e.Rolagem);
+            e.Descricao = TextoDaRolagem(e.Rolagem, e);
             Gravar();
             return Resultado.Sucesso();
         }
@@ -670,7 +687,7 @@ namespace TorreDeControle.Core.Salas
             if (i.CustoEquipe > 0)
                 MudarEquipeDaRolagem(e, i.CustoEquipe);
             e.Rolagem.Intervencoes.RemoveAt(indice);
-            e.Descricao = TextoDaRolagem(e.Rolagem);
+            e.Descricao = TextoDaRolagem(e.Rolagem, e);
             Gravar();
             return Resultado.Sucesso();
         }
@@ -714,6 +731,8 @@ namespace TorreDeControle.Core.Salas
                     var temAlternativas = o.Alternativas.Count > 0;
                     if (temAlternativas && (escolha.Subopcao == null || escolha.Subopcao < 0 || escolha.Subopcao >= o.Alternativas.Count))
                         return Resultado.Falha($"Em \"{o.Texto}\", marque uma das alternativas.");
+                    if (temAlternativas && AlvoEhPj(r) && !movimento.AlternativaValeContraPj(o.Id, escolha.Subopcao.Value))
+                        return Resultado.Falha($"Contra PJ, \"{o.Alternativas[escolha.Subopcao.Value]}\" não vale: brigar com colega não enche a pilha.");
                     gravadas.Add(new EscolhaDaRolagem
                     {
                         Opcao = o.Id,
@@ -740,10 +759,46 @@ namespace TorreDeControle.Core.Salas
             r.Troca = trocaGravada;
             r.AceitaEm = DateTime.Now.ToString("s");
             r.Aceita = true;
-            e.Descricao = TextoDaRolagem(r);
+            AplicarAceite(e, movimento);
+            e.Descricao = TextoDaRolagem(r, e);
             Gravar();
             return Resultado.Sucesso();
         }
+
+        /// <summary>
+        /// O que o aceite muda na mesa, dentro do próprio evento da rolagem (desfazer a rolagem desfaz tudo):
+        /// na falha, +1 potencial para quem rolou; na troca, a condição do alvo NPC e a condição do retorno;
+        /// nas escolhas, o que a alternativa marcada dá à pilha (+1 Equipe da oportunidade). O golpe poderoso é
+        /// outra rolagem: fica só no log. O herói genérico não tem ficha: o que seria dele fica só gravado.
+        /// </summary>
+        void AplicarAceite(Evento e, MovimentosBasicos.Movimento movimento)
+        {
+            var r = e.Rolagem;
+            var p = e.Personagem == null ? null : personagens.Buscar(e.Personagem);
+            var novas = new List<Mudanca>();
+            if (r.Tipo == RolagemDaMesa.TipoFalha && p != null)
+                novas.Add(new Mudanca { Campo = CampoPotencial, Antes = p.Potencial, Depois = p.Potencial + 1 });
+            if (r.Troca?.CondicaoDoAlvo != null && r.Alvo != null && !r.Troca.AlvoGolpePoderoso)
+                novas.Add(new Mudanca { Campo = CampoDeVilao(r.Alvo, r.Troca.CondicaoDoAlvo), Antes = 0, Depois = 1 });
+            if (r.Troca?.Retorno == TrocaDeGolpes.RetornoCondicao && p != null)
+                novas.Add(new Mudanca { Campo = CampoCondicao(r.Troca.CondicaoDeQuemRolou), Antes = 0, Depois = 1 });
+            if (novas.Count > 0)
+            {
+                Aplicar(p, novas);
+                e.Mudancas.AddRange(novas);
+            }
+            // A condição do impressionar num alvo PJ é da ficha dele, não de quem rolou: entra como entrada própria
+            // no log, logo depois da rolagem (e se desfaz à parte).
+            if (r.Troca?.AlvoGolpePoderoso == true && r.Troca.CondicaoDoAlvo != null)
+                AlternarCondicao(r.Alvo, r.Troca.CondicaoDoAlvo, $"impressionar ({p?.NomeExibicao ?? "herói genérico"})");
+            if (movimento == null)
+                return;
+            var equipe = r.Escolhas.Where(x => x.Subopcao != null).Sum(x => movimento.EquipeDaAlternativa(x.Opcao, x.Subopcao.Value));
+            if (equipe != 0)
+                MudarEquipeDaRolagem(e, equipe);
+        }
+
+        bool AlvoEhPj(RolagemDaMesa r) => r.Alvo != null && personagens.Buscar(r.Alvo)?.Papel == Papel.Heroi;
 
         /// <summary>
         /// Confere a troca de golpes marcada pelo mestre. Contra NPC: a condição do alvo (uma que ele tem e ainda não
@@ -757,7 +812,20 @@ namespace TorreDeControle.Core.Salas
             var alvo = e.Rolagem.Alvo == null ? null : personagens.Buscar(e.Rolagem.Alvo);
             var alvoPj = alvo != null && alvo.Papel == Papel.Heroi;
             if (alvoPj)
+            {
                 gravada.AlvoGolpePoderoso = true;
+                // Contra PJ, a troca não dá condição; o "impressionar" deixa o MJ dar uma (opcional).
+                if (troca.CondicaoDoAlvo != null)
+                {
+                    if (!escolhas.Any(x => movimento.ReflectePercepcao(x.Opcao)))
+                        return "Condição no alvo PJ só com \"impressionar, surpreender ou assustar\" escolhido.";
+                    if (!Condicoes.Todas.Contains(troca.CondicaoDoAlvo))
+                        return "Condição desconhecida.";
+                    if (alvo.CondicoesMarcadas.Contains(troca.CondicaoDoAlvo))
+                        return $"{alvo.NomeExibicao} já está com {Condicoes.Nome(troca.CondicaoDoAlvo)} marcada.";
+                    gravada.CondicaoDoAlvo = troca.CondicaoDoAlvo;
+                }
+            }
             else if (alvo != null)
             {
                 var marcadas = CondicoesMarcadasDoVilao(alvo.Id);
@@ -811,7 +879,7 @@ namespace TorreDeControle.Core.Salas
         /// O texto da rolagem no log: a linha do dado ("rolou 2d6+1: 4 + 5 + 1 = 10 (10+)"), uma linha por
         /// intervenção e o resultado final quando houve intervenção.
         /// </summary>
-        string TextoDaRolagem(RolagemDaMesa r)
+        string TextoDaRolagem(RolagemDaMesa r, Evento dono = null)
         {
             static string Sinal(int n) => n > 0 ? $"+{n}" : n < 0 ? $"−{-n}" : "±0";
             var sinal = r.Mod == 0 ? string.Empty : r.Mod > 0 ? $"+{r.Mod}" : r.Mod.ToString();
@@ -842,14 +910,19 @@ namespace TorreDeControle.Core.Salas
                 {
                     var alvo = r.Alvo == null ? null : personagens.Buscar(r.Alvo)?.NomeExibicao ?? r.Alvo;
                     var doAlvo = alvo == null ? null
-                        : r.Troca.AlvoGolpePoderoso ? $"{alvo} toma golpe poderoso"
+                        : r.Troca.AlvoGolpePoderoso ? $"{alvo} toma golpe poderoso" +
+                          (r.Troca.CondicaoDoAlvo != null ? $" e marca {Condicoes.Nome(r.Troca.CondicaoDoAlvo)}" : "")
                         : r.Troca.CondicaoDoAlvo != null ? $"{alvo} marca {Condicoes.Nome(r.Troca.CondicaoDoAlvo)}"
                         : $"{alvo} sem condição livre";
-                    var retorno = r.Troca.Retorno == TrocaDeGolpes.RetornoIleso ? "retorno: ileso"
-                        : r.Troca.Retorno == TrocaDeGolpes.RetornoGolpePoderoso ? "retorno: golpe poderoso"
-                        : $"retorno: marca {Condicoes.Nome(r.Troca.CondicaoDeQuemRolou)}";
+                    // Com o nome de quem rolou: "retorno: ileso" sozinho parecia falar do alvo.
+                    var quemRolou = dono?.Personagem == null ? "herói genérico" : personagens.Buscar(dono.Personagem)?.NomeExibicao ?? "quem rolou";
+                    var retorno = r.Troca.Retorno == TrocaDeGolpes.RetornoIleso ? $"{quemRolou} não recebe retorno (resistiu)"
+                        : r.Troca.Retorno == TrocaDeGolpes.RetornoGolpePoderoso ? $"{quemRolou} toma golpe poderoso (role à parte)"
+                        : $"{quemRolou} marca {Condicoes.Nome(r.Troca.CondicaoDeQuemRolou)}";
                     texto += "\n  troca de golpes: " + (doAlvo == null ? retorno : doAlvo + " · " + retorno);
                 }
+                if (dono != null && dono.Mudancas.Any(m => m.Campo == CampoPotencial))
+                    texto += "\n  falha: +1 potencial";
             }
             return texto;
         }

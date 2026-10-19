@@ -354,6 +354,8 @@ namespace TorreDeControle.UI
                 TokenDeBonus(filaB, bonus);
             var dar = Estilo.BotaoContorno(filaB, "+", 30, Estilo.TextoSuave, () => AbrirBonus(p.Id));
             dar.gameObject.AddComponent<Dica>().Configurar("Dar um bônus (adiante, constante, controle).");
+            var mover = Estilo.BotaoContorno(filaB, "M", 30, Estilo.TextoSuave, () => AbrirRolagem(p.Id));
+            mover.gameObject.AddComponent<Dica>().Configurar("Rolar movimento já com " + p.NomeExibicao + " (e o vilão, se houver um só em cena).");
             Estilo.Rect("Vao", filaB).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
         }
 
@@ -797,7 +799,13 @@ namespace TorreDeControle.UI
                 if (mesa.Pendente(e))
                 {
                     var acoes = Estilo.Fila(lista, 36, 6);
-                    var intervir = Elastico(Estilo.BotaoContorno(acoes, "Intervir", 0, Estilo.Dourado, () => AbrirIntervencao(evento)));
+                    var intervir = Elastico(Estilo.BotaoContorno(acoes, "Intervir", 0, Estilo.Dourado, () =>
+                    {
+                        if (evento.Rolagem.Movimento != null)
+                            AbrirRolagemDoEvento(evento, intervir: true);
+                        else
+                            AbrirIntervencao(evento);
+                    }));
                     Encolher(intervir);
                     intervir.gameObject.AddComponent<Dica>().Configurar("Alguém mexe no resultado depois do dado: ajuda da pilha, egoísta, renúncia de Influência, Defender, carta custom.");
                     // Rolagem de movimento: o Aceitar abre o painel (as escolhas do resultado são marcadas lá).
@@ -982,14 +990,28 @@ namespace TorreDeControle.UI
         readonly List<EscolhaDaRolagem> rolEscolhas = new List<EscolhaDaRolagem>();
         string rolCondAlvo, rolRetorno, rolCondRolou; // a troca de golpes, como o mestre marca
 
+        bool rolIntervindo; // a seção 2 está aberta: o total ainda pode mudar, as opções esperam
+        TMP_InputField campoModDefensorDoPainel;
+
         void LimparEscolhas()
         {
             rolEscolhas.Clear();
             rolCondAlvo = rolRetorno = rolCondRolou = null;
+            rolIntervindo = false;
+        }
+
+        void ComecarIntervencao()
+        {
+            LimparEscolhas(); // as escolhas eram do total de antes
+            rolIntervindo = true;
+            intervOrigem = 0;
+            intervMod = Origens[0].mod;
+            intervQuem = null;
+            intervRolagem = null;
         }
 
         /// <summary>Reabre o painel de uma rolagem de movimento pendente no log, para escolher e aceitar.</summary>
-        void AbrirRolagemDoEvento(Evento e)
+        void AbrirRolagemDoEvento(Evento e, bool intervir = false)
         {
             basicos ??= Core.Regras.MovimentosBasicos.Carregar(new FonteDeRegrasResources());
             var indice = basicos.ComRotulo.ToList().FindIndex(m => m.Id == e.Rolagem.Movimento);
@@ -1003,15 +1025,26 @@ namespace TorreDeControle.UI
             rolAlvo = e.Rolagem.Alvo;
             rolEvento = e.Id;
             LimparEscolhas();
+            if (intervir)
+                ComecarIntervencao();
             DesenharRolagem();
         }
 
-        void AbrirRolagem()
+        void AbrirRolagem() => AbrirRolagem(null);
+
+        /// <summary>
+        /// Abre o painel de rolagem. Com <paramref name="heroi"/> (o "M" do assento), ela já vem como quem rola e,
+        /// com um vilão só em cena, ele já vem como contra quem.
+        /// </summary>
+        void AbrirRolagem(string heroi)
         {
             basicos ??= Core.Regras.MovimentosBasicos.Carregar(new FonteDeRegrasResources());
+            if (heroi != null)
+                rolQuem = heroi;
             if (rolQuem != null && NaMesa().All(h => h.Id != rolQuem))
                 rolQuem = null;
-            rolAlvo = null;
+            var viloes = mesa.EmCena();
+            rolAlvo = heroi != null && viloes.Count == 1 ? viloes[0].Id : null;
             rolEvento = null;
             LimparEscolhas();
             DesenharRolagem();
@@ -1043,14 +1076,10 @@ namespace TorreDeControle.UI
 
             // 1 · rolamento simples
             Estilo.Rotulo(esquerda, "1 · ROLAMENTO SIMPLES", 22, Estilo.Azul, FontStyles.Bold).characterSpacing = 3;
-            var sec1 = Estilo.Fila(esquerda, 330, 20);
-            Estilo.Moldura(sec1.gameObject, Estilo.Campo, Estilo.BordaApagada);
-            sec1.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(24, 24, 20, 20);
-            sec1.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.UpperLeft;
+            // Os campos em cima, com a largura toda (as listas espremidas ficavam ilegíveis); o resultado embaixo.
+            var sec1 = Coluna(esquerda, 22, true, 12);
             var campos = Coluna(sec1, 0, false, 14);
-            campos.GetComponent<LayoutElement>().flexibleWidth = 1;
-            var resultado = Coluna(sec1, 0, false, 12);
-            resultado.GetComponent<LayoutElement>().preferredWidth = 300;
+            var resultado = Coluna(sec1, 0, false, 8);
 
             var opcoesQuem = new List<(string, string)> { (QuemGenerico, HeroiGenerico) };
             opcoesQuem.AddRange(NaMesa().Select(h => (h.Id, h.NomeExibicao)));
@@ -1068,20 +1097,30 @@ namespace TorreDeControle.UI
                 rolAlvo = id == AlvoNinguem ? null : id;
                 DesenharRolagem();
             }, !rolou);
-            var opcoesMov = movimentos.Select(m => (m.Id,
-                $"{m.Nome} ({Rotulos.Nome(m.Rotulo)} {Sinal(quem == null ? 0 : personagens.ValorDeJogo(quem, Mesa.CampoRotulo(m.Rotulo)))})")).ToList();
+            var opcoesMov = movimentos.Select(m => (m.Id, m.Nome)).ToList();
             CampoDaRolagem(campos, "MOVIMENTO", opcoesMov, movimento.Id, id =>
             {
                 rolMovimento = Math.Max(0, movimentos.ToList().FindIndex(m => m.Id == id));
                 DesenharRolagem();
             }, !rolou);
+            // O Rótulo que a rolagem soma, ao lado do botão (na lista ele espremia o nome do movimento).
             var filaRolar = Estilo.Fila(campos, 56, 12);
-            Estilo.Rect("Vao", filaRolar).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            var valorDoRotulo = quem == null ? 0 : personagens.ValorDeJogo(quem, Mesa.CampoRotulo(movimento.Rotulo));
+            var rotuloDaRolagem = Estilo.Rotulo(filaRolar,
+                $"2d6 + {Rotulos.Nome(movimento.Rotulo)} <b>{Sinal(valorDoRotulo)}</b>" + (quem == null ? "  <size=80%>(herói genérico)</size>" : ""),
+                22, Estilo.Dourado);
+            Estilo.ColunaElastica(rotuloDaRolagem);
             if (rolou)
                 Estilo.BotaoContorno(filaRolar, "Já rolou", 240, Estilo.TextoApagado, () => { });
             else
                 Estilo.BotaoPrincipal(filaRolar, "Rolar 2d6", 240, async () =>
                 {
+                    // Recusa antes de jogar os dados (e não depois, com os dados já na mesa).
+                    if (movimento.PedeAlvo && rolAlvo == null)
+                    {
+                        Mostrar(Resultado.Falha(Mesa.MensagemPedeAlvo(movimento)));
+                        return;
+                    }
                     // A caixa fecha enquanto os dados rolam (para vê-los) e volta com o resultado.
                     var (rolador, mov, alvo) = (rolQuem, movimento, rolAlvo);
                     FecharBatalha();
@@ -1116,18 +1155,18 @@ namespace TorreDeControle.UI
             Marca(faixas, "6−", total <= 6, Estilo.Erro);
             if (rolou)
             {
+                var somaIntervencoes = evento.Rolagem.Intervencoes.Sum(i => i.Mod);
                 var dados = Estilo.Rotulo(resultado, evento.Rolagem.Dados[0] + " + " + evento.Rolagem.Dados[1] +
-                    (evento.Rolagem.Mod == 0 ? "" : $" {Sinal(evento.Rolagem.Mod)} ({Rotulos.Nome(evento.Rolagem.Rotulo)})"), 18, Estilo.TextoSuave);
+                    (evento.Rolagem.Mod == 0 ? "" : $" {Sinal(evento.Rolagem.Mod)} ({Rotulos.Nome(evento.Rolagem.Rotulo)})") +
+                    (evento.Rolagem.Intervencoes.Count == 0 ? "" : $" {Sinal(somaIntervencoes)} (intervenção)"), 18, Estilo.TextoSuave);
                 dados.textWrappingMode = TextWrappingModes.Normal;
             }
 
-            // 2 · intervenção (por fazer: pilha de Equipe, bônus/malus, nova rolagem)
+            // 2 · intervenção: depois do dado, antes das opções (o total ainda pode mudar)
             Estilo.Rotulo(esquerda, "2 · INTERVENÇÃO (se houver)", 22, Estilo.Dourado, FontStyles.Bold).characterSpacing = 3;
             var sec2 = Coluna(esquerda, 20, true, 8);
-            sec2.GetComponent<LayoutElement>().minHeight = 110;
-            Estilo.Rotulo(sec2, "Bônus/malus ou nova rolagem", 20, Estilo.Texto, FontStyles.Bold);
-            Estilo.Rotulo(sec2, "Em construção. Por enquanto, a rolagem fica pendente no log e o Intervir de lá funciona.", 16,
-                Estilo.TextoApagado, FontStyles.Italic).textWrappingMode = TextWrappingModes.Normal;
+            sec2.GetComponent<LayoutElement>().flexibleHeight = 1;
+            SecaoDeIntervencao(sec2, evento, rolou);
 
             // Efeito esperado: as linhas que não valem para o resultado ficam apagadas.
             Estilo.Rotulo(direita, "EFEITO ESPERADO", 24, Estilo.Texto, FontStyles.Bold).gameObject.AddComponent<LayoutElement>().minHeight = 36;
@@ -1136,7 +1175,7 @@ namespace TorreDeControle.UI
             var faixaDoResultado = !total.HasValue ? Core.Regras.MovimentosBasicos.Faixa.Falha
                 : total >= 10 ? Core.Regras.MovimentosBasicos.Faixa.Forte
                 : total >= 7 ? Core.Regras.MovimentosBasicos.Faixa.Parcial : Core.Regras.MovimentosBasicos.Faixa.Falha;
-            var opcoes = rolou ? movimento.OpcoesNo(faixaDoResultado) : new List<Core.Regras.MovimentosBasicos.OpcaoDeEscolha>();
+            var opcoes = rolou && !rolIntervindo ? movimento.OpcoesNo(faixaDoResultado) : new List<Core.Regras.MovimentosBasicos.OpcaoDeEscolha>();
             var pede = Math.Min(rolou ? movimento.EscolhasNo(faixaDoResultado) : 0, opcoes.Count);
             var textosDasOpcoes = new HashSet<string>(pede > 0 ? opcoes.Select(o => o.Texto) : Enumerable.Empty<string>());
             foreach (var linha in movimento.EfeitoEsperado())
@@ -1165,7 +1204,11 @@ namespace TorreDeControle.UI
                     UnityEngine.Events.UnityAction alternar = () =>
                     {
                         if (marcada != null)
+                        {
                             rolEscolhas.Remove(marcada);
+                            if (movimento.ReflectePercepcao(opcao.Id) && personagens.Buscar(rolAlvo ?? "")?.Papel == Papel.Heroi)
+                                rolCondAlvo = null;
+                        }
                         else if (rolEscolhas.Count < pede)
                             rolEscolhas.Add(new EscolhaDaRolagem { Opcao = opcao.Id });
                         else if (pede == 1)
@@ -1194,8 +1237,11 @@ namespace TorreDeControle.UI
                         continue;
                     var filaAlt = Estilo.Fila(direita, 34, 6);
                     Estilo.Rect("Recuo", filaAlt).gameObject.AddComponent<LayoutElement>().preferredWidth = 20;
+                    var contraPj = personagens.Buscar(rolAlvo ?? "")?.Papel == Papel.Heroi;
                     for (var k = 0; k < opcao.Alternativas.Count; k++)
                     {
+                        if (contraPj && !movimento.AlternativaValeContraPj(opcao.Id, k))
+                            continue; // contra PJ, nada de encher a pilha
                         var alternativa = k;
                         var ba = Escolha(filaAlt, opcao.Alternativas[k], marcada.Subopcao == k, () =>
                         {
@@ -1206,18 +1252,38 @@ namespace TorreDeControle.UI
                     }
                 }
             }
-            if (rolou && total >= 7 && movimento.TrocaGolpes)
+            var alvoDaRolagem = rolAlvo == null ? null : personagens.Buscar(rolAlvo);
+            if (rolou && total <= 6 && !rolIntervindo && alvoDaRolagem?.Papel == Papel.Heroi)
+                Estilo.Rotulo(direita, "PJ contra PJ: o MJ pode virar o movimento contra quem falhou (o alvo ganha o efeito como se tivesse tirado 10+).",
+                    16, Estilo.Dourado, FontStyles.Italic).textWrappingMode = TextWrappingModes.Normal;
+            if (rolIntervindo)
+                Estilo.Rotulo(direita, "Intervenção aberta: o total ainda pode mudar. Termine a intervenção para marcar as opções e a troca.",
+                    16, Estilo.Dourado, FontStyles.Italic).textWrappingMode = TextWrappingModes.Normal;
+            else if (rolou && total >= 7 && movimento.TrocaGolpes)
                 CartoesDaTroca(direita, movimento, quem);
             Estilo.Rect("Vao", direita).gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
             var acoes = Estilo.Fila(direita, 52, 12);
             var intervir = Estilo.BotaoContorno(acoes, "Intervir", 0, Estilo.Dourado, () =>
-                Mostrar(Resultado.Falha("A intervenção desta caixa ainda está em construção: use o Intervir da rolagem no log.")));
+            {
+                if (!rolou)
+                {
+                    Mostrar(Resultado.Falha("Role os dados antes: a intervenção vem depois do dado."));
+                    return;
+                }
+                ComecarIntervencao();
+                DesenharRolagem();
+            });
             intervir.GetComponent<LayoutElement>().flexibleWidth = 1;
             var aceitar = Estilo.BotaoPrincipal(acoes, "Aceitar", 0, () =>
             {
                 if (!rolou)
                 {
                     Mostrar(Resultado.Falha("Role os dados antes de aceitar."));
+                    return;
+                }
+                if (rolIntervindo)
+                {
+                    Mostrar(Resultado.Falha("Termine a intervenção antes de aceitar."));
                     return;
                 }
                 var r = mesa.AceitarRolagem(evento.Id, movimento, rolEscolhas,
@@ -1238,6 +1304,136 @@ namespace TorreDeControle.UI
         }
 
         /// <summary>
+        /// A seção 2 do painel: as intervenções já feitas (cada uma com o que mudou) e, aberta pelo Intervir, a linha
+        /// para acrescentar outra (de onde, quem, modificador; Defender rola). O total do painel acompanha na hora.
+        /// "Terminar intervenção" fecha e libera as opções.
+        /// </summary>
+        void SecaoDeIntervencao(Transform sec, Evento evento, bool rolou)
+        {
+            if (!rolou)
+            {
+                Estilo.Rotulo(sec, "Depois do dado: ajuda da pilha, egoísta, renúncia de Influência, Defender, carta custom.", 16,
+                    Estilo.TextoApagado, FontStyles.Italic).textWrappingMode = TextWrappingModes.Normal;
+                return;
+            }
+            var r = evento.Rolagem;
+            if (r.Intervencoes.Count == 0)
+                Estilo.Rotulo(sec, rolIntervindo ? "Quem intervém?" : "Ninguém interveio.", 17, Estilo.TextoApagado, FontStyles.Italic);
+            for (var k = 0; k < r.Intervencoes.Count; k++)
+            {
+                var indice = k;
+                var i = r.Intervencoes[k];
+                var fila = Estilo.Fila(sec, 36, 8);
+                var nome = personagens.Buscar(i.Quem)?.NomeExibicao ?? i.Quem;
+                var sinal = i.Mod > 0 ? $"+{i.Mod}" : i.Mod < 0 ? $"−{-i.Mod}" : "±0";
+                var t = Estilo.Rotulo(fila, $"{nome} · {i.DeOnde}: <b>{sinal}</b>" +
+                    (i.CustoEquipe > 0 ? $"  (−{i.CustoEquipe} Equipe)" : "") + (i.Rolagem != null ? $"  [{i.Rolagem}]" : ""), 18, Estilo.Texto);
+                Estilo.ColunaElastica(t);
+                if (rolIntervindo)
+                    Estilo.BotaoContorno(fila, "Retirar", 130, Estilo.Erro, () =>
+                    {
+                        var res = mesa.RetirarIntervencao(evento.Id, indice);
+                        Redesenhar();
+                        Mostrar(res);
+                        DesenharRolagem();
+                    });
+            }
+            if (!rolIntervindo)
+                return;
+
+            var origem = Origens[intervOrigem];
+            var filaO = Estilo.Fila(sec, 40, 6);
+            for (var k = 0; k < Origens.Length; k++)
+            {
+                var alvo = k;
+                Escolha(filaO, Origens[k].nome, k == intervOrigem, () =>
+                {
+                    intervOrigem = alvo;
+                    intervMod = Origens[alvo].mod;
+                    intervRolagem = null;
+                    DesenharRolagem();
+                }).gameObject.AddComponent<Dica>().Configurar(Origens[k].dica);
+            }
+            var filaP = Estilo.Fila(sec, 40, 6);
+            foreach (var p in NaMesa().Concat(mesa.EmCena()))
+            {
+                var id = p.Id;
+                Escolha(filaP, p.NomeExibicao, id == intervQuem, () => { intervQuem = id; DesenharRolagem(); });
+            }
+            var filaM = Estilo.Fila(sec, 40, 6);
+            Estilo.Rotulo(filaM, "mod", 17, Estilo.TextoSuave).gameObject.AddComponent<LayoutElement>().preferredWidth = 50;
+            for (var m = Mesa.IntervencaoMinima; m <= Mesa.IntervencaoMaxima; m++)
+            {
+                var valor = m;
+                Escolha(filaM, m > 0 ? $"+{m}" : m < 0 ? $"−{-m}" : "0", m == intervMod, () => { intervMod = valor; DesenharRolagem(); });
+            }
+            if (origem.rola)
+            {
+                var filaR = Estilo.Fila(sec, 40, 8);
+                var modAnterior = campoModDefensorDoPainel != null ? campoModDefensorDoPainel.text : string.Empty;
+                campoModDefensorDoPainel = Estilo.CampoTexto(filaR, "mod de quem defende");
+                campoModDefensorDoPainel.text = modAnterior;
+                campoModDefensorDoPainel.gameObject.AddComponent<LayoutElement>().preferredWidth = 220;
+                Estilo.BotaoContorno(filaR, "Rolar 2d6", 160, Estilo.Dourado, async () =>
+                {
+                    int.TryParse((campoModDefensorDoPainel.text ?? string.Empty).Replace("+", string.Empty).Trim(), out var md);
+                    md = Math.Max(Mesa.TetoMinimo, Math.Min(Mesa.TetoMaximo, md));
+                    FecharBatalha(); // os dados aparecem na mesa
+                    var d = await JogarDados();
+                    if (this == null || mesa == null)
+                        return;
+                    if (d != null)
+                    {
+                        var (a, b2) = d.Value;
+                        var soma = a + b2 + md;
+                        intervRolagem = $"{a} + {b2}{(md == 0 ? "" : $" {(md > 0 ? "+" : "−")} {Math.Abs(md)}")} = {soma} ({RolagemDaMesa.Faixa(soma)})";
+                    }
+                    else
+                        Mostrar(Resultado.Falha("Os dados ainda estão rolando."));
+                    DesenharRolagem();
+                });
+                var tr = Estilo.Rotulo(filaR, intervRolagem == null ? "ainda não rolou" : "defesa: " + intervRolagem, 16,
+                    intervRolagem == null ? Estilo.TextoApagado : Estilo.Texto);
+                Estilo.ColunaElastica(tr);
+            }
+            else
+                campoModDefensorDoPainel = null;
+
+            var fim = Estilo.Fila(sec, 46, 10);
+            Estilo.BotaoPrincipal(fim, "Adicionar", 200, () =>
+            {
+                if (origem.rola && intervRolagem == null)
+                {
+                    Mostrar(Resultado.Falha("Role a defesa antes (quem defende)."));
+                    return;
+                }
+                var res = mesa.Intervir(evento.Id, new Intervencao
+                {
+                    Quem = intervQuem,
+                    DeOnde = origem.nome,
+                    Mod = intervMod,
+                    CustoEquipe = origem.custo,
+                    Rolagem = origem.rola ? intervRolagem : null,
+                });
+                if (!res.Ok)
+                {
+                    Mostrar(res);
+                    return;
+                }
+                intervQuem = null;
+                intervRolagem = null;
+                Redesenhar(); // a pilha e o log mudam
+                DesenharRolagem();
+            });
+            Estilo.Rect("Vao", fim).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            Estilo.BotaoContorno(fim, "Terminar intervenção", 280, Estilo.Azul, () =>
+            {
+                rolIntervindo = false;
+                DesenharRolagem();
+            });
+        }
+
+        /// <summary>
         /// Os dois cartões da troca de golpes (livro p.57): o alvo NPC marca 1 condição (com "impressionar", uma que
         /// mostre a nova percepção); quem rolou recebe o retorno que o MJ escolher, condição OU golpe poderoso, ou
         /// sai ileso com "resistir". Contra PJ, os dois tomam golpe poderoso.
@@ -1253,7 +1449,29 @@ namespace TorreDeControle.UI
             {
                 var c = CartaoDaTroca(pai, alvo, alvo.NomeExibicao);
                 if (alvo.Papel == Papel.Heroi)
+                {
                     LinhaDoCartao(c, "toma um golpe poderoso", Estilo.Dourado);
+                    if (percepcao)
+                    {
+                        // p.58: contra PJ, o MJ pode dar uma condição pela nova percepção (opcional; clicar de novo tira).
+                        LinhaDoCartao(c, "impressionar: o MJ pode dar uma condição pela nova percepção (opcional)", Estilo.TextoSuave);
+                        var f = Estilo.Fila(c, 32, 6);
+                        foreach (var cond in Condicoes.Todas.Where(x => !alvo.CondicoesMarcadas.Contains(x)))
+                        {
+                            var id = cond;
+                            UnityEngine.Events.UnityAction alternar = () =>
+                            {
+                                rolCondAlvo = rolCondAlvo == id ? null : id;
+                                DesenharRolagem();
+                            };
+                            var b = rolCondAlvo == id
+                                ? Estilo.BotaoPrincipal(f, Condicoes.Nome(cond), 0, alternar)
+                                : Estilo.BotaoContorno(f, Condicoes.Nome(cond), 0, Estilo.Dourado, alternar);
+                            b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                            Encolher(b);
+                        }
+                    }
+                }
                 else
                 {
                     var marcadas = mesa.CondicoesMarcadasDoVilao(alvo.Id);
@@ -1277,7 +1495,7 @@ namespace TorreDeControle.UI
 
             var cq = CartaoDaTroca(pai, quem, quem?.NomeExibicao ?? HeroiGenerico);
             if (ileso)
-                LinhaDoCartao(cq, "ILESO: escolheu sair ileso da troca", Estilo.Azul);
+                LinhaDoCartao(cq, "SEM RETORNO: escolheu resistir ou evitar os golpes", Estilo.Azul);
             else if (alvo != null && alvo.Papel == Papel.Heroi)
                 LinhaDoCartao(cq, "toma um golpe poderoso", Estilo.Dourado);
             else
@@ -1385,8 +1603,8 @@ namespace TorreDeControle.UI
         /// </summary>
         static readonly (string nome, int mod, int custo, bool rola, string dica)[] Origens =
         {
-            ("ajuda (pilha)", 1, 1, false, "Um colega que alcança a cena gasta 1 da pilha: +1 (o Farol dá +2)."),
-            ("egoísta (pilha)", 1, 1, false, "Gasta 1 da pilha e a mesa confirma a mudança de Rótulos (faça na ficha). O resultado só sobe se o Rótulo rolado subir: ajuste o modificador."),
+            (Intervencao.DaPilha, 1, 1, false, "Gasta 1 da pilha. Outra pessoa que alcança a cena: ajuda, +1 (o Farol dá +2). " +
+                "Quem rola: egoísta (a mesa confirma a mudança de Rótulos, feita na ficha; o resultado só sobe se o Rótulo rolado subir: ajuste o modificador)."),
             ("renúncia de Influência", 1, 0, false, "Quem rola abre mão da Influência sobre o alvo: +1. Quem tem Influência sobre quem rola abre mão dela: −2."),
             ("defender", -2, 0, true, "PvP: quem defende rola; pelo resultado, escolha o efeito (−2 antes de o resultado valer)."),
             ("outro", 1, 0, false, "Carta custom ou carta do mestre (fim do cap. 10): de −2 a +2."),

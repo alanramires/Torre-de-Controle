@@ -10,6 +10,8 @@
       "requisito": "uma ameaça de verdade: quem não é páreo para a personagem (capangas) não aciona o movimento, ela simplesmente vence",
       "rolagem": { "rotulo": "perigoso" },
       "alvo": "pnj",
+      "pede_alvo": true,
+      "_pede_alvo": "Sem oponente não é Enfrentar: superar obstáculo, remodelar o ambiente ou ampliar os sentidos é liberar os poderes (livro p.57, p.60).",
       "sucesso_base": [{
         "op": "trocar_golpes",
         "texto": "Vocês trocam golpes: a ameaça marca uma condição (o MJ escolhe qual) e o MJ decide o seu retorno: uma condição ou tomar um golpe poderoso.",
@@ -24,12 +26,14 @@
       "parcial": { "op": "escolher", "n": 1, "lista": "opcoes" },
       "leitura": "Só 'resistir' protege quem rolou; as outras são ganhos. No 10+: resistir e um ganho, ou dois ganhos e aguentar o retorno. No 7-9: proteger-se, ou ganhar algo e apanhar.",
       "opcoes": [
-        { "id": "resistir", "texto": "Sair ileso da troca", "efeitos": [{ "op": "anular_retorno_da_troca" }],
+        { "id": "resistir", "texto": "Resistir ou evitar os golpes", "efeitos": [{ "op": "anular_retorno_da_troca" }],
           "nota": "a única opção que protege quem rolou: sem condição e sem golpe poderoso. A condição da ameaça continua." },
         { "id": "tirar", "texto": "Arrancar algo do oponente (objeto, posição, equilíbrio, alguém que ele segura)", "efeitos": [{ "op": "narrativo" }],
           "nota": "segue a ficção: sem o que perdeu, a ameaça não usa o que dependia disso (ex.: movimento de vilão que usa a arma tirada). Não cancela o retorno." },
         { "id": "oportunidade", "texto": "Abrir uma chance para os aliados", "efeitos": [{ "op": "mj_decide", "entre": [[{ "op": "narrativo", "texto": "um aliado ganha a chance" }], [{ "op": "equipe", "delta": 1 }]] }],
-          "nota": "inicia manobras de Equipe. A chance é de um aliado agir (o MJ diz qual das duas vale); quem rolou não encerra a luta sozinho com ela. Não cancela o retorno." },
+          "nota": "inicia manobras de Equipe. A chance é de um aliado agir (o MJ diz qual das duas vale); quem rolou não encerra a luta sozinho com ela. Não cancela o retorno.",
+          "contra_pj": "sem_equipe",
+          "_decisao": "Alan, 2026-10-18: contra PJ, a oportunidade não dá +1 Equipe (brigar com colega não enche a pilha); a chance a um aliado continua." },
         { "id": "impressionar", "texto": "Impressionar, surpreender ou assustar o oponente", "efeitos": [
             { "op": "mj_decide", "entre": [[{ "op": "narrativo", "texto": "impressionar" }], [{ "op": "narrativo", "texto": "surpreender" }], [{ "op": "narrativo", "texto": "assustar" }]] },
             { "op": "condicao_da_troca_reflete_percepcao", "contra": "pnj" },

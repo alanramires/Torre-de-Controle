@@ -421,8 +421,12 @@ namespace TorreDeControle.Tests
             Assert.That(e.Descricao, Does.StartWith($"{enfrentar.Nome} → {colega.NomeExibicao} (Perigoso "));
             Assert.That(mesa.Pendente(e), Is.True, "fica pendente: Intervir / Aceitar");
 
-            Assert.That(mesa.RolarMovimento(null, enfrentar, null, 6, 6, null).Ok, Is.True);
-            Assert.That(mesa.Eventos.Last().Descricao, Is.EqualTo($"{enfrentar.Nome} (Perigoso +0): 6 + 6 = 12 (10+)"));
+            Assert.That(enfrentar.PedeAlvo, Is.True);
+            Assert.That(mesa.RolarMovimento(null, enfrentar, null, 6, 6, null).Ok, Is.False, "Enfrentar contra o nada é liberar os poderes");
+            Assert.That(mesa.RolarMovimento(null, enfrentar, colega.Id, 6, 6, null).Ok, Is.True);
+            Assert.That(mesa.Eventos.Last().Descricao, Is.EqualTo($"{enfrentar.Nome} → {colega.NomeExibicao} (Perigoso +0): 6 + 6 = 12 (10+)"));
+            var liberar = basicos.ComRotulo.First(m => m.Id == "basico/liberar-poderes");
+            Assert.That(mesa.RolarMovimento(null, liberar, null, 3, 3, null).Ok, Is.True, "liberar os poderes não pede alvo");
             Assert.That(mesa.RolarMovimento(heroi.Id, enfrentar, heroi.Id, 1, 1, null).Ok, Is.False, "alvo não é quem rola");
         }
 
@@ -435,7 +439,7 @@ namespace TorreDeControle.Tests
             Assert.That(sucesso[0].Texto, Is.EqualTo("Num sucesso (7+):"));
             Assert.That(sucesso[1].Texto, Does.StartWith("Vocês trocam golpes"));
             Assert.That(sucesso.Any(l => l.Texto == "Num 10+, escolha 2. Num 7–9, escolha 1:"), Is.True);
-            Assert.That(sucesso.Count(l => l.Nivel == 1 && l.Texto.StartsWith("Sair ileso")), Is.EqualTo(1), "a lista aparece uma vez");
+            Assert.That(sucesso.Count(l => l.Nivel == 1 && l.Texto.StartsWith("Resistir ou evitar")), Is.EqualTo(1), "a lista aparece uma vez");
             Assert.That(linhas.Last().Texto, Is.EqualTo("o MJ faz um movimento"), "falha padrão");
             Assert.That(TorreDeControle.Core.Regras.MovimentosBasicos.Vale(TorreDeControle.Core.Regras.MovimentosBasicos.Faixa.Sucesso, 7), Is.True);
             Assert.That(TorreDeControle.Core.Regras.MovimentosBasicos.Vale(TorreDeControle.Core.Regras.MovimentosBasicos.Faixa.Forte, 9), Is.False);
@@ -457,7 +461,8 @@ namespace TorreDeControle.Tests
             Assert.That(opcoes.First(o => o.Id == "impressionar").Alternativas, Is.EqualTo(new[] { "impressionar", "surpreender", "assustar" }),
                 "o MJ escolhe qual das três");
 
-            mesa.RolarMovimento(null, enfrentar, null, 6, 6, null); // 12: sucesso total
+            var alvo = Colega(); // o Enfrentar pede contra quem
+            mesa.RolarMovimento(null, enfrentar, alvo.Id, 6, 6, null); // 12: sucesso total
             var e = mesa.Eventos.Last();
             Assert.That(mesa.AceitarRolagem(e.Id, enfrentar, new[] { new EscolhaDaRolagem { Opcao = "resistir" } }).Ok, Is.False, "10+ escolhe 2");
             Assert.That(mesa.AceitarRolagem(e.Id, enfrentar, new[]
@@ -466,23 +471,23 @@ namespace TorreDeControle.Tests
             }).Ok, Is.False, "a oportunidade pede a alternativa");
             Assert.That(mesa.AceitarRolagem(e.Id, enfrentar, new[]
             {
-                new EscolhaDaRolagem { Opcao = "resistir" }, new EscolhaDaRolagem { Opcao = "oportunidade", Subopcao = 1 },
-            }).Ok, Is.True);
+                new EscolhaDaRolagem { Opcao = "resistir" }, new EscolhaDaRolagem { Opcao = "oportunidade", Subopcao = 0 },
+            }).Ok, Is.True, "contra PJ, a chance a um aliado (o +1 Equipe não vale)");
             var r = e.Rolagem;
             Assert.That(r.Resultado, Is.EqualTo(RolagemDaMesa.ResultadoSucesso));
             Assert.That(r.Tipo, Is.EqualTo(RolagemDaMesa.TipoTotal));
             Assert.That(r.Escolhas.Select(x => x.Opcao), Is.EqualTo(new[] { "resistir", "oportunidade" }));
-            Assert.That(r.Escolhas[1].Subtexto, Is.EqualTo("+1 Equipe"));
+            Assert.That(r.Escolhas[1].Subtexto, Is.EqualTo("um aliado ganha a chance"));
             Assert.That(r.AceitaEm, Is.Not.Null);
-            Assert.That(e.Descricao, Does.Contain("· sucesso total: Sair ileso da troca, Abrir uma chance para os aliados (+1 Equipe)").And.EndWith("troca de golpes: retorno: ileso"));
+            Assert.That(e.Descricao, Does.Contain("· sucesso total: Resistir ou evitar os golpes, Abrir uma chance para os aliados (um aliado ganha a chance)").And.EndWith("toma golpe poderoso · herói genérico não recebe retorno (resistiu)"));
 
-            mesa.RolarMovimento(null, enfrentar, null, 1, 2, null); // 3: falha, nada a escolher
+            mesa.RolarMovimento(null, enfrentar, alvo.Id, 1, 2, null); // 3: falha, nada a escolher
             var falha = mesa.Eventos.Last();
             Assert.That(mesa.AceitarRolagem(falha.Id, enfrentar, null).Ok, Is.True);
             Assert.That(falha.Rolagem.Resultado, Is.EqualTo(RolagemDaMesa.ResultadoFalha));
             Assert.That(falha.Rolagem.Tipo, Is.EqualTo(RolagemDaMesa.TipoFalha));
             var gravada = Mesa.Carregar(armazenamento, personagens, sala.Id).Eventos.First(x => x.Id == e.Id).Rolagem;
-            Assert.That(gravada.Escolhas[1].Subopcao, Is.EqualTo(1));
+            Assert.That(gravada.Escolhas[1].Subopcao, Is.EqualTo(0));
         }
 
         [Test]
@@ -516,7 +521,7 @@ namespace TorreDeControle.Tests
                 new TrocaDeGolpes { CondicaoDoAlvo = "irritado", Retorno = TrocaDeGolpes.RetornoGolpePoderoso }).Ok, Is.True);
             Assert.That(e.Rolagem.Troca.CondicaoDoAlvo, Is.EqualTo("irritado"));
             Assert.That(e.Rolagem.Troca.Retorno, Is.EqualTo(TrocaDeGolpes.RetornoGolpePoderoso));
-            Assert.That(e.Descricao, Does.EndWith("troca de golpes: Slade marca Irritado · retorno: golpe poderoso"));
+            Assert.That(e.Descricao, Does.EndWith("troca de golpes: Slade marca Irritado · herói genérico toma golpe poderoso (role à parte)"));
 
             // 7: resistir deixa quem rolou ileso; a condição do Slade continua.
             mesa.RolarMovimento(null, enfrentar, slade.Id, 3, 4, null);
@@ -530,6 +535,101 @@ namespace TorreDeControle.Tests
             var r3 = mesa.Eventos.Last();
             Assert.That(mesa.AceitarRolagem(r3.Id, enfrentar, null, null).Ok, Is.True);
             Assert.That(r3.Rolagem.Troca, Is.Null);
+        }
+
+        [Test]
+        public void Pilha_uma_vez_por_pessoa_e_quem_rola_gastando_e_egoista()
+        {
+            var colega = Colega();
+            mesa.MudarEquipe(3, null, null);
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var enfrentar = basicos.ComRotulo.First(m => m.Id == "basico/enfrentar");
+            mesa.RolarMovimento(heroi.Id, enfrentar, colega.Id, 2, 3, null);
+            var e = mesa.Eventos.Last();
+            Intervencao Pilha(string quem) => new Intervencao { Quem = quem, DeOnde = Intervencao.DaPilha, Mod = 1, CustoEquipe = 1 };
+
+            Assert.That(mesa.Intervir(e.Id, Pilha(colega.Id)).Ok, Is.True);
+            Assert.That(e.Rolagem.Intervencoes.Last().DeOnde, Is.EqualTo(Intervencao.AjudaDaPilha), "outra pessoa: ajuda");
+            Assert.That(mesa.Intervir(e.Id, Pilha(colega.Id)).Ok, Is.False, "1 ponto por pessoa por jogada");
+            Assert.That(mesa.Intervir(e.Id, Pilha(heroi.Id)).Ok, Is.True, "quem rola também gasta");
+            Assert.That(e.Rolagem.Intervencoes.Last().DeOnde, Is.EqualTo(Intervencao.EgoistaDaPilha), "quem rola: egoísta");
+            Assert.That(mesa.Intervir(e.Id, Pilha(heroi.Id)).Ok, Is.False, "o egoísta também é 1 por jogada");
+            Assert.That(mesa.Equipe, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Aceitar_aplica_condicoes_equipe_e_potencial_e_desfazer_volta_tudo()
+        {
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var enfrentar = basicos.ComRotulo.First(m => m.Id == "basico/enfrentar");
+            personagens.CriarNpc(sala.Id, "Slade", Maturidade.Adulto, Papel.Vilao);
+            var slade = personagens.NpcsDaSala(sala.Id).Single();
+            personagens.AlternarCondicaoDeVilao(slade.Id, "irritado");
+            mesa.AlternarEmCena(slade.Id);
+
+            // 7: oportunidade (+1 Equipe); Slade marca Irritado; o retorno é Assustado.
+            var perigoso = personagens.ValorDeJogo(heroi, Mesa.CampoRotulo(Rotulos.Perigoso));
+            mesa.RolarMovimento(heroi.Id, enfrentar, slade.Id, 4, 4 - perigoso, null); // total 8
+            var e = mesa.Eventos.Last();
+            Assert.That(e.Rolagem.Total, Is.EqualTo(8));
+            Assert.That(mesa.AceitarRolagem(e.Id, enfrentar, new[] { new EscolhaDaRolagem { Opcao = "oportunidade", Subopcao = 1 } },
+                new TrocaDeGolpes { CondicaoDoAlvo = "irritado", Retorno = TrocaDeGolpes.RetornoCondicao, CondicaoDeQuemRolou = "assustado" }).Ok, Is.True);
+            Assert.That(mesa.CondicoesMarcadasDoVilao(slade.Id), Does.Contain("irritado"));
+            Assert.That(heroi.CondicoesMarcadas, Does.Contain("assustado"));
+            Assert.That(mesa.Equipe, Is.EqualTo(1), "a oportunidade deu +1 Equipe");
+
+            Assert.That(mesa.Corrigir(e.Id, "rolagem errada").Ok, Is.True);
+            Assert.That(mesa.CondicoesMarcadasDoVilao(slade.Id), Is.Empty, "desfazer tira a condição do vilão");
+            Assert.That(heroi.CondicoesMarcadas, Does.Not.Contain("assustado"));
+            Assert.That(mesa.Equipe, Is.EqualTo(0));
+
+            // Falha: +1 potencial para quem rolou, sem troca.
+            var potencial = heroi.Potencial;
+            mesa.RolarMovimento(heroi.Id, enfrentar, slade.Id, 1, 1, null);
+            var falha = mesa.Eventos.Last();
+            Assert.That(mesa.AceitarRolagem(falha.Id, enfrentar, null, null).Ok, Is.True);
+            Assert.That(heroi.Potencial, Is.EqualTo(potencial + 1));
+            Assert.That(falha.Descricao, Does.EndWith("falha: +1 potencial"));
+        }
+
+        [Test]
+        public void Pvp_resistir_livra_quem_escolheu_e_impressionar_pode_dar_condicao_ao_alvo()
+        {
+            var colega = Colega();
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var enfrentar = basicos.ComRotulo.First(m => m.Id == "basico/enfrentar");
+            var perigoso = personagens.ValorDeJogo(heroi, Mesa.CampoRotulo(Rotulos.Perigoso));
+
+            // 9 (como Vértice): resistir; só o alvo toma golpe poderoso.
+            mesa.RolarMovimento(heroi.Id, enfrentar, colega.Id, 4, 5 - perigoso, null);
+            var e = mesa.Eventos.Last();
+            Assert.That(mesa.AceitarRolagem(e.Id, enfrentar, new[] { new EscolhaDaRolagem { Opcao = "resistir" } }, null).Ok, Is.True);
+            Assert.That(e.Rolagem.Troca.AlvoGolpePoderoso, Is.True);
+            Assert.That(e.Rolagem.Troca.Retorno, Is.EqualTo(TrocaDeGolpes.RetornoIleso));
+
+            // 9: condição no alvo PJ sem impressionar é recusada; com impressionar, entra na ficha dele.
+            mesa.RolarMovimento(heroi.Id, enfrentar, colega.Id, 4, 5 - perigoso, null);
+            var e2 = mesa.Eventos.Last();
+            Assert.That(mesa.AceitarRolagem(e2.Id, enfrentar, new[] { new EscolhaDaRolagem { Opcao = "tirar" } },
+                new TrocaDeGolpes { CondicaoDoAlvo = "inseguro" }).Ok, Is.False, "só com impressionar");
+            Assert.That(mesa.AceitarRolagem(e2.Id, enfrentar, new[] { new EscolhaDaRolagem { Opcao = "impressionar", Subopcao = 1 } },
+                new TrocaDeGolpes { CondicaoDoAlvo = "inseguro" }).Ok, Is.True);
+            Assert.That(colega.CondicoesMarcadas, Does.Contain("inseguro"));
+            Assert.That(heroi.CondicoesMarcadas, Does.Not.Contain("inseguro"), "a condição é do alvo, não de quem rolou");
+            Assert.That(e2.Rolagem.Troca.Retorno, Is.EqualTo(TrocaDeGolpes.RetornoGolpePoderoso), "sem resistir, quem rolou também toma");
+            Assert.That(e2.Descricao, Does.Contain($"{colega.NomeExibicao} toma golpe poderoso e marca Inseguro"));
+
+            // Contra PJ, a oportunidade não dá +1 Equipe; a chance a um aliado vale.
+            Assert.That(enfrentar.AlternativaValeContraPj("oportunidade", 1), Is.False);
+            Assert.That(enfrentar.AlternativaValeContraPj("oportunidade", 0), Is.True);
+            mesa.RolarMovimento(heroi.Id, enfrentar, colega.Id, 4, 5 - perigoso, null);
+            var e3 = mesa.Eventos.Last();
+            Assert.That(mesa.AceitarRolagem(e3.Id, enfrentar, new[] { new EscolhaDaRolagem { Opcao = "oportunidade", Subopcao = 1 } },
+                new TrocaDeGolpes()).Ok, Is.False, "nada de farmar a pilha em PvP");
+            var aceite = mesa.AceitarRolagem(e3.Id, enfrentar, new[] { new EscolhaDaRolagem { Opcao = "oportunidade", Subopcao = 0 } },
+                new TrocaDeGolpes());
+            Assert.That(aceite.Ok, Is.True, aceite.Erro);
+            Assert.That(mesa.Equipe, Is.EqualTo(0));
         }
 
         [Test]

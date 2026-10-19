@@ -107,7 +107,10 @@ namespace TorreDeControle.Core.Salas
     {
         public const string RetornoCondicao = "condicao", RetornoGolpePoderoso = "golpe_poderoso", RetornoIleso = "ileso";
 
-        /// <summary>A condição que o alvo NPC marca, ou null (alvo PJ, ou NPC já com todas marcadas).</summary>
+        /// <summary>
+        /// A condição que o alvo marca: no NPC, a da troca (obrigatória se ele tem alguma livre); no PJ, a opcional do
+        /// "impressionar" (o MJ pode dar uma pela nova percepção, p.58). Null se não houve.
+        /// </summary>
         [JsonProperty("condicao_do_alvo", NullValueHandling = NullValueHandling.Ignore)] public string CondicaoDoAlvo { get; set; }
         /// <summary>O alvo é PJ: toma um golpe poderoso.</summary>
         [JsonProperty("alvo_golpe_poderoso")] public bool AlvoGolpePoderoso { get; set; }
@@ -136,6 +139,10 @@ namespace TorreDeControle.Core.Salas
     /// </summary>
     public sealed class Intervencao
     {
+        public const string AjudaDaPilha = "ajuda (pilha)", EgoistaDaPilha = "egoísta (pilha)";
+        /// <summary>Gastar da pilha: a mesa grava como ajuda (outra pessoa) ou egoísta (quem rola).</summary>
+        public const string DaPilha = "pilha de Equipe";
+
         /// <summary>Id da personagem ou do NPC que intervém.</summary>
         [JsonProperty("quem")] public string Quem { get; set; }
         /// <summary>De onde veio: "ajuda (pilha)", "egoísta (pilha)", "renúncia de Influência", "defender"...</summary>
