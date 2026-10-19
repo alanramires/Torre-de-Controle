@@ -50,6 +50,19 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Pot_forca_o_potencial_para_o_valor()
+        {
+            var nome = heroi.NomeExibicao.Split(' ')[0];
+            Assert.That(console.Executar($"/pot {nome} 3").ok, Is.True);
+            Assert.That(heroi.Potencial, Is.EqualTo(3));
+            Assert.That(console.Executar($"/potencial {nome} 1").ok, Is.True, "também desce");
+            Assert.That(heroi.Potencial, Is.EqualTo(1));
+            Assert.That(console.Executar($"/pot {nome} -1").ok, Is.False);
+            Assert.That(console.Executar($"/potencial {nome} o soco foi absorvido").ok, Is.True, "com motivo: +1 como antes");
+            Assert.That(heroi.Potencial, Is.EqualTo(2));
+        }
+
+        [Test]
         public void Rolagem_com_os_dados_fisicos()
         {
             Assert.That(ConsoleDaMesa.EhRolagem("/rolar +1 avaliar"), Is.True);
@@ -93,6 +106,7 @@ namespace TorreDeControle.Tests
             Assert.That(heroi.CondicoesMarcadas, Has.Member(Condicoes.Inseguro));
             Assert.That(console.Executar("/nota a cena vai para o hospital").ok, Is.True);
             var (ok, _) = console.Executar("/clearlog");
+            Assert.That(console.Executar("/clear").ok, Is.True, "/clear é o mesmo que /clearlog");
             Assert.That(ok, Is.True);
             Assert.That(mesa.Visiveis, Is.Empty);
             Assert.That(mesa.Equipe, Is.EqualTo(2), "limpar o log não desfaz nada");

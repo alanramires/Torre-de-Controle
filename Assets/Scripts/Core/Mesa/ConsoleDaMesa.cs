@@ -31,6 +31,7 @@ namespace TorreDeControle.Core.Salas
         {
             ("/roll +2", "rola 2d6 + modificador (teto de −3 a +4) e anota no log"),
             ("/potencial Aurora o soco foi absorvido", "+1 potencial, com o motivo obrigatório"),
+            ("/pot Aurora 3", "debug: força o potencial para o valor (também /potencial Aurora 3; com uma heroína só na mesa, /pot 3)"),
             ("/pilha +2 questionário", "soma ou tira da pilha de Equipe (motivo opcional)"),
             ("/cond Aurora inseguro", "marca ou desmarca a condição de uma heroína ou de um vilão em cena"),
             ("/lembrete Ocaso abertura: Aurora cedeu terreno", "lembrete no cartão"),
@@ -38,14 +39,14 @@ namespace TorreDeControle.Core.Salas
             ("/npc_create \"Seu Valdir\" neutral \"vigia noturno\"", "cria NPC na campanha: ally, neutral ou villain; a nota vai para as Notas"),
             ("/location_create \"Usina Halcyon Sul\" \"galpão destruído\"", "cria um Local no cenário, com a descrição"),
             ("/rodada", "abre a próxima rodada do log"),
-            ("/clearlog", "esconde todas as entradas do log (ficam no arquivo; o efeito na mesa continua)"),
+            ("/clear", "esconde todas as entradas do log (o mesmo que /clearlog; ficam no arquivo e o efeito na mesa continua)"),
             ("/help", "abre esta janela"),
         };
 
         public const string Ajuda =
-            "/roll [mod] · /potencial Nome motivo · /pilha +N|-N [motivo] · /cond Nome condição · " +
+            "/roll [mod] · /potencial Nome motivo · /pot [Nome] valor · /pilha +N|-N [motivo] · /cond Nome condição · " +
             "/lembrete Nome texto · /nota texto · /npc_create \"Nome\" ally|neutral|villain [\"nota\"] · " +
-            "/location_create \"Nome\" [\"nota\"] · /rodada · /clearlog · /help";
+            "/location_create \"Nome\" [\"nota\"] · /rodada · /clearlog (/clear) · /help";
 
         /// <summary>Executa a linha. Devolve o resultado e a mensagem para mostrar (sucesso ou erro).</summary>
         public (bool ok, string mensagem) Executar(string linha)
@@ -61,7 +62,7 @@ namespace TorreDeControle.Core.Salas
                 {
                     case "help": case "ajuda": return (true, Ajuda);
                     case "roll": case "rolar": return Rolar(args);
-                    case "potencial": return Potencial(args);
+                    case "potencial": case "pot": return Potencial(args);
                     case "pilha": case "equipe": return Pilha(args);
                     case "cond": case "condicao": return Condicao(args);
                     case "lembrete": return Lembrete(args);
@@ -69,7 +70,7 @@ namespace TorreDeControle.Core.Salas
                     case "npc_create": case "npc": return CriarNpc(args);
                     case "location_create": case "local": return CriarLocal(args);
                     case "rodada": mesa.NovaRodada(); return (true, $"Rodada {mesa.Rodada}.");
-                    case "clearlog": case "limparlog":
+                    case "clearlog": case "clear": case "limparlog":
                         var n = mesa.EsconderTudo();
                         return (true, n == 0 ? "O log já está vazio." : $"{n} entrada{(n == 1 ? "" : "s")} escondida{(n == 1 ? "" : "s")} (ficam no arquivo; o efeito na mesa continua).");
                     default: return (false, $"Comando desconhecido: /{comando}. Veja /help.");
@@ -112,10 +113,43 @@ namespace TorreDeControle.Core.Salas
             return r.Ok ? (true, mesa.Eventos.Last().Descricao) : (false, r.Erro);
         }
 
+        /// <summary>
+        /// Debug: põe o potencial no valor pedido (o evento fica no log e se desfaz como os outros). Sem nome, vale se
+        /// houver uma heroína só na mesa. Não desce abaixo do que já virou avanço marcado.
+        /// </summary>
+        (bool, string) ForcarPotencial(string nome, int valor)
+        {
+            Personagem p;
+            if (nome != null)
+            {
+                var (achada, erro) = Achar(nome, incluirViloes: false);
+                if (achada == null)
+                    return (false, erro);
+                p = achada;
+            }
+            else
+            {
+                var herois = sala.Slots.Where(s => s.Personagem != null).Select(s => personagens.Buscar(s.Personagem))
+                    .Where(x => x != null && x.Ativo && x.Status == StatusCriacao.EmCarreira).ToList();
+                if (herois.Count != 1)
+                    return (false, "Diga de quem: /pot Nome valor (há mais de uma heroína na mesa).");
+                p = herois[0];
+            }
+            if (valor < 0)
+                return (false, "Potencial não fica negativo.");
+            if (valor == p.Potencial)
+                return (true, $"{p.NomeExibicao} já está com potencial {valor}.");
+            var r = mesa.DarPotencial(p.Id, valor - p.Potencial, $"debug: potencial forçado para {valor}");
+            return r.Ok ? (true, $"{p.NomeExibicao}: potencial = {p.Potencial} (debug).") : (false, r.Erro);
+        }
+
         (bool, string) Potencial(List<string> args)
         {
+            // Debug: o último argumento é um número (e no máximo um nome antes) = força o potencial para esse valor.
+            if (args.Count is 1 or 2 && int.TryParse(args[args.Count - 1], out var valor))
+                return ForcarPotencial(args.Count == 2 ? args[0] : null, valor);
             if (args.Count < 2)
-                return (false, "Use /potencial Nome motivo (o motivo é obrigatório).");
+                return (false, "Use /potencial Nome motivo (o motivo é obrigatório), ou /pot [Nome] valor para forçar.");
             var (p, erro) = Achar(args[0], incluirViloes: false);
             if (p == null)
                 return (false, erro);
