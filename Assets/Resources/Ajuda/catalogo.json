@@ -63,7 +63,7 @@
         },
         {
           "titulo": "ROLAGEM",
-          "texto": "2d6 + modificador. Some Rótulo, bônus e penalidades aplicáveis. O modificador final fica entre −3 e +4."
+          "texto": "Role 2d6 + a base indicada pelo movimento, com bônus e penalidades aplicáveis. Esse modificador fica entre −3 e +4; ajustes depois do dado não entram nesse teto."
         },
         {
           "titulo": "10+",
@@ -80,6 +80,39 @@
         {
           "titulo": "ATENÇÃO",
           "texto": "Tomar um golpe poderoso é invertido: uma falha permite resistir. Equipe e outros efeitos podem mudar o resultado depois dos dados, antes da resolução."
+        }
+      ]
+    },
+    {
+      "id": "panorama/antes-e-depois-do-dado",
+      "categoria": "referencia-rapida",
+      "arquivo": "00-antes-e-depois-do-dado.png",
+      "titulo": "A ROLAGEM: ANTES E DEPOIS DO DADO",
+      "compacto": false,
+      "origem": "Visão geral · livro pp.47, 81, 84–85, 189",
+      "regras_ref": [
+        "nucleo.json#/modificador",
+        "influencia.json#/bonus_passivo",
+        "influencia.json#/movimentos",
+        "equipe_e_sessao.json#/equipe/movimentos",
+        "pvp.json#/variantes_pj"
+      ],
+      "secoes": [
+        {
+          "titulo": "NA ROLAGEM",
+          "texto": "Rótulo, adiante, constante, avaliação, +1 de Influência sobre o alvo, −2 por condição ligada ao movimento. O total fica entre −3 e +4."
+        },
+        {
+          "titulo": "DEPOIS DO DADO",
+          "texto": "Ajuda (+1 de cada colega, da pilha), renunciar à Influência (+1 contra o alvo, ou −2 no movimento de quem rolou), Defender contra PJ (−2), agir de forma egoísta. Aqui o resultado desliza livre."
+        },
+        {
+          "titulo": "QUEM PODE",
+          "texto": "Ninguém se ajuda; egoísta e o +1 da renúncia são de quem rolou; o −2 da renúncia é de quem tem Influência sobre quem rolou."
+        },
+        {
+          "titulo": "EXEMPLO",
+          "texto": "A Vespa provoca o Tiro-Certo com +1 de Influência e tira 6. Renuncia à Influência e chega a 7, mas o Tiro-Certo deixa de dar peso ao que ela pensa."
         }
       ]
     },
@@ -419,12 +452,13 @@
       "origem": "livro pp.76–77",
       "regras_ref": [
         "movimentos_basicos.json#/movimentos/7",
-        "nucleo.json#/condicoes"
+        "nucleo.json#/condicoes",
+        "nucleo.json#/modificador"
       ],
       "secoes": [
         {
           "titulo": "QUANDO / + CONDIÇÕES",
-          "texto": "O mestre pede o teste ao ocorrer golpe físico ou emocional forte. Some as condições marcadas, no máximo +4."
+          "texto": "O mestre pede o teste ao ocorrer golpe físico ou emocional forte. Role 2d6 + o número de condições marcadas, em vez de Rótulo."
         },
         {
           "titulo": "10+: ESCOLHA 1",
@@ -440,7 +474,7 @@
         },
         {
           "titulo": "RESULTADO INVERTIDO",
-          "texto": "Aqui, rolar alto é pior. Sem condições, role +0."
+          "texto": "Aqui, rolar alto é pior. Sem condições, a base é +0. O teto de −3 a +4 vale para o total na rolagem, não para ajustes depois do dado."
         }
       ]
     },
@@ -515,7 +549,8 @@
       "compacto": false,
       "origem": "PvP · livro pp.57–75, 182 e 191–192",
       "regras_ref": [
-        "pvp.json"
+        "pvp.json",
+        "nucleo.json#/modificador"
       ],
       "secoes": [
         {
@@ -536,7 +571,7 @@
         },
         {
           "titulo": "ANTES DA RESOLUÇÃO",
-          "texto": "O alvo pode Defender, se houver ameaça iminente, e reduzir sua rolagem em 2. Uma falha rende potencial e um movimento do mestre."
+          "texto": "O alvo ou um terceiro que alcança pode Defender da ameaça iminente. Com 7+, reduz o resultado do atacante em 2 após o dado, sem teto. Uma falha rende potencial e um movimento do mestre."
         }
       ]
     },
@@ -548,16 +583,17 @@
       "compacto": false,
       "origem": "PvP · livro pp.57–75, 182 e 191–192",
       "regras_ref": [
-        "pvp.json"
+        "pvp.json",
+        "nucleo.json#/modificador"
       ],
       "secoes": [
         {
           "titulo": "QUANDO / + SALVADOR",
-          "texto": "Um PJ faz uma ação perigosa e direta contra você ou alguém que protege. Precisa haver ameaça iminente. Inseguro: −2."
+          "texto": "Proteja a si ou outra pessoa de uma ação perigosa e direta de um PJ. Você precisa alcançar a ameaça iminente na ficção. Inseguro: −2."
         },
         {
           "titulo": "7+",
-          "texto": "Aplique −2 à rolagem do agressor antes de resolver seu resultado. Se cair para falha, ele marca potencial e o mestre faz um movimento pesado."
+          "texto": "Após os dados, aplique −2 ao resultado do agressor, sem o teto de −3 a +4. Se virar falha, ele marca potencial e o mestre faz um movimento pesado."
         },
         {
           "titulo": "7–9: O MESTRE ESCOLHE",
@@ -715,7 +751,8 @@
       "origem": "Influência · livro pp.79–83",
       "regras_ref": [
         "pvp.json",
-        "influencia.json"
+        "influencia.json",
+        "nucleo.json#/modificador"
       ],
       "secoes": [
         {
@@ -728,7 +765,7 @@
         },
         {
           "titulo": "DEPOIS DOS DADOS",
-          "texto": "Os ajustes de rolagem podem ser usados depois dos dados, antes de resolver o resultado. Respeite o teto do modificador."
+          "texto": "Antes de resolver: quem rolou pode renunciar para somar +1 ao próprio resultado contra o alvo; quem tem Influência sobre quem rolou pode renunciar para aplicar −2. Esses ajustes não têm teto."
         },
         {
           "titulo": "CONSEQUÊNCIA",
@@ -836,7 +873,8 @@
       "origem": "Influência · livro pp.79–83 e 178",
       "regras_ref": [
         "influencia.json",
-        "nucleo.json#/condicoes"
+        "nucleo.json#/condicoes",
+        "nucleo.json#/modificador"
       ],
       "secoes": [
         {
@@ -853,7 +891,7 @@
         },
         {
           "titulo": "MOMENTO",
-          "texto": "Os ajustes podem ser escolhidos após os dados, antes de resolver o resultado. Respeite o teto do modificador."
+          "texto": "Após os dados, antes de resolver: quem rolou pode renunciar para somar +1 contra o alvo; quem tem Influência sobre quem rolou pode renunciar para aplicar −2. Esses ajustes não têm teto."
         },
         {
           "titulo": "DEPOIS",
@@ -908,7 +946,8 @@
         "nucleo.json#/condicoes",
         "nucleo.json#/rotulos/mudanca",
         "movimentos_basicos.json",
-        "influencia.json#/movimentos/2"
+        "influencia.json#/movimentos/2",
+        "nucleo.json#/modificador"
       ],
       "secoes": [
         {
@@ -925,7 +964,7 @@
         },
         {
           "titulo": "LIMITES",
-          "texto": "O modificador final fica entre −3 e +4. Se uma troca de Rótulos ultrapassar −2 ou +3, nenhum muda: marque uma condição escolhida pelo mestre."
+          "texto": "O modificador na rolagem fica entre −3 e +4; ajustes depois do dado não entram nesse teto. Se uma troca de Rótulos ultrapassar −2 ou +3, nenhum muda: marque uma condição escolhida pelo mestre."
         }
       ],
       "borda": "#efd65b"
@@ -972,7 +1011,8 @@
       "borda": "#53a9e8",
       "origem": "Equipe e sessão · livro pp.84–88 e 92–93",
       "regras_ref": [
-        "equipe_e_sessao.json"
+        "equipe_e_sessao.json",
+        "nucleo.json#/modificador"
       ],
       "secoes": [
         {
@@ -985,7 +1025,7 @@
         },
         {
           "titulo": "LIMITES",
-          "texto": "Cada personagem pode gastar no máximo 1 ponto por rolagem. Vários colegas podem ajudar no mesmo teste; respeite o teto do modificador."
+          "texto": "Ninguém se ajuda; cada colega gasta no máximo 1 ponto por rolagem. Vários podem ajudar no mesmo teste. A ajuda vem depois do dado e não está presa ao teto de −3 a +4: ele vale só na rolagem."
         },
         {
           "titulo": "PNJs ALIADOS",
@@ -1033,7 +1073,8 @@
       "borda": "#53a9e8",
       "origem": "Equipe e sessão · livro pp.84–88 e 92–93",
       "regras_ref": [
-        "equipe_e_sessao.json"
+        "equipe_e_sessao.json",
+        "nucleo.json#/modificador"
       ],
       "secoes": [
         {
@@ -1042,11 +1083,11 @@
         },
         {
           "titulo": "CUSTO E EFEITO",
-          "texto": "Gaste 1 ponto da pilha. Aumente um Rótulo e diminua outro, à sua escolha, respeitando os limites."
+          "texto": "Só quem rolou gasta 1 ponto da pilha. Aumente um Rótulo e diminua outro, à sua escolha, respeitando os limites de −2 a +3 dos Rótulos."
         },
         {
           "titulo": "APÓS OS DADOS",
-          "texto": "Pode ser usado depois de rolar: recalcule a rolagem com o novo valor do Rótulo usado. Isso pode transformar falha em sucesso ou parcial em forte."
+          "texto": "Depois de rolar, ajuste o resultado pela mudança do Rótulo usado. Esse ajuste vem após o dado e não fica preso ao teto de −3 a +4; pode mudar a faixa de sucesso."
         },
         {
           "titulo": "CONSEQUÊNCIA",
@@ -2157,7 +2198,8 @@
         "arquetipos.json#/arquetipos/2/movimentos/opcoes/4",
         "movimentos_basicos.json",
         "influencia.json",
-        "equipe_e_sessao.json"
+        "equipe_e_sessao.json",
+        "nucleo.json#/modificador"
       ],
       "secoes": [
         {
@@ -2170,7 +2212,7 @@
         },
         {
           "titulo": "LIMITES DA AJUDA",
-          "texto": "Você precisa conseguir ajudar na ficção. Continua podendo gastar no máximo 1 ponto por rolagem; outros colegas podem ajudar também. O modificador final não passa de +4."
+          "texto": "Você precisa conseguir ajudar na ficção. Gasta no máximo 1 ponto por rolagem; outros colegas podem ajudar também. O +2 vem depois do dado e não fica preso ao teto de −3 a +4."
         },
         {
           "titulo": "NA HISTÓRIA",
@@ -2505,7 +2547,8 @@
         "arquetipos.json#/arquetipos/4/movimentos/opcoes/2",
         "movimentos_basicos.json",
         "equipe_e_sessao.json",
-        "nucleo.json#/condicoes"
+        "nucleo.json#/condicoes",
+        "nucleo.json#/modificador"
       ],
       "secoes": [
         {
@@ -2522,7 +2565,7 @@
         },
         {
           "titulo": "LIMITE",
-          "texto": "Outros colegas também podem ajudar; o modificador final continua limitado a +4."
+          "texto": "Outros colegas também podem ajudar. Esta ajuda vem depois do dado e não fica presa ao teto de −3 a +4; a exceção permite gastar 2 pontos, não ajudar a si mesmo."
         }
       ]
     },
@@ -3491,7 +3534,8 @@
       "origem": "Nova · livro pp.146 e 148–149",
       "regras_ref": [
         "arquetipos.json#/arquetipos/8/extras/0/campos/0/opcoes/6",
-        "nucleo.json#/condicoes"
+        "nucleo.json#/condicoes",
+        "nucleo.json#/modificador"
       ],
       "secoes": [
         {
@@ -3508,7 +3552,7 @@
         },
         {
           "titulo": "MOMENTO",
-          "texto": "A ajuda precisa existir na ficção e pode ajustar o resultado depois dos dados, antes da resolução. Respeite o teto do modificador."
+          "texto": "A ajuda precisa existir na ficção. Ajuste o resultado do colega depois dos dados, antes da resolução, sem o teto de −3 a +4. Não é ajuda para si mesmo."
         }
       ]
     },

@@ -7,10 +7,10 @@
 > podendo ser criados como artes separadas. As instruções do gerador abaixo
 > descrevem o fluxo anterior; não executá-lo para novas cartas ou revisões.
 
-Fonte única dos textos das quatro cartas de panorama, dos oito movimentos básicos,
+Fonte única dos textos das cinco cartas de panorama, dos oito movimentos básicos,
 das nove cartas PvP, das seis cartas de Influência, das duas de Condições
 das seis de Equipe e sessão, das dez de Movimentos de equipe e dos seis
-movimentos da Bruta e das doze cartas de Vilões (116 ao todo):
+movimentos da Bruta e das doze cartas de Vilões (154 ao todo no catálogo atual):
 `Assets/Resources/Ajuda/catalogo.json` (UTF-8, texto próprio).
 As regras executáveis continuam em `Assets/Resources/Regras/`; o catálogo
 editorial não substitui essas regras nem os dados de jogadores, personagens e salas.
@@ -240,3 +240,103 @@ Bordas herdadas das cartas de referência; vínculos tipo mj, origem mestre,
 para acesso também pela Gestão. Textos próprios, seis/quatro/cinco seções,
 sem PNGs. Validados JSONs, IDs, vínculos, posições e preservação das outras
 cartas. Aparência final depende de conferência no Play.
+
+## Revisão 2026-10-17
+
+Executado `docs/briefing_ajuda_teto.md`, na ordem: corrigir Pontos de Equipe,
+criar a referência de antes/depois do dado e revisar as cartas relacionadas.
+As decisões de regra do Alan prevalecem: o modificador na rolagem fica entre
+−3 e +4; intervenções depois do dado alteram o resultado sem esse teto.
+O +1 passivo de Influência entra na rolagem. Limites de Rótulos e custos
+continuam valendo, mesmo quando o ajuste posterior não tem teto.
+
+### O que foi corrigido ou acrescentado
+
+| Carta | Seção | Alteração |
+|---|---|---|
+| `equipe/ajudar` | LIMITES | Retirado o teto da ajuda posterior; explicitado que ninguém se ajuda e que a ajuda comum custa no máximo 1 ponto por colega e rolagem. |
+| `panorama/antes-e-depois-do-dado` | Nova carta, quatro seções | Inserida após Sucessos e falhas, na Visão geral, com a mesma borda padrão. Mantém o exemplo aprovado de Vespa e Tiro-Certo. |
+| `panorama/movimentos` | ROLAGEM | Teto ligado ao modificador na rolagem, sem alcançar intervenções posteriores; a base é a indicada pelo movimento, não necessariamente um Rótulo. |
+| `pvp/renunciar` | DEPOIS DOS DADOS | Retirado o teto; esclarecido quem pode aplicar +1 próprio ou −2 em quem rolou. |
+| `influencia/renunciar` | MOMENTO | Mesma correção de teto e de direção da renúncia. O +1 extra continua somando com o passivo. |
+| `pvp/defender` | QUANDO / + SALVADOR; 7+ | Alvo ou terceiro precisa alcançar a ameaça; o −2 muda o resultado depois do dado, sem teto. |
+| `pvp/enfrentar` | ANTES DA RESOLUÇÃO | Lembrete alinhado a Defender: alvo ou terceiro que alcança, com 7+, reduz o resultado em 2 após o dado. |
+| `equipe/egoista` | CUSTO E EFEITO; APÓS OS DADOS | Uso próprio de quem rolou; limites de −2 a +3 pertencem aos Rótulos. A diferença do Rótulo ajusta o resultado depois do dado, sem reaplicar o teto da rolagem. |
+| `condicoes/efeitos` | LIMITES | Separados o teto na rolagem e os ajustes posteriores; preservados estouro e limites dos Rótulos. |
+| `movimento/golpe-poderoso` | QUANDO / + CONDIÇÕES; RESULTADO INVERTIDO | Base é o número de condições, não um Rótulo; o teto limita o total na rolagem. Resultado continua invertido, com base zero quando não há condições. |
+| `arquetipo/delinquente/encrenqueiro` | LIMITES DA AJUDA | +2 posterior sem teto; mantidos gasto de 1 ponto e exigência ficcional. |
+| `arquetipo/farol/nao-vou-te-decepcionar` | LIMITE | Ajuda posterior sem teto; preservada a exceção de gastar 2 pontos e vedada autoajuda. |
+| `arquetipo/nova/impulso` | MOMENTO | Ajuda ao colega após o dado, sem teto; continua custando Chama, sem retirar Equipe da pilha. |
+
+### Conferência das cartas relacionadas
+
+Lidas integralmente as categorias Visão geral, Movimentos básicos, PvP,
+Influência, Condições, Equipe e sessão e Movimentos de arquétipo. A busca no
+catálogo inteiro incluiu movimentos de equipe e menções em Vilões e nas
+orientações do MJ. As cartas de Influência passiva, rejeição, ganho/perda,
+ajuda em combate, formação e reposição da pilha, Defender contra PNJ e
+exemplo de ceder terreno mantiveram suas regras.
+
+Conferência: `Regras/nucleo.json`, `influencia.json`, `equipe_e_sessao.json`,
+`movimentos_basicos.json`, além de `pvp.json` e das exceções em `arquetipos.json`.
+Consulta ao texto do livro no acervo: p.47 (teto), pp.76–77 (golpe), pp.81–83
+(passivo, renúncia e rejeição), pp.84–86 (ajuda e egoísta), pp.189–191 (defesa
+e resolução de conflitos). Nenhuma tradução ou imagem do acervo foi copiada.
+
+O +1 de `arquetipo/farol/vamos-sortudo` foi mantido no modificador com teto:
+é bônus do movimento, sem gastar Equipe, diferente da ajuda posterior paga.
+As exceções de Encrenqueiro, Farol e Impulso foram preservadas, não reduzidas
+à ajuda comum de 1 ponto por colega.
+
+### Repetições encontradas — preservadas para decisão do Alan
+
+| Pares de IDs | Sobreposição |
+|---|---|
+| `panorama/movimentos` ↔ `panorama/antes-e-depois-do-dado` | Teto e ajustes posteriores; a primeira resume as faixas, a segunda explica os dois momentos. |
+| `pvp/renunciar` ↔ `influencia/renunciar` | Mesmos três efeitos e perda de Influência; uma está na navegação PvP, outra na categoria geral. |
+| `pvp/influencia` ↔ `influencia/usar` | +1 passivo e prioridade de Provocar/Confortar. |
+| `pvp/influencia` ↔ `influencia/conceito` | Mudança de Rótulos por Influência e ganho repetido sobre PJ. |
+| `influencia/conceito` ↔ `influencia/npcs` | Adultos, direção da relação e ganhar Influência novamente. |
+| `influencia/rejeitar` ↔ `influencia/ganhar-perder` | Cancelar Influência ao rejeitar; a segunda é resumo de fontes. |
+| `movimento/confortar` ↔ `pvp/confortar` | Mesmos efeitos, com esclarecimentos sobre decisão do PJ e defesa na variante. |
+| `movimento/perfurar-mascara` ↔ `pvp/perfurar` | Mesmas perguntas e efeitos, com orientação de resposta no fórum na variante. |
+| `equipe/ajudar` ↔ `equipe/exemplo-ajuda-combate` | Regra e aplicação em cena; repetição didática. |
+| `movimento/golpe-poderoso` ↔ `movimento/exemplo-ceder-terreno` | Opção e exemplo de consequência; não são movimentos concorrentes. |
+
+Nenhuma carta foi apagada ou fundida. Cabe ao Alan decidir se mantém essas
+duplicações de navegação e ensino ou se pede outra organização.
+
+### Dúvidas para o Alan
+
+Não ficou dúvida sobre o teto ou sobre quem pode usar ajuda e renúncia:
+seguem a decisão do briefing. Ficaram dois pontos editoriais para decidir:
+
+- `viloes/exemplo-rosa-rook`, PRESSÃO ENTRE COLEGAS, diz que não cabe Defender
+  **dessa** provocação. Foi preservado como caso ficcional, sem ação perigosa
+  e direta. Confirmar se deseja explicitar isso ali para evitar a leitura de
+  que toda provocação proíbe Defender; `pvp/defender` exige ameaça iminente.
+- `equipe/egoista` depende de alterar o Rótulo usado. Confirmar se deseja
+  acrescentar um lembrete específico para movimentos sem Rótulo, como
+  Rejeitar Influência e Tomar um golpe poderoso: mudar Rótulos não muda a
+  base dessas rolagens. Nenhuma nova interação foi inventada nesta revisão.
+
+### Procedimento daqui para frente
+
+Antes de criar ou alterar qualquer carta: ler a categoria inteira e as
+vizinhas do tema, procurar contradições e repetições, conferir as regras da
+Torre e consultar o livro quando necessário. Corrigir texto errado; não
+apagar nem fundir cartas sem decisão do Alan. Registrar aqui as correções
+por carta/seção, pares repetidos e dúvidas. Usar texto próprio, seções curtas,
+mesma borda da categoria e não gerar PNGs. A instrução também está no
+`AGENTS.md` da raiz para orientar as próximas tarefas.
+
+### Validação desta revisão
+
+154 cartas no JSON final: 12 existentes corrigidas e uma nova, sem remoções
+ou reordenação das anteriores. Conferidos IDs e nomes de arquivo únicos,
+seções, borda herdada e preservação dos demais campos/cartas. As 346
+referências apontam para arquivos existentes; os novos ponteiros e os das
+cartas corrigidas foram resolvidos. Os 11 fragmentos semânticos de Perdição
+por ID, já existentes, foram preservados sem convertê-los em índices JSON.
+Nenhum PNG foi gerado. A apresentação final das cartas no Play ainda
+precisa de conferência visual.
