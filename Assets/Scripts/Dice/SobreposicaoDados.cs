@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class SobreposicaoDados : MonoBehaviour
 {
     [SerializeField] private GameObject palcoPrefab = null;
-    [SerializeField] private bool mostrarControlesTemporarios = true;
+    [SerializeField] private bool mostrarControlesTemporarios = false;
     [SerializeField, Min(0f)] private float segundosExibindoResultado = 3f;
     [SerializeField, Min(0.05f)] private float duracaoFade = 0.5f;
     private GameObject palco;

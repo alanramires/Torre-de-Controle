@@ -2643,7 +2643,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: TorreDeControle.Dados::SobreposicaoDados
   palcoPrefab: {fileID: 900000001, guid: 875a1df77d4a43df8408a9490692ce22, type: 3}
-  mostrarControlesTemporarios: 1
+  mostrarControlesTemporarios: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
