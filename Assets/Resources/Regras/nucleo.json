@@ -27,8 +27,10 @@
   "modificador": {
     "minimo": -3,
     "maximo": 4,
-    "_nota": "Limite do total somado aos dados (Rótulo + bônus + penalidades). Vale para toda rolagem.",
-    "origem": "livro p.66, p.77, p.89"
+    "_nota": "Limite do total somado aos dados na hora de rolar (Rótulo + adiante + constante + avaliação + Influência passiva sobre o alvo da ação (+1, livro p.81) − condições). Vale para toda rolagem.",
+    "depois_do_dado": "As intervenções depois do dado (ajuda +1 da pilha, Influência −2 ou +1, Defender contra PJ −2, agir de forma egoísta) mexem no resultado e não respeitam o teto: o resultado desliza livre.",
+    "_decisao": "Alan, 2026-10-17: o livro só limita a rolagem inicial (p.47 'nunca pode rolar com mais de +4 e menos de -3'); não há regra limitando o que vem depois.",
+    "origem": "livro p.47, p.66, p.77, p.89"
   },
 
   "rolagem": {

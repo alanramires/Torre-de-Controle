@@ -7,18 +7,39 @@
       "id": "basico/enfrentar",
       "nome": "Enfrentar diretamente a ameaça",
       "gatilho": "Partir para a briga contra algo que é de fato perigoso para você.",
+      "requisito": "uma ameaça de verdade: quem não é páreo para a personagem (capangas) não aciona o movimento, ela simplesmente vence",
       "rolagem": { "rotulo": "perigoso" },
       "alvo": "pnj",
-      "sucesso_base": [{ "op": "narrativo", "texto": "Vocês trocam golpes: o MJ marca uma condição na ameaça e decide se você marca uma condição ou toma um golpe poderoso." }],
+      "sucesso_base": [{
+        "op": "trocar_golpes",
+        "texto": "Vocês trocam golpes: a ameaça marca uma condição (o MJ escolhe qual) e o MJ decide o seu retorno: uma condição ou tomar um golpe poderoso.",
+        "alvo": [{ "op": "marcar_condicao", "quem": "alvo", "escolhe": "mj", "padrao": "irritado", "nota": "sempre, em qualquer sucesso; nenhuma opção cancela" }],
+        "quem_rolou": [{ "op": "mj_escolhe_um", "entre": [
+          [{ "op": "marcar_condicao", "quem": "rolou", "escolhe": "mj" }],
+          [{ "op": "rolar", "movimento": "basico/golpe-poderoso" }]
+        ], "nota": "um OU outro, nunca os dois: condição junto com golpe poderoso só vem de fora da troca (movimento do MJ numa falha, condição já marcada, resultado do próprio golpe poderoso)" }],
+        "contra_pj": "ver pvp.json (variantes_pj): os dois rolam golpe poderoso"
+      }],
       "forte": { "op": "escolher", "n": 2, "lista": "opcoes" },
       "parcial": { "op": "escolher", "n": 1, "lista": "opcoes" },
+      "leitura": "Só 'resistir' protege quem rolou; as outras são ganhos. No 10+: resistir e um ganho, ou dois ganhos e aguentar o retorno. No 7-9: proteger-se, ou ganhar algo e apanhar.",
       "opcoes": [
-        { "id": "resistir", "texto": "Sair ileso da troca", "efeitos": [{ "op": "anular_retorno_da_troca" }] },
-        { "id": "tirar", "texto": "Arrancar algo do oponente (objeto, posição, equilíbrio)", "efeitos": [{ "op": "narrativo" }] },
-        { "id": "oportunidade", "texto": "Abrir uma chance para os aliados", "efeitos": [{ "op": "mj_decide", "entre": [[{ "op": "narrativo", "texto": "um aliado ganha a chance" }], [{ "op": "equipe", "delta": 1 }]] }] },
-        { "id": "impressionar", "texto": "Impressionar, surpreender ou assustar o oponente", "efeitos": [{ "op": "narrativo" }, { "op": "mj_pode", "efeitos": [{ "op": "marcar_condicao", "quem": "alvo", "escolhe": "mj" }] }] }
+        { "id": "resistir", "texto": "Sair ileso da troca", "efeitos": [{ "op": "anular_retorno_da_troca" }],
+          "nota": "a única opção que protege quem rolou: sem condição e sem golpe poderoso. A condição da ameaça continua." },
+        { "id": "tirar", "texto": "Arrancar algo do oponente (objeto, posição, equilíbrio, alguém que ele segura)", "efeitos": [{ "op": "narrativo" }],
+          "nota": "segue a ficção: sem o que perdeu, a ameaça não usa o que dependia disso (ex.: movimento de vilão que usa a arma tirada). Não cancela o retorno." },
+        { "id": "oportunidade", "texto": "Abrir uma chance para os aliados", "efeitos": [{ "op": "mj_decide", "entre": [[{ "op": "narrativo", "texto": "um aliado ganha a chance" }], [{ "op": "equipe", "delta": 1 }]] }],
+          "nota": "inicia manobras de Equipe. A chance é de um aliado agir (o MJ diz qual das duas vale); quem rolou não encerra a luta sozinho com ela. Não cancela o retorno." },
+        { "id": "impressionar", "texto": "Impressionar, surpreender ou assustar o oponente", "efeitos": [
+            { "op": "mj_decide", "entre": [[{ "op": "narrativo", "texto": "impressionar" }], [{ "op": "narrativo", "texto": "surpreender" }], [{ "op": "narrativo", "texto": "assustar" }]] },
+            { "op": "condicao_da_troca_reflete_percepcao", "contra": "pnj" },
+            { "op": "mj_pode", "contra": "pj", "efeitos": [{ "op": "marcar_condicao", "quem": "alvo", "escolhe": "mj" }] }
+          ],
+          "nota": "muda como a ameaça vê quem rolou (respeito, cautela, evita o confronto). Contra PNJ não soma condição: a condição da troca é escolhida para mostrar a nova percepção (Insegura em vez da Irritada de costume). Contra PJ, que não marca condição na troca, o MJ pode dar uma. Não cancela o retorno.",
+          "_decisao": "Alan, 2026-10-18: seguir o exemplo do livro (troca a condição, não soma); se a ficção pedir mais, o mestre marca outra à mão" }
       ],
-      "origem": "livro p.57-59"
+      "exemplos": "livro p.59 (Toro x Ursa: 8, tira as garras, toma golpe poderoso, Ursa marca Irritada; Rex x capangas: não é ameaça), p.188-190 (Rex x Professora: 11, impressionar + tirar a Canção dos Céus, toma golpe poderoso, ela marca Insegura em vez de Irritada)",
+      "origem": "livro p.57-59, p.188-190"
     },
     {
       "id": "basico/liberar-poderes",

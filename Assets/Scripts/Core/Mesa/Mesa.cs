@@ -4,6 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using TorreDeControle.Core.Armazenamento;
 using TorreDeControle.Core.Personagens;
+using TorreDeControle.Core.Regras;
 
 namespace TorreDeControle.Core.Salas
 {
@@ -468,6 +469,391 @@ namespace TorreDeControle.Core.Salas
             return Resultado.Sucesso();
         }
 
+        // ---------- o log editado pelo mestre ----------
+
+        /// <summary>Os eventos que o log mostra: os não apagados, do mais antigo ao mais novo.</summary>
+        public IReadOnlyList<Evento> Visiveis => arquivo.Eventos.Where(e => !e.Oculto).ToList();
+
+        /// <summary>Uma anotação no log (rolagem do console, nota do mestre): sem efeito na mesa.</summary>
+        public void Anotar(string descricao, string motivo) => RegistrarDaMesa(null, descricao, motivo);
+
+        /// <summary>Esconde todas as entradas visíveis (o efeito delas na mesa continua). Devolve quantas.</summary>
+        public int EsconderTudo()
+        {
+            var visiveis = arquivo.Eventos.Where(e => !e.Oculto).ToList();
+            foreach (var e in visiveis)
+                e.Oculto = true;
+            if (visiveis.Count > 0)
+                Gravar();
+            return visiveis.Count;
+        }
+
+        /// <summary>A entrada ainda tem efeito na mesa (mudou algo e não foi desfeita).</summary>
+        public bool TemEfeito(Evento e) => e.Corrige == null && e.Mudancas.Count > 0 && !Corrigido(e);
+
+        /// <summary>Corrige o texto de uma entrada (descrição e motivo). O efeito não muda.</summary>
+        public Resultado EditarEvento(string id, string descricao, string motivo)
+        {
+            var e = arquivo.Eventos.FirstOrDefault(x => x.Id == id);
+            if (e == null)
+                return Resultado.Falha("Entrada não encontrada.");
+            var d = (descricao ?? string.Empty).Trim();
+            if (d.Length == 0)
+                return Resultado.Falha("A descrição não fica vazia (para tirar a entrada, apague).");
+            var m = (motivo ?? string.Empty).Trim();
+            if (d == e.Descricao && m == e.Motivo)
+                return Resultado.Sucesso();
+            (e.Descricao, e.Motivo, e.Editado) = (d, m, true);
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>
+        /// Apaga uma entrada do log: some da lista, mas fica no arquivo. Se ela ainda tem efeito, só apaga junto
+        /// com o desfazer (<paramref name="desfazerEfeito"/>): o desfazer também fica oculto, e a mesa volta como
+        /// se a entrada não tivesse acontecido.
+        /// </summary>
+        public Resultado ApagarEvento(string id, bool desfazerEfeito)
+        {
+            var e = arquivo.Eventos.FirstOrDefault(x => x.Id == id);
+            if (e == null)
+                return Resultado.Falha("Entrada não encontrada.");
+            if (TemEfeito(e))
+            {
+                if (!desfazerEfeito)
+                    return Resultado.Falha("Essa entrada ainda mudou algo na mesa: apagar também desfaz o efeito.");
+                var r = Corrigir(e.Id, "apagado do log");
+                if (!r.Ok)
+                    return r;
+                arquivo.Eventos.Last().Oculto = true; // o desfazer que acabou de entrar
+            }
+            e.Oculto = true;
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>
+        /// Ida e volta: <paramref name="volta"/> desfaz exatamente <paramref name="ida"/> (mesma pessoa, mesmos
+        /// campos, sentidos opostos), nenhum dos dois tem motivo e nenhum é desfazer/refazer. Os dois se anulam:
+        /// esconder o par não muda a mesa.
+        /// </summary>
+        static bool IdaEVolta(Evento ida, Evento volta) =>
+            ida.Personagem == volta.Personagem &&
+            string.IsNullOrWhiteSpace(ida.Motivo) && string.IsNullOrWhiteSpace(volta.Motivo) &&
+            ida.Corrige == null && volta.Corrige == null && ida.Refaz == null && volta.Refaz == null &&
+            ida.Mudancas.Count > 0 && ida.Mudancas.Count == volta.Mudancas.Count &&
+            ida.Mudancas.All(m => volta.Mudancas.Any(v => v.Campo == m.Campo && v.Antes == m.Depois && v.Depois == m.Antes));
+
+        /// <summary>
+        /// Esconde os pares de ida e volta já no log (cliques de marcar e desmarcar seguidos). Não muda a mesa:
+        /// os dois se anulam. Devolve quantos pares saíram.
+        /// </summary>
+        public int EsconderIdasEVoltas()
+        {
+            var pares = 0;
+            var visiveis = Visiveis.ToList();
+            for (var k = 1; k < visiveis.Count; k++)
+            {
+                if (visiveis[k - 1].Oculto || !IdaEVolta(visiveis[k - 1], visiveis[k]))
+                    continue;
+                visiveis[k - 1].Oculto = visiveis[k].Oculto = true;
+                pares++;
+                k++; // o par saiu inteiro; o próximo começa depois dele
+            }
+            if (pares > 0)
+                Gravar();
+            return pares;
+        }
+
+        // ---------- a rolagem e as intervenções depois do dado ----------
+
+        /// <summary>O teto do modificador na rolagem (as intervenções depois do dado não respeitam).</summary>
+        public const int TetoMinimo = -3, TetoMaximo = 4;
+        /// <summary>Uma intervenção mexe de −2 a +2 (ajuda +1, Farol +2, renúncia +1/−2, Defender −2, custom).</summary>
+        public const int IntervencaoMinima = -2, IntervencaoMaxima = 2;
+
+        /// <summary>
+        /// Lança uma rolagem de 2d6 no log, pendente: o resultado só vale quando o mestre aceita
+        /// (<see cref="AceitarRolagem"/>). Quem rola é opcional (o console rola pela mesa).
+        /// </summary>
+        public Resultado Rolar(string personagem, int dado1, int dado2, int mod, string motivo)
+        {
+            if (dado1 < 1 || dado1 > 6 || dado2 < 1 || dado2 > 6)
+                return Resultado.Falha($"Dados impossíveis: {dado1} e {dado2}.");
+            Personagem p = null;
+            if (personagem != null && !EmJogo(personagem, out p, out var erro))
+                return erro;
+            return Lancar(p, new RolagemDaMesa { Dados = new[] { dado1, dado2 }, Mod = mod }, motivo);
+        }
+
+        /// <summary>
+        /// Rola um movimento básico: 2d6 + o Rótulo dele na ficha de quem rola. Sem personagem, é o herói
+        /// genérico (+0). O alvo (personagem ou NPC) é opcional. Fica pendente como qualquer rolagem.
+        /// Por enquanto só dado + Rótulo: condições, adiante, constante e Influência ainda não entram.
+        /// </summary>
+        public Resultado RolarMovimento(string personagem, MovimentosBasicos.Movimento movimento, string alvo,
+            int dado1, int dado2, string motivo)
+        {
+            if (movimento?.Rotulo == null)
+                return Resultado.Falha("Esse movimento não rola com Rótulo.");
+            if (dado1 < 1 || dado1 > 6 || dado2 < 1 || dado2 > 6)
+                return Resultado.Falha($"Dados impossíveis: {dado1} e {dado2}.");
+            Personagem p = null;
+            if (personagem != null && !EmJogo(personagem, out p, out var erro))
+                return erro;
+            if (alvo != null && alvo == personagem)
+                return Resultado.Falha("O alvo não pode ser quem rola.");
+            return Lancar(p, new RolagemDaMesa
+            {
+                Dados = new[] { dado1, dado2 },
+                Mod = p == null ? 0 : personagens.ValorDeJogo(p, CampoRotulo(movimento.Rotulo)),
+                Movimento = movimento.Id,
+                NomeDoMovimento = movimento.Nome,
+                Rotulo = movimento.Rotulo,
+                Alvo = alvo,
+            }, motivo);
+        }
+
+        Resultado Lancar(Personagem p, RolagemDaMesa rolagem, string motivo)
+        {
+            rolagem.Mod = Math.Max(TetoMinimo, Math.Min(TetoMaximo, rolagem.Mod)); // o teto vale na rolagem
+            var evento = NovoEvento(p, null, motivo);
+            evento.Rolagem = rolagem;
+            evento.Descricao = TextoDaRolagem(rolagem);
+            arquivo.Eventos.Add(evento);
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>A rolagem ainda espera o mestre aceitar (e não foi desfeita nem escondida).</summary>
+        public bool Pendente(Evento e) => e.Rolagem != null && !e.Rolagem.Aceita && !e.Oculto && !Corrigido(e);
+
+        /// <summary>
+        /// Alguém intervém numa rolagem pendente. O custo na pilha sai na hora e fica no mesmo evento: desfazer
+        /// a rolagem devolve os pontos.
+        /// </summary>
+        public Resultado Intervir(string eventoId, Intervencao intervencao)
+        {
+            var e = arquivo.Eventos.FirstOrDefault(x => x.Id == eventoId);
+            if (e?.Rolagem == null)
+                return Resultado.Falha("Rolagem não encontrada.");
+            if (!Pendente(e))
+                return Resultado.Falha("Essa rolagem já foi aceita (ou desfeita): não aceita mais intervenção.");
+            if (intervencao == null || string.IsNullOrWhiteSpace(intervencao.Quem))
+                return Resultado.Falha("Quem intervém?");
+            if (string.IsNullOrWhiteSpace(intervencao.DeOnde))
+                return Resultado.Falha("De onde vem a intervenção?");
+            if (intervencao.Mod < IntervencaoMinima || intervencao.Mod > IntervencaoMaxima)
+                return Resultado.Falha($"Uma intervenção vai de {IntervencaoMinima} a +{IntervencaoMaxima}.");
+            if (intervencao.CustoEquipe < 0)
+                return Resultado.Falha("Custo negativo na pilha.");
+            if (intervencao.CustoEquipe > arquivo.Equipe)
+                return Resultado.Falha($"A pilha tem {arquivo.Equipe} ponto{(arquivo.Equipe == 1 ? "" : "s")}.");
+            intervencao.Detalhe = (intervencao.Detalhe ?? string.Empty).Trim();
+            if (intervencao.CustoEquipe > 0)
+                MudarEquipeDaRolagem(e, -intervencao.CustoEquipe);
+            e.Rolagem.Intervencoes.Add(intervencao);
+            e.Descricao = TextoDaRolagem(e.Rolagem);
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>Tira uma intervenção da rolagem pendente (engano): devolve o que ela gastou da pilha.</summary>
+        public Resultado RetirarIntervencao(string eventoId, int indice)
+        {
+            var e = arquivo.Eventos.FirstOrDefault(x => x.Id == eventoId);
+            if (e?.Rolagem == null || !Pendente(e))
+                return Resultado.Falha("Só se retira intervenção de rolagem pendente.");
+            if (indice < 0 || indice >= e.Rolagem.Intervencoes.Count)
+                return Resultado.Falha("Intervenção não encontrada.");
+            var i = e.Rolagem.Intervencoes[indice];
+            if (i.CustoEquipe > 0)
+                MudarEquipeDaRolagem(e, i.CustoEquipe);
+            e.Rolagem.Intervencoes.RemoveAt(indice);
+            e.Descricao = TextoDaRolagem(e.Rolagem);
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>
+        /// O mestre aceita: grava o resultado (sucesso/falha), o tipo (total/drawback/falha), a hora e, com o
+        /// movimento, as opções escolhidas. O movimento confere a conta: 10+ escolhe tantas, 7–9 tantas, falha nenhuma,
+        /// e opção com alternativas dentro pede uma marcada. Sem movimento (rolagem livre), não há escolhas.
+        /// </summary>
+        public Resultado AceitarRolagem(string eventoId, MovimentosBasicos.Movimento movimento = null,
+            IReadOnlyList<EscolhaDaRolagem> escolhas = null, TrocaDeGolpes troca = null)
+        {
+            var e = arquivo.Eventos.FirstOrDefault(x => x.Id == eventoId);
+            if (e?.Rolagem == null)
+                return Resultado.Falha("Rolagem não encontrada.");
+            if (!Pendente(e))
+                return Resultado.Falha("Essa rolagem já foi aceita (ou desfeita).");
+            var r = e.Rolagem;
+            var tipo = RolagemDaMesa.TipoDe(r.Total);
+            escolhas ??= new List<EscolhaDaRolagem>();
+            var gravadas = new List<EscolhaDaRolagem>();
+            if (movimento != null)
+            {
+                if (movimento.Id != r.Movimento)
+                    return Resultado.Falha("Essa rolagem é de outro movimento.");
+                var faixa = tipo == RolagemDaMesa.TipoTotal ? MovimentosBasicos.Faixa.Forte
+                    : tipo == RolagemDaMesa.TipoDrawback ? MovimentosBasicos.Faixa.Parcial : MovimentosBasicos.Faixa.Falha;
+                var opcoes = movimento.OpcoesNo(faixa);
+                var pede = Math.Min(movimento.EscolhasNo(faixa), opcoes.Count);
+                if (escolhas.Count != pede)
+                    return Resultado.Falha(pede == 0
+                        ? $"No resultado {RolagemDaMesa.NomeDoTipo(tipo)} não há o que escolher."
+                        : $"No resultado {RolagemDaMesa.NomeDoTipo(tipo)}, escolha {pede} (marcou {escolhas.Count}).");
+                foreach (var escolha in escolhas)
+                {
+                    var o = opcoes.FirstOrDefault(x => x.Id == escolha.Opcao);
+                    if (o == null)
+                        return Resultado.Falha("Essa opção não vale neste resultado.");
+                    if (gravadas.Any(g => g.Opcao == o.Id))
+                        return Resultado.Falha($"\"{o.Texto}\" marcada duas vezes.");
+                    var temAlternativas = o.Alternativas.Count > 0;
+                    if (temAlternativas && (escolha.Subopcao == null || escolha.Subopcao < 0 || escolha.Subopcao >= o.Alternativas.Count))
+                        return Resultado.Falha($"Em \"{o.Texto}\", marque uma das alternativas.");
+                    gravadas.Add(new EscolhaDaRolagem
+                    {
+                        Opcao = o.Id,
+                        Texto = o.Texto,
+                        Subopcao = temAlternativas ? escolha.Subopcao : null,
+                        Subtexto = temAlternativas ? o.Alternativas[escolha.Subopcao.Value] : null,
+                    });
+                }
+            }
+            else if (escolhas.Count > 0)
+                return Resultado.Falha("Escolhas pedem o movimento da rolagem.");
+
+            TrocaDeGolpes trocaGravada = null;
+            if (movimento != null && movimento.TrocaGolpes && tipo != RolagemDaMesa.TipoFalha)
+            {
+                var erroDaTroca = ConferirTroca(e, movimento, gravadas, troca ?? new TrocaDeGolpes(), out trocaGravada);
+                if (erroDaTroca != null)
+                    return Resultado.Falha(erroDaTroca);
+            }
+
+            r.Resultado = RolagemDaMesa.ResultadoDe(r.Total);
+            r.Tipo = tipo;
+            r.Escolhas = gravadas;
+            r.Troca = trocaGravada;
+            r.AceitaEm = DateTime.Now.ToString("s");
+            r.Aceita = true;
+            e.Descricao = TextoDaRolagem(r);
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>
+        /// Confere a troca de golpes marcada pelo mestre. Contra NPC: a condição do alvo (uma que ele tem e ainda não
+        /// marcou; se já marcou todas, nenhuma) e o retorno de quem rolou (condição ou golpe poderoso; ileso com
+        /// "resistir"). Contra PJ: os dois tomam golpe poderoso, e "resistir" livra quem escolheu. Devolve o erro ou null.
+        /// </summary>
+        string ConferirTroca(Evento e, MovimentosBasicos.Movimento movimento, List<EscolhaDaRolagem> escolhas,
+            TrocaDeGolpes troca, out TrocaDeGolpes gravada)
+        {
+            gravada = new TrocaDeGolpes();
+            var alvo = e.Rolagem.Alvo == null ? null : personagens.Buscar(e.Rolagem.Alvo);
+            var alvoPj = alvo != null && alvo.Papel == Papel.Heroi;
+            if (alvoPj)
+                gravada.AlvoGolpePoderoso = true;
+            else if (alvo != null)
+            {
+                var marcadas = CondicoesMarcadasDoVilao(alvo.Id);
+                var livres = (alvo.Vilao?.Condicoes ?? new List<string>()).Where(c => !marcadas.Contains(c)).ToList();
+                if (livres.Count > 0)
+                {
+                    if (troca.CondicaoDoAlvo == null || !livres.Contains(troca.CondicaoDoAlvo))
+                        return $"Troca de golpes: marque a condição de {alvo.NomeExibicao} (o MJ escolhe).";
+                    gravada.CondicaoDoAlvo = troca.CondicaoDoAlvo;
+                }
+            }
+
+            if (escolhas.Any(x => movimento.AnulaRetorno(x.Opcao)))
+                gravada.Retorno = TrocaDeGolpes.RetornoIleso;
+            else if (alvoPj)
+                gravada.Retorno = TrocaDeGolpes.RetornoGolpePoderoso;
+            else if (troca.Retorno == TrocaDeGolpes.RetornoGolpePoderoso)
+                gravada.Retorno = TrocaDeGolpes.RetornoGolpePoderoso;
+            else if (troca.Retorno == TrocaDeGolpes.RetornoCondicao)
+            {
+                var rolou = e.Personagem == null ? null : personagens.Buscar(e.Personagem);
+                if (troca.CondicaoDeQuemRolou == null || !Condicoes.Todas.Contains(troca.CondicaoDeQuemRolou))
+                    return "Troca de golpes: qual condição quem rolou marca?";
+                if (rolou != null && rolou.CondicoesMarcadas.Contains(troca.CondicaoDeQuemRolou))
+                    return $"{rolou.NomeExibicao} já está com {Condicoes.Nome(troca.CondicaoDeQuemRolou)} marcada.";
+                gravada.Retorno = TrocaDeGolpes.RetornoCondicao;
+                gravada.CondicaoDeQuemRolou = troca.CondicaoDeQuemRolou;
+            }
+            else
+                return "Troca de golpes: o retorno é uma condição ou tomar um golpe poderoso (o MJ escolhe um).";
+            return null;
+        }
+
+        /// <summary>
+        /// Muda a pilha por conta da rolagem, numa única mudança de "equipe" no evento (duas mudanças do mesmo
+        /// campo no evento confundiriam o desfazer, que calcula o inverso de cada uma a partir do valor de agora).
+        /// </summary>
+        void MudarEquipeDaRolagem(Evento e, int delta)
+        {
+            var novo = Math.Max(0, arquivo.Equipe + delta);
+            var m = e.Mudancas.FirstOrDefault(x => x.Campo == CampoEquipe);
+            if (m == null)
+                e.Mudancas.Add(m = new Mudanca { Campo = CampoEquipe, Antes = arquivo.Equipe, Depois = arquivo.Equipe });
+            m.Depois += novo - arquivo.Equipe;
+            Aplicar(null, new List<Mudanca> { new Mudanca { Campo = CampoEquipe, Antes = arquivo.Equipe, Depois = novo } });
+            if (m.Antes == m.Depois)
+                e.Mudancas.Remove(m);
+        }
+
+        /// <summary>
+        /// O texto da rolagem no log: a linha do dado ("rolou 2d6+1: 4 + 5 + 1 = 10 (10+)"), uma linha por
+        /// intervenção e o resultado final quando houve intervenção.
+        /// </summary>
+        string TextoDaRolagem(RolagemDaMesa r)
+        {
+            static string Sinal(int n) => n > 0 ? $"+{n}" : n < 0 ? $"−{-n}" : "±0";
+            var sinal = r.Mod == 0 ? string.Empty : r.Mod > 0 ? $"+{r.Mod}" : r.Mod.ToString();
+            var modTexto = r.Mod == 0 ? string.Empty : $" {(r.Mod > 0 ? "+" : "−")} {Math.Abs(r.Mod)}";
+            var texto = $"rolou 2d6{sinal}: {r.Dados[0]} + {r.Dados[1]}{modTexto} = {r.Inicial} ({RolagemDaMesa.Faixa(r.Inicial)})";
+            if (r.Movimento != null)
+            {
+                var alvo = r.Alvo == null ? string.Empty : " → " + (personagens.Buscar(r.Alvo)?.NomeExibicao ?? r.Alvo);
+                texto = $"{r.NomeDoMovimento}{alvo} ({Rotulos.Nome(r.Rotulo)} {(r.Mod < 0 ? "−" : "+")}{Math.Abs(r.Mod)}): " +
+                        $"{r.Dados[0]} + {r.Dados[1]}{modTexto} = {r.Inicial} ({RolagemDaMesa.Faixa(r.Inicial)})";
+            }
+            foreach (var i in r.Intervencoes)
+            {
+                var quem = personagens.Buscar(i.Quem)?.NomeExibicao ?? i.Quem;
+                var detalhe = string.IsNullOrWhiteSpace(i.Detalhe) ? string.Empty : ": " + i.Detalhe;
+                var custo = i.CustoEquipe > 0 ? $", −{i.CustoEquipe} Equipe" : string.Empty;
+                var segunda = string.IsNullOrWhiteSpace(i.Rolagem) ? string.Empty : $" [{i.Rolagem}]";
+                texto += $"\n  {Sinal(i.Mod)} {quem} ({i.DeOnde}{detalhe}{custo}){segunda}";
+            }
+            if (r.Intervencoes.Count > 0)
+                texto += $"\n  = {r.Total} ({RolagemDaMesa.Faixa(r.Total)})";
+            if (r.Aceita)
+            {
+                texto += r.Tipo == null ? " · aceito" : " · " + RolagemDaMesa.NomeDoTipo(r.Tipo);
+                if (r.Escolhas.Count > 0)
+                    texto += ": " + string.Join(", ", r.Escolhas.Select(x => x.Subtexto == null ? x.Texto : $"{x.Texto} ({x.Subtexto})"));
+                if (r.Troca != null)
+                {
+                    var alvo = r.Alvo == null ? null : personagens.Buscar(r.Alvo)?.NomeExibicao ?? r.Alvo;
+                    var doAlvo = alvo == null ? null
+                        : r.Troca.AlvoGolpePoderoso ? $"{alvo} toma golpe poderoso"
+                        : r.Troca.CondicaoDoAlvo != null ? $"{alvo} marca {Condicoes.Nome(r.Troca.CondicaoDoAlvo)}"
+                        : $"{alvo} sem condição livre";
+                    var retorno = r.Troca.Retorno == TrocaDeGolpes.RetornoIleso ? "retorno: ileso"
+                        : r.Troca.Retorno == TrocaDeGolpes.RetornoGolpePoderoso ? "retorno: golpe poderoso"
+                        : $"retorno: marca {Condicoes.Nome(r.Troca.CondicaoDeQuemRolou)}";
+                    texto += "\n  troca de golpes: " + (doAlvo == null ? retorno : doAlvo + " · " + retorno);
+                }
+            }
+            return texto;
+        }
+
         // ---------- por dentro ----------
 
         /// <summary>Só as instâncias desta sala, em carreira e numa vaga, recebem comando de jogo.</summary>
@@ -493,7 +879,11 @@ namespace TorreDeControle.Core.Salas
             var evento = NovoEvento(p, descricao, motivo);
             evento.Mudancas = mudancas.ToList();
             Aplicar(p, evento.Mudancas);
+            // Clique que desfaz exatamente o clique anterior (marcou/desmarcou): o par some do log na hora.
+            var anterior = arquivo.Eventos.LastOrDefault(e => !e.Oculto);
             arquivo.Eventos.Add(evento);
+            if (anterior != null && IdaEVolta(anterior, evento))
+                anterior.Oculto = evento.Oculto = true;
             Gravar();
             return Resultado.Sucesso();
         }
