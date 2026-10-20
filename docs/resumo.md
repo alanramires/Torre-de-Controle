@@ -1,6 +1,6 @@
 # Resumo — onde a Torre está
 
-> Handoff para a próxima conversa. Atualizado no fechamento da **v0.3.0** (2026-10-18).
+> Handoff para a próxima conversa. Atualizado no fechamento da **v0.4.0** (2026-10-19).
 > Se algo aqui contradiz o código, o código manda — e este arquivo precisa de poda.
 
 ## Leitura para retomar
@@ -10,37 +10,32 @@ cuidados de interpretação e direção dos painéis de ajuda, em palavras próp
 As regras executáveis continuam em `Assets/Resources/Regras/*.json`; consulte também
 `CLAUDE.md`, `regras.md`, `fluxo_de_telas.md` e os achados dos relatórios antes de alterar regras.
 
-**Duas IAs na mesma pasta:** esta (mecânica: regras, fichas, salas, mesa) e outra (cartas de ajuda e os dados
-3D; antes, imagens). O Alan autorizou commitar o trabalho dela, num commit próprio. Antes de commitar, `git status` e ler o diff do que não é seu; não assumir que arquivo
-novo é seu.
+**Duas IAs na mesma pasta:** esta (mecânica: regras, fichas, salas, mesa, rolador) e outra (cartas de ajuda e os
+dados 3D). Cada uma commita o seu. Antes de commitar, `git status` e ler o diff do que não é seu; não assumir que
+arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seus trechos (script
+`so_meus_trechos.py`, recriar no scratchpad: `git diff -U0`, tirar os trechos dela, `git apply --cached --unidiff-zero`).
 
 ## Estado
 
-- **Versão:** v0.3.0 — *O primeiro movimento* (`docs/relatorio_v0.3.0.md`). O **Enfrentar diretamente a
-  ameaça** virou um painel completo ("Rolar movimento", ou o "M" no assento): quem rola, contra quem,
-  2d6 + Rótulo nos dados físicos, intervenção (pilha, renúncia, Defender, outro), efeito esperado com as
-  opções e os cartões da troca de golpes, e um Aceitar que aplica na mesa. Antes: v0.2.2 (*Confiabilidade*),
-  v0.2.1 (*Ponto a ponto*), v0.2.0 (*A mesa*).
-- **O que organiza o que vem:** a rolagem é uma **entidade** (`RolagemDaMesa` em `Core/Mesa/Evento.cs`):
-  resultado (sucesso/falha), tipo (total/drawback/falha), escolhas com subopção, troca, intervenções e
-  `aceita_em`. Regra nova entra **no JSON do movimento** (`movimentos_basicos.json`: `trocar_golpes`,
-  `pede_alvo`, `contra_pj`, notas e `_decisao` com página). O próximo movimento usa o mesmo molde.
-- **Como foi feito:** um movimento só, até o fim, lendo cada ocorrência no livro com o Alan. Cada dúvida
-  virou decisão escrita. Achados que desmentiram suposições estão no relatório da v0.3.0.
-- **Onde o Alan chegou:** salas com personagens **em aprovação** (formação, Influência e relacionamentos
-  prontos; NPCs nascem da ficha). Agora há o **laboratório de NPCs** (botão Npcs na entrada): originais,
-  cópia entre campanhas, exportar/importar, foto, papel "Vilão / Oponente" e a ficha de vilão conferida no
-  livro. Exemplos nos dados locais do Alan: Professora, Rosa Rook, Sentinel, Eclipse.
-- **Pendente de decisão do Alan:** a outra IA trocou a regra da casa da Forasteira ("Entre dois mundos")
-  pela leitura do livro em `arquetipos.json`; confirmar se a regra da casa sai.
-- **O que organiza o que vem:** regra que gera NPC ou cenário é **dado** no `arquetipos.json` (`npcs`,
-  `npcs_historico`, `por_escolha` com `opcoes`, `equipe.npc`; `cenario` no lugar de papel; `cenario` nos
-  extras com nome automático e `dica_nome`; `npc_se` + `senao_cenario`), não código.
-- **Regra de mapear:** conferir a pergunta no livro antes de dizer que ela dá NPC ou lugar (o Farol pede
-  *sinais*, não lugar: o mapeamento errado saiu na v0.1.0).
-- **Como o Alan trabalha esta fase:** ele **desenha cada tela** (rascunho colorido) e explica a regra.
-  Não adiantar conteúdo nem regra antes do desenho (ele já parou isso duas vezes).
-- **O caminho da ficha**, e cada ação depende de onde ela está (e de onde foi aberta: hierarquia):
+- **Versão:** v0.4.0 — *O MJ decide a ordem* (`docs/relatorio_v0.4.0.md`). Antes: v0.3.0 (*O primeiro movimento*:
+  o Enfrentar), v0.2.2, v0.2.1, v0.2.0 (*A mesa*).
+- **O que organiza o que vem:** o que uma rolagem pede vira **pendência no log** (botão), nunca janela que abre
+  sozinha: a condição do vilão interrompe a mesa com o movimento dela, e só o MJ sabe a ordem. Hoje há três:
+  golpe pedido pela troca (`Mesa.GolpesPedidos`), movimento de condição do vilão (`CondicaoPedida` /
+  `ResolverMovimentoDeCondicao`), pedido pelo console (`PedirRolagem` / `PedidoAberto`, atalho no JSON).
+  A rolagem nova guarda `origem`; desfazer devolve a pendência.
+- **Movimentos conferidos:** Enfrentar (v0.3.0) e Tomar um golpe poderoso (v0.4.0). O molde: regra no JSON do
+  movimento (`movimentos_basicos.json`, com `_decisao` e página), lida por `Core/Regras/MovimentosBasicos.cs`;
+  opções com `efeitos` (`marcar_condicao` com `n`, `escolher` dentro de opção, `mj_decide`/`quem_rolou_decide` para
+  alternativas, `lembrete_na_oposicao`), `atalho` do console, `invertido`, `sem_intervencao`.
+- **Como o Alan trabalha esta fase:** ele **desenha cada tela** e explica a regra; não adiantar conteúdo nem regra
+  antes do desenho. Quando ele diz "não implemente, só leia", é só leitura.
+- **Validação pelo livro:** a ideia do Alan é reproduzir os exemplos do livro na Torre com "Rolar fixo" e ver se bate.
+  Ele criou a campanha **Pacatópolis** para isso (fichas ainda por criar). Arquétipos da equipe dos exemplos: Huma
+  (Legado), Toro (Bruta), Crepúsculo (Amaldiçoada), Vespa (Discípula), Gafanhoto (Janus), Tiro-Certo (Farol), Rex
+  (Transformado); Vértice (Nova) e Canção dos Céus (Forasteira) **segundo o Alan**, o texto não diz. Não há fichas
+  publicadas; o "Rolar fixo" escolhe a soma dos dados, então basta o arquétipo e o estado da cena.
+- **O caminho da ficha** (inalterado):
 
   ```
   laboratório:  novo ⇄ em aprovação
@@ -48,72 +43,48 @@ novo é seu.
                 em aprovação e em carreira → em revisão (botão na aba Mestre) → em aprovação
   ```
 
-  Pôr na vaga **copia** a ficha (a original fica no laboratório). Do laboratório, a instância é só
-  consulta. Em carreira, o jogo muda por evento da **mesa** (Core pronto, sem tela).
-- **Troca com outras máquinas:** exportar/importar JSON (lista = personagem nova; ficha = por cima da
-  mesma). Ida e volta conferida pelo Alan.
-- **Princípio:** a Torre é só do mestre, mas se comporta como se um dia fosse pública (conteúdo do
-  jogador passa por moderação: fotos por link com aprovar/recusar).
+- **Princípio:** a Torre é só do mestre, mas se comporta como se um dia fosse pública.
 
 ## Onde eu parei
 
-- **Cartas:** `Regras/cartas.json` (jogo) + `Ajuda/catalogo.json` (texto do help), desenhadas por
-  `DesenhoDeCarta`; help em `PainelAjuda` (cortina, dois níveis nos arquétipos, filtro); Gestão das cartas
-  = help em modo edição (`PainelEditorDeCarta`, grava via `Infra/ArquivosDoProjeto`, só no Editor).
-  **Não se fabricam mais PNGs de cartas** (decisão no fim deste arquivo). Falta: categorias descobertas pelo
-  catálogo, botão "nova carta" (Adulto), "?" por chip de movimento.
-- **Cenário:** `Cenario.cs`, `CadastroPersonagens.Cenario.cs` (`FontesDeCenario`, sincronização junto com a
-  dos NPCs), `CadastroPersonagens.TrocaCenario.cs`, aba em `PainelSala.SecaoCenario`. Anotados: copiar um
-  elemento para outra campanha; laboratório de cenário (botão "NPCs e cenário", não um sexto botão);
-  cidade acima das campanhas; Legado (linhagem → Organização) e Janus (emprego/escola → Local) em "talvez".
-  "Evento" não é cenário: vai para o log/Diário.
-
-- **Aprovação na campanha** — feitos: formação da equipe, Influência e **relacionamentos** (ficha, aba
-  História; sala só leitura; Bruta sincroniza amor/rival com a Influência). **NPCs da ficha** feitos em
-  `CadastroPersonagens.Pnj.cs` (`FontesDeNpc`, `SincronizarNpcsDaFicha`, `OrigemDoNpc`): nêmesis, mentora,
-  Legado, histórico de 7 arquétipos, obrigações do Janus, 3 impulsos do Farol. Em aprovação, nome e
-  descrição de NPC seguem editáveis (decisão do Alan: ajudar o mestre). **Ainda não** entram na trava.
-- **Laboratório de NPCs** — feito: `CadastroPersonagens.Pnj.cs` (`NpcsDoLaboratorio`, `CopiarNpc`,
-  `NomeRepetidoNoDestino`), `CadastroPersonagens.TrocaNpc.cs` (formato `torre-de-controle/npcs`),
-  `PainelNpcs.cs` (tela), `PainelNpc.cs` (ficha: foto, papel/maturidade, exportar/importar por cima).
-- **Influência PJ↔NPC** feita (ficha do NPC, ficha da heroína e árvore com "(NPC)"). Falta, de
-  `docs/npc_lab.md`: Influência oculta e a de nascença pela regra. E o vilão na mesa: marcar condição na
-  luta, derrotado, lembrete dos movimentos de condição (depende da Área do mestre).
-- **Help contextual:** `PainelAjuda.TemMovimentos(id)` / `AbrirMovimentos(id, movimento)`; o "?" por chip
-  de movimento tem o parâmetro pronto, sem ligação.
-- **Sons:** código versionado (`SonsUI`, `SomBotao`); `Assets/audio` no `.gitignore` até confirmar a origem.
-- **NPCs de fichas antigas** nasceram com o texto inteiro no nome (Estrela Negra, Aurora, a Discípula):
-  o Alan separa nome e descrição à mão.
-- **Influência no jogo** — `DefinirEstadoDaInfluencia` (dar nova, perder, voltar; só em carreira) está no
-  Core, sem tela e sem evento no log: vai para o painel do mestre (a aba Influência da sala).
-- **Mesa** — `UI/PainelMesa.cs` + `Core/Mesa/Mesa.cs` (eventos com desfazer e refazer; pilha, condições de vilão,
-  bônus e lembretes são da mesa, `mesa_<sala>.json`; trilhas e potencial vão para a ficha). Console do mestre
-  embaixo do log (`Core/Mesa/ConsoleDaMesa.cs`, `/help`).
-- **Rolador (v0.3.0)** — painel em `PainelMesa.DesenharRolagem` (seções `SecaoDeIntervencao`,
-  `CartoesDaTroca`); regras em `Mesa.RolarMovimento`, `Intervir`, `AceitarRolagem` (`ConferirTroca`,
-  `AplicarAceite`); leitura do JSON em `Core/Regras/MovimentosBasicos.cs` (`EfeitoEsperado`, `OpcoesNo`,
-  `EscolhasNo`, `AnulaRetorno`, `ReflectePercepcao`, `AlternativaValeContraPj`). **Próximo:**
-  1. **tomar um golpe poderoso** no mesmo painel (contra quem vazio, faixas invertidas, soma as condições
-     marcadas), com `origem` apontando para a rolagem que o pediu; hoje fica só no log;
-  2. cartão de **movimentos do MJ na falha** (pode combinar);
-  3. o modificador completo (condições −2, adiante, constante, Influência passiva +1); hoje é só o Rótulo;
-  4. os outros movimentos básicos, um por vez, como o Enfrentar;
-  5. sair de cena (com as 5 condições marcadas, o retorno "condição" fica sem opção).
-
-  O Alan vai testar mais, inclusive PvP. O exemplo `docs/exemplo_primeira_luta.md` continua revisado só até
-  "Aurora sai dos escombros". Falta também: Influência mudando Rótulos pela mesa (com Rejeitar); egoísta
-  mudando Rótulos (hoje à mão); post BBCode; roteiro marcando sozinho pelo log.
-- **Área do mestre** — `UI/PainelMestre.cs`: Primeira sessão (`Regras/primeira_sessao.json`,
-  `Core/Salas/PrimeiraSessao.cs`), Anotações (na sala: `AnotacoesFormacao`, `AnotacoesNpcs`, `Trama`),
-  e, abertas pela mesa, Vilões em cena e Potencial. Trama → ganchos e arcos (livro cap. 9) depois.
-- **Validação por arquétipo**, guiada pelo Alan: passaram Farol, Amaldiçoada, Janus, Nova, Forasteira;
-  Bruta e Delinquente sem validação; Discípula, Legado e Transformado sem revisão. Esperar o Alan.
-- Anotados para depois: aposentar no 15º avanço; ajuste do mestre em ficha em carreira
-  (`implementacao_futura.md`).
-- **Ajuste pontual com motivo** em ficha em carreira (sem reabrir a criação) e **resultado sem rolagem**
-  (Sobrecarga 10+, Vou te salvar! 12+) para o rolador: anotados.
-- Testes: `Assets/Tests/EditMode/` — 184 passando no harness dotnet fora da Unity; rodar também no Test
-  Runner da Unity.
+- **Próximo (combinado com o Alan): Cena e Spectate.** Desenho dele: quem está em cena (assentos) e quem assiste
+  (caixa "Spectate" no canto superior esquerdo, com o motivo: em outra cena, afastou-se, nocauteada, fugiu). Criar
+  cena registra quem está e quem assiste (sugere: a cena anterior + quem saiu nocauteada, que volta na seguinte).
+  **O MJ move qualquer uma para dentro e para fora à vontade** (exigência do Alan); entrar também pode gastar o
+  controle do "Chegar na hora certa" (Bruta). Saídas pela regra no Aceitar: golpe 10+ "afastar-se", precisar marcar
+  condição sem ter livre. O painel de rolagem e a intervenção passam a oferecer só quem está em cena (p.84). Hoje "sai
+  de cena" é só texto no log; NPCs já têm `em_cena` na mesa. Perguntas em aberto: a falha só tira de cena pelo botão
+  manual (movimento do MJ)? O Alan vai desenhar a janela de criar cena?
+- **Depois:** Liberar seus poderes (o par do Enfrentar; o 7–9 já pede a condição), Defender (proteger alguém + a
+  interrupção de PvP, hoje só intervenção −2) e o ganho de controle do "Chegar na hora certa" ("hold 1 instead of
+  choosing", preso à pessoa defendida; o custo do 7–9 continua). Depois, patches de arquétipo um movimento por vez
+  (ex.: Legado rolar Superior no Enfrentar).
+- **Modificador** (`Mesa.PartesDoModificador`): Rótulo + condições −2 já entram. Faltam adiante, constante e
+  Influência passiva +1 (p.81).
+- **Atalho para os movimentos do MJ no help** (pedido do Alan, "parece rápido"): ainda não feito. `PainelAjuda` tem
+  `AbrirCategoria("movimentos-mj")`.
+- **Influência na mesa**: "descontar num colega" e a renúncia são só marca narrativa. `DefinirEstadoDaInfluencia`
+  está no Core, sem tela e sem evento.
+- **Console** (`Core/Mesa/ConsoleDaMesa.cs`): `/eda`, `/tgp`, `/cena`, `/tempo`, `/salvar` (a tela grava: o Core só
+  monta o texto), `/avancar`, `/fixo`, `/reset` (a tela pede confirmação). Nome com espaço vai entre aspas; nome de
+  uma palavra ou primeiro nome único dispensam; se nenhum nome começa com o texto, vale o começo de qualquer palavra.
+- **Dados fixos:** `Mesa.FixarDados` / `TirarDadoFixo` (fila em memória, não gravada). `PainelMesa.JogarDados` (da
+  outra IA) anima os dados 3D até o valor pedido. Botão "Rolar fixo" no painel (`AbrirRolarFixo`).
+- **Cartas e help**: `Regras/cartas.json` + `Ajuda/catalogo.json`, desenhadas por `DesenhoDeCarta`; não se fabricam
+  PNGs de cartas (decisão de 2026-10-15). Faltam categorias descobertas pelo catálogo, "nova carta" (Adulto), "?" por
+  chip de movimento (`PainelAjuda.AbrirMovimentos(id, movimento)` pronto, sem ligação). Movimentos de arquétipo de
+  todos os arquétipos já estão no catálogo (trabalho da outra IA, conferido com Fichas Exemplo e livro).
+- **Pendente de decisão do Alan:** os papéis das NPCs novas de histórico (Amaldiçoada: aliado; Discípula: neutro);
+  a regra da casa da Forasteira ("Entre dois mundos"), trocada pela leitura do livro.
+- **Validação por arquétipo:** passaram Farol, Amaldiçoada, Janus, Nova, Forasteira; Bruta e Delinquente sem
+  validação; Discípula, Legado e Transformado sem revisão.
+- **Anotados para depois:** aposentar no 15º avanço; ajuste pontual com motivo em ficha em carreira; resultado sem
+  rolagem (Sobrecarga 10+, Vou te salvar! 12+); Influência oculta e de nascença; o vilão derrotado na mesa;
+  post BBCode; o exemplo `docs/exemplo_primeira_luta.md` revisado só até "Aurora sai dos escombros".
+- **Sons:** `Assets/audio` no `.gitignore` até confirmar a origem.
+- **Testes:** `Assets/Tests/EditMode/` — 197 passando no harness dotnet fora da Unity (scratchpad `testcore/t.csproj`:
+  Core + testes + Newtonsoft + NUnit, com os JSON de Regras ao lado). Rodar também no Test Runner da Unity. A outra
+  IA tem testes próprios em `Assets/Tests/Dice/`.
 
 ## Armadilhas
 
@@ -121,183 +92,74 @@ novo é seu.
 |---|---|---|
 | Campo de texto não edita | `TMP_InputField` cria o cursor no `OnEnable` | montar desligado, ligar depois |
 | Lista espremida / cabeçalho gigante | `HorizontalLayoutGroup` com `childForceExpandHeight` | `LayoutElement.flexibleHeight = 0` |
-| Coluna fixa esticando e espremendo as outras | herda `flexibleWidth` de um filho (campo de texto) | `LayoutElement` com `flexibleWidth = 0`, prioridade 2 |
+| Coluna fixa esticando e espremendo as outras | herda `flexibleWidth` de um filho | `LayoutElement` com `flexibleWidth = 0`, prioridade 2 |
 | Contorno sai cheio | `Outline` sob fundo translúcido | borda com 4 filetes |
 | Glifo vira quadrado | fonte sem ▾ | "›" girado |
 | Colunas desalinhadas | empate de `layoutPriority` com TMP | `ColunaElastica` com prioridade 2 |
-| Tab perde o foco / edição desfaz a anterior | redesenho após edição; callback com dado velho | não redesenhar em edição ok; ler `p.Identidade` na hora |
-| Tab pula para o painel de trás | dois `NavegacaoTab` ligados | só o último ligado responde |
+| Tab perde o foco / edição desfaz a anterior | redesenho após edição; callback com dado velho | não redesenhar em edição ok; ler na hora |
 | Rolagem volta ao topo | aba refeita | `MontarConteudo(manterRolagem: true)` |
 | Roda do mouse não rola | sem raycast nos vãos; TMP multilinha engole | Image transparente; `RepassaRolagem` |
-| Ficha abre em branco | `AddComponent<Image>` num objeto que já tem TMP vem **nulo** | um gráfico por objeto; ver `Logs/Editor.log` |
+| Ficha abre em branco | `AddComponent<Image>` num objeto que já tem TMP vem **nulo** | um gráfico por objeto; `Logs/Editor.log` |
 | Compila "verde" mas a tela quebra | `tools/compilar.sh` só prova tipos | conferir o `Logs/Editor.log` da Unity |
-| Compila "verde" sem o arquivo novo | `.csproj` velho até a Unity regenerar | `tools/compilar.sh` após a Unity abrir; ou cópias `_v_` dos csproj |
+| `compilar.sh` acusa arquivo fora (meu ou da outra IA) | `.csproj` só se regenera com a Unity aberta (Ctrl+R) | compilar por cópias `_v_` com glob da pasta (`vcsproj.py` no scratchpad: Core, Infra, UI e Dados=`Dice`), apagar depois |
 | Teste passa no harness e falha na Unity | NUnit da Unity é antigo: `Does.Contain` só aceita texto | `Has.Member` para coleções |
 | `dotnet test` trava / dll presa | `testhost` de uma execução anterior | encerrar o `testhost` |
-| Ficha concluída sem movimentos | foto posta antes de congelar os módulos | montar a foto inteira antes de atribuir |
-| String C# quebrada | heredoc do Bash come `\` | patch em arquivo `.py` no scratchpad |
+| String C# quebrada / comando travado | heredoc do Bash come `\`; `cat >` sem entrada espera para sempre | patch em arquivo `.py` escrito com a ferramenta de arquivo |
+| **Busca-e-troca corrompeu PNG** | `grep -rl` sem `-I` lista binários e o `sed` reescreve | `grep -rlI` (só texto); conferir `git status` depois |
+| Busca com acento não acha | `grep -i` com `[aá]` falha no locale do Git Bash | sem `-i`, as duas grafias, ou Python |
+| Python não imprime acento | `-I` ignora `PYTHONIOENCODING`; console em cp1252 | `sys.stdout.reconfigure(encoding='utf-8')` |
 | Imagem não carrega por caminho | fora de uma pasta `Resources` | `Resources/...` ou lista no Inspector |
 | Ficha em branco ao abrir (2º Play) | Play sem domain reload: cache estático com textura destruída | limpar estáticos com `[RuntimeInitializeOnLoadMethod]` |
-| Texto digitado some | gravava só ao sair do campo | `onValueChanged` (barato com a gravação adiada) |
-| "Textos trocados" nas descrições | caixas na ordem do JSON, jogador preenche na ordem que marcou | caixas na ordem da marcação |
-| Engasgo a cada clique | aba inteira refeita + arquivo gravado por clique | `SecaoRefazivel` + `ArmazenamentoAdiado` |
-| Recompilação de 6–16 s ao voltar à Unity | Auto Refresh com duas IAs editando | desligar Auto Refresh, Ctrl+R quando quiser |
-| Direção da Influência trocada | "dar a X" = X tem Influência sobre quem deu | quem **recebe** tem o poder; reversa = "ela exerce Influência sobre" |
-| Chips que deixam passar do limite | só o Core recusava, a tela deixava | travar os que sobram no limite (como as habilidades) |
-| Botão/coluna gigante | coluna fixa herda "esticável" de dentro | `LayoutElement`: `flexibleWidth = 0`, prioridade 2 |
-| `dotnet test` "sem resultado" | saída em inglês ("Passed!") | filtrar `Passed!|Failed!` também |
-| Texto de regra copiado | repo é **público** | texto próprio sempre; livro/acervo só como consulta |
-| Ícone de terceiros no repo | licença (ex.: Icons8) | fora do repositório (`.gitignore`) |
-| Caixa de texto "expande" às vezes | campo de uma linha com texto colado com quebras vaza | `AreaTexto` (várias linhas, rola dentro) |
-| NPC duplicado ao mudar a chave do vínculo | busca nova não acha o gravado no formato antigo | adotar o antigo no mesmo passo (`AcertarVinculosSemCampo`) |
-| Mudança de formato "não pegou" | o Unity só recompilou depois | conferir no Play mode depois do reload, antes de mexer à mão |
-| Em aprovação, chip parece clicável e não funciona | tela destravou o extra inteiro, o Core só o campo | destravar por **campo** (`ExtraEditavelNaSala(p, extra, campo)`) |
-| Desmarcar opção não mexe no NPC | sincronização só no texto | sincronizar também em `AlternarOpcaoDeExtra` |
-| Heredoc do Bash falha com aspas | "unexpected EOF" no Git Bash do Windows | script `.py` escrito com a ferramenta de arquivo |
-| NPC original aparece entre as heroínas | "laboratório" era "sem sala" | filtrar também por `Controle` |
-| Conta de vida do vilão | "3 condições = cai no 3º" é errado | derrotado quando **precisa** marcar e não tem: com 3, cai no 4º |
+| Engasgo a cada clique | aba refeita + arquivo gravado por clique | `SecaoRefazivel` + `ArmazenamentoAdiado` |
+| Recompilação lenta / "não pegou" / carta nova não aparece | Auto Refresh desligado (duas IAs editando) | **Ctrl+R** na Unity antes de procurar bug |
+| Direção da Influência trocada | "dar a X" = X tem Influência sobre quem deu | quem **recebe** tem o poder |
+| Texto de regra copiado / ícone de terceiros | repo é **público** | texto próprio sempre; ícones fora do repo |
+| Caixa de texto cresce com o texto | `TMP_InputField` também é `ILayoutElement` | `LayoutElement.layoutPriority = 2` (`AreaTexto`) |
+| Rótulo vaza do botão | `Encolher` põe numa linha só, mínimo 12; frase longa não cabe | opção do resultado: `TextoDeOpcao` (duas linhas, mín. 11); botão `TextoLivre` fica fora do `LateUpdate` |
+| Texto fixo espremido numa seção que cresce | seção de altura fixa com itens empilhados | explicação em `Dica` (flutuante); lista longa em `ListaRolavel` |
+| CS0136 no painel | `DesenharRolagem` é enorme: nome de variável repetido em escopo aninhado | nomes específicos (`somaDasPartes`, `deDentro`) |
+| Enum e constante com o mesmo nome | `const string Controle` dentro de `Mesa` esconde o enum | prefixar (`BonusControle`) |
 | Gravar nos dados com a Unity aberta | a gravação adiada sobrescreve | Unity fechada, ou arquivo na pasta `importar` |
-| Link de foto não aparece | a Unity só desenha jpg/png (outro formato vira 8x8 "?") | aviso + abrir no navegador; aprovar mesmo assim |
-| PDF "baixado" sem texto | impresso por site de download, perdeu a camada de texto | não serve de fonte; conferir no livro |
-| NRE em `AddComponent` depois de `GetComponent ?? ...` | "fake null" da Unity: `??` não vê o objeto destruído/ausente | `TryGetComponent` |
-| NRE em `GetPreferredValues` | TMP em objeto inativo não mede | estimar a largura (`LarguraEstimada`) |
-| Carta nova "não aparece" | Auto Refresh desligado, JSON velho em memória | Ctrl+R antes de procurar bug |
-| Commit levou arquivo de outra frente | `git commit` grava o índice inteiro (havia `D` já staged) | `git status` antes; refazer se ainda não houve push |
-| Caixa de texto cresce com o texto | `TMP_InputField` também é `ILayoutElement`: empate de prioridade, vence a maior | `LayoutElement.layoutPriority = 2` (`AreaTexto`) |
-| Rótulo vaza do botão | ajuste feito botão a botão, alguns escapam | ajustar todos ao redesenhar (`PainelMesa.LateUpdate`), exceto texto longo marcado |
-| Enum e constante com o mesmo nome | `const string Controle` dentro de `Mesa` esconde o enum `Controle` | prefixar (`BonusControle`) |
-| `compilar.sh` acusa arquivo novo com o Unity fechado | `.csproj` só se regenera com o Unity aberto | compilar pelas cópias `_v_` (vcsproj.py) até o Unity abrir |
-| Testar o armazenamento real | o assembly de testes do Unity não referencia o Infra | harness à parte (scratchpad `testinfra`); falta trazer para o projeto |
-| Apagar pasta duas vezes na retenção | lista recalculada depois de apagar | separar as listas antes de apagar |
-| Narrar o que a ficha não tem | inventei habilidade ("enxerga no escuro") | ler a ficha antes de narrar; usar o que ela tem (Visões sombrias) |
-| Explicar regra de cabeça | "egoísta = +1", "ajuda de quem está longe" | conferir no livro (p.84–85) antes de escrever o exemplo |
-| Pilha "zerando" no questionário | leitura errada da regra | a pilha **soma** sempre; só "o tempo passa" volta para 1 (pp.86–88) |
-| Mapeamento de NPC/lugar errado | lista pronta sem conferir a pergunta (Farol) | conferir no livro PT-BR e inglês |
-| Exemplo do livro lido pela metade | a p.189 tem duas cenas (Defender da Canção dos Céus, Enfrentar do Rex) | ler a cena inteira antes de concluir uma regra |
-| Pedido entendido como entidade nova | "Herói genérico" virou arquétipo; era opção de "quem rola" | perguntar o lugar na tela antes de criar entidade |
+| Testar o armazenamento real | o assembly de testes não referencia o Infra | harness à parte (scratchpad `testinfra`) |
+| **Janela que abre sozinha** | auto-trigger do que a rolagem pede | pendência no log; o MJ decide a ordem (memória do projeto) |
+| Narrar o que a ficha não tem / regra de cabeça | inventei habilidade; "egoísta = +1" | ler a ficha e conferir no livro antes de escrever |
+| Pilha "zerando" | leitura errada | a pilha **soma** sempre; só "o tempo passa" volta para 1 (p.88); cena nova não mexe |
+| Mapeamento de NPC/lugar errado | lista pronta sem conferir a pergunta | conferir no livro; pergunta com "quem" = pessoa = NPC |
+| Exemplo do livro lido pela metade | a p.189 tem duas cenas | ler a cena inteira antes de concluir |
+| PT ambíguo | "quando a pessoa estiver em perigo" | conferir no PDF inglês do acervo (`Livros/Masks-ENG-Arquetipos.pdf`, `pypdf`) |
+| Nome do movimento no livro não acha | o nome é nosso (texto próprio) | procurar pela regra, não pelo nome |
+| Pedido entendido como entidade nova | "Herói genérico" virou arquétipo | perguntar o lugar na tela antes de criar entidade |
 | Log ambíguo | "retorno: ileso" sem dizer de quem | escrever sempre o nome de quem recebe |
-| Teste antigo quebra com regra nova | rolagem sem alvo, +1 Equipe contra PJ | atualizar o teste para a regra, não a regra para o teste |
-| Dados físicos escondidos | a caixa do painel por cima da sobreposição | fechar a caixa antes de jogar e reabrir com o resultado |
+| Teste antigo quebra com regra nova | rolagem sem alvo, +1 Equipe contra PJ | atualizar o teste para a regra |
+| Dados físicos escondidos | a caixa do painel por cima | fechar a caixa antes de jogar e reabrir com o resultado |
+| Commit levou arquivo de outra frente | `git commit` grava o índice inteiro | `git status` antes; arquivo misto por trecho |
+| Valor no prefab parece churn | ajuste no Inspector junto com a reordenação da Unity | comparar com o padrão do script antes de chamar de churn |
 
 ## MVP (do `CLAUDE.md`)
 
 | Item | Estado |
 |---|---|
-| Tela de entrada → partida | **de pé**: "Entrar na sala" abre a mesa da campanha pronta (ou lista) |
-| Criar personagem | **de pé** (laboratório e revisão na sala, com pendências) |
-| Mesa com N fichas clicáveis | **de pé**: assentos com Rótulos, condições, potencial, bônus; ficha no clique |
-| Pilha de Equipe | **de pé**: Gerir pilha (±1, usar, questionário, passagem do tempo) |
-| Mão de cartas por jogador | falta |
-| Rolador 2d6 + log | **de pé para o Enfrentar** (painel, intervenção, aceite que aplica); outros movimentos e golpe poderoso faltam |
-| Exportar log para o fórum | falta |
+| Tela de entrada → partida | **de pé** |
+| Criar personagem | **de pé** (laboratório e revisão na sala) |
+| Mesa com N fichas clicáveis | **de pé**; com 9 heroínas falta o modo cena/Spectate |
+| Pilha de Equipe | **de pé** |
+| Mão de cartas por jogador | falta (base no Core: `CatalogoDeCartas` + `MontadorDeBaralho`) |
+| Rolador 2d6 + log | **de pé para Enfrentar e golpe poderoso**, com condições na conta, pendências e dados fixos; outros movimentos faltam |
+| Exportar log para o fórum | **parcial**: `/salvar` grava o log em .txt e copia; falta o post BBCode da colheita |
 
-Fora do MVP, já de pé: jogadores; NPCs com ficha de vilão (Neutro/Aliado/Vilão / Oponente), **NPCs que
-nascem da ficha** e o **laboratório de NPCs** (cópia entre campanhas, troca em JSON); Influência PJ↔NPC;
-**Cenário** da campanha; relacionamentos; **help com as cartas desenhadas** e editor de cartas; fotos por
-link com aprovação; retratos; exportar/importar a ficha em JSON (troca com outras máquinas).
-A "mão de cartas" tem base: `CatalogoDeCartas` + `MontadorDeBaralho` no Core, sem tela de mesa.
+Fora do MVP, já de pé: jogadores; NPCs (laboratório, ficha de vilão, os que nascem da ficha); Influência PJ↔NPC;
+Cenário; relacionamentos; help com cartas desenhadas e editor de cartas; fotos por link com aprovação;
+exportar/importar ficha; console do mestre; dados 3D com animação dirigida (outra IA).
 
 ## Schema da ficha
 
-- Gravado em JSON por `ArmazenamentoLocalJson` (`persistentDataPath/dados/`): `jogadores.json`,
-  `personagens.json` (laboratório, instâncias e NPCs juntos), `salas.json` e `mesa_<sala>.json`.
-- Campos novos desta versão (sem migração, com conversão ao carregar quando preciso): `relacoes`
-  (era `relacionamentos`), `nomes_historico`, `pnj.vinculo` (personagem, extra, campo, vaga),
-  `pnj.maturidade_a_definir`; NPC com papel `heroi` vira `aliado` ao carregar.
-- v0.0.6: NPC sem sala = original do laboratório de NPCs; troca de NPCs com formato próprio
-  (`torre-de-controle/npcs`, versão 1). Foto do NPC usa `foto_heroica`.
-- v0.1.0: `personagens.json` ganha a lista `cenario` (elementos com `sala`, `tipo`, `vinculo`,
-  `descricao_copiada`); `pnj.descricao_copiada`; `equipe_npc_nome`; textos do nome do lugar nos extras com
-  campo `cenario`. Troca de cenário: formato `torre-de-controle/cenario`, versão 1.
-- v0.2.0: `mesa_<sala>.json` ganha `equipe`, `em_cena`, `condicoes_de_vilao`, `bonus`; `salas.json` ganha
-  `primeira_sessao`, `anotacoes_formacao`, `anotacoes_npcs`, `trama`, `ultima_mesa`; `pnj.ligacoes`. Trocas
-  novas: `torre-de-controle/anotacoes` e `torre-de-controle/vinculos` (versão 1).
-- v0.3.0: eventos de `mesa_<sala>.json` ganham `oculto`, `editado` e `rolagem` (dados, mod, movimento,
-  rotulo, alvo, intervenções, resultado, tipo, escolhas, troca, aceita, aceita_em). Evento antigo sem
-  `rolagem` continua valendo (campo opcional).
-- **Os arquivos têm o campo `versao`, mas ainda não há migração** (o número é gravado; ao carregar, não se
-  converte nem se recusa versão diferente). Na v0.0.2 o status `criado` deixou de existir; os dados
-  locais do Alan foram convertidos à mão (backup em `dados/personagens.antes-dos-status.json`).
-  Antes de uma campanha de verdade, criar a migração (converter ou recusar versão diferente ao carregar).
-
-
-Movimentos de arquétipo: Delinquente adicionado com seis cartas de borda vermelha,
-conferidas com Fichas Exemplo/Delinquente e o livro (pp.110 e 113).
-Textos em Ajuda/catalogo.json; referências para as seis opções de
-arquetipos.json. A galeria e o help contextual da ficha usam os IDs existentes.
-Amaldiçoada não tem movimentos comuns na criação; seus extras ficam pendentes.
-
-
-Discípula: seis movimentos adicionados a Movimentos de arquétipo, com borda
-vermelha e IDs do arquetipos.json. Conferidos com as seis cartas de
-Fichas Exemplo/Discipula e o livro (pp.116 e 118–119). Recursos da mentora
-ficam para os extras. O help contextual usa os parâmetros existentes.
-
-
-Farol: seis movimentos adicionados a Movimentos de arquétipo, com borda
-vermelha e IDs do arquetipos.json. Conferidos com Fichas Exemplo/Farol
-e o livro (pp.122 e 124–125). Vamos, Sortudo! dá +1 quando o bicho ajuda
-nos três movimentos escolhidos, sem ser adiante de uso único. Impulsos
-ficam para os extras. O help contextual usa os parâmetros existentes.
-
-
-Forasteira: seis movimentos em Movimentos de arquétipo, borda vermelha,
-IDs de arquetipos.json. Conferidos com Fichas Exemplo/Forasteira e livro
-(pp.128 e 130–131). Entre dois mundos explicita que a exigência do povo ocorre na falha;
-não exige pagamento em todo contato nem bloqueia novo contato no texto do livro. Nave Kirby inclui as opções da nave.
-O help contextual usa os parâmetros existentes.
-
-
-Janus: seis movimentos em Movimentos de arquétipo, borda vermelha e IDs
-de arquetipos.json. Conferidos com Fichas Exemplo/Janus e livro (pp.134
-e 136–137). A Máscara é inicial obrigatório, mais dois escolhidos; troca
-os valores dos Rótulos uma vez por sessão. Obrigações civis ficam para os extras.
-
-
-Legado: seis movimentos em Movimentos de arquétipo, borda vermelha e IDs
-de arquetipos.json. Conferidos com Fichas Exemplo/Legado e livro (pp.140
-e 142–143). Símbolo de autoridade dá −1 adiante na falha (o PNG antigo
-indicava +1 incorretamente). Nunca desista usa +Salvador e substitui o golpe
-poderoso básico. O módulo do legado fica para os extras.
-
-
-Nova: onze cartas (Chamas + dez faíscas) em Movimentos de arquétipo,
-borda vermelha. Chamas explica a analogia com pontos de magia: carregar,
-formar reserva, pagar custos e perder o restante no fim da cena. Conferidas
-com Fichas Exemplo/Nova e livro (pp.146 e 148–149). Referências apontam
-para extras de Nova, pois ele não escolhe movimentos comuns. IDs de help:
-arquetipo/nova/chamas e arquetipo/nova/<id-da-faisca>.
-
-
-Transformado: seis movimentos em Movimentos de arquétipo, borda vermelha
-e IDs de arquetipos.json. Conferidos com Fichas Exemplo/Transformado e o
-livro (pp.152 e 155). Eu não sou meu corpo reduz a contagem de condições
-em duas, com mínimo zero; Eu sou o monstro exige complicações mesmo no
-sucesso. Galeria e help contextual usam os parâmetros existentes.
-
-
-## Decisão sobre cartas (2026-10-15)
-
-Não fabricar nem regenerar PNGs de cartas a partir de agora. O novo sistema
-desenha as cartas usando Assets/Resources/Ajuda/catalogo.json; textos novos
-e correções entram nele. Tokens e ícones podem continuar sendo gerados como
-artes separadas. Esta decisão substitui o fluxo antigo de geração de cartas.
-
-
-## Perdição da Amaldiçoada (2026-10-15)
-
-Onze cartas novas, somente em Ajuda/catalogo.json, categoria principal
-perdicao: Nêmesis, Perdição, Sinais (visão geral), os cinco poderes,
-Sua perdição chega, Santuário e Usar o santuário. Todas ligadas pelo
-campo ajuda em Regras/cartas.json, origem amaldicoada (selo da classe),
-tipo extra. Entradas existentes preservadas; criadas as faltantes para
-os sinais e para o uso do santuário. Referências por IDs dos extras,
-sem posições numéricas. Texto próprio conferido com livro pp.96,98–101
-e Cards/Novas/Arquetipos/Amaldicoada (só consulta).
-
-Começa com um Sinal; trilha de cinco casas rende outro. Poderes infinitos
-concede habilidade, não movimento. O Sinal final e o avanço de enfrentar
-a perdição são caminhos distintos. Requisitos do santuário não são
-condições emocionais. Não foram gerados PNGs de cartas nem novos tokens.
-Validado: IDs únicos, um vínculo de jogo por help, marcação e build UI.
-Conferência visual no Play ainda depende do Alan.
+- Gravado em JSON por `ArmazenamentoLocalJson` (`persistentDataPath/dados/`): `jogadores.json`, `personagens.json`,
+  `salas.json`, `mesa_<sala>.json`. Exportações em `dados/exportacoes` (inclui `log_<sala>_<data>.txt`).
+- v0.4.0 (todos opcionais, sem migração; evento antigo continua valendo): na rolagem, `partes` (do modificador),
+  `origem`; nas escolhas, `condicoes`, `faltaram_condicoes`, `dentro`, `para`; no evento, `pedido` (movimento, alvo)
+  e `resolve` (a pendência de condição do vilão). Lembretes da abertura são `bonus` do tipo lembrete.
+- v0.3.0: eventos com `oculto`, `editado` e `rolagem`. v0.2.0: `mesa_<sala>.json` com `equipe`, `em_cena`,
+  `condicoes_de_vilao`, `bonus`. Formatos de troca próprios: `torre-de-controle/npcs`, `cenario`, `anotacoes`,
+  `vinculos` (versão 1).
+- **Os arquivos têm o campo `versao`, mas ainda não há migração** (grava o número; ao carregar, não converte nem
+  recusa). Antes de uma campanha de verdade, criar a migração.
