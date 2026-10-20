@@ -1,0 +1,30 @@
+{
+  "versao": 1,
+  "_sobre": "Os movimentos do MJ (livro cap. 7, p.177-184), para o deck da mesa. O peso (leve ou pesado) NÃO é do movimento: o MJ escolhe ao jogar (p.177: 'você decide o peso de qualquer movimento'). 'tendencia' só onde o livro aponta uma; a tela pré-marca e o MJ troca. 'efeito' é o que a mesa faz junto (marcar_condicao: a condição no alvo, no mesmo evento); o resto é narrativo. 'ajuda' é o id da carta em Ajuda/catalogo.json.",
+  "quando": "Numa falha (se o movimento não descreve a própria falha), quando a conversa para e todos olham para o MJ, ou quando a ficção pede (p.177).",
+  "movimentos": [
+    { "id": "mj/infligir-condicao", "nome": "Infligir uma condição", "ajuda": "movimentos-mj/infligir-condicao",
+      "tendencia": "pesado", "efeito": "marcar_condicao", "alvo": "heroina",
+      "_tendencia": "p.189: 'infligindo uma condição, um movimento pesado e simples'",
+      "nota": "o MJ só determina qual condição se tiver uma ideia muito clara; senão, quem recebe escolhe" },
+    { "id": "mj/ganhar-influencia", "nome": "Ganhar Influência sobre alguém", "ajuda": "movimentos-mj/ganhar-influencia",
+      "tendencia": "pesado", "_tendencia": "cap. 9: 'Se precisar fazer um movimento pesado, faça um dos ganchos ganhar Influência sobre a PJ e mudar seus Rótulos'",
+      "nota": "a Influência na mesa ainda não existe: por enquanto é registro narrativo" },
+    { "id": "mj/juntar-grupo", "nome": "Juntar o grupo", "ajuda": "movimentos-mj/juntar-grupo" },
+    { "id": "mj/capturar-alguem", "nome": "Capturar alguém", "ajuda": "movimentos-mj/capturar-alguem" },
+    { "id": "mj/inocentes-em-perigo", "nome": "Colocar inocentes em perigo", "ajuda": "movimentos-mj/inocentes-em-perigo" },
+    { "id": "mj/custos-danos-colaterais", "nome": "Mostrar os custos dos danos colaterais", "ajuda": "movimentos-mj/custos-danos-colaterais" },
+    { "id": "mj/revelar-futuro", "nome": "Revelar o futuro, sutil ou diretamente", "ajuda": "movimentos-mj/revelar-futuro" },
+    { "id": "mj/ameacas-entre-quadrinhos", "nome": "Anunciar ameaças espreitando entre os quadrinhos", "ajuda": "movimentos-mj/ameacas-entre-quadrinhos" },
+    { "id": "mj/preco-vitoria", "nome": "Cobrar um preço pela vitória", "ajuda": "movimentos-mj/preco-vitoria" },
+    { "id": "mj/virar-movimentos", "nome": "Virar os movimentos contra os heróis", "ajuda": "movimentos-mj/virar-movimentos" },
+    { "id": "mj/consequencias", "nome": "Definir as possíveis consequências e esperar resposta", "ajuda": "movimentos-mj/consequencias" },
+    { "id": "mj/identidade", "nome": "Determinar quem as personagens são ou deveriam ser", "ajuda": "movimentos-mj/identidade" },
+    { "id": "mj/conclusoes-precipitadas", "nome": "Fazer uma PNJ tomar decisões precipitadas e tirar conclusões difíceis", "ajuda": "movimentos-mj/conclusoes-precipitadas" },
+    { "id": "mj/desvantagens", "nome": "Acionar as desvantagens das habilidades e dos relacionamentos", "ajuda": "movimentos-mj/desvantagens" },
+    { "id": "mj/movimento-arquetipo", "nome": "Fazer um movimento de arquétipo", "ajuda": "movimentos-mj/movimento-arquetipo" },
+    { "id": "mj/movimento-vilao", "nome": "Fazer um movimento de vilão", "ajuda": "movimentos-mj/movimento-vilao", "efeito": "movimento_de_vilao",
+      "nota": "a tela abre os movimentos do vilão em cena; o movimento escolhido também entra no log" }
+  ],
+  "origem": "livro p.177-184"
+}

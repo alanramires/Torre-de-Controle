@@ -56,6 +56,11 @@ namespace TorreDeControle.Core.Salas
             arquivo.CondicoesDeVilao ??= new Dictionary<string, List<string>>();
             arquivo.Cenas ??= new List<Cena>();
             arquivo.HeroisEmCena ??= new List<string>();
+            foreach (var c in arquivo.Cenas)
+            {
+                c.Herois ??= new List<string>();
+                c.Npcs ??= new List<string>();
+            }
             if (arquivo.Rodada < 1)
                 arquivo.Rodada = 1; // sempre há uma rodada corrente
             return new Mesa(armazenamento, personagens, sala, arquivo, regrasDeCondicoes);
@@ -69,7 +74,20 @@ namespace TorreDeControle.Core.Salas
         /// <summary>Do mais antigo ao mais novo.</summary>
         public IReadOnlyList<Evento> Eventos => arquivo.Eventos;
 
-        public bool Corrigido(Evento e) => arquivo.Eventos.Any(x => x.Corrige == e.Id);
+        /// <summary>
+        /// O evento foi desfeito e o desfazer ainda vale (um desfazer que foi refeito não conta: o original volta a valer,
+        /// com as pendências dele).
+        /// </summary>
+        public bool Corrigido(Evento e) => arquivo.Eventos.Any(x => x.Corrige == e.Id && !Refeito(x));
+
+        /// <summary>O desfazer foi refeito (há um "refez" apontando para ele).</summary>
+        bool Refeito(Evento correcao) => arquivo.Eventos.Any(y => y.Refaz == correcao.Id);
+
+        /// <summary>
+        /// Desfazer e refazer se anulam: o desfazer refeito e o "refez" saem da tela (ficam no arquivo), como as idas e
+        /// voltas. O log volta a mostrar o original como se nada tivesse acontecido.
+        /// </summary>
+        bool Anulado(Evento e) => e.Refaz != null || (e.Corrige != null && Refeito(e));
 
         /// <summary>Fecha a rodada corrente e abre a próxima.</summary>
         public void NovaRodada()
@@ -421,7 +439,7 @@ namespace TorreDeControle.Core.Salas
             var r = e?.Rolagem;
             if (r?.Troca?.CondicaoDoAlvo == null || r.Troca.AlvoGolpePoderoso || r.Alvo == null || !r.Aceita || e.Oculto || Corrigido(e))
                 return null;
-            if (arquivo.Eventos.Any(x => x.Resolve == e.Id && !x.Oculto && !Corrigido(x)))
+            if (arquivo.Eventos.Any(x => x.Resolve == e.Id && x.MovimentoDoMj == null && !x.Oculto && !Corrigido(x)))
                 return null;
             return (r.Alvo, r.Troca.CondicaoDoAlvo);
         }
@@ -446,6 +464,82 @@ namespace TorreDeControle.Core.Salas
             return Resultado.Sucesso();
         }
 
+        // ---------- o deck do MJ (movimentos_mj.json, livro p.177-184) ----------
+
+        /// <summary>
+        /// A rolagem aceita falhou e o MJ ainda não fez o movimento que a falha pede (pendência no log, sem abrir
+        /// sozinha). Some quando o movimento é feito; volta se ele for desfeito.
+        /// </summary>
+        public bool MovimentoDoMjPedido(Evento e) =>
+            e?.Rolagem?.PedeMovimentoDoMj == true && e.Rolagem.Aceita && !e.Oculto && !Corrigido(e) &&
+            !arquivo.Eventos.Any(x => x.Resolve == e.Id && x.MovimentoDoMj != null && !x.Oculto && !Corrigido(x));
+
+        /// <summary>
+        /// O MJ faz um movimento: com o peso que escolheu (leve ou pesado, p.177), contra quem (em cena, ou ninguém) e o
+        /// que fez. "Infligir uma condição" marca a condição na heroína no mesmo evento (sem condição escolhida, quem
+        /// recebe escolhe e o mestre marca depois). Com <paramref name="pendencia"/>, resolve a falha que pediu.
+        /// </summary>
+        public Resultado FazerMovimentoDoMj(MovimentosDoMj.Movimento movimento, string peso, string alvo, string condicao,
+            string oQueFez, string pendencia = null)
+        {
+            if (movimento == null)
+                return Resultado.Falha("Qual movimento?");
+            if (peso != MovimentosDoMj.Leve && peso != MovimentosDoMj.Pesado)
+                return Resultado.Falha("Leve ou pesado? O peso é seu (p.177).");
+            Personagem a = null;
+            if (alvo != null)
+            {
+                a = personagens.Buscar(alvo);
+                if (a == null || a.Sala != sala)
+                    return Resultado.Falha("Esse alvo não está nesta campanha.");
+                if (ForaDeCena(alvo) is string fora)
+                    return Resultado.Falha(fora);
+            }
+            var mudancas = new List<Mudanca>();
+            if (movimento.MarcaCondicao)
+            {
+                if (a == null || a.Controle == Controle.Mestre || !EmJogo(a.Id, out _, out _))
+                    return Resultado.Falha($"{movimento.Nome} pede uma heroína em cena.");
+                if (condicao != null)
+                {
+                    if (!Condicoes.Todas.Contains(condicao))
+                        return Resultado.Falha("Condição desconhecida.");
+                    if (a.CondicoesMarcadas.Contains(condicao))
+                        return Resultado.Falha($"{a.NomeExibicao} já está com {Condicoes.Nome(condicao)} marcada.");
+                    mudancas.Add(new Mudanca { Campo = CampoCondicao(condicao), Antes = 0, Depois = 1 });
+                }
+            }
+            else if (condicao != null)
+                return Resultado.Falha("Só \"Infligir uma condição\" marca condição.");
+            if (pendencia != null && !MovimentoDoMjPedido(arquivo.Eventos.FirstOrDefault(x => x.Id == pendencia)))
+                return Resultado.Falha("Essa falha já teve o movimento do MJ (ou foi desfeita).");
+
+            var texto = $"movimento do MJ ({peso}): {movimento.Nome}" + (a != null ? $" → {a.NomeExibicao}" : string.Empty);
+            if (condicao != null)
+                texto += $" · marcou {Condicoes.Nome(condicao)}";
+            else if (movimento.MarcaCondicao)
+                texto += " · condição à escolha de quem recebe";
+            var heroi = a != null && a.Controle != Controle.Mestre ? a : null;
+            var evento = NovoEvento(a, texto, oQueFez);
+            evento.Mudancas = mudancas;
+            evento.MovimentoDoMj = new MovimentoDoMjFeito { Id = movimento.Id, Nome = movimento.Nome, Peso = peso };
+            evento.Resolve = pendencia;
+            Aplicar(heroi, mudancas);
+            arquivo.Eventos.Add(evento);
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>
+        /// Quantos movimentos do MJ leves e pesados há no log visível (o termômetro do livro: só pesados, você deixou de
+        /// ser fã dos heróis; só leves, as ameaças não assustam).
+        /// </summary>
+        public (int leves, int pesados) PesosNoLog()
+        {
+            var feitos = VisiveisDaCena.Where(e => e.MovimentoDoMj != null && !Corrigido(e)).ToList();
+            return (feitos.Count(e => e.MovimentoDoMj.Peso == MovimentosDoMj.Leve), feitos.Count(e => e.MovimentoDoMj.Peso == MovimentosDoMj.Pesado));
+        }
+
         /// <summary>A tela reconhece este texto para pedir a condição do estouro.</summary>
         public const string MensagemDeEstouro = "Estoura o limite dos Rótulos: nenhum muda e a personagem marca uma condição. Qual?";
 
@@ -462,6 +556,8 @@ namespace TorreDeControle.Core.Salas
                 return Resultado.Falha("Uma correção não se corrige: lance o comando de novo.");
             if (Corrigido(original))
                 return Resultado.Falha("Esse evento já foi corrigido.");
+            if (MexeEmCenaDeOutraCena(original))
+                return Resultado.Falha($"Isso aconteceu em \"{NomeDaCena(original.Cena)}\": vá para essa cena para desfazer.");
             var p = original.Personagem == null ? null : personagens.Buscar(original.Personagem);
             if (p == null && original.Mudancas.Any(m => !DaMesa(m.Campo)))
                 return Resultado.Falha("Personagem não encontrada.");
@@ -497,6 +593,8 @@ namespace TorreDeControle.Core.Salas
             var original = arquivo.Eventos.FirstOrDefault(e => e.Id == correcao.Corrige);
             if (original == null)
                 return Resultado.Falha("Evento original não encontrado.");
+            if (MexeEmCenaDeOutraCena(original))
+                return Resultado.Falha($"Isso aconteceu em \"{NomeDaCena(original.Cena)}\": vá para essa cena para refazer.");
             var p = original.Personagem == null ? null : personagens.Buscar(original.Personagem);
             if (p == null && original.Mudancas.Any(m => !DaMesa(m.Campo)))
                 return Resultado.Falha("Personagem não encontrada.");
@@ -555,6 +653,11 @@ namespace TorreDeControle.Core.Salas
             daMesa.AddRange(arquivo.Bonus.Where(b => b.Ativo).Select(b => new Mudanca { Campo = CampoDeBonus(b.Id), Antes = 1, Depois = 0 }));
             daMesa.AddRange(arquivo.CondicoesDeVilao.SelectMany(v => v.Value.Select(c => new Mudanca { Campo = CampoDeVilao(v.Key, c), Antes = 1, Depois = 0 })).ToList());
             daMesa.AddRange(arquivo.HeroisEmCena.ToList().Select(h => new Mudanca { Campo = CampoDeCena(h), Antes = 1, Depois = 0 }));
+            foreach (var c in arquivo.Cenas)
+            {
+                c.Herois.Clear();
+                c.Npcs.Clear();
+            }
             arquivo.CenaAtual = null; // a mesa volta vazia, esperando a primeira cena
             RegistrarDaMesa(null, "reset (debug): a mesa volta ao início do jogo (rodada 1, pilha 0, sem cena)", null, daMesa.ToArray());
             return Resultado.Sucesso();
@@ -616,13 +719,15 @@ namespace TorreDeControle.Core.Salas
                 Rodada = arquivo.Rodada,
                 Quando = DateTime.Now.ToString("s"),
             };
+            // A cena de agora fica guardada com quem está nela (cenas paralelas: a Toro pode continuar lá).
+            GuardarCenaAtual();
+            foreach (var h in ids)
+                TirarDasOutrasCenas(h, cena.Id);
             arquivo.Cenas.Add(cena);
             arquivo.CenaAtual = cena.Id;
-            var mudancas = new List<Mudanca>();
-            foreach (var h in arquivo.HeroisEmCena.Where(h => !ids.Contains(h)).ToList())
-                mudancas.Add(new Mudanca { Campo = CampoDeCena(h), Antes = 1, Depois = 0 });
-            foreach (var h in ids.Where(h => !arquivo.HeroisEmCena.Contains(h)))
-                mudancas.Add(new Mudanca { Campo = CampoDeCena(h), Antes = 0, Depois = 1 });
+            arquivo.HeroisEmCena = new List<string>();
+            arquivo.EmCena = new List<string>();
+            var mudancas = ids.Select(h => new Mudanca { Campo = CampoDeCena(h), Antes = 0, Depois = 1 }).ToList();
             var nomeDoLocal = cena.Local == null ? null : personagens.CenarioDaSala(sala).FirstOrDefault(e => e.Id == cena.Local)?.Nome;
             var quem = ids.Count == 0 ? "ninguém em cena"
                 : "em cena: " + string.Join(", ", ids.Select(h => personagens.Buscar(h)?.NomeExibicao ?? "?"));
@@ -645,7 +750,8 @@ namespace TorreDeControle.Core.Salas
             if (arquivo.HeroisEmCena.Count >= MaximoEmCena)
                 return Resultado.Falha($"A cena já tem {MaximoEmCena} heroínas: tire alguém antes.");
             var mudancas = new List<Mudanca> { new Mudanca { Campo = CampoDeCena(heroi), Antes = 0, Depois = 1 } };
-            var texto = "entrou em cena";
+            var veioDe = TirarDasOutrasCenas(heroi, arquivo.CenaAtual);
+            var texto = "entrou em cena" + (veioDe != null ? $" (veio de {veioDe})" : string.Empty);
             if (bonusControle != null)
             {
                 var b = arquivo.Bonus.FirstOrDefault(x => x.Id == bonusControle && x.Ativo && x.Personagem == heroi && x.Tipo == BonusControle);
@@ -665,6 +771,53 @@ namespace TorreDeControle.Core.Salas
             if (!HeroiEmCena(heroi))
                 return Resultado.Falha($"{p.NomeExibicao} não está em cena.");
             return RegistrarDaMesa(p, "saiu de cena", motivo, new Mudanca { Campo = CampoDeCena(heroi), Antes = 1, Depois = 0 });
+        }
+
+        /// <summary>
+        /// Vai para outra cena (cenas paralelas): a de agora fica guardada com quem está nela, e a mesa passa a mostrar a
+        /// outra, com quem estava lá. Não é evento: ninguém sai do lugar, só o olhar do mestre muda.
+        /// </summary>
+        public Resultado IrParaCena(string cenaId)
+        {
+            var cena = arquivo.Cenas.FirstOrDefault(c => c.Id == cenaId);
+            if (cena == null)
+                return Resultado.Falha("Cena não encontrada.");
+            if (cena.Id == arquivo.CenaAtual)
+                return Resultado.Sucesso();
+            GuardarCenaAtual();
+            arquivo.CenaAtual = cena.Id;
+            arquivo.HeroisEmCena = cena.Herois.ToList();
+            arquivo.EmCena = cena.Npcs.ToList();
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
+        /// <summary>O nome da cena pelo id (para o log da campanha), ou "sem cena".</summary>
+        public string NomeDaCena(string cenaId) => cenaId == null ? "sem cena" : arquivo.Cenas.FirstOrDefault(c => c.Id == cenaId)?.Nome ?? "?";
+
+        /// <summary>O log da mesa: só o que aconteceu na cena aberta (sem cena, o que veio antes de haver cena).</summary>
+        public IReadOnlyList<Evento> VisiveisDaCena => arquivo.Eventos.Where(e => !e.Oculto && !Anulado(e) && e.Cena == arquivo.CenaAtual).ToList();
+
+        /// <summary>Copia quem está na mesa para o registro da cena aberta.</summary>
+        void GuardarCenaAtual()
+        {
+            var c = CenaAtual;
+            if (c == null)
+                return;
+            c.Herois = arquivo.HeroisEmCena.ToList();
+            c.Npcs = arquivo.EmCena.ToList();
+        }
+
+        /// <summary>Uma heroína fica numa cena só: tira das outras (menos <paramref name="exceto"/>). Devolve o nome de onde saiu.</summary>
+        string TirarDasOutrasCenas(string heroi, string exceto)
+        {
+            string veioDe = null;
+            foreach (var c in arquivo.Cenas.Where(c => c.Id != exceto && c.Id != arquivo.CenaAtual && c.Herois.Contains(heroi)))
+            {
+                c.Herois.Remove(heroi);
+                veioDe = c.Nome;
+            }
+            return veioDe;
         }
 
         /// <summary>
@@ -694,6 +847,9 @@ namespace TorreDeControle.Core.Salas
         {
             if (HeroiEmCena(heroi))
                 return null;
+            var outra = arquivo.Cenas.FirstOrDefault(c => c.Id != arquivo.CenaAtual && c.Herois.Contains(heroi));
+            if (outra != null)
+                return $"em outra cena: {outra.Nome}";
             var campo = CampoDeCena(heroi);
             var saiu = arquivo.Eventos.LastOrDefault(e => !e.Oculto && TemEfeito(e) && e.Mudancas.Any(m => m.Campo == campo && m.Depois == 0));
             if (saiu == null || saiu.Descricao.StartsWith("nova cena"))
@@ -747,10 +903,14 @@ namespace TorreDeControle.Core.Salas
             return true;
         }
 
+        /// <summary>O evento põe ou tira alguém de cena, e foi noutra cena que não a aberta.</summary>
+        bool MexeEmCenaDeOutraCena(Evento e) =>
+            e.Cena != arquivo.CenaAtual && e.Mudancas.Any(m => m.Campo.StartsWith("cena:") || m.Campo.StartsWith("npc_em_cena:"));
+
         // ---------- o log editado pelo mestre ----------
 
         /// <summary>Os eventos que o log mostra: os não apagados, do mais antigo ao mais novo.</summary>
-        public IReadOnlyList<Evento> Visiveis => arquivo.Eventos.Where(e => !e.Oculto).ToList();
+        public IReadOnlyList<Evento> Visiveis => arquivo.Eventos.Where(e => !e.Oculto && !Anulado(e)).ToList();
 
         /// <summary>Uma anotação no log (rolagem do console, nota do mestre): sem efeito na mesa.</summary>
         public void Anotar(string descricao, string motivo) => RegistrarDaMesa(null, descricao, motivo);
@@ -1126,6 +1286,8 @@ namespace TorreDeControle.Core.Salas
 
             r.Resultado = RolagemDaMesa.ResultadoDe(r.Total);
             r.Tipo = tipo;
+            // Na falha, o MJ faz um movimento, a menos que o movimento descreva a própria falha (p.177).
+            r.PedeMovimentoDoMj = tipo == RolagemDaMesa.TipoFalha && (movimento == null || movimento.FalhaPedeMovimentoDoMj);
             r.Escolhas = gravadas;
             r.Troca = trocaGravada;
             r.AceitaEm = DateTime.Now.ToString("s");
@@ -1392,7 +1554,7 @@ namespace TorreDeControle.Core.Salas
                     // Com o nome de quem rolou: "retorno: ileso" sozinho parecia falar do alvo.
                     var quemRolou = dono?.Personagem == null ? HeroiGenerico : personagens.Buscar(dono.Personagem)?.NomeExibicao ?? "quem rolou";
                     var retorno = r.Troca.Retorno == TrocaDeGolpes.RetornoIleso ? $"{quemRolou} não recebe retorno (resistiu)"
-                        : r.Troca.Retorno == TrocaDeGolpes.RetornoGolpePoderoso ? $"{quemRolou} toma golpe poderoso (role à parte)"
+                        : r.Troca.Retorno == TrocaDeGolpes.RetornoGolpePoderoso ? $"{quemRolou} toma golpe poderoso"
                         : $"{quemRolou} marca {Condicoes.Nome(r.Troca.CondicaoDeQuemRolou)}";
                     texto += "\n  troca de golpes: " + (doAlvo == null ? retorno : doAlvo + " · " + retorno);
                 }
@@ -1525,6 +1687,7 @@ namespace TorreDeControle.Core.Salas
             Id = Guid.NewGuid().ToString("N"),
             Rodada = arquivo.Rodada,
             Quando = DateTime.Now.ToString("s"),
+            Cena = arquivo.CenaAtual,
             Personagem = p?.Id,
             Descricao = descricao,
             Motivo = (motivo ?? string.Empty).Trim(),
@@ -1540,6 +1703,7 @@ namespace TorreDeControle.Core.Salas
 
         void Gravar()
         {
+            GuardarCenaAtual();
             arquivo.Versao = VersaoArquivo;
             armazenamento.Gravar(Chave(sala), JsonConvert.SerializeObject(arquivo, Formatting.Indented));
         }

@@ -300,6 +300,31 @@ namespace TorreDeControle.Core.Personagens
             return Resultado.Sucesso();
         }
 
+        /// <summary>O mestre gravou alguma Influência (dada ou perdida) entre os dois; o padrão do adulto não conta.</summary>
+        public bool TemRegistroDeInfluencia(Personagem quem, Personagem sobre) =>
+            quem != null && sobre != null && sobre.Influencias.ContainsKey(quem.Id);
+
+        /// <summary>
+        /// Desfaz um clique errado no seletor de Influência entre uma PJ e um NPC: apaga o registro, e vale de novo o
+        /// que valia antes de qualquer clique (o adulto volta à Influência por padrão; o jovem, a nenhuma). É a exceção
+        /// ao "nada se exclui", pedida pelo Alan (2026-10-20): um engano que não gerou nada no jogo, como o rascunho
+        /// nunca usado. Influência que mudou no jogo (pela mesa) não passa por aqui.
+        /// </summary>
+        public Resultado DesfazerEnganoDeInfluencia(string quemId, string sobreId)
+        {
+            var quem = Buscar(quemId);
+            var sobre = Buscar(sobreId);
+            if (quem == null || sobre == null)
+                return Resultado.Falha("Personagem não encontrada.");
+            if ((quem.Controle == Controle.Mestre) == (sobre.Controle == Controle.Mestre))
+                return Resultado.Falha("Aqui é entre uma PJ e um NPC.");
+            if (!sobre.Influencias.Remove(quem.Id))
+                return Resultado.Falha("Não há registro de Influência entre os dois para desfazer.");
+            sobre.InfluenciaPorque.Remove(quem.Id);
+            Gravar();
+            return Resultado.Sucesso();
+        }
+
         // ---------- copiar NPC: laboratório → sala, sala → sala (reboot), sala → laboratório ----------
 
         /// <summary>

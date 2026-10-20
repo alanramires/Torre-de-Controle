@@ -24,6 +24,8 @@ namespace TorreDeControle.Core.Salas
         [JsonProperty("id")] public string Id { get; set; }
         [JsonProperty("rodada")] public int Rodada { get; set; }
         [JsonProperty("quando")] public string Quando { get; set; }
+        /// <summary>Id da cena em que aconteceu (o log da mesa mostra a cena atual), ou null: antes de haver cena.</summary>
+        [JsonProperty("cena", NullValueHandling = NullValueHandling.Ignore)] public string Cena { get; set; }
         [JsonProperty("personagem")] public string Personagem { get; set; }
         /// <summary>O comando em texto, para o log e a colheita ("+1 potencial", "marcou Irritado"...).</summary>
         [JsonProperty("descricao")] public string Descricao { get; set; }
@@ -43,6 +45,8 @@ namespace TorreDeControle.Core.Salas
         /// Id da rolagem cuja pendência este evento resolve (o movimento de condição do vilão que a troca marcou), ou null.
         /// </summary>
         [JsonProperty("resolve", NullValueHandling = NullValueHandling.Ignore)] public string Resolve { get; set; }
+        /// <summary>Se o evento é um movimento do MJ (o deck): qual e com que peso. Senão, null.</summary>
+        [JsonProperty("movimento_do_mj", NullValueHandling = NullValueHandling.Ignore)] public MovimentoDoMjFeito MovimentoDoMj { get; set; }
         /// <summary>Se o evento é um pedido de rolagem para depois (/eda, /tgp no console): o que rolar. Senão, null.</summary>
         [JsonProperty("pedido", NullValueHandling = NullValueHandling.Ignore)] public PedidoDeRolagem Pedido { get; set; }
     }
@@ -56,6 +60,21 @@ namespace TorreDeControle.Core.Salas
         [JsonProperty("local", NullValueHandling = NullValueHandling.Ignore)] public string Local { get; set; }
         [JsonProperty("rodada")] public int Rodada { get; set; }
         [JsonProperty("quando")] public string Quando { get; set; }
+        /// <summary>
+        /// Quem está nesta cena (heroínas e NPCs). A da cena aberta acompanha a mesa; as outras ficam como estavam
+        /// quando o mestre saiu delas (ir para outra cena não tira ninguém de lugar nenhum).
+        /// </summary>
+        [JsonProperty("herois")] public List<string> Herois { get; set; } = new List<string>();
+        [JsonProperty("npcs")] public List<string> Npcs { get; set; } = new List<string>();
+    }
+
+    /// <summary>Um movimento do MJ feito na mesa: o id (movimentos_mj.json), o nome de quando foi feito e o peso escolhido.</summary>
+    public sealed class MovimentoDoMjFeito
+    {
+        [JsonProperty("id")] public string Id { get; set; }
+        [JsonProperty("nome")] public string Nome { get; set; }
+        /// <summary>"leve" ou "pesado": o MJ escolhe na hora (p.177).</summary>
+        [JsonProperty("peso")] public string Peso { get; set; }
     }
 
     /// <summary>Uma parte do modificador: "rotulo:perigoso" +1, "condicao:assustado" −2, "condicoes" +2 (golpe poderoso).</summary>
@@ -120,6 +139,11 @@ namespace TorreDeControle.Core.Salas
         [JsonProperty("escolhas")] public List<EscolhaDaRolagem> Escolhas { get; set; } = new List<EscolhaDaRolagem>();
         /// <summary>A troca de golpes do sucesso (Enfrentar), como o mestre marcou; null se não houve troca.</summary>
         [JsonProperty("troca", NullValueHandling = NullValueHandling.Ignore)] public TrocaDeGolpes Troca { get; set; }
+        /// <summary>
+        /// A falha pede um movimento do MJ (o movimento não descreve a própria falha): fica a pendência no log até o MJ
+        /// fazer. Gravado no Aceitar.
+        /// </summary>
+        [JsonProperty("pede_movimento_do_mj", DefaultValueHandling = DefaultValueHandling.Ignore)] public bool PedeMovimentoDoMj { get; set; }
         /// <summary>Quando o mestre aceitou (a hora da rolagem é o "quando" do evento).</summary>
         [JsonProperty("aceita_em", NullValueHandling = NullValueHandling.Ignore)] public string AceitaEm { get; set; }
 

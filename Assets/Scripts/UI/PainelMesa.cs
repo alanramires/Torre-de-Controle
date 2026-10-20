@@ -215,7 +215,9 @@ namespace TorreDeControle.UI
             const float Alto = 236, Lado = 318, Log = 340;
             var cima = Aresta("Cima", new Vector2(0, 1), new Vector2(1, 1), new Vector2(Lado, -Alto), new Vector2(-Log - 10, 0), true);
             var baixo = Aresta("Baixo", new Vector2(0, 0), new Vector2(1, 0), new Vector2(Lado, 0), new Vector2(-Log - 10, Alto), true);
-            var esquerda = Aresta("Esquerda", new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, Alto), new Vector2(Lado, -Alto), false);
+            // A esquerda (vilões e NPCs) desce até o fim da mesa: o canto de baixo é livre (os assentos de baixo começam
+            // depois dela); o de cima é do "Assistindo".
+            var esquerda = Aresta("Esquerda", new Vector2(0, 0), new Vector2(0, 1), new Vector2(0, 10), new Vector2(Lado, -Alto), false);
             // Cima e baixo alternando até 3 em cada (4 → 2/2, 6 → 3/3); depois a esquerda (7 e 8).
             // Mais de 8 não cabe com folga neste tamanho de assento: volta a encher em cima e embaixo.
             var ordem = new[] { cima, baixo, cima, baixo, cima, baixo, esquerda, esquerda };
@@ -228,7 +230,8 @@ namespace TorreDeControle.UI
             // Os vilões em cena sentam à esquerda (o outro lado da mesa), depois das heroínas que estiverem lá.
             // A coluna da esquerda rola quando não cabe (dois vilões e dois aliados já passam da altura).
             var ladoEsquerdo = Estilo.ListaRolavel(esquerda, 8);
-            ladoEsquerdo.GetComponent<LayoutElement>().flexibleWidth = 1;
+            // ListaRolavel devolve o conteúdo; o LayoutElement é da lista (conteúdo → viewport → lista).
+            ladoEsquerdo.parent.parent.GetComponent<LayoutElement>().flexibleWidth = 1;
             foreach (var v in mesa.EmCena().Where(n => n.Papel == Papel.Vilao))
                 AssentoDeVilao(ladoEsquerdo, v);
             // Os outros NPCs em cena (aliados, neutros) sentam abaixo dos vilões: podem ajudar (p.84: um ponto da pilha por NPC).
@@ -376,7 +379,7 @@ namespace TorreDeControle.UI
             var mover = Estilo.BotaoContorno(filaB, "M", 30, Estilo.TextoSuave, () => AbrirRolagem(p.Id));
             mover.gameObject.AddComponent<Dica>().Configurar("Rolar movimento já com " + p.NomeExibicao + " (e o vilão, se houver um só em cena).");
             Estilo.Rect("Vao", filaB).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
-            var sair = Estilo.BotaoContorno(filaB, "Sair", 60, Estilo.TextoSuave, () => AbrirSairDeCena(p));
+            var sair = Estilo.BotaoContorno(filaB, "X", 30, Estilo.TextoSuave, () => AbrirSairDeCena(p));
             sair.gameObject.AddComponent<Dica>().Configurar("Tirar " + p.NomeExibicao + " da cena: passa a assistir (fugiu, afastou-se, nocauteada, outra cena).");
         }
 
@@ -528,6 +531,21 @@ namespace TorreDeControle.UI
             }
             var caixa = Caixa("GESTÃO DA CENA", 900, 1100);
 
+            // Cenas paralelas: ir para outra (quem está em cada uma fica onde está; o log da mesa acompanha a cena).
+            if (mesa.Cenas.Count > 1)
+            {
+                var filaIr = Estilo.Fila(caixa, 52, 10);
+                Estilo.Rotulo(filaIr, "IR PARA A CENA", 18, Estilo.TextoSuave, FontStyles.Bold).gameObject.AddComponent<LayoutElement>().preferredWidth = 190;
+                var cenas = mesa.Cenas.Reverse().Select(c => (c.Id, $"{c.Nome}  ·  {c.Herois.Count} heroína{(c.Herois.Count == 1 ? "" : "s")}" +
+                                                                    (c.Id == cena.Id ? "  (aberta)" : ""))).ToList();
+                Estilo.ColunaElastica(Estilo.ListaSuspensa(filaIr, 520, cenas, cena.Id, id =>
+                {
+                    Mostrar(mesa.IrParaCena(id));
+                    Redesenhar();
+                    AbrirGestaoDaCena();
+                }));
+            }
+
             // Nome e local.
             var filaN = Estilo.Fila(caixa, 52, 10);
             var nome = Estilo.CampoTexto(filaN, "nome da cena");
@@ -655,6 +673,163 @@ namespace TorreDeControle.UI
             Estilo.BotaoContorno(fim, "Nova cena", 220, Estilo.Dourado, AbrirCriarCena);
             Estilo.Rect("Vao", fim).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
             Estilo.BotaoContorno(fim, "Fechar", 200, Estilo.TextoSuave, FecharBatalha);
+        }
+
+        Core.Regras.MovimentosDoMj movimentosDoMj;
+        string mjMovimento, mjPeso, mjAlvo, mjCondicao, mjTexto = string.Empty, mjPendencia;
+        PainelAjuda ajudaDoMj;
+        const string MjNinguem = "_ninguem";
+
+        /// <summary>
+        /// O deck do MJ: a mão com os movimentos do livro (p.177-184), e à direita o escolhido. O peso (leve ou pesado) é
+        /// escolhido na hora, com a tendência do livro pré-marcada quando há; contra quem (em cena, ou ninguém); o que
+        /// acontece. "Infligir uma condição" marca a condição junto. Com <paramref name="pendencia"/>, resolve a falha.
+        /// </summary>
+        void AbrirMovimentoDoMj(string pendencia, string alvoPadrao)
+        {
+            movimentosDoMj ??= Core.Regras.MovimentosDoMj.Carregar(new FonteDeRegrasResources());
+            mjMovimento = mjPeso = mjCondicao = null;
+            mjTexto = string.Empty;
+            mjPendencia = pendencia;
+            mjAlvo = alvoPadrao != null && (mesa.HeroiEmCena(alvoPadrao) || mesa.EstaEmCena(alvoPadrao)) ? alvoPadrao : null;
+            DesenharMovimentoDoMj();
+        }
+
+        void DesenharMovimentoDoMj()
+        {
+            var escolhido = mjMovimento == null ? null : movimentosDoMj.Buscar(mjMovimento);
+            var caixa = Caixa("MOVIMENTO DO MJ", 900, 1400);
+            var (leves, pesados) = mesa.PesosNoLog();
+            var pediu = mjPendencia == null ? null : mesa.Eventos.FirstOrDefault(x => x.Id == mjPendencia);
+            var quem = pediu?.Personagem == null ? null : personagens.Buscar(pediu.Personagem)?.NomeExibicao;
+            Nota(caixa, (pediu != null ? $"Pedido pela falha{(quem != null ? " de " + quem : "")} (r{pediu.Rodada}). " : "") +
+                        $"No log: leves {leves} · pesados {pesados}. O peso é seu: a mesma carta pode chegar leve ou pesada.");
+
+            var corpo = Estilo.Fila(caixa, 700, 18);
+            corpo.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.UpperLeft;
+            // Esquerda: a mão.
+            var esquerda = Coluna(corpo, 0, false, 6);
+            esquerda.GetComponent<LayoutElement>().flexibleWidth = 1;
+            Estilo.Rotulo(esquerda, "A MÃO DO MJ", 20, Estilo.Erro, FontStyles.Bold).characterSpacing = 3;
+            var mao = Estilo.ListaRolavel(esquerda, 6);
+            foreach (var m in movimentosDoMj.Todos)
+            {
+                var mov = m;
+                var fila = Estilo.Fila(mao, 46, 6);
+                UnityEngine.Events.UnityAction escolher = () =>
+                {
+                    if (mjMovimento != mov.Id)
+                    {
+                        mjMovimento = mov.Id;
+                        mjPeso = mov.Tendencia; // a tendência do livro, quando há; o MJ troca
+                        mjCondicao = null;
+                    }
+                    DesenharMovimentoDoMj();
+                };
+                var b = mjMovimento == mov.Id
+                    ? Estilo.BotaoPrincipal(fila, mov.Nome, 0, escolher)
+                    : Estilo.BotaoContorno(fila, mov.Nome, 0, Estilo.Dourado, escolher);
+                b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                b.name = TextoLivre;
+                TextoDeOpcao(b, 17);
+                var ver = Estilo.BotaoContorno(fila, "?", 46, Estilo.TextoSuave, () =>
+                {
+                    if (ajudaDoMj == null)
+                        ajudaDoMj = PainelAjuda.Criar(transform.parent);
+                    ajudaDoMj.AbrirCategoria("movimentos-mj", mov.Ajuda);
+                });
+                ver.gameObject.AddComponent<Dica>().Configurar("Ver a carta no help.");
+            }
+
+            // Direita: o movimento escolhido.
+            var direita = Coluna(corpo, 20, true, 10);
+            direita.GetComponent<LayoutElement>().preferredWidth = 560;
+            if (escolhido == null)
+            {
+                Estilo.Rotulo(direita, "Escolha um movimento na mão.", 20, Estilo.TextoApagado, FontStyles.Italic);
+                Estilo.Rect("Vao", direita).gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            }
+            else
+            {
+                var titulo = Estilo.Rotulo(direita, escolhido.Nome, 22, Estilo.Texto, FontStyles.Bold);
+                titulo.textWrappingMode = TextWrappingModes.Normal;
+                if (!string.IsNullOrWhiteSpace(escolhido.Nota))
+                    Estilo.Rotulo(direita, escolhido.Nota, 15, Estilo.TextoSuave, FontStyles.Italic).textWrappingMode = TextWrappingModes.Normal;
+
+                Pergunta(direita, escolhido.Tendencia != null ? $"Peso (o livro tende a {escolhido.Tendencia})" : "Peso");
+                var filaP = Estilo.Fila(direita, 46, 8);
+                Escolha(filaP, "Leve", mjPeso == Core.Regras.MovimentosDoMj.Leve, () => { mjPeso = Core.Regras.MovimentosDoMj.Leve; DesenharMovimentoDoMj(); })
+                    .gameObject.AddComponent<Dica>().Configurar("Prepara, anuncia, ameaça: os heróis ainda podem reagir.");
+                Escolha(filaP, "Pesado", mjPeso == Core.Regras.MovimentosDoMj.Pesado, () => { mjPeso = Core.Regras.MovimentosDoMj.Pesado; DesenharMovimentoDoMj(); })
+                    .gameObject.AddComponent<Dica>().Configurar("Acontece agora e muda a cena; não dá para interceptar.");
+
+                Pergunta(direita, "Contra quem?");
+                var alvos = new List<(string, string)> { (MjNinguem, "ninguém em particular") };
+                alvos.AddRange(NaMesa().Concat(mesa.EmCena()).Select(a => (a.Id, a.NomeExibicao)));
+                var filaA = Estilo.Fila(direita, 52, 8);
+                Estilo.ColunaElastica(Estilo.ListaSuspensa(filaA, 420, alvos, mjAlvo ?? MjNinguem, id =>
+                {
+                    mjAlvo = id == MjNinguem ? null : id;
+                    mjCondicao = null;
+                    DesenharMovimentoDoMj();
+                }));
+
+                var alvo = mjAlvo == null ? null : personagens.Buscar(mjAlvo);
+                if (escolhido.MarcaCondicao)
+                {
+                    if (alvo == null || alvo.Controle == Controle.Mestre)
+                        Estilo.Rotulo(direita, "Escolha uma heroína em cena.", 16, Estilo.Dourado, FontStyles.Italic);
+                    else
+                    {
+                        Pergunta(direita, "Qual condição? (só se a ficção apontar uma; senão, quem recebe escolhe)");
+                        var filaC = Estilo.Fila(direita, 40, 6);
+                        Escolha(filaC, "à escolha", mjCondicao == null, () => { mjCondicao = null; DesenharMovimentoDoMj(); });
+                        foreach (var cond in Condicoes.Todas.Where(c => !alvo.CondicoesMarcadas.Contains(c)))
+                        {
+                            var id = cond;
+                            Escolha(filaC, Condicoes.Nome(cond), mjCondicao == id, () => { mjCondicao = id; DesenharMovimentoDoMj(); });
+                        }
+                    }
+                }
+                if (escolhido.Efeito == Core.Regras.MovimentosDoMj.EfeitoMovimentoDeVilao)
+                {
+                    var viloes = mesa.EmCena().Where(v => v.Papel == Papel.Vilao).ToList();
+                    if (viloes.Count == 0)
+                        Estilo.Rotulo(direita, "Nenhum vilão em cena.", 16, Estilo.TextoApagado, FontStyles.Italic);
+                    foreach (var v in viloes)
+                    {
+                        var vilao = v;
+                        Estilo.BotaoContorno(direita, $"Movimentos de {v.NomeExibicao}", 0, Estilo.Erro, () => AbrirMovimentos(vilao))
+                            .GetComponent<LayoutElement>().preferredHeight = 40;
+                    }
+                }
+
+                Pergunta(direita, "O que acontece? (vai para o log)");
+                var campo = Estilo.AreaTexto(direita, "ex.: eram seus irmãos de laboratório", 90);
+                campo.text = mjTexto;
+                campo.onValueChanged.AddListener(t => mjTexto = t);
+                Estilo.Rect("Vao", direita).gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            }
+
+            var fim = Estilo.Fila(caixa, 56, 12);
+            Estilo.Rect("Vao", fim).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            Estilo.BotaoContorno(fim, "Cancelar", 200, Estilo.TextoSuave, FecharBatalha);
+            Estilo.BotaoPrincipal(fim, "Fazer movimento", 280, () =>
+            {
+                if (escolhido == null)
+                {
+                    Mostrar(Resultado.Falha("Escolha um movimento na mão."));
+                    return;
+                }
+                var r = mesa.FazerMovimentoDoMj(escolhido, mjPeso, mjAlvo, mjCondicao, mjTexto, mjPendencia);
+                if (!r.Ok)
+                {
+                    Mostrar(r);
+                    return;
+                }
+                FecharBatalha();
+                Aplicar(r);
+            });
         }
 
         string entrarControle;
@@ -1168,31 +1343,43 @@ namespace TorreDeControle.UI
             }
 
             // A pilha fica à vista na mesa; mexer nela é pelo "Gerir pilha" (uma telinha).
-            var topo = Estilo.Fila(centro, 70, 14);
+            var topo = Estilo.Fila(centro, 60, 14);
             var t = Estilo.Rotulo(topo, "PILHA DE EQUIPE", 24, Estilo.Azul, FontStyles.Bold);
             t.characterSpacing = 5;
             t.gameObject.AddComponent<LayoutElement>().preferredWidth = 260;
-            var n = Estilo.Rotulo(topo, mesa.Equipe.ToString(), 60, Estilo.Texto, FontStyles.Bold);
+            var n = Estilo.Rotulo(topo, mesa.Equipe.ToString(), 56, Estilo.Texto, FontStyles.Bold);
             n.gameObject.AddComponent<LayoutElement>().preferredWidth = 90;
             var gerir = Estilo.BotaoPrincipal(topo, "Gerir pilha", 220, AbrirGestaoDaPilha);
             Encolher(gerir);
-            var rolar = Estilo.BotaoPrincipal(topo, "Rolar movimento", 240, AbrirRolagem);
-            Encolher(rolar);
-            rolar.gameObject.AddComponent<Dica>().Configurar("Quem rola, o alvo e o movimento básico: 2d6 + Rótulo. O resultado entra no log pendente (Intervir / Aceitar).");
             Estilo.Rect("Vao", topo).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
 
             var token = Resources.Load<Texture2D>("Icones/Tokens/equipe");
-            var fichas = Estilo.Fila(centro, 64, 6);
+            var fichas = Estilo.Fila(centro, 52, 6);
             fichas.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
             for (var k = 0; k < Math.Min(mesa.Equipe, 12); k++)
             {
                 var img = Estilo.Rect("Token", fichas).gameObject.AddComponent<RawImage>();
                 img.texture = token;
                 var li = img.gameObject.AddComponent<LayoutElement>();
-                li.preferredWidth = li.preferredHeight = 60;
+                li.preferredWidth = li.preferredHeight = 48;
             }
             if (mesa.Equipe == 0)
                 Estilo.Rotulo(fichas, "pilha vazia", 20, Estilo.TextoApagado, FontStyles.Italic);
+
+            // As jogadas: a dos jogadores (rolar) e a do MJ (o deck), com o termômetro de leves e pesados do log.
+            var acoes = Estilo.Fila(centro, 56, 12);
+            acoes.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
+            var rolar = Estilo.BotaoPrincipal(acoes, "Rolar movimento", 260, AbrirRolagem);
+            Encolher(rolar);
+            rolar.gameObject.AddComponent<Dica>().Configurar("Quem rola, o alvo e o movimento básico: 2d6 + Rótulo. O resultado entra no log pendente (Intervir / Aceitar).");
+            var movMj = Estilo.BotaoContorno(acoes, "Movimento do MJ", 260, Estilo.Erro, () => AbrirMovimentoDoMj(null, null));
+            Encolher(movMj);
+            movMj.gameObject.AddComponent<Dica>().Configurar("O deck do MJ: escolha o movimento, o peso (leve ou pesado) e contra quem. Vai para o log.");
+            var (leves, pesados) = mesa.PesosNoLog();
+            var termometro = Estilo.Rotulo(acoes, $"leves {leves} · pesados {pesados}", 16, Estilo.TextoSuave);
+            termometro.gameObject.AddComponent<LayoutElement>().preferredWidth = 170;
+            termometro.raycastTarget = true;
+            termometro.gameObject.AddComponent<Dica>().Configurar("Movimentos do MJ no log. Só pesados: você deixou de ser fã dos heróis; só leves: as ameaças não assustam (p.177).");
 
             var filaCena = Estilo.Fila(centro, 44, 12);
             filaCena.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
@@ -1225,7 +1412,7 @@ namespace TorreDeControle.UI
             lt.gameObject.AddComponent<LayoutElement>().minHeight = 28;
             var cabeca = Estilo.Fila(log, 36, 6);
             // Desfeito por engano: se o último evento é um desfazer (ainda não refeito), dá para refazer.
-            var fim = mesa.Visiveis.LastOrDefault();
+            var fim = mesa.VisiveisDaCena.LastOrDefault();
             if (fim?.Corrige != null && !mesa.Eventos.Any(e => e.Refaz == fim.Id))
                 Encolher(Elastico(Estilo.BotaoContorno(cabeca, "Refazer", 0, Estilo.Dourado, () =>
                     Aplicar(mesa.Refazer(fim.Id, null)))));
@@ -1237,14 +1424,19 @@ namespace TorreDeControle.UI
             }));
             Encolher(limpar);
             limpar.gameObject.AddComponent<Dica>().Configurar("Limpar idas e voltas: esconde cliques que se anularam (marcou e desmarcou seguidos). A mesa não muda.");
-            var ultimo = mesa.Visiveis.LastOrDefault(e => e.Corrige == null && !mesa.Corrigido(e));
+            var ultimo = mesa.VisiveisDaCena.LastOrDefault(e => e.Corrige == null && !mesa.Corrigido(e));
             if (ultimo != null)
-                Encolher(Elastico(Estilo.BotaoContorno(cabeca, "Desfazer último", 0, Estilo.TextoSuave, () =>
-                    Aplicar(mesa.Corrigir(ultimo.Id, "desfeito na mesa")))));
+            {
+                // "Desfazer" curto: com Refazer e Limpar ao lado, "Desfazer último" não cabia no log estreito.
+                var desfazer = Elastico(Estilo.BotaoContorno(cabeca, "Desfazer", 0, Estilo.TextoSuave, () =>
+                    Aplicar(mesa.Corrigir(ultimo.Id, "desfeito na mesa"))));
+                Encolher(desfazer);
+                desfazer.gameObject.AddComponent<Dica>().Configurar("Desfazer a última entrada desta cena (ela fica riscada no log; o efeito volta).");
+            }
             var lista = Estilo.ListaRolavel(log, 6);
             var suave = ColorUtility.ToHtmlStringRGB(Estilo.TextoApagado);
             // Cada entrada é clicável: abre editar/apagar.
-            foreach (var e in mesa.Visiveis.Reverse())
+            foreach (var e in mesa.VisiveisDaCena.Reverse())
             {
                 var quem = e.Personagem != null ? personagens.Buscar(e.Personagem)?.NomeExibicao ?? "?"
                     : e.Rolagem?.Movimento != null ? HeroiGenerico : "Mesa";
@@ -1295,11 +1487,14 @@ namespace TorreDeControle.UI
                 // Rolagem anotada para depois (/eda, /tgp): o botão abre o painel já preenchido.
                 if (mesa.PedidoAberto(e))
                 {
-                    var acoes = Estilo.Fila(lista, 36, 6);
-                    var rolarPedido = Elastico(Estilo.BotaoContorno(acoes, $"Rolar: {evento.Pedido.NomeDoMovimento}", 0, Estilo.Dourado,
-                        () => AbrirPedido(evento)));
-                    Encolher(rolarPedido);
-                    rolarPedido.gameObject.AddComponent<Dica>().Configurar("Pedido no log: abre o painel com quem rola, o movimento e contra quem.");
+                    BotaoDePendencia(lista, $"Rolar: {evento.Pedido.NomeDoMovimento}", Estilo.Dourado, () => AbrirPedido(evento),
+                        "Pedido no log: abre o painel com quem rola, o movimento e contra quem.");
+                }
+                // Falha: o MJ faz um movimento (p.177). Fica a pendência, para fazer na ordem que couber.
+                if (mesa.MovimentoDoMjPedido(e))
+                {
+                    BotaoDePendencia(lista, "Movimento do MJ (falha)", Estilo.Erro, () => AbrirMovimentoDoMj(evento.Id, evento.Personagem),
+                        "A rolagem falhou: o MJ faz um movimento (leve ou pesado, você decide).");
                 }
                 // A troca marcou condição no vilão: o movimento dela fica pendente, para o MJ resolver na ordem que couber.
                 var condicaoPedida = mesa.CondicaoPedida(e);
@@ -1307,25 +1502,20 @@ namespace TorreDeControle.UI
                 {
                     var (vilaoId, condicao) = condicaoPedida.Value;
                     var nomeDoVilao = personagens.Buscar(vilaoId)?.NomeExibicao ?? "vilão";
-                    var acoes = Estilo.Fila(lista, 36, 6);
-                    var mov = Elastico(Estilo.BotaoContorno(acoes, $"Movimento de condição: {nomeDoVilao} ({Condicoes.Nome(condicao)})", 0,
-                        Estilo.Erro, () => AbrirMovimentoDeCondicao(evento, nomeDoVilao, condicao)));
-                    Encolher(mov);
-                    mov.gameObject.AddComponent<Dica>().Configurar("A troca marcou essa condição: o vilão faz o movimento dela. Abre a carta e marca como resolvido.");
+                    BotaoDePendencia(lista, $"Movimento de condição: {nomeDoVilao} ({Condicoes.Nome(condicao)})", Estilo.Erro,
+                        () => AbrirMovimentoDeCondicao(evento, nomeDoVilao, condicao),
+                        "A troca marcou essa condição: o vilão faz o movimento dela. Abre a carta e marca como resolvido.");
                 }
                 // Golpe poderoso pedido por esta rolagem e ainda não rolado: um botão por quem toma.
                 foreach (var tomaId in mesa.GolpesPedidos(e))
                 {
                     var toma = tomaId;
                     var nome = toma == null ? HeroiGenerico : personagens.Buscar(toma)?.NomeExibicao ?? "?";
-                    var acoes = Estilo.Fila(lista, 36, 6);
-                    var golpe = Elastico(Estilo.BotaoContorno(acoes, $"Golpe poderoso: {nome}", 0, Estilo.Dourado,
-                        () => AbrirGolpePoderoso(evento.Id, toma)));
-                    Encolher(golpe);
-                    golpe.gameObject.AddComponent<Dica>().Configurar("A troca de golpes pediu: rolar + condições marcadas (faixas invertidas).");
+                    BotaoDePendencia(lista, $"Golpe poderoso: {nome}", Estilo.Dourado, () => AbrirGolpePoderoso(evento.Id, toma),
+                        "A troca de golpes pediu: rolar + condições marcadas (faixas invertidas).");
                 }
             }
-            if (mesa.Visiveis.Count == 0)
+            if (mesa.VisiveisDaCena.Count == 0)
                 Estilo.Rotulo(lista, "Nada ainda. Início de sessão: +1 na pilha (Gerir pilha → Passagem do tempo).", 17,
                     Estilo.TextoApagado, FontStyles.Italic).textWrappingMode = TextWrappingModes.Normal;
 
@@ -1421,6 +1611,20 @@ namespace TorreDeControle.UI
                 focarConsole = false;
                 comando.ActivateInputField();
             }
+        }
+
+        /// <summary>
+        /// Um botão de pendência no log (pedido, falha, condição do vilão, golpe): até duas linhas, a fonte encolhe até
+        /// caber. Numa linha só, "Movimento de condição: Ursa Metálica (Irritado)" não cabia no log estreito.
+        /// </summary>
+        void BotaoDePendencia(Transform lista, string texto, Color cor, UnityEngine.Events.UnityAction acao, string dica)
+        {
+            var fila = Estilo.Fila(lista, 44, 6);
+            var b = Elastico(Estilo.BotaoContorno(fila, texto, 0, cor, acao));
+            b.name = TextoLivre;
+            TextoDeOpcao(b, 16);
+            b.GetComponentInChildren<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+            b.gameObject.AddComponent<Dica>().Configurar(dica);
         }
 
         /// <summary>

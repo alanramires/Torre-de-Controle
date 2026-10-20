@@ -111,7 +111,8 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
 | String C# quebrada / comando travado | heredoc do Bash come `\`; `cat >` sem entrada espera para sempre | patch em arquivo `.py` escrito com a ferramenta de arquivo |
 | Patch `.py` "não acha" o trecho | os `.cs` estão em CRLF e o trecho do script em LF | ler com `newline=''`, trocar `\n` pelo fim de linha do arquivo antes de comparar |
 | Pedido ambíguo ("rolagem dos vilões") | "rolagem" pode ser rolar dados ou a barra de rolagem; o MJ nunca rola (p.34) | perguntar com as duas leituras antes de fazer |
-| Coluna/aba vaza da tela com muita gente | pilha de botões sem rolagem estica o layout | `ListaRolavel` com `flexibleWidth = 1`; o que fica fixo, fora da lista |
+| Coluna/aba vaza da tela com muita gente | pilha de botões sem rolagem estica o layout | `ListaRolavel`; o que fica fixo, fora da lista |
+| Mesa some depois dos assentos (NRE no `Redesenhar`) | `ListaRolavel` devolve o **conteúdo**; o `LayoutElement` é da lista | `lista.parent.parent.GetComponent<LayoutElement>()`; exceção no meio do redesenho também deixa os botões sem o ajuste de texto (rótulo gigante) |
 | **Busca-e-troca corrompeu PNG** | `grep -rl` sem `-I` lista binários e o `sed` reescreve | `grep -rlI` (só texto); conferir `git status` depois |
 | Busca com acento não acha | `grep -i` com `[aá]` falha no locale do Git Bash | sem `-i`, as duas grafias, ou Python |
 | Python não imprime acento | `-I` ignora `PYTHONIOENCODING`; console em cp1252 | `sys.stdout.reconfigure(encoding='utf-8')` |

@@ -138,6 +138,13 @@ namespace TorreDeControle.Core.Regras
                     linhas.Add(new LinhaDeEfeito(faixa, (string)o["texto"], nivel));
             }
 
+            /// <summary>
+            /// A falha manda o MJ fazer um movimento: vale a falha padrão (sem "falha" própria) ou a própria pede
+            /// ("movimento_do_mj"). O golpe poderoso descreve a falha dele (se mantém firme) e não pede.
+            /// </summary>
+            [JsonIgnore] public bool FalhaPedeMovimentoDoMj =>
+                Falha == null || ((Falha as JContainer)?.DescendantsAndSelf().OfType<JObject>().Any(o => (string)o["op"] == "movimento_do_mj") ?? false);
+
             /// <summary>Num sucesso, quem rolou e o alvo trocam golpes (op "trocar_golpes" no sucesso_base).</summary>
             [JsonIgnore] public bool TrocaGolpes => TrocaDoSucesso != null;
 

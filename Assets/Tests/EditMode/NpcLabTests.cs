@@ -200,6 +200,34 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Clique_errado_na_influencia_se_desfaz_e_volta_ao_que_era()
+        {
+            salas.PorPersonagem(halcyon.Id, 0, FichaPronta.Criada(personagens, "Toro").Id, false);
+            var toro = personagens.Buscar(halcyon.Slots[0].Personagem);
+            personagens.CriarNpc(halcyon.Id, "Soldados de Preto", Maturidade.Jovem, Papel.Vilao);
+            personagens.CriarNpc(halcyon.Id, "Rosa Rook", Maturidade.Adulto, Papel.Vilao);
+            var soldados = personagens.NpcsDaSala(halcyon.Id).Single(n => n.NomeExibicao == "Soldados de Preto");
+            var rosa = personagens.NpcsDaSala(halcyon.Id).Single(n => n.NomeExibicao == "Rosa Rook");
+
+            // O caso do Alan: dois cliques no lugar errado deixaram "perdida" da Toro sobre os soldados.
+            personagens.AlternarInfluencia(toro.Id, soldados.Id);
+            personagens.AlternarInfluencia(toro.Id, soldados.Id);
+            Assert.That(personagens.PerdeuInfluencia(toro, soldados), Is.True);
+            Assert.That(personagens.TemRegistroDeInfluencia(toro, soldados), Is.True);
+            Assert.That(personagens.DesfazerEnganoDeInfluencia(toro.Id, soldados.Id).Ok, Is.True);
+            Assert.That(personagens.TemRegistroDeInfluencia(toro, soldados), Is.False);
+            Assert.That(personagens.PerdeuInfluencia(toro, soldados), Is.False, "nunca houve");
+            Assert.That(personagens.DesfazerEnganoDeInfluencia(toro.Id, soldados.Id).Ok, Is.False, "nada mais a desfazer");
+
+            // Adulto: desfazer o clique devolve a Influência por padrão.
+            personagens.AlternarInfluencia(rosa.Id, toro.Id);
+            Assert.That(personagens.TemInfluencia(rosa, toro), Is.False);
+            personagens.DesfazerEnganoDeInfluencia(rosa.Id, toro.Id);
+            Assert.That(personagens.TemInfluencia(rosa, toro), Is.True);
+            Assert.That(personagens.InfluenciaPorPadrao(rosa, toro), Is.True);
+        }
+
+        [Test]
         public void Heroina_nao_se_copia_como_npc()
         {
             var heroina = FichaPronta.Criada(personagens, "Pulsar");

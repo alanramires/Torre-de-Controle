@@ -523,7 +523,7 @@ namespace TorreDeControle.Tests
                 new TrocaDeGolpes { CondicaoDoAlvo = "irritado", Retorno = TrocaDeGolpes.RetornoGolpePoderoso }).Ok, Is.True);
             Assert.That(e.Rolagem.Troca.CondicaoDoAlvo, Is.EqualTo("irritado"));
             Assert.That(e.Rolagem.Troca.Retorno, Is.EqualTo(TrocaDeGolpes.RetornoGolpePoderoso));
-            Assert.That(e.Descricao, Does.EndWith("troca de golpes: Slade marca Irritado · herói genérico toma golpe poderoso (role à parte)"));
+            Assert.That(e.Descricao, Does.EndWith("troca de golpes: Slade marca Irritado · herói genérico toma golpe poderoso"));
 
             // 7: resistir deixa quem rolou ileso; a condição do Slade continua.
             mesa.RolarMovimento(null, enfrentar, slade.Id, 3, 4, null);
@@ -871,6 +871,170 @@ namespace TorreDeControle.Tests
             mesa.AlternarEmCena(ocaso.Id, "foge prometendo voltar");
             Assert.That(mesa.Eventos.Last().Descricao, Is.EqualTo("saiu de cena"));
             Assert.That(mesa.EstaEmCena(ocaso.Id), Is.False);
+        }
+
+        [Test]
+        public void Falha_pede_movimento_do_mj_menos_no_golpe_que_descreve_a_propria_falha()
+        {
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var enfrentar = basicos.Todos.First(m => m.Id == "basico/enfrentar");
+            var golpe = basicos.Todos.First(m => m.Id == "basico/golpe-poderoso");
+            Assert.That(enfrentar.FalhaPedeMovimentoDoMj, Is.True, "falha padrão: potencial e movimento do MJ");
+            Assert.That(golpe.FalhaPedeMovimentoDoMj, Is.False, "o golpe descreve a falha: se mantém firme");
+            var alvo = Colega();
+
+            mesa.RolarMovimento(heroi.Id, enfrentar, alvo.Id, 1, 1, null);
+            var falha = mesa.Eventos.Last();
+            Assert.That(mesa.MovimentoDoMjPedido(falha), Is.False, "pendente ainda não pede");
+            mesa.AceitarRolagem(falha.Id, enfrentar, null, null);
+            Assert.That(mesa.MovimentoDoMjPedido(falha), Is.True);
+
+            mesa.RolarMovimento(heroi.Id, golpe, null, 1, 1, null);
+            var golpeFalho = mesa.Eventos.Last();
+            mesa.AceitarRolagem(golpeFalho.Id, golpe, null);
+            Assert.That(mesa.MovimentoDoMjPedido(golpeFalho), Is.False);
+
+            mesa.Rolar(null, 1, 2, 0, null); // rolagem livre do console: a falha também pede
+            var livre = mesa.Eventos.Last();
+            mesa.AceitarRolagem(livre.Id);
+            Assert.That(mesa.MovimentoDoMjPedido(livre), Is.True);
+        }
+
+        [Test]
+        public void Movimento_do_mj_grava_o_peso_marca_a_condicao_e_resolve_a_falha()
+        {
+            var mj = TorreDeControle.Core.Regras.MovimentosDoMj.Carregar(new RegrasDeTeste());
+            var infligir = mj.Buscar("mj/infligir-condicao");
+            var preco = mj.Buscar("mj/preco-vitoria");
+            Assert.That(infligir.Tendencia, Is.EqualTo("pesado"));
+            Assert.That(preco.Tendencia, Is.Null, "o livro não aponta peso: o MJ escolhe");
+            Assert.That(mj.Todos.Count, Is.EqualTo(16));
+
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var enfrentar = basicos.Todos.First(m => m.Id == "basico/enfrentar");
+            mesa.RolarMovimento(heroi.Id, enfrentar, Colega().Id, 1, 1, null);
+            var falha = mesa.Eventos.Last();
+            mesa.AceitarRolagem(falha.Id, enfrentar, null, null);
+
+            Assert.That(mesa.FazerMovimentoDoMj(preco, null, null, null, null).Ok, Is.False, "o peso é obrigatório");
+            Assert.That(mesa.FazerMovimentoDoMj(preco, "leve", null, "irritado", null).Ok, Is.False, "só infligir marca condição");
+            Assert.That(mesa.FazerMovimentoDoMj(infligir, "pesado", null, null, null).Ok, Is.False, "infligir pede uma heroína");
+
+            var r = mesa.FazerMovimentoDoMj(infligir, "pesado", heroi.Id, "culpado", "eram irmãos de laboratório", falha.Id);
+            Assert.That(r.Ok, Is.True, r.Erro);
+            var feito = mesa.Eventos.Last();
+            Assert.That(heroi.CondicoesMarcadas, Does.Contain("culpado"));
+            Assert.That(feito.Descricao, Is.EqualTo($"movimento do MJ (pesado): Infligir uma condição → {heroi.NomeExibicao} · marcou Culpado"));
+            Assert.That(feito.Motivo, Is.EqualTo("eram irmãos de laboratório"));
+            Assert.That(mesa.MovimentoDoMjPedido(falha), Is.False, "resolvido: o botão some");
+            Assert.That(mesa.FazerMovimentoDoMj(preco, "leve", null, null, null, falha.Id).Ok, Is.False, "já resolvida");
+
+            mesa.FazerMovimentoDoMj(preco, "leve", null, null, "a estátua cai");
+            Assert.That(mesa.PesosNoLog(), Is.EqualTo((1, 1)));
+
+            mesa.Corrigir(feito.Id, "engano");
+            Assert.That(heroi.CondicoesMarcadas, Does.Not.Contain("culpado"), "desfazer tira a condição");
+            Assert.That(mesa.MovimentoDoMjPedido(falha), Is.True, "e devolve a pendência");
+            Assert.That(mesa.PesosNoLog(), Is.EqualTo((1, 0)), "desfeito não conta");
+
+            // Com cena aberta, o alvo precisa estar nela.
+            mesa.CriarCena("Parque", null, new string[0], null);
+            Assert.That(mesa.FazerMovimentoDoMj(infligir, "pesado", heroi.Id, null, null).Ok, Is.False);
+        }
+
+        [Test]
+        public void Cenas_paralelas_guardam_quem_esta_em_cada_uma_e_o_log_e_da_cena()
+        {
+            var toro = Colega();
+            personagens.CriarNpc(sala.Id, "Ursa", Maturidade.Adulto, Papel.Vilao);
+            var ursa = personagens.NpcsDaSala(sala.Id).Single();
+
+            mesa.CriarCena("Laboratório", null, new[] { toro.Id }, null);
+            var laboratorio = mesa.CenaAtual.Id;
+            mesa.AlternarEmCena(ursa.Id);
+            mesa.DarPotencial(toro.Id, 1, "fugiu do tanque");
+            Assert.That(mesa.Eventos.Last().Cena, Is.EqualTo(laboratorio), "o evento guarda a cena");
+
+            mesa.CriarCena("Parque Arcaico", null, new[] { heroi.Id }, null);
+            Assert.That(mesa.HeroiEmCena(toro.Id), Is.False);
+            Assert.That(mesa.EstaEmCena(ursa.Id), Is.False, "a Ursa ficou no laboratório");
+            Assert.That(mesa.MotivoFora(toro.Id), Is.EqualTo("em outra cena: Laboratório"));
+            Assert.That(mesa.VisiveisDaCena.All(e => e.Cena == mesa.CenaAtual.Id), Is.True, "o log da mesa é só desta cena");
+            Assert.That(mesa.VisiveisDaCena.Any(e => e.Descricao.Contains("potencial")), Is.False);
+
+            // Voltar ao laboratório: quem estava lá continua lá.
+            Assert.That(mesa.IrParaCena(laboratorio).Ok, Is.True);
+            Assert.That(mesa.HeroiEmCena(toro.Id), Is.True);
+            Assert.That(mesa.EstaEmCena(ursa.Id), Is.True);
+            Assert.That(mesa.HeroiEmCena(heroi.Id), Is.False);
+            Assert.That(mesa.MotivoFora(heroi.Id), Is.EqualTo("em outra cena: Parque Arcaico"));
+
+            // A Toro chega ao parque: sai do laboratório (uma cena só por vez).
+            var parque = mesa.Cenas.Last().Id;
+            mesa.IrParaCena(parque);
+            Assert.That(mesa.EntrarEmCena(toro.Id, "Chegar na hora certa").Ok, Is.True);
+            Assert.That(mesa.Eventos.Last().Descricao, Does.Contain("veio de Laboratório"));
+            Assert.That(mesa.Cenas.First(c => c.Id == laboratorio).Herois, Is.Empty);
+
+            // O que mexeu em cena noutra cena só se desfaz lá.
+            var criouLaboratorio = mesa.Eventos.First(e => e.Cena == laboratorio && e.Descricao.StartsWith("nova cena"));
+            Assert.That(mesa.Corrigir(criouLaboratorio.Id, "engano").Ok, Is.False);
+
+            // Recarregar mantém tudo.
+            var relida = Mesa.Carregar(armazenamento, personagens, sala.Id);
+            Assert.That(relida.CenaAtual.Id, Is.EqualTo(parque));
+            Assert.That(relida.HeroiEmCena(toro.Id), Is.True);
+            Assert.That(relida.Cenas.First(c => c.Id == laboratorio).Npcs, Has.Member(ursa.Id));
+        }
+
+        [Test]
+        public void Refazer_reativa_o_original_com_as_pendencias_e_o_par_some_do_log()
+        {
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var enfrentar = basicos.Todos.First(m => m.Id == "basico/enfrentar");
+            var golpe = basicos.Todos.First(m => m.Id == "basico/golpe-poderoso");
+            personagens.CriarNpc(sala.Id, "Ursa", Maturidade.Jovem, Papel.Vilao);
+            var ursa = personagens.NpcsDaSala(sala.Id).Single();
+            personagens.AlternarCondicaoDeVilao(ursa.Id, "irritado");
+            mesa.AlternarEmCena(ursa.Id);
+
+            // O caso do Alan: Enfrentar 8, a troca pede golpe e o movimento de condição; os dois são feitos.
+            var perigoso = personagens.ValorDeJogo(heroi, Mesa.CampoRotulo(Rotulos.Perigoso));
+            mesa.RolarMovimento(heroi.Id, enfrentar, ursa.Id, 3, 5 - perigoso, null);
+            var e = mesa.Eventos.Last();
+            mesa.AceitarRolagem(e.Id, enfrentar, new[] { new EscolhaDaRolagem { Opcao = "tirar" } },
+                new TrocaDeGolpes { CondicaoDoAlvo = "irritado", Retorno = TrocaDeGolpes.RetornoGolpePoderoso });
+            mesa.RolarMovimento(heroi.Id, golpe, null, 1, 2, null, origem: e.Id);
+            var g = mesa.Eventos.Last();
+            mesa.AceitarRolagem(g.Id, golpe, null);
+            mesa.ResolverMovimentoDeCondicao(e.Id, "destrói o corredor");
+            var c = mesa.Eventos.Last();
+
+            // Desfaz os três, do último ao primeiro.
+            mesa.Corrigir(c.Id, "x");
+            mesa.Corrigir(g.Id, "x");
+            mesa.Corrigir(e.Id, "x");
+            Assert.That(mesa.CondicoesMarcadasDoVilao(ursa.Id), Is.Empty);
+
+            // Refazer o Enfrentar: o original volta a valer, com as duas pendências; o par desfazer/refazer some do log.
+            var desfazerDoEnfrentar = mesa.Eventos.Last();
+            Assert.That(mesa.Refazer(desfazerDoEnfrentar.Id, null).Ok, Is.True);
+            Assert.That(mesa.Corrigido(e), Is.False);
+            Assert.That(mesa.CondicoesMarcadasDoVilao(ursa.Id), Has.Member("irritado"));
+            Assert.That(mesa.GolpesPedidos(e), Is.EqualTo(new[] { heroi.Id }), "o golpe volta a ser pedido");
+            Assert.That(mesa.CondicaoPedida(e), Is.Not.Null, "o movimento de condição também");
+            Assert.That(mesa.Visiveis, Has.No.Member(desfazerDoEnfrentar));
+            Assert.That(mesa.Visiveis.Any(x => x.Refaz != null), Is.False);
+
+            // Refazer de novo traz o golpe: a pendência dele some.
+            var desfazerDoGolpe = mesa.Visiveis.Last();
+            Assert.That(desfazerDoGolpe.Corrige, Is.EqualTo(g.Id));
+            Assert.That(mesa.Refazer(desfazerDoGolpe.Id, null).Ok, Is.True);
+            Assert.That(mesa.GolpesPedidos(e), Is.Empty);
+            Assert.That(heroi.Potencial, Is.EqualTo(1), "a falha do golpe deu o potencial de novo");
+
+            // E dá para desfazer o original de novo.
+            Assert.That(mesa.Corrigir(e.Id, "de novo").Ok, Is.True);
         }
 
         [Test]

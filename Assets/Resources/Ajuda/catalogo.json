@@ -4364,6 +4364,10 @@
         {
           "titulo": "NA DOSE CERTA",
           "texto": "Só pesados: você deixou de ser fã dos heróis. Só leves: as ameaças não assustam. Uma falha permite pesar, mas não obriga. O leve de agora prepara o pesado de depois."
+        },
+        {
+          "titulo": "NA TORRE",
+          "texto": "Ao jogar uma carta do MJ (Movimento do MJ, no centro da mesa), marque Leve ou Pesado. O peso fica no log, em cada movimento, e a mesa conta os dois da cena aberta."
         }
       ]
     },

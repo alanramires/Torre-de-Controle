@@ -146,7 +146,7 @@ namespace TorreDeControle.UI
         }
 
         /// <summary>Consulta contextual de uma categoria inteira (ex.: "influencia"), só ela no menu.</summary>
-        public void AbrirCategoria(string id)
+        public void AbrirCategoria(string id, string carta = null)
         {
             Abrir(null);
             filtrado = true;
@@ -156,6 +156,10 @@ namespace TorreDeControle.UI
             for (var k = 0; k < botoesCategoria.Length; k++)
                 botoesCategoria[k].gameObject.SetActive(k == categoria);
             EscolherCategoria(categoria);
+            // Com a carta (id do catálogo), já abre nela (ex.: o "?" de um movimento do MJ na mesa).
+            var indice = carta == null ? -1 : System.Array.IndexOf(ids, carta);
+            if (indice >= 0)
+                Ler(indice);
         }
 
         /// <summary>Os movimentos de condição do vilão; com <paramref name="condicao"/> ("irritado"), já abre a carta dela.</summary>

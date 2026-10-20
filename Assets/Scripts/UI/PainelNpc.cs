@@ -515,6 +515,37 @@ namespace TorreDeControle.UI
                 for (var vazio = herois.Count - k; vazio < 4; vazio++)
                     Estilo.Rect("Vao", fila).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
             }
+
+            // Clique errado: apaga o registro (volta ao que era antes do clique). Só aparece onde há registro gravado.
+            var gravadas = herois.Where(h => { var (quem, sobre) = par(h); return cadastro.TemRegistroDeInfluencia(quem, sobre); }).ToList();
+            if (gravadas.Count == 0)
+                return;
+            var filaD = Estilo.Fila(conteudo, 40, 8);
+            Estilo.Rotulo(filaD, "Clique errado? Desfazer:", 16, Estilo.TextoSuave, FontStyles.Italic)
+                .gameObject.AddComponent<LayoutElement>().preferredWidth = 210;
+            foreach (var h in gravadas)
+            {
+                var (quem, sobre) = par(h);
+                var estado = cadastro.TemInfluencia(quem, sobre) ? "dada" : "perdeu";
+                var nome = h.NomeExibicao;
+                var b = Estilo.BotaoContorno(filaD, $"{nome} ({estado})", 0, Estilo.TextoSuave, () =>
+                    Estilo.Confirmar(transform,
+                        $"Desfazer o registro de Influência com {nome}?\nFoi engano: volta a valer o que era antes do clique " +
+                        "(adulto: a Influência por padrão; jovem: nenhuma).",
+                        "Desfazer", () =>
+                        {
+                            var r = cadastro.DesfazerEnganoDeInfluencia(quem.Id, sobre.Id);
+                            if (!r.Ok)
+                            {
+                                rodape.color = Estilo.Erro;
+                                rodape.text = r.Erro;
+                                return;
+                            }
+                            Redesenhar();
+                        }));
+                b.GetComponent<LayoutElement>().flexibleWidth = 1;
+            }
+            Estilo.Rect("Vao", filaD).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
         }
 
         void FichaDeVilao()

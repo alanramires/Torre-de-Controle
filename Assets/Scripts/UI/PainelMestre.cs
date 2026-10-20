@@ -48,7 +48,7 @@ namespace TorreDeControle.UI
             Mesa mesaAberta = null)
         {
             mesa = mesaAberta;
-            if (mesa == null && (aba == Aba.Viloes || aba == Aba.Potencial))
+            if (mesa == null && (aba == Aba.Viloes || aba == Aba.Potencial || aba == Aba.Log))
                 aba = Aba.PrimeiraSessao;
             sala = salaAberta;
             salas = cadastroSalas;
@@ -108,7 +108,7 @@ namespace TorreDeControle.UI
         }
 
         RectTransform abas;
-        enum Aba { PrimeiraSessao, Anotacoes, Viloes, Potencial }
+        enum Aba { PrimeiraSessao, Anotacoes, Viloes, Potencial, Log }
         Aba aba = Aba.PrimeiraSessao;
 
         void MontarAbas()
@@ -120,6 +120,7 @@ namespace TorreDeControle.UI
             {
                 lista.Add((Aba.Viloes, "Vilões em cena"));
                 lista.Add((Aba.Potencial, "Potencial"));
+                lista.Add((Aba.Log, "Log da campanha"));
             }
             foreach (var (qual, nome) in lista)
             {
@@ -223,6 +224,41 @@ namespace TorreDeControle.UI
         /// Os vilões e oponentes da campanha, para pôr e tirar da mesa (pode haver mais de um em cena). A mesa
         /// mostra os que estão, com as condições para marcar na luta e os movimentos de vilão.
         /// </summary>
+        /// <summary>
+        /// O log da campanha inteira, sem filtro de cena (a mesa mostra só a cena aberta): do mais antigo ao mais novo,
+        /// com a cena de cada entrada. Só leitura: corrigir e desfazer são na mesa, na cena em que aconteceu.
+        /// </summary>
+        void SecaoLog()
+        {
+            var eventos = mesa.Visiveis;
+            subtitulo.text = $"{sala.Nome} · {eventos.Count} entrada{(eventos.Count == 1 ? "" : "s")} · {mesa.Cenas.Count} cena{(mesa.Cenas.Count == 1 ? "" : "s")}";
+            if (eventos.Count == 0)
+            {
+                Estilo.Rotulo(lista, "O log está vazio.", 20, Estilo.TextoApagado, FontStyles.Italic);
+                return;
+            }
+            var suave = ColorUtility.ToHtmlStringRGB(Estilo.TextoApagado);
+            string cenaAnterior = "-";
+            foreach (var e in eventos)
+            {
+                if (e.Cena != cenaAnterior)
+                {
+                    cenaAnterior = e.Cena;
+                    var titulo = Estilo.Rotulo(lista, ("CENA: " + mesa.NomeDaCena(e.Cena)).ToUpperInvariant(), 20, Estilo.Azul, FontStyles.Bold);
+                    titulo.characterSpacing = 3;
+                    titulo.gameObject.AddComponent<LayoutElement>().minHeight = 40;
+                }
+                var quem = e.Personagem != null ? personagens.Buscar(e.Personagem)?.NomeExibicao ?? "?"
+                    : e.Rolagem?.Movimento != null ? "Herói genérico" : "Mesa";
+                var riscado = mesa.Corrigido(e);
+                var motivo = string.IsNullOrWhiteSpace(e.Motivo) ? "" : $"\n<size=85%><i><color=#{suave}>{e.Motivo}</color></i></size>";
+                var linha = Estilo.Rotulo(lista, $"<color=#{suave}>r{e.Rodada}</color>  <b>{quem}</b>: " +
+                                                 (riscado ? $"<s>{e.Descricao}</s>" : e.Descricao) + motivo, 18,
+                    riscado ? Estilo.TextoApagado : Estilo.Texto);
+                linha.textWrappingMode = TextWrappingModes.Normal;
+            }
+        }
+
         void SecaoViloes()
         {
             subtitulo.text = $"{sala.Nome} · quem está em cena na mesa";
@@ -339,6 +375,11 @@ namespace TorreDeControle.UI
             if (aba == Aba.Potencial)
             {
                 SecaoPotencial();
+                return;
+            }
+            if (aba == Aba.Log)
+            {
+                SecaoLog();
                 return;
             }
             subtitulo.text = $"{sala.Nome} · a primeira sessão abre já na luta (livro, cap. 8)";

@@ -97,7 +97,8 @@ no histórico, pode ser reativado). Motivo: o log de eventos aponta para eles po
 deixaria o histórico apontando para o nada. Correção de dado também não apaga: é evento de correção.
 
 Exceção possível, só se o Alan pedir: rascunho que nunca foi usado (personagem `novo` que nunca entrou
-em sala nem gerou evento).
+em sala nem gerou evento). Pedida e feita (2026-10-20): o **clique errado no seletor de Influência** PJ↔NPC
+("Clique errado? Desfazer" na ficha do NPC) apaga o registro, porque é engano que não gerou nada no jogo.
 
 ## Estilo herdado do The Map Room
 
