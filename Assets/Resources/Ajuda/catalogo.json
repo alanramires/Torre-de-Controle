@@ -4335,6 +4335,39 @@
       ]
     },
     {
+      "id": "movimentos-mj/leve-ou-pesado",
+      "categoria": "movimentos-mj",
+      "titulo": "LEVE OU PESADO?",
+      "compacto": false,
+      "borda": "#999999",
+      "origem": "Texto próprio · Masks, Brendan Conway / Magpie Games · consulta ao livro PT-BR p.177",
+      "regras_ref": [
+        "docs/ajuda.md"
+      ],
+      "secoes": [
+        {
+          "titulo": "A CARTA NÃO TEM PESO",
+          "texto": "Nenhum movimento do MJ é leve ou pesado por natureza. O peso está em como você narra: a mesma carta pode chegar como aviso ou como estrago. Escolha o peso na hora."
+        },
+        {
+          "titulo": "LEVE",
+          "texto": "Prepara, anuncia, ameaça. Os heróis veem o perigo chegando e ainda podem reagir, impedir ou contornar. Você para antes do estrago e pergunta: “O que você faz?”."
+        },
+        {
+          "titulo": "PESADO",
+          "texto": "Acontece agora e muda a cena de verdade. Não dá para interceptar o que já aconteceu: condição marcada, golpe poderoso, alguém capturado, algo perdido."
+        },
+        {
+          "titulo": "A MESMA CENA, DOS DOIS JEITOS",
+          "texto": "Leve: o Ocaso começa a drenar a luz e o parque escurece aos poucos. O que vocês fazem? Pesado: tudo apaga de uma vez e o raio devolvido acerta a Estrela Negra. Marque uma condição."
+        },
+        {
+          "titulo": "NA DOSE CERTA",
+          "texto": "Só pesados: você deixou de ser fã dos heróis. Só leves: as ameaças não assustam. Uma falha permite pesar, mas não obriga. O leve de agora prepara o pesado de depois."
+        }
+      ]
+    },
+    {
       "id": "movimentos-mj/combinar-pesado-leve",
       "categoria": "movimentos-mj",
       "arquivo": "mj-combinar-pesado-leve.png",
