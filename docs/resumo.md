@@ -1,6 +1,6 @@
 # Resumo — onde a Torre está
 
-> Handoff para a próxima conversa. Atualizado no fechamento da **v0.5.0** (2026-10-20).
+> Handoff para a próxima conversa. Atualizado no fechamento da **v0.5.1** (2026-10-20).
 > Se algo aqui contradiz o código, o código manda — e este arquivo precisa de poda.
 
 ## Leitura para retomar
@@ -12,13 +12,20 @@ As regras executáveis continuam em `Assets/Resources/Regras/*.json`; consulte t
 
 **Duas IAs na mesma pasta:** esta (mecânica: regras, fichas, salas, mesa, rolador) e outra (cartas de ajuda e os
 dados 3D). Cada uma commita o seu. Antes de commitar, `git status` e ler o diff do que não é seu; não assumir que
-arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seus trechos (script
-`so_meus_trechos.py`, recriar no scratchpad: `git diff -U0`, tirar os trechos dela, `git apply --cached --unidiff-zero`).
+arquivo novo é seu. Arquivo misto (as duas mexeram): o índice recebe o arquivo do disco **com os trechos dela
+desfeitos no texto** (`git hash-object -w` + `git update-index --cacheinfo`); conferir depois que o `git diff` que
+sobra é só o dela. O `git apply --unidiff-zero` errou o lugar de inserções puras (ver armadilhas).
 
 ## Estado
 
-- **Versão:** v0.5.0 — *A cena* (`docs/relatorio_v0.5.0.md`). Antes: v0.4.0 (*O MJ decide a ordem*: golpe poderoso
-  e pendências no log), v0.3.0 (*O primeiro movimento*: o Enfrentar), v0.2.0 (*A mesa*).
+- **Versão:** v0.5.1 — *Validação dos movimentos básicos* (`docs/relatorio_v0.5.1.md`). Antes: v0.5.0 (*A cena*),
+  v0.4.0 (*O MJ decide a ordem*), v0.3.0 (*O primeiro movimento*), v0.2.0 (*A mesa*).
+- **Como se valida agora:** cada exemplo do livro vira uma **cena** na campanha **Pacatópolis**, com o "Rolar fixo"
+  na soma do texto, e a mesa tem de chegar ao que o livro conta. Validados: Toro falha nos soldados (p.33–34), Toro ×
+  Ursa (p.58), Rex × subordinados (p.58, negativa), Fissão no reator com o Vértice (p.62), Liberar no 7–9 (nosso).
+- **Cenas paralelas:** cada cena guarda quem está nela (`Cena.Herois`/`Npcs`); o evento guarda a cena
+  (`Evento.Cena`); a mesa mostra a cena aberta (`VisiveisDaCena`), a Área do mestre o Log da campanha; uma heroína
+  numa cena só; `IrParaCena`.
 - **A cena organiza a mesa:** a mesa começa vazia; a cena (`Mesa.CriarCena`, `CenaAtual`, `HeroiEmCena`) diz quem
   senta, e o resto assiste. Com cena aberta, o Core recusa quem está fora (`Mesa.ForaDeCena`): rolar, ser alvo,
   intervir, usar a pilha, entrar em batalha (p.84). Cabem 6 (`MaximoEmCena`). Entrar, sair, cena nova, vilão/NPC
@@ -30,14 +37,16 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
   golpe pedido pela troca (`Mesa.GolpesPedidos`), movimento de condição do vilão (`CondicaoPedida` /
   `ResolverMovimentoDeCondicao`), pedido pelo console (`PedirRolagem` / `PedidoAberto`, atalho no JSON).
   A rolagem nova guarda `origem`; desfazer devolve a pendência.
-- **Movimentos conferidos:** Enfrentar (v0.3.0) e Tomar um golpe poderoso (v0.4.0). O molde: regra no JSON do
+- **Movimentos conferidos:** Enfrentar (v0.3.0), Tomar um golpe poderoso (v0.4.0), Liberar seus poderes (v0.5.1).
+  Deck do MJ: `Regras/movimentos_mj.json` + `Core/Regras/MovimentosDoMj.cs` (peso escolhido na hora, no log). O molde: regra no JSON do
   movimento (`movimentos_basicos.json`, com `_decisao` e página), lida por `Core/Regras/MovimentosBasicos.cs`;
   opções com `efeitos` (`marcar_condicao` com `n`, `escolher` dentro de opção, `mj_decide`/`quem_rolou_decide` para
   alternativas, `lembrete_na_oposicao`), `atalho` do console, `invertido`, `sem_intervencao`.
 - **Como o Alan trabalha esta fase:** ele **desenha cada tela** e explica a regra; não adiantar conteúdo nem regra
   antes do desenho. Quando ele diz "não implemente, só leia", é só leitura.
 - **Validação pelo livro:** a ideia do Alan é reproduzir os exemplos do livro na Torre com "Rolar fixo" e ver se bate.
-  Ele criou a campanha **Pacatópolis** com as 9 (Rótulos do livro ainda por conferir; a Toro tem Perigosa +2, p.34). Arquétipos da equipe dos exemplos: Huma
+  Na **Pacatópolis** estão as 9 (Toro com Perigosa +2, p.34; Vértice Nova com Aberração +3; NPCs Soldados de Preto
+  e Ursa Metálica). Arquétipos da equipe dos exemplos: Huma
   (Legado), Toro (Bruta), Crepúsculo (Amaldiçoada), Vespa (Discípula), Gafanhoto (Janus), Tiro-Certo (Farol), Rex
   (Transformado); Vértice (Nova) e Canção dos Céus (Forasteira) **segundo o Alan**, o texto não diz. Não há fichas
   publicadas; o "Rolar fixo" escolhe a soma dos dados, então basta o arquétipo e o estado da cena.
@@ -53,23 +62,21 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
 
 ## Onde eu parei
 
-- **Próximo: o deck do MJ** (decidido, memória `deck-do-mj-peso-na-hora`): botão "Movimento do MJ" ao lado do
-  "Rolar movimento"; a mão das cartas de `movimentos-mj` do catálogo; ao jogar, **Leve ou Pesado escolhido na hora**
-  (p.177: o peso não é da carta; tendência do livro pré-marcada), contra quem (em cena) e o que fez, no log;
-  "Infligir uma condição" marca no mesmo evento; "Fazer um movimento de vilão" abre a lista do vilão; a rolagem que
-  falha ganha a pendência "Movimento do MJ". Depois, a conta leves × pesados da sessão. A carta tutorial "Leve ou
-  pesado?" já existe; acrescentar a ela como a Torre registra o peso.
+- **Próximo: o Defender** (p.63–65): proteger alguém de uma ameaça (sucesso: escolha +1 Equipe, Influência sobre o
+  protegido ou remover condição; 7–9: expor-se ou escalar); a interrupção de PvP (hoje só intervenção −2); e o
+  Controle do "Chegar na hora certa" (Bruta: "hold 1 instead of choosing", preso à pessoa defendida; o custo do 7–9
+  continua). Mesmo processo: ler no livro, decidir as dúvidas com o Alan, cenário de validação do livro.
 - **Cena, o que falta:** saídas pela regra no Aceitar (golpe 10+ "afastar-se", precisar marcar condição sem ter livre);
   a cena guardar quem estava nela no fim; a sugestão de quem volta na cena seguinte (quem saiu nocauteada).
-- **Depois:** Liberar seus poderes (o par do Enfrentar; o 7–9 já pede a condição), Defender (proteger alguém + a
-  interrupção de PvP, hoje só intervenção −2) e o ganho de controle do "Chegar na hora certa" ("hold 1 instead of
-  choosing", preso à pessoa defendida; o custo do 7–9 continua). Depois, patches de arquétipo um movimento por vez
-  (ex.: Legado rolar Superior no Enfrentar).
+- **Depois:** os outros básicos (Avaliar, Provocar, Confortar, Perfurar a máscara), um por vez; depois, patches de
+  arquétipo um movimento por vez (ex.: Legado rolar Superior no Enfrentar).
+- **Oferecidos, não feitos:** `docs/validacao_livro.md` (lista dos cenários como roteiro de regressão); exportações
+  com BOM (o Bloco de Notas mostra os acentos errados); "entre cenas" como motivo de quem saiu de cena por desfazer.
 - **Modificador** (`Mesa.PartesDoModificador`): Rótulo + condições −2 já entram. Faltam adiante, constante e
   Influência passiva +1 (p.81).
 - **Influência na mesa**: "descontar num colega" e a renúncia são só marca narrativa. `DefinirEstadoDaInfluencia`
   está no Core, sem tela e sem evento.
-- **Console** (`Core/Mesa/ConsoleDaMesa.cs`): `/eda`, `/tgp`, `/cena`, `/tempo`, `/salvar` (a tela grava: o Core só
+- **Console** (`Core/Mesa/ConsoleDaMesa.cs`): `/eda`, `/tgp`, `/lsp`, `/cena`, `/tempo`, `/salvar` (a tela grava: o Core só
   monta o texto), `/avancar`, `/fixo`, `/reset` (a tela pede confirmação). Nome com espaço vai entre aspas; nome de
   uma palavra ou primeiro nome único dispensam; se nenhum nome começa com o texto, vale o começo de qualquer palavra.
 - **Dados fixos:** `Mesa.FixarDados` / `TirarDadoFixo` (fila em memória, não gravada). `PainelMesa.JogarDados` (da
@@ -78,6 +85,10 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
   PNGs de cartas (decisão de 2026-10-15). Faltam categorias descobertas pelo catálogo, "nova carta" (Adulto), "?" por
   chip de movimento (`PainelAjuda.AbrirMovimentos(id, movimento)` pronto, sem ligação). Movimentos de arquétipo de
   todos os arquétipos já estão no catálogo (trabalho da outra IA, conferido com Fichas Exemplo e livro).
+- **Regras novas da v0.5.1:** um arquétipo por equipe (p.16; quem saiu não conta:
+  `CadastroPersonagens.QuemTemOArquetipoNaSala`); "Clique errado? Desfazer" na Influência PJ↔NPC (exceção ao "nada se
+  exclui", no `CLAUDE.md`); o Refazer reativa a original (`Mesa.Corrigido` ignora desfazer refeito; `Anulado` tira o
+  par da tela).
 - **Pendente de decisão do Alan:** os papéis das NPCs novas de histórico (Amaldiçoada: aliado; Discípula: neutro);
   a regra da casa da Forasteira ("Entre dois mundos"), trocada pela leitura do livro.
 - **Validação por arquétipo:** passaram Farol, Amaldiçoada, Janus, Nova, Forasteira; Bruta e Delinquente sem
@@ -86,9 +97,10 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
   rolagem (Sobrecarga 10+, Vou te salvar! 12+); Influência oculta e de nascença; o vilão derrotado na mesa;
   post BBCode; o exemplo `docs/exemplo_primeira_luta.md` revisado só até "Aurora sai dos escombros".
 - **Sons:** `Assets/audio` no `.gitignore` até confirmar a origem.
-- **Testes:** `Assets/Tests/EditMode/` — 202 passando no harness dotnet fora da Unity (scratchpad `testcore/t.csproj`:
+- **Testes:** `Assets/Tests/EditMode/` — 220 passando no harness dotnet fora da Unity (scratchpad `testcore/t.csproj`:
   Core + testes + Newtonsoft + NUnit, com os JSON de Regras ao lado). Rodar também no Test Runner da Unity. A outra
-  IA tem testes próprios em `Assets/Tests/Dice/`.
+  IA tem testes próprios em `Assets/Tests/Dice/`. A `FichaPronta` dos testes: a primeira é Nova, as seguintes giram de
+  arquétipo (equipe não repete).
 
 ## Armadilhas
 
@@ -112,6 +124,11 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
 | Patch `.py` "não acha" o trecho | os `.cs` estão em CRLF e o trecho do script em LF | ler com `newline=''`, trocar `\n` pelo fim de linha do arquivo antes de comparar |
 | Pedido ambíguo ("rolagem dos vilões") | "rolagem" pode ser rolar dados ou a barra de rolagem; o MJ nunca rola (p.34) | perguntar com as duas leituras antes de fazer |
 | Coluna/aba vaza da tela com muita gente | pilha de botões sem rolagem estica o layout | `ListaRolavel`; o que fica fixo, fora da lista |
+| `git apply --unidiff-zero` põe linha no lugar errado | inserção pura sem contexto: o git escolhe uma linha vizinha | montar o índice pelo texto (desfazer os trechos alheios, `hash-object` + `update-index`) e conferir o `diff` que sobra |
+| Painel "incompleto" depois de rolar | faixas que não valem eram puladas | mostrar todas, as que não valem em cinza |
+| Refazer some com as pendências | o "refez" era cópia sem a rolagem | reativar a original (o desfazer refeito não conta) |
+| 81 testes quebram com regra nova de equipe | a ficha pronta dos testes era sempre Nova | variar o arquétipo na `FichaPronta` (só os de habilidade "escolha N") |
+| "Página X" do Alan não bate | ele vê outra numeração (PDF, outra edição) | perguntar a primeira frase do exemplo |
 | Mesa some depois dos assentos (NRE no `Redesenhar`) | `ListaRolavel` devolve o **conteúdo**; o `LayoutElement` é da lista | `lista.parent.parent.GetComponent<LayoutElement>()`; exceção no meio do redesenho também deixa os botões sem o ajuste de texto (rótulo gigante) |
 | **Busca-e-troca corrompeu PNG** | `grep -rl` sem `-I` lista binários e o `sed` reescreve | `grep -rlI` (só texto); conferir `git status` depois |
 | Busca com acento não acha | `grep -i` com `[aá]` falha no locale do Git Bash | sem `-i`, as duas grafias, ou Python |
@@ -152,7 +169,7 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
 | Mesa com N fichas clicáveis | **de pé**, por cena (até 6 em cena; as outras assistem) |
 | Pilha de Equipe | **de pé** |
 | Mão de cartas por jogador | falta (base no Core: `CatalogoDeCartas` + `MontadorDeBaralho`) |
-| Rolador 2d6 + log | **de pé para Enfrentar e golpe poderoso**, com condições na conta, pendências e dados fixos; outros movimentos faltam |
+| Rolador 2d6 + log | **de pé para Enfrentar, golpe poderoso e Liberar** (validados com o livro), com condições na conta, pendências, deck do MJ e dados fixos; faltam Defender e os outros básicos |
 | Exportar log para o fórum | **parcial**: `/salvar` grava o log em .txt e copia; falta o post BBCode da colheita |
 
 Fora do MVP, já de pé: jogadores; NPCs (laboratório, ficha de vilão, os que nascem da ficha); Influência PJ↔NPC;
@@ -163,6 +180,8 @@ exportar/importar ficha; console do mestre; dados 3D com animação dirigida (ou
 
 - Gravado em JSON por `ArmazenamentoLocalJson` (`persistentDataPath/dados/`): `jogadores.json`, `personagens.json`,
   `salas.json`, `mesa_<sala>.json`. Exportações em `dados/exportacoes` (inclui `log_<sala>_<data>.txt`).
+- v0.5.1 (sem migração): `Cena.herois`/`npcs`; `Evento.cena`; `Evento.movimento_do_mj` (id, nome, peso);
+  `RolagemDaMesa.pede_movimento_do_mj` e `pede_golpe_poderoso`. Eventos antigos sem `cena` aparecem só no Log da campanha.
 - v0.5.0 (sem migração): `mesa_<sala>.json` ganha `cenas` (id, nome, local, rodada, quando), `cena_atual` e
   `herois_em_cena`; campos de mudança novos `cena:<heroína>` e `npc_em_cena:<npc>`. Mesa antiga abre vazia (sem
   cena) até criar uma.
