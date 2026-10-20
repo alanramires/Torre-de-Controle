@@ -872,6 +872,7 @@ namespace TorreDeControle.Core.Salas
         }
 
         readonly Queue<int> dadosFixos = new Queue<int>();
+        readonly Random sorteioDosDadosFixos = new Random();
 
         /// <summary>
         /// Debug: as próximas rolagens dão estas somas de 2d6 (2 a 12), na ordem, sem jogar os dados. O modificador soma
@@ -891,14 +892,15 @@ namespace TorreDeControle.Core.Salas
         /// <summary>As somas ainda na fila de dados fixos.</summary>
         public IReadOnlyList<int> DadosFixos => dadosFixos.ToList();
 
-        /// <summary>Tira a próxima soma fixa, em dois dados (8 = 4 + 4; 11 = 6 + 5). False se a fila está vazia.</summary>
-        public bool TirarDadoFixo(out int dado1, out int dado2)
+        /// <summary>Tira a próxima soma fixa e sorteia um dos pares de d6 que a compõem. False se a fila está vazia.</summary>
+        public bool TirarDadoFixo(out int dado1, out int dado2, Random sorteio = null)
         {
             dado1 = dado2 = 0;
             if (dadosFixos.Count == 0)
                 return false;
             var soma = dadosFixos.Dequeue();
-            dado1 = (soma + 1) / 2;
+            // All ordered pairs with this sum are equally likely, as with two fair d6.
+            dado1 = (sorteio ?? sorteioDosDadosFixos).Next(Math.Max(1, soma - 6), Math.Min(6, soma - 1) + 1);
             dado2 = soma - dado1;
             return true;
         }

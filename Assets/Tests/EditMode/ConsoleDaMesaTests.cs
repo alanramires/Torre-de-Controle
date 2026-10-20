@@ -122,11 +122,41 @@ namespace TorreDeControle.Tests
             Assert.That(mesa.Eventos.Last().Rolagem.Dados.Sum(), Is.EqualTo(8));
             Assert.That(mesa.Eventos.Last().Rolagem.Total, Is.EqualTo(9), "o modificador soma por cima");
             Assert.That(mesa.TirarDadoFixo(out var a, out var b), Is.True);
-            Assert.That((a, b), Is.EqualTo((6, 5)));
+            Assert.That(a + b, Is.EqualTo(11));
+            Assert.That(a, Is.InRange(1, 6));
+            Assert.That(b, Is.InRange(1, 6));
             Assert.That(mesa.TirarDadoFixo(out _, out _), Is.False, "a fila acabou");
             console.Executar("/fixo 2");
             Assert.That(console.Executar("/fixo").ok, Is.True);
             Assert.That(mesa.DadosFixos, Is.Empty, "/fixo sozinho limpa");
+        }
+
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        [TestCase(5)]
+        [TestCase(6)]
+        [TestCase(7)]
+        [TestCase(8)]
+        [TestCase(9)]
+        [TestCase(10)]
+        [TestCase(11)]
+        [TestCase(12)]
+        public void Fixo_varia_os_pares_sem_alterar_a_soma(int soma)
+        {
+            var sorteio = new Random(20261020);
+            var pares = new System.Collections.Generic.HashSet<(int, int)>();
+            mesa.FixarDados(Enumerable.Repeat(soma, 256));
+            for (int i = 0; i < 256; i++)
+            {
+                Assert.That(mesa.TirarDadoFixo(out var a, out var b, sorteio), Is.True);
+                Assert.That(a, Is.InRange(1, 6));
+                Assert.That(b, Is.InRange(1, 6));
+                Assert.That(a + b, Is.EqualTo(soma));
+                pares.Add((a, b));
+            }
+            Assert.That(pares.Count, Is.EqualTo(Math.Min(6, soma - 1) - Math.Max(1, soma - 6) + 1));
+            Assert.That(mesa.DadosFixos, Is.Empty);
         }
 
         [Test]

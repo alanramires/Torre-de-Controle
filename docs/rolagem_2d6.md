@@ -57,8 +57,11 @@ imagem transparente. `TesteDados` continua sendo a cena de experimentação.
 
 ## Rolagem dirigida para debug
 
-No console da mesa, `/fixo 5` prepara a próxima soma bruta. Ao executar
-`/roll` ou um movimento, os dados visuais reproduzem um arremesso que termina
+No console da mesa, `/fixo 5` prepara a próxima soma bruta.
+O par é sorteado entre todas as combinações válidas:
+`/fixo 6` pode mostrar 1+5, 2+4, 3+3, 4+2 ou 5+1, com chances iguais.
+Pedir a mesma soma novamente não obriga repetir nem trocar o par anterior.
+Ao executar `/roll` ou um movimento, os dados visuais reproduzem um arremesso que termina
 nos valores escolhidos pela fila de debug. `/roll +2`, por exemplo, mostra
 dados somando 5 e registra o total 7. `/fixo 5 12` prepara duas rolagens;
 `/fixo` sem números limpa a fila e volta à física livre. Sem dados visuais
