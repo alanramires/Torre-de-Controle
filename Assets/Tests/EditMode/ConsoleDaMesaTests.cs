@@ -134,7 +134,7 @@ namespace TorreDeControle.Tests
         {
             console.Executar("/pilha +3");
             Assert.That(console.Executar("/cena \"o hospital\"").ok, Is.True);
-            Assert.That(mesa.Visiveis.Last().Descricao, Is.EqualTo("nova cena: o hospital"));
+            Assert.That(mesa.Visiveis.Last().Descricao, Does.StartWith("nova cena: o hospital · em cena: "));
             Assert.That(mesa.Equipe, Is.EqualTo(3), "a pilha só volta para 1 quando o tempo passa (p.88)");
             Assert.That(console.Executar("/tempo três semanas depois").ok, Is.True);
             Assert.That(mesa.Equipe, Is.EqualTo(1));

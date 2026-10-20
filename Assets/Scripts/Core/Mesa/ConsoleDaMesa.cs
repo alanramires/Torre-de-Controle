@@ -46,7 +46,7 @@ namespace TorreDeControle.Core.Salas
             ("/npc_create \"Seu Valdir\" neutral \"vigia noturno\"", "cria NPC na campanha: ally, neutral ou villain; a nota vai para as Notas"),
             ("/location_create \"Usina Halcyon Sul\" \"galpão destruído\"", "cria um Local no cenário, com a descrição"),
             ("/rodada", "abre a próxima rodada do log (também /avancar)"),
-            ("/cena \"o hospital\"", "marca uma cena nova no log; a pilha fica como está"),
+            ("/cena \"o hospital\"", "abre uma cena nova com quem já está em cena (na primeira, todas); a pilha fica como está. O botão Nova cena escolhe quem entra"),
             ("/tempo três semanas depois", "o tempo passa: a pilha volta para 1 (p.88)"),
             ("/salvar", "salva o log visível em texto (dados/exportacoes) e copia para colar"),
             ("/fixo 8", "debug: a próxima rolagem dá 8 nos dados, com animação dirigida se disponível (/fixo 8 11: as duas próximas; /fixo: limpa)"),
@@ -83,8 +83,13 @@ namespace TorreDeControle.Core.Salas
                     case "location_create": case "local": return CriarLocal(args);
                     case "rodada": case "avancar": case "proxima": mesa.NovaRodada(); return (true, $"Rodada {mesa.Rodada}.");
                     case "cena": case "novacena":
-                        mesa.NovaCena(args.Count > 0 ? string.Join(" ", args) : null);
-                        return (true, $"Cena nova no log. A pilha continua em {mesa.Equipe} (só volta para 1 quando o tempo passa: /tempo).");
+                        var herois = sala.Slots.Where(v => v.Personagem != null).Select(v => personagens.Buscar(v.Personagem))
+                            .Where(p => p != null && p.Ativo && p.Status == StatusCriacao.EmCarreira).Select(p => p.Id).ToList();
+                        var participantes = mesa.TemCena ? herois.Where(mesa.HeroiEmCena).ToList() : herois;
+                        var c = mesa.CriarCena(args.Count > 0 ? string.Join(" ", args) : null, null, participantes, null);
+                        return c.Ok
+                            ? (true, $"Cena nova ({participantes.Count} em cena). A pilha continua em {mesa.Equipe} (só volta para 1 quando o tempo passa: /tempo).")
+                            : (false, c.Erro);
                     case "tempo":
                         var t = mesa.OTempoPassa(args.Count > 0 ? string.Join(" ", args) : null);
                         return t.Ok ? (true, "O tempo passa: a pilha volta para 1.") : (false, t.Erro);

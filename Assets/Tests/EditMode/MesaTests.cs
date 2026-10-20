@@ -756,6 +756,133 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Cena_registra_quem_esta_nela_e_quem_assiste_e_tudo_se_desfaz()
+        {
+            var colega = Colega();
+            Assert.That(mesa.TemCena, Is.False, "a mesa começa vazia");
+            Assert.That(mesa.EntrarEmCena(heroi.Id, null).Ok, Is.False, "sem cena, ninguém entra");
+
+            Assert.That(mesa.CriarCena("Parque Arcaico", null, new[] { heroi.Id }, null).Ok, Is.True);
+            Assert.That(mesa.CenaAtual.Nome, Is.EqualTo("Parque Arcaico"));
+            Assert.That(mesa.HeroiEmCena(heroi.Id), Is.True);
+            Assert.That(mesa.HeroiEmCena(colega.Id), Is.False);
+            Assert.That(mesa.MotivoFora(colega.Id), Is.EqualTo("não entrou nesta cena"));
+
+            Assert.That(mesa.SairDeCena(heroi.Id, "fugiu").Ok, Is.True);
+            Assert.That(mesa.MotivoFora(heroi.Id), Is.EqualTo("fugiu"));
+            var saida = mesa.Eventos.Last();
+            mesa.Corrigir(saida.Id, "engano");
+            Assert.That(mesa.HeroiEmCena(heroi.Id), Is.True, "desfazer a saída devolve à cena");
+
+            // Chegar na hora certa: entrar gastando o Controle (sai do assento no mesmo evento).
+            mesa.DarBonus(colega.Id, Mesa.BonusControle, 1, "Chegar na hora certa: " + heroi.NomeExibicao, null);
+            var controle = mesa.BonusDe(colega.Id).Single();
+            Assert.That(mesa.EntrarEmCena(colega.Id, "surge do nada", controle.Id).Ok, Is.True);
+            Assert.That(mesa.HeroiEmCena(colega.Id), Is.True);
+            Assert.That(mesa.BonusDe(colega.Id), Is.Empty, "o Controle foi gasto");
+            Assert.That(mesa.Eventos.Last().Descricao, Does.Contain("gastando Controle (Chegar na hora certa"));
+            mesa.Corrigir(mesa.Eventos.Last().Id, "engano");
+            Assert.That(mesa.HeroiEmCena(colega.Id), Is.False);
+            Assert.That(mesa.BonusDe(colega.Id).Count, Is.EqualTo(1), "desfazer devolve o Controle");
+
+            // Cena nova: quem fica de fora sai; desfazer a cena volta quem estava.
+            Assert.That(mesa.CriarCena("Hospital", null, new[] { colega.Id }, null).Ok, Is.True);
+            Assert.That(mesa.HeroiEmCena(heroi.Id), Is.False);
+            Assert.That(mesa.HeroiEmCena(colega.Id), Is.True);
+            Assert.That(mesa.Cenas.Count, Is.EqualTo(2), "nada se exclui");
+
+            // Reset: a mesa volta vazia, sem cena.
+            mesa.ResetarMesa();
+            Assert.That(mesa.TemCena, Is.False);
+            Assert.That(mesa.HeroiEmCena(colega.Id), Is.False);
+        }
+
+        [Test]
+        public void Com_cena_aberta_so_quem_esta_nela_rola_ajuda_e_entra_em_batalha()
+        {
+            var colega = Colega();
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var enfrentar = basicos.Todos.First(m => m.Id == "basico/enfrentar");
+            personagens.CriarNpc(sala.Id, "Doutor Ocaso", Maturidade.Adulto, Papel.Vilao);
+            var ocaso = personagens.NpcsDaSala(sala.Id).Single();
+            mesa.MudarEquipe(3, null, null);
+
+            // Sem cena aberta, nada muda (o comportamento de antes).
+            Assert.That(mesa.RolarMovimento(colega.Id, enfrentar, heroi.Id, 3, 4, null).Ok, Is.True);
+
+            mesa.CriarCena("Parque", null, new[] { heroi.Id }, null);
+            Assert.That(mesa.RolarMovimento(colega.Id, enfrentar, heroi.Id, 3, 4, null).Ok, Is.False, "quem assiste não rola");
+            Assert.That(mesa.RolarMovimento(heroi.Id, enfrentar, colega.Id, 3, 4, null).Ok, Is.False, "nem é alvo");
+            Assert.That(mesa.RolarMovimento(heroi.Id, enfrentar, ocaso.Id, 3, 4, null).Ok, Is.False, "vilão fora de cena também não");
+            mesa.AlternarEmCena(ocaso.Id);
+            Assert.That(mesa.RolarMovimento(heroi.Id, enfrentar, ocaso.Id, 3, 4, null).Ok, Is.True);
+            var e = mesa.Eventos.Last();
+            Assert.That(mesa.Intervir(e.Id, new Intervencao { Quem = colega.Id, DeOnde = Intervencao.DaPilha, Mod = 1, CustoEquipe = 1 }).Ok,
+                Is.False, "quem assiste não ajuda (p.84)");
+            Assert.That(mesa.UsarEquipe(colega.Id, 1, null).Ok, Is.False);
+            Assert.That(mesa.EntrarEmBatalha(new Mesa.EntradaEmBatalha { Lider = heroi.Id, Colegas = new[] { heroi.Id, colega.Id } }, null).Ok,
+                Is.False, "a colega de fora não entra na batalha nem conta para a Influência da líder");
+
+            mesa.EntrarEmCena(colega.Id, "chegou");
+            Assert.That(mesa.Intervir(e.Id, new Intervencao { Quem = colega.Id, DeOnde = Intervencao.DaPilha, Mod = 1, CustoEquipe = 1 }).Ok, Is.True);
+            Assert.That(mesa.EntrarEmBatalha(new Mesa.EntradaEmBatalha { Lider = heroi.Id, Colegas = new[] { heroi.Id, colega.Id } }, null).Ok, Is.True);
+        }
+
+        [Test]
+        public void Gestao_da_cena_edita_nome_e_aliado_em_cena_ajuda_com_a_pilha()
+        {
+            Assert.That(mesa.EditarCena("x", null).Ok, Is.False, "sem cena, nada a editar");
+            mesa.CriarCena("Parque", null, new[] { heroi.Id }, null);
+            Assert.That(mesa.EditarCena("  ", null).Ok, Is.False);
+            Assert.That(mesa.EditarCena("Parque Arcaico", "nao-existe").Ok, Is.False, "local fora do Cenário");
+            Assert.That(mesa.EditarCena("Parque Arcaico", null).Ok, Is.True);
+            Assert.That(mesa.CenaAtual.Nome, Is.EqualTo("Parque Arcaico"));
+
+            // p.84: NPC que faz parte da equipe pode ajudar; gasta 1 ponto da pilha por NPC.
+            personagens.CriarNpc(sala.Id, "Louva-a-Deus", Maturidade.Adulto, Papel.Aliado);
+            var mentora = personagens.NpcsDaSala(sala.Id).Single();
+            mesa.MudarEquipe(2, null, null);
+            mesa.Rolar(heroi.Id, 3, 3, 0, null);
+            var e = mesa.Eventos.Last();
+            var ajuda = new Intervencao { Quem = mentora.Id, DeOnde = Intervencao.DaPilha, Mod = 1, CustoEquipe = 1 };
+            Assert.That(mesa.Intervir(e.Id, ajuda).Ok, Is.False, "fora de cena não ajuda");
+            Assert.That(mesa.AlternarEmCena(mentora.Id).Ok, Is.True, "aliado também entra em cena");
+            Assert.That(mesa.Intervir(e.Id, new Intervencao { Quem = mentora.Id, DeOnde = Intervencao.DaPilha, Mod = 1, CustoEquipe = 1 }).Ok, Is.True);
+            Assert.That(mesa.Equipe, Is.EqualTo(1));
+            Assert.That(e.Rolagem.Intervencoes.Single().DeOnde, Is.EqualTo(Intervencao.AjudaDaPilha));
+        }
+
+        [Test]
+        public void Npc_entrando_e_saindo_de_cena_vai_para_o_log_e_se_desfaz()
+        {
+            personagens.CriarNpc(sala.Id, "Doutor Ocaso", Maturidade.Adulto, Papel.Vilao);
+            var ocaso = personagens.NpcsDaSala(sala.Id).Single();
+            Assert.That(mesa.AlternarEmCena(ocaso.Id, "surge no telhado").Ok, Is.True);
+            var entrou = mesa.Eventos.Last();
+            Assert.That(entrou.Personagem, Is.EqualTo(ocaso.Id));
+            Assert.That(entrou.Descricao, Is.EqualTo("entrou em cena"));
+            Assert.That(entrou.Motivo, Is.EqualTo("surge no telhado"));
+            Assert.That(mesa.EstaEmCena(ocaso.Id), Is.True);
+
+            mesa.Corrigir(entrou.Id, "engano");
+            Assert.That(mesa.EstaEmCena(ocaso.Id), Is.False, "desfazer tira da cena");
+
+            mesa.AlternarEmCena(ocaso.Id, "volta");
+            mesa.AlternarEmCena(ocaso.Id, "foge prometendo voltar");
+            Assert.That(mesa.Eventos.Last().Descricao, Is.EqualTo("saiu de cena"));
+            Assert.That(mesa.EstaEmCena(ocaso.Id), Is.False);
+        }
+
+        [Test]
+        public void Cena_cabe_seis_herois()
+        {
+            Assert.That(Mesa.MaximoEmCena, Is.EqualTo(6));
+            Assert.That(mesa.CriarCena("cheia", null, Enumerable.Repeat(heroi.Id, 1), null).Ok, Is.True);
+            Assert.That(mesa.CriarCena("lotada", null, Enumerable.Range(0, 7).Select(k => "x" + k), null).Ok, Is.False,
+                "id que não está em jogo é recusado antes (e 7 passaria do máximo)");
+        }
+
+        [Test]
         public void Descontar_num_colega_pede_provocar_ou_influencia_tambem_dentro_da_lista()
         {
             var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());

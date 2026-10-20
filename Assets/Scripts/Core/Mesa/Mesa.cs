@@ -54,6 +54,8 @@ namespace TorreDeControle.Core.Salas
             arquivo.EmCena ??= new List<string>();
             arquivo.Bonus ??= new List<BonusDeMesa>();
             arquivo.CondicoesDeVilao ??= new Dictionary<string, List<string>>();
+            arquivo.Cenas ??= new List<Cena>();
+            arquivo.HeroisEmCena ??= new List<string>();
             if (arquivo.Rodada < 1)
                 arquivo.Rodada = 1; // sempre há uma rodada corrente
             return new Mesa(armazenamento, personagens, sala, arquivo, regrasDeCondicoes);
@@ -179,6 +181,8 @@ namespace TorreDeControle.Core.Salas
         {
             if (quantidade < 1)
                 return Resultado.Falha("Use pelo menos 1 ponto.");
+            if (ForaDeCena(personagem) is string fora)
+                return Resultado.Falha(fora);
             if (quantidade > arquivo.Equipe)
                 return Resultado.Falha($"A pilha tem {arquivo.Equipe} ponto{(arquivo.Equipe == 1 ? "" : "s")}.");
             Personagem p = null;
@@ -252,6 +256,9 @@ namespace TorreDeControle.Core.Salas
         {
             if (!EmJogo(e.Lider, out var lider, out var erro))
                 return erro;
+            // Só quem está na cena entra na batalha (e conta para o +1 de Influência sobre cada colega).
+            if (new[] { e.Lider }.Concat(e.Colegas).Select(ForaDeCena).FirstOrDefault(x => x != null) is string fora)
+                return Resultado.Falha(fora);
             if (e.Colegas.Count(id => id != e.Lider) == 0)
                 return Resultado.Falha("Uma pessoa só não é equipe: o movimento pede mais de um personagem.");
             var perdas = (e.AlguemNaoConfia ? 1 : 0) + (e.MalPreparada ? 1 : 0);
@@ -352,19 +359,21 @@ namespace TorreDeControle.Core.Salas
 
         public bool EstaEmCena(string npc) => arquivo.EmCena.Contains(npc);
 
+        public static string CampoDeNpcEmCena(string npc) => "npc_em_cena:" + npc;
+
         /// <summary>
-        /// Põe ou tira um NPC da mesa (preparo do mestre, pela Área do mestre). Não é evento de jogo; as condições
-        /// marcadas na luta ficam guardadas se ele sair e voltar.
+        /// Põe ou tira um NPC da cena (vilão, aliado, neutro), pela gestão da cena ou pela Área do mestre. Vai para o log
+        /// ("entrou em cena" / "saiu de cena", com o motivo) e se desfaz como os outros; as condições marcadas na luta
+        /// ficam guardadas se ele sair e voltar.
         /// </summary>
-        public Resultado AlternarEmCena(string npc)
+        public Resultado AlternarEmCena(string npc, string motivo = null)
         {
             var n = personagens.Buscar(npc);
             if (n == null || n.Controle != Controle.Mestre || n.Sala != sala)
                 return Resultado.Falha("NPC fora desta campanha.");
-            if (!arquivo.EmCena.Remove(npc))
-                arquivo.EmCena.Add(npc);
-            Gravar();
-            return Resultado.Sucesso();
+            var dentro = arquivo.EmCena.Contains(npc);
+            return RegistrarDaMesa(n, dentro ? "saiu de cena" : "entrou em cena", motivo,
+                new Mudanca { Campo = CampoDeNpcEmCena(npc), Antes = dentro ? 1 : 0, Depois = dentro ? 0 : 1 });
         }
 
         public IReadOnlyList<string> CondicoesMarcadasDoVilao(string vilao) =>
@@ -545,16 +554,153 @@ namespace TorreDeControle.Core.Salas
                 daMesa.Add(new Mudanca { Campo = CampoEquipe, Antes = arquivo.Equipe, Depois = 0 });
             daMesa.AddRange(arquivo.Bonus.Where(b => b.Ativo).Select(b => new Mudanca { Campo = CampoDeBonus(b.Id), Antes = 1, Depois = 0 }));
             daMesa.AddRange(arquivo.CondicoesDeVilao.SelectMany(v => v.Value.Select(c => new Mudanca { Campo = CampoDeVilao(v.Key, c), Antes = 1, Depois = 0 })).ToList());
-            RegistrarDaMesa(null, "reset (debug): a mesa volta ao início do jogo (rodada 1, pilha 0)", null, daMesa.ToArray());
+            daMesa.AddRange(arquivo.HeroisEmCena.ToList().Select(h => new Mudanca { Campo = CampoDeCena(h), Antes = 1, Depois = 0 }));
+            arquivo.CenaAtual = null; // a mesa volta vazia, esperando a primeira cena
+            RegistrarDaMesa(null, "reset (debug): a mesa volta ao início do jogo (rodada 1, pilha 0, sem cena)", null, daMesa.ToArray());
+            return Resultado.Sucesso();
+        }
+
+        // ---------- a cena: quem está nela e quem assiste ----------
+
+        public static string CampoDeCena(string heroi) => "cena:" + heroi;
+
+        /// <summary>Quantas heroínas cabem numa cena: o jogo foi pensado para até 6 (a mesa senta 3 em cima e 3 embaixo).</summary>
+        public const int MaximoEmCena = 6;
+
+        /// <summary>Há uma cena aberta. Sem ela, a mesa está vazia (esperando "criar cena").</summary>
+        public bool TemCena => arquivo.CenaAtual != null;
+
+        /// <summary>A cena aberta, ou null.</summary>
+        public Cena CenaAtual => arquivo.Cenas.FirstOrDefault(c => c.Id == arquivo.CenaAtual);
+
+        /// <summary>Todas as cenas da campanha, da primeira à atual (nada se exclui).</summary>
+        public IReadOnlyList<Cena> Cenas => arquivo.Cenas;
+
+        /// <summary>A heroína está na cena aberta (as outras assistem: estão em outra cena, saíram ou foram nocauteadas).</summary>
+        public bool HeroiEmCena(string heroi) => TemCena && arquivo.HeroisEmCena.Contains(heroi);
+
+        /// <summary>
+        /// Com cena aberta, quem age na mesa precisa estar nela: heroína em cena ou NPC em cena. Devolve o erro, ou null
+        /// (também null sem cena aberta, ou sem ninguém: o herói genérico).
+        /// </summary>
+        string ForaDeCena(string id)
+        {
+            if (id == null || !TemCena)
+                return null;
+            var p = personagens.Buscar(id);
+            if (p == null)
+                return null;
+            if (p.Controle == Controle.Mestre)
+                return EstaEmCena(id) ? null : $"{p.NomeExibicao} não está em cena.";
+            return HeroiEmCena(id) ? null : $"{p.NomeExibicao} está assistindo: ponha em cena antes.";
+        }
+
+        /// <summary>
+        /// Abre uma cena nova com quem está nela (o resto assiste). Um evento só: desfazer volta quem estava em cena
+        /// antes. Não mexe na pilha: ela só volta para 1 quando o tempo passa (p.88, <see cref="OTempoPassa"/>); as
+        /// condições também ficam.
+        /// </summary>
+        public Resultado CriarCena(string nome, string local, IEnumerable<string> participantes, string motivo)
+        {
+            var ids = (participantes ?? Enumerable.Empty<string>()).Distinct().ToList();
+            foreach (var id in ids)
+                if (!EmJogo(id, out _, out var erro))
+                    return erro;
+            if (ids.Count > MaximoEmCena)
+                return Resultado.Falha($"Cabem {MaximoEmCena} heroínas numa cena (marcou {ids.Count}): as outras assistem.");
+            var cena = new Cena
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Nome = string.IsNullOrWhiteSpace(nome) ? $"cena {arquivo.Cenas.Count + 1}" : nome.Trim(),
+                Local = string.IsNullOrWhiteSpace(local) ? null : local,
+                Rodada = arquivo.Rodada,
+                Quando = DateTime.Now.ToString("s"),
+            };
+            arquivo.Cenas.Add(cena);
+            arquivo.CenaAtual = cena.Id;
+            var mudancas = new List<Mudanca>();
+            foreach (var h in arquivo.HeroisEmCena.Where(h => !ids.Contains(h)).ToList())
+                mudancas.Add(new Mudanca { Campo = CampoDeCena(h), Antes = 1, Depois = 0 });
+            foreach (var h in ids.Where(h => !arquivo.HeroisEmCena.Contains(h)))
+                mudancas.Add(new Mudanca { Campo = CampoDeCena(h), Antes = 0, Depois = 1 });
+            var nomeDoLocal = cena.Local == null ? null : personagens.CenarioDaSala(sala).FirstOrDefault(e => e.Id == cena.Local)?.Nome;
+            var quem = ids.Count == 0 ? "ninguém em cena"
+                : "em cena: " + string.Join(", ", ids.Select(h => personagens.Buscar(h)?.NomeExibicao ?? "?"));
+            return RegistrarDaMesa(null, $"nova cena: {cena.Nome}" + (nomeDoLocal != null ? $" ({nomeDoLocal})" : string.Empty) + $" · {quem}",
+                motivo, mudancas.ToArray());
+        }
+
+        /// <summary>
+        /// A heroína entra na cena aberta (chegou pela narração, ou gastou um Controle, como o "Chegar na hora certa" da
+        /// Bruta). O Controle gasto sai do assento no mesmo evento: desfazer devolve os dois.
+        /// </summary>
+        public Resultado EntrarEmCena(string heroi, string motivo, string bonusControle = null)
+        {
+            if (!EmJogo(heroi, out var p, out var erro))
+                return erro;
+            if (!TemCena)
+                return Resultado.Falha("Ainda não há cena: crie uma.");
+            if (HeroiEmCena(heroi))
+                return Resultado.Falha($"{p.NomeExibicao} já está em cena.");
+            if (arquivo.HeroisEmCena.Count >= MaximoEmCena)
+                return Resultado.Falha($"A cena já tem {MaximoEmCena} heroínas: tire alguém antes.");
+            var mudancas = new List<Mudanca> { new Mudanca { Campo = CampoDeCena(heroi), Antes = 0, Depois = 1 } };
+            var texto = "entrou em cena";
+            if (bonusControle != null)
+            {
+                var b = arquivo.Bonus.FirstOrDefault(x => x.Id == bonusControle && x.Ativo && x.Personagem == heroi && x.Tipo == BonusControle);
+                if (b == null)
+                    return Resultado.Falha("Esse Controle não está no assento dela.");
+                mudancas.Add(new Mudanca { Campo = CampoDeBonus(b.Id), Antes = 1, Depois = 0 });
+                texto += " gastando Controle" + (b.Contexto.Length > 0 ? $" ({b.Contexto})" : string.Empty);
+            }
+            return RegistrarDaMesa(p, texto, motivo, mudancas.ToArray());
+        }
+
+        /// <summary>A heroína sai da cena e passa a assistir (fugiu, afastou-se, nocauteada, foi para outra cena).</summary>
+        public Resultado SairDeCena(string heroi, string motivo)
+        {
+            if (!EmJogo(heroi, out var p, out var erro))
+                return erro;
+            if (!HeroiEmCena(heroi))
+                return Resultado.Falha($"{p.NomeExibicao} não está em cena.");
+            return RegistrarDaMesa(p, "saiu de cena", motivo, new Mudanca { Campo = CampoDeCena(heroi), Antes = 1, Depois = 0 });
+        }
+
+        /// <summary>
+        /// Corrige o nome e o local da cena aberta (o registro da cena; a entrada "nova cena" do log fica como foi
+        /// escrita). Local null = sem local.
+        /// </summary>
+        public Resultado EditarCena(string nome, string local)
+        {
+            var cena = CenaAtual;
+            if (cena == null)
+                return Resultado.Falha("Ainda não há cena: crie uma.");
+            if (string.IsNullOrWhiteSpace(nome))
+                return Resultado.Falha("A cena precisa de um nome.");
+            if (local != null && personagens.CenarioDaSala(sala).All(e => e.Id != local))
+                return Resultado.Falha("Esse local não está no Cenário da campanha.");
+            cena.Nome = nome.Trim();
+            cena.Local = local;
+            Gravar();
             return Resultado.Sucesso();
         }
 
         /// <summary>
-        /// Marca no log o começo de uma cena nova. Não mexe na pilha: ela só volta para 1 quando o tempo passa (p.88,
-        /// <see cref="OTempoPassa"/>). As condições também ficam; o que as tira no fim da cena o mestre desmarca.
+        /// Por que ela está fora da cena: o motivo (ou o texto) do último evento que a tirou e ainda vale. "não entrou
+        /// nesta cena" quando a cena nova começou sem ela; null se está em cena.
         /// </summary>
-        public void NovaCena(string nome) =>
-            RegistrarDaMesa(null, string.IsNullOrWhiteSpace(nome) ? "nova cena" : $"nova cena: {nome.Trim()}", null);
+        public string MotivoFora(string heroi)
+        {
+            if (HeroiEmCena(heroi))
+                return null;
+            var campo = CampoDeCena(heroi);
+            var saiu = arquivo.Eventos.LastOrDefault(e => !e.Oculto && TemEfeito(e) && e.Mudancas.Any(m => m.Campo == campo && m.Depois == 0));
+            if (saiu == null || saiu.Descricao.StartsWith("nova cena"))
+                return TemCena ? "não entrou nesta cena" : null;
+            return string.IsNullOrWhiteSpace(saiu.Motivo) ? saiu.Descricao : saiu.Motivo;
+        }
+
 
         /// <summary>O log visível em texto, do mais antigo ao mais novo ("r2  Aurora: ... — motivo"), para salvar.</summary>
         public string LogEmTexto()
@@ -741,6 +887,9 @@ namespace TorreDeControle.Core.Salas
                 return Resultado.Falha(MensagemPedeAlvo(movimento));
             if (movimento.SomaCondicoes && alvo != null)
                 return Resultado.Falha($"{movimento.Nome} não tem contra quem: rola quem toma o golpe.");
+            var foraDeCena = ForaDeCena(personagem) ?? ForaDeCena(alvo);
+            if (foraDeCena != null)
+                return Resultado.Falha(foraDeCena);
             if (origem != null)
             {
                 var pediu = arquivo.Eventos.FirstOrDefault(x => x.Id == origem);
@@ -882,6 +1031,8 @@ namespace TorreDeControle.Core.Salas
                 return Resultado.Falha("Essa rolagem já foi aceita (ou desfeita): não aceita mais intervenção.");
             if (intervencao == null || string.IsNullOrWhiteSpace(intervencao.Quem))
                 return Resultado.Falha("Quem intervém?");
+            if (ForaDeCena(intervencao.Quem) is string quemFora)
+                return Resultado.Falha(quemFora + " Quem intervém precisa poder ajudar na ficção (p.84).");
             if (string.IsNullOrWhiteSpace(intervencao.DeOnde))
                 return Resultado.Falha("De onde vem a intervenção?");
             if (intervencao.Mod < IntervencaoMinima || intervencao.Mod > IntervencaoMaxima)
@@ -1317,6 +1468,22 @@ namespace TorreDeControle.Core.Salas
                         b.Ativo = m.Depois > 0;
                     continue;
                 }
+                if (m.Campo.StartsWith("npc_em_cena:"))
+                {
+                    var npc = m.Campo.Substring("npc_em_cena:".Length);
+                    arquivo.EmCena.Remove(npc);
+                    if (m.Depois > 0)
+                        arquivo.EmCena.Add(npc); // entra no fim: a ordem da mesa é a ordem de entrada
+                    continue;
+                }
+                if (m.Campo.StartsWith("cena:"))
+                {
+                    var heroi = m.Campo.Substring("cena:".Length);
+                    arquivo.HeroisEmCena.Remove(heroi);
+                    if (m.Depois > 0)
+                        arquivo.HeroisEmCena.Add(heroi);
+                    continue;
+                }
                 var (vilao, condicao) = PartesDoCampoDeVilao(m.Campo);
                 if (!arquivo.CondicoesDeVilao.TryGetValue(vilao, out var marcadas))
                     arquivo.CondicoesDeVilao[vilao] = marcadas = new List<string>();
@@ -1329,7 +1496,9 @@ namespace TorreDeControle.Core.Salas
                 personagens.AplicarDeJogo(p, daFicha);
         }
 
-        static bool DaMesa(string campo) => campo == CampoEquipe || campo.StartsWith("vilao:") || campo.StartsWith("bonus:");
+        static bool DaMesa(string campo) =>
+            campo == CampoEquipe || campo.StartsWith("vilao:") || campo.StartsWith("bonus:") || campo.StartsWith("cena:") ||
+            campo.StartsWith("npc_em_cena:");
 
         int ValorDaMesa(string campo)
         {
@@ -1337,6 +1506,10 @@ namespace TorreDeControle.Core.Salas
                 return arquivo.Equipe;
             if (campo.StartsWith("bonus:"))
                 return arquivo.Bonus.FirstOrDefault(b => "bonus:" + b.Id == campo)?.Ativo == true ? 1 : 0;
+            if (campo.StartsWith("cena:"))
+                return arquivo.HeroisEmCena.Contains(campo.Substring("cena:".Length)) ? 1 : 0;
+            if (campo.StartsWith("npc_em_cena:"))
+                return arquivo.EmCena.Contains(campo.Substring("npc_em_cena:".Length)) ? 1 : 0;
             var (vilao, condicao) = PartesDoCampoDeVilao(campo);
             return CondicoesMarcadasDoVilao(vilao).Contains(condicao) ? 1 : 0;
         }
@@ -1358,7 +1531,9 @@ namespace TorreDeControle.Core.Salas
         };
 
         static int Limitar(string campo, int valor) =>
-            campo.StartsWith("condicao:") || campo.StartsWith("vilao:") || campo.StartsWith("bonus:") ? Math.Max(0, Math.Min(1, valor))
+            campo.StartsWith("condicao:") || campo.StartsWith("vilao:") || campo.StartsWith("bonus:") || campo.StartsWith("cena:") ||
+            campo.StartsWith("npc_em_cena:")
+                ? Math.Max(0, Math.Min(1, valor))
             : campo == CampoPotencial || campo == CampoEquipe || campo.StartsWith("contador:") ? Math.Max(0, valor)
             : campo.StartsWith("rotulo:") ? Math.Max(Rotulos.Minimo, Math.Min(Rotulos.Maximo, valor))
             : valor;
@@ -1381,6 +1556,12 @@ namespace TorreDeControle.Core.Salas
             /// <summary>Condições marcadas na luta, por vilão (as que ele tem estão na ficha dele).</summary>
             [JsonProperty("condicoes_de_vilao")] public Dictionary<string, List<string>> CondicoesDeVilao { get; set; } =
                 new Dictionary<string, List<string>>();
+            /// <summary>As cenas da campanha, na ordem (nada se exclui).</summary>
+            [JsonProperty("cenas")] public List<Cena> Cenas { get; set; } = new List<Cena>();
+            /// <summary>A cena aberta; null = mesa vazia, esperando "criar cena".</summary>
+            [JsonProperty("cena_atual", NullValueHandling = NullValueHandling.Ignore)] public string CenaAtual { get; set; }
+            /// <summary>As heroínas na cena aberta; as outras assistem.</summary>
+            [JsonProperty("herois_em_cena")] public List<string> HeroisEmCena { get; set; } = new List<string>();
             [JsonProperty("eventos")] public List<Evento> Eventos { get; set; } = new List<Evento>();
         }
     }

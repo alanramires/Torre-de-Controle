@@ -187,10 +187,16 @@ namespace TorreDeControle.UI
             }, mesa);
         }
 
-        /// <summary>As heroínas da mesa: as das vagas, ativas e em carreira (só elas recebem comando de jogo).</summary>
-        List<Personagem> NaMesa() =>
+        /// <summary>As heroínas da campanha: as das vagas, ativas e em carreira (só elas recebem comando de jogo).</summary>
+        List<Personagem> DaSala() =>
             sala.Slots.Where(v => v.Personagem != null).Select(v => personagens.Buscar(v.Personagem))
                 .Where(p => p != null && p.Ativo && p.Status == StatusCriacao.EmCarreira).ToList();
+
+        /// <summary>
+        /// As heroínas na cena aberta: só elas sentam, rolam, ajudam e entram em batalha (p.84: quem ajuda precisa poder
+        /// ajudar na ficção). As outras assistem. Sem cena, ninguém.
+        /// </summary>
+        List<Personagem> NaMesa() => DaSala().Where(p => mesa.HeroiEmCena(p.Id)).ToList();
 
         void Redesenhar()
         {
@@ -198,8 +204,11 @@ namespace TorreDeControle.UI
                 Destroy(tabuleiro.GetChild(i).gameObject);
             titulo.text = $"MESA · {sala.Nome.ToUpperInvariant()}";
             var herois = NaMesa();
-            var foraDaMesa = sala.Slots.Count(v => v.Personagem != null) - herois.Count;
-            subtitulo.text = $"rodada {mesa.Rodada} · {herois.Count} na mesa" +
+            var assistindo = DaSala().Where(h => !mesa.HeroiEmCena(h.Id)).ToList();
+            var foraDaMesa = sala.Slots.Count(v => v.Personagem != null) - DaSala().Count;
+            var cena = mesa.CenaAtual;
+            subtitulo.text = $"rodada {mesa.Rodada} · " + (cena == null ? "sem cena" : $"cena: {cena.Nome} · {herois.Count} em cena") +
+                             (assistindo.Count > 0 ? $" · {assistindo.Count} assistindo" : string.Empty) +
                              (foraDaMesa > 0 ? $" · {foraDaMesa} fora (não estão em carreira)" : string.Empty);
 
             // O lado direito é do log (desenho do Alan). As heroínas sentam em cima, embaixo e à esquerda.
@@ -217,14 +226,23 @@ namespace TorreDeControle.UI
             centro.anchorMin = Vector2.zero;
             centro.anchorMax = Vector2.one;
             // Os vilões em cena sentam à esquerda (o outro lado da mesa), depois das heroínas que estiverem lá.
-            foreach (var v in mesa.EmCena())
-                AssentoDeVilao(esquerda, v);
+            // A coluna da esquerda rola quando não cabe (dois vilões e dois aliados já passam da altura).
+            var ladoEsquerdo = Estilo.ListaRolavel(esquerda, 8);
+            ladoEsquerdo.GetComponent<LayoutElement>().flexibleWidth = 1;
+            foreach (var v in mesa.EmCena().Where(n => n.Papel == Papel.Vilao))
+                AssentoDeVilao(ladoEsquerdo, v);
+            // Os outros NPCs em cena (aliados, neutros) sentam abaixo dos vilões: podem ajudar (p.84: um ponto da pilha por NPC).
+            foreach (var n in mesa.EmCena().Where(n => n.Papel != Papel.Vilao))
+                AssentoDeNpc(ladoEsquerdo, n);
             // Sem ninguém à esquerda, o centro ocupa esse lado também.
             var esquerdaVazia = herois.Count <= 6 && mesa.EmCena().Count == 0;
             esquerda.gameObject.SetActive(!esquerdaVazia);
             if (esquerdaVazia)
-                foreach (var aresta in new[] { cima, baixo })
-                    aresta.offsetMin = new Vector2(10, aresta.offsetMin.y); // assentos centralizados com o centro
+                // Assentos centralizados com o centro; em cima, só se o canto não for de quem assiste.
+                foreach (var aresta in assistindo.Count > 0 ? new[] { baixo } : new[] { cima, baixo })
+                    aresta.offsetMin = new Vector2(10, aresta.offsetMin.y);
+            if (assistindo.Count > 0)
+                CaixaAssistindo(assistindo, Lado, Alto);
             centro.offsetMin = new Vector2(esquerdaVazia ? 10 : Lado + 10, Alto + 10);
             centro.offsetMax = new Vector2(-Log - 20, -Alto - 10);
             Centro(centro);
@@ -358,6 +376,351 @@ namespace TorreDeControle.UI
             var mover = Estilo.BotaoContorno(filaB, "M", 30, Estilo.TextoSuave, () => AbrirRolagem(p.Id));
             mover.gameObject.AddComponent<Dica>().Configurar("Rolar movimento já com " + p.NomeExibicao + " (e o vilão, se houver um só em cena).");
             Estilo.Rect("Vao", filaB).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            var sair = Estilo.BotaoContorno(filaB, "Sair", 60, Estilo.TextoSuave, () => AbrirSairDeCena(p));
+            sair.gameObject.AddComponent<Dica>().Configurar("Tirar " + p.NomeExibicao + " da cena: passa a assistir (fugiu, afastou-se, nocauteada, outra cena).");
+        }
+
+        // ---------- a cena: quem está nela e quem assiste (desenho do Alan) ----------
+
+        /// <summary>
+        /// Quem assiste, no canto de cima à esquerda: nome, por que está fora e o "Entrar" (com cena aberta). A lista
+        /// rola quando são muitas.
+        /// </summary>
+        void CaixaAssistindo(List<Personagem> assistindo, float lado, float alto)
+        {
+            var caixa = Estilo.Rect("Assistindo", tabuleiro);
+            caixa.anchorMin = caixa.anchorMax = new Vector2(0, 1);
+            caixa.pivot = new Vector2(0, 1);
+            caixa.anchoredPosition = new Vector2(10, -10);
+            caixa.sizeDelta = new Vector2(lado - 20, alto - 20);
+            Estilo.Moldura(caixa.gameObject, Estilo.Campo, Estilo.BordaApagada);
+            var v = caixa.gameObject.AddComponent<VerticalLayoutGroup>();
+            v.padding = new RectOffset(10, 10, 8, 8);
+            v.spacing = 6;
+            v.childControlWidth = v.childControlHeight = true;
+            v.childForceExpandHeight = false;
+            var t = Estilo.Rotulo(caixa, $"ASSISTINDO · {assistindo.Count}", 17, Estilo.TextoSuave, FontStyles.Bold);
+            t.characterSpacing = 3;
+            t.gameObject.AddComponent<LayoutElement>().minHeight = 24;
+            var lista = Estilo.ListaRolavel(caixa, 4);
+            var suave = ColorUtility.ToHtmlStringRGB(Estilo.TextoApagado);
+            foreach (var h in assistindo)
+            {
+                var heroi = h;
+                var fila = Estilo.Fila(lista, 40, 6);
+                var motivo = mesa.MotivoFora(h.Id);
+                var nome = Estilo.Rotulo(fila, $"<b>{h.NomeExibicao}</b>" + (motivo == null ? "" : $"\n<size=75%><color=#{suave}>{motivo}</color></size>"),
+                    16, Estilo.Texto);
+                nome.textWrappingMode = TextWrappingModes.NoWrap;
+                nome.overflowMode = TextOverflowModes.Ellipsis;
+                Estilo.ColunaElastica(nome);
+                if (mesa.TemCena)
+                {
+                    var entrar = Estilo.BotaoContorno(fila, "Entrar", 78, Estilo.Dourado, () => AbrirEntrarEmCena(heroi));
+                    entrar.gameObject.AddComponent<Dica>().Configurar("Pôr " + h.NomeExibicao + " na cena (pela narração, ou gastando um Controle).");
+                }
+            }
+        }
+
+        string cenaNome = string.Empty;
+        string cenaLocal;
+        readonly HashSet<string> cenaQuem = new HashSet<string>();
+        const string LocalNenhum = "_nenhum";
+
+        /// <summary>
+        /// Criar cena: nome, local (opcional, do Cenário) e quem está nela. Já vem marcado quem está na cena aberta; na
+        /// primeira, todas (até caberem).
+        /// </summary>
+        void AbrirCriarCena()
+        {
+            cenaNome = string.Empty;
+            cenaLocal = null;
+            cenaQuem.Clear();
+            var sugestao = mesa.TemCena ? NaMesa() : DaSala();
+            foreach (var h in sugestao.Take(Mesa.MaximoEmCena))
+                cenaQuem.Add(h.Id);
+            DesenharCriarCena();
+        }
+
+        void DesenharCriarCena()
+        {
+            var herois = DaSala();
+            var caixa = Caixa(mesa.TemCena ? "NOVA CENA" : "CRIAR CENA", 360 + (herois.Count + 2) / 3 * 58, 1000);
+            Pergunta(caixa, "Nome da cena");
+            var campo = CampoMotivo(caixa, "ex.: Parque Arcaico, a nave pousou");
+            campo.text = cenaNome;
+            campo.onValueChanged.AddListener(t => cenaNome = t);
+            Pergunta(caixa, "Local (opcional, do Cenário)");
+            var locais = new List<(string, string)> { (LocalNenhum, "—") };
+            locais.AddRange(personagens.CenarioDaSala(sala.Id).Where(e => e.Tipo == ElementoDeCenario.Local).Select(e => (e.Id, e.Nome)));
+            var filaL = Estilo.Fila(caixa, 52, 8);
+            Estilo.ColunaElastica(Estilo.ListaSuspensa(filaL, 420, locais, cenaLocal ?? LocalNenhum, id =>
+            {
+                cenaLocal = id == LocalNenhum ? null : id;
+                DesenharCriarCena();
+            }));
+            Pergunta(caixa, $"Quem está em cena? ({cenaQuem.Count} de até {Mesa.MaximoEmCena}; as outras assistem)");
+            for (var k = 0; k < herois.Count; k += 3)
+            {
+                var fila = Estilo.Fila(caixa, 50, 8);
+                foreach (var h in herois.Skip(k).Take(3))
+                {
+                    var id = h.Id;
+                    UnityEngine.Events.UnityAction alternar = () =>
+                    {
+                        if (!cenaQuem.Remove(id))
+                        {
+                            if (cenaQuem.Count >= Mesa.MaximoEmCena)
+                            {
+                                Mostrar(Resultado.Falha($"Cabem {Mesa.MaximoEmCena} numa cena: desmarque alguém antes."));
+                                return;
+                            }
+                            cenaQuem.Add(id);
+                        }
+                        DesenharCriarCena();
+                    };
+                    var b = cenaQuem.Contains(id)
+                        ? Estilo.BotaoPrincipal(fila, h.NomeExibicao, 0, alternar)
+                        : Estilo.BotaoContorno(fila, h.NomeExibicao, 0, Estilo.Dourado, alternar);
+                    b.GetComponent<LayoutElement>().flexibleWidth = 1;
+                }
+                for (var vazio = herois.Skip(k).Take(3).Count(); vazio < 3; vazio++)
+                    Estilo.Rect("Vao", fila).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            }
+            Nota(caixa, "A pilha e as condições continuam (a pilha só volta para 1 quando o tempo passa). Quem assiste entra depois pelo \"Entrar\".");
+            Rodape(caixa, mesa.TemCena ? "Abrir cena" : "Criar cena", () =>
+            {
+                var r = mesa.CriarCena(cenaNome, cenaLocal, cenaQuem.ToList(), null);
+                if (!r.Ok)
+                {
+                    Mostrar(r);
+                    return;
+                }
+                FecharBatalha();
+                Aplicar(r);
+            });
+        }
+
+        string gestaoNome = string.Empty, gestaoMotivo = string.Empty, gestaoLocal;
+
+        /// <summary>
+        /// A gestão da cena aberta (clicar no nome dela): nome e local; as heroínas, pôr ou tirar à vontade (entra no log,
+        /// com o motivo); os vilões e oponentes da campanha, pôr ou tirar da mesa (como na Área do mestre).
+        /// </summary>
+        void AbrirGestaoDaCena()
+        {
+            var cena = mesa.CenaAtual;
+            if (cena == null)
+                return;
+            gestaoNome = cena.Nome;
+            gestaoLocal = cena.Local;
+            gestaoMotivo = string.Empty;
+            DesenharGestaoDaCena();
+        }
+
+        void DesenharGestaoDaCena()
+        {
+            var cena = mesa.CenaAtual;
+            if (cena == null)
+            {
+                FecharBatalha();
+                return;
+            }
+            var caixa = Caixa("GESTÃO DA CENA", 900, 1100);
+
+            // Nome e local.
+            var filaN = Estilo.Fila(caixa, 52, 10);
+            var nome = Estilo.CampoTexto(filaN, "nome da cena");
+            nome.text = gestaoNome;
+            nome.onValueChanged.AddListener(t => gestaoNome = t);
+            Estilo.ColunaElastica(nome);
+            var locais = new List<(string, string)> { (LocalNenhum, "sem local") };
+            locais.AddRange(personagens.CenarioDaSala(sala.Id).Where(e => e.Tipo == ElementoDeCenario.Local).Select(e => (e.Id, e.Nome)));
+            Estilo.ListaSuspensa(filaN, 300, locais, gestaoLocal ?? LocalNenhum, id =>
+            {
+                gestaoLocal = id == LocalNenhum ? null : id;
+                DesenharGestaoDaCena();
+            });
+            Estilo.BotaoContorno(filaN, "Salvar", 140, Estilo.Dourado, () =>
+            {
+                var r = mesa.EditarCena(gestaoNome, gestaoLocal);
+                Mostrar(r.Ok ? (Resultado?)null : r, r.Ok ? "Cena atualizada." : null);
+                Redesenhar();
+                DesenharGestaoDaCena();
+            });
+            var motivo = CampoMotivo(caixa, "motivo de quem entra ou sai (opcional, vai para o log)");
+            motivo.text = gestaoMotivo;
+            motivo.onValueChanged.AddListener(t => gestaoMotivo = t);
+
+            var lista = Estilo.ListaRolavel(caixa, 6);
+            var suave = ColorUtility.ToHtmlStringRGB(Estilo.TextoApagado);
+
+            // Heroínas: em cena ou assistindo.
+            var herois = DaSala();
+            var emCena = herois.Count(h => mesa.HeroiEmCena(h.Id));
+            var th = Estilo.Rotulo(lista, $"HEROÍNAS · {emCena} em cena (até {Mesa.MaximoEmCena}) · {herois.Count - emCena} assistindo", 18,
+                Estilo.Azul, FontStyles.Bold);
+            th.gameObject.AddComponent<LayoutElement>().minHeight = 30;
+            foreach (var h in herois)
+            {
+                var heroi = h;
+                var dentro = mesa.HeroiEmCena(h.Id);
+                var fila = Estilo.Fila(lista, 48, 10);
+                Estilo.Moldura(fila.gameObject, Estilo.Linha, dentro ? Estilo.Dourado : Estilo.BordaApagada);
+                fila.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(12, 8, 4, 4);
+                var estado = dentro ? "em cena" : mesa.MotivoFora(h.Id) ?? "assistindo";
+                var r = Estilo.Rotulo(fila, $"<b>{h.NomeExibicao}</b>   <size=80%><color=#{suave}>{estado}</color></size>", 19,
+                    dentro ? Estilo.Texto : Estilo.TextoSuave);
+                r.textWrappingMode = TextWrappingModes.NoWrap;
+                r.overflowMode = TextOverflowModes.Ellipsis;
+                Estilo.ColunaElastica(r);
+                UnityEngine.Events.UnityAction alternar = () =>
+                {
+                    var res = dentro ? mesa.SairDeCena(heroi.Id, gestaoMotivo) : mesa.EntrarEmCena(heroi.Id, gestaoMotivo);
+                    Mostrar(res.Ok ? (Resultado?)null : res);
+                    Redesenhar();
+                    DesenharGestaoDaCena();
+                };
+                if (dentro)
+                    Estilo.BotaoPrincipal(fila, "Tirar", 150, alternar);
+                else
+                    Estilo.BotaoContorno(fila, "Pôr", 150, Estilo.Dourado, alternar);
+            }
+
+            // Vilões e oponentes da campanha (o mesmo da Área do mestre); entrar e sair vai para o log, com o motivo.
+            var viloes = personagens.NpcsDaSala(sala.Id).Where(n => n.Ativo && n.Papel == Papel.Vilao).ToList();
+            var tv = Estilo.Rotulo(lista, $"VILÕES E OPONENTES · {mesa.EmCena().Count} em cena", 18, Estilo.Erro, FontStyles.Bold);
+            tv.gameObject.AddComponent<LayoutElement>().minHeight = 34;
+            if (viloes.Count == 0)
+                Estilo.Rotulo(lista, "Nenhum NPC com papel Vilão / Oponente nesta campanha (aba NPCs da sala).", 17,
+                    Estilo.TextoApagado, FontStyles.Italic).textWrappingMode = TextWrappingModes.Normal;
+            foreach (var v in viloes)
+            {
+                var id = v.Id;
+                var dentro = mesa.EstaEmCena(v.Id);
+                var fila = Estilo.Fila(lista, 48, 10);
+                Estilo.Moldura(fila.gameObject, Estilo.Linha, dentro ? Estilo.Erro : Estilo.BordaApagada);
+                fila.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(12, 8, 4, 4);
+                var marcadas = mesa.CondicoesMarcadasDoVilao(v.Id).Count;
+                var total = v.Vilao?.Condicoes.Count ?? 0;
+                var r = Estilo.Rotulo(fila, $"<b>{v.NomeExibicao}</b>   <size=80%><color=#{suave}>{(dentro ? "em cena" : "fora")} · {marcadas} de {total} condições</color></size>",
+                    19, dentro ? Estilo.Texto : Estilo.TextoSuave);
+                r.textWrappingMode = TextWrappingModes.NoWrap;
+                r.overflowMode = TextOverflowModes.Ellipsis;
+                Estilo.ColunaElastica(r);
+                UnityEngine.Events.UnityAction alternar = () =>
+                {
+                    Mostrar(mesa.AlternarEmCena(id, gestaoMotivo));
+                    Redesenhar();
+                    DesenharGestaoDaCena();
+                };
+                if (dentro)
+                    Estilo.BotaoPrincipal(fila, "Tirar", 150, alternar);
+                else
+                    Estilo.BotaoContorno(fila, "Pôr", 150, Estilo.Dourado, alternar);
+            }
+
+            // Os outros NPCs da campanha (aliados, neutros): também podem estar em cena e ajudar com a pilha (p.84).
+            var outros = personagens.NpcsDaSala(sala.Id).Where(n => n.Ativo && n.Papel != Papel.Vilao).ToList();
+            var tn = Estilo.Rotulo(lista, $"OUTROS NPCs · {outros.Count(n => mesa.EstaEmCena(n.Id))} em cena", 18, Estilo.Azul, FontStyles.Bold);
+            tn.gameObject.AddComponent<LayoutElement>().minHeight = 34;
+            if (outros.Count == 0)
+                Estilo.Rotulo(lista, "Nenhum outro NPC nesta campanha.", 17, Estilo.TextoApagado, FontStyles.Italic);
+            foreach (var n in outros)
+            {
+                var id = n.Id;
+                var dentro = mesa.EstaEmCena(n.Id);
+                var fila = Estilo.Fila(lista, 48, 10);
+                Estilo.Moldura(fila.gameObject, Estilo.Linha, dentro ? Estilo.Azul : Estilo.BordaApagada);
+                fila.GetComponent<HorizontalLayoutGroup>().padding = new RectOffset(12, 8, 4, 4);
+                var papel = n.Papel == Papel.Aliado ? "aliado" : n.Papel == Papel.Neutro ? "neutro" : n.Papel.ToString().ToLowerInvariant();
+                var r = Estilo.Rotulo(fila, $"<b>{n.NomeExibicao}</b>   <size=80%><color=#{suave}>{papel} · {(dentro ? "em cena" : "fora")}</color></size>",
+                    19, dentro ? Estilo.Texto : Estilo.TextoSuave);
+                r.textWrappingMode = TextWrappingModes.NoWrap;
+                r.overflowMode = TextOverflowModes.Ellipsis;
+                Estilo.ColunaElastica(r);
+                UnityEngine.Events.UnityAction alternar = () =>
+                {
+                    Mostrar(mesa.AlternarEmCena(id, gestaoMotivo));
+                    Redesenhar();
+                    DesenharGestaoDaCena();
+                };
+                if (dentro)
+                    Estilo.BotaoPrincipal(fila, "Tirar", 150, alternar);
+                else
+                    Estilo.BotaoContorno(fila, "Pôr", 150, Estilo.Dourado, alternar);
+            }
+
+            var fim = Estilo.Fila(caixa, 56, 12);
+            Estilo.BotaoContorno(fim, "Nova cena", 220, Estilo.Dourado, AbrirCriarCena);
+            Estilo.Rect("Vao", fim).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            Estilo.BotaoContorno(fim, "Fechar", 200, Estilo.TextoSuave, FecharBatalha);
+        }
+
+        string entrarControle;
+
+        /// <summary>Entrar em cena: pela narração, ou gastando um Controle do assento dela (ex.: Chegar na hora certa).</summary>
+        void AbrirEntrarEmCena(Personagem h)
+        {
+            entrarControle = null;
+            DesenharEntrarEmCena(h, string.Empty);
+        }
+
+        void DesenharEntrarEmCena(Personagem h, string motivo)
+        {
+            var controles = mesa.BonusDe(h.Id).Where(b => b.Tipo == Mesa.BonusControle).ToList();
+            var caixa = Caixa($"ENTRAR EM CENA · {h.NomeExibicao.ToUpperInvariant()}", 430 + controles.Count * 56);
+            Pergunta(caixa, "Como ela chega?");
+            TMP_InputField campo = null;
+            var filaN = Estilo.Fila(caixa, 48, 8);
+            Escolha(filaN, "pela narração", entrarControle == null, () => { entrarControle = null; DesenharEntrarEmCena(h, campo.text); });
+            foreach (var b in controles)
+            {
+                var id = b.Id;
+                var fila = Estilo.Fila(caixa, 48, 8);
+                Escolha(fila, $"gastando Controle {b.Valor}" + (b.Contexto.Length > 0 ? $": {b.Contexto}" : ""), entrarControle == id,
+                    () => { entrarControle = id; DesenharEntrarEmCena(h, campo.text); });
+            }
+            campo = CampoMotivo(caixa, "motivo (opcional; ex.: ouviu o pedido de socorro pelo rádio)");
+            campo.text = motivo;
+            Rodape(caixa, "Entrar", () =>
+            {
+                var r = mesa.EntrarEmCena(h.Id, campo.text, entrarControle);
+                if (!r.Ok)
+                {
+                    Mostrar(r);
+                    return;
+                }
+                FecharBatalha();
+                Aplicar(r);
+            });
+        }
+
+        /// <summary>Sair de cena (à vontade do mestre): ela passa a assistir, com o motivo no log.</summary>
+        void AbrirSairDeCena(Personagem p)
+        {
+            var caixa = Caixa($"SAIR DE CENA · {p.NomeExibicao.ToUpperInvariant()}", 430);
+            Nota(caixa, "Ela passa a assistir (o canto de cima à esquerda) e volta pelo \"Entrar\". Desfazer pelo log também devolve.");
+            TMP_InputField campo = null;
+            var fila = Estilo.Fila(caixa, 46, 8);
+            foreach (var motivo in new[] { "fugiu", "afastou-se (golpe poderoso)", "nocauteada", "foi para outra cena" })
+            {
+                var texto = motivo;
+                var b = Estilo.BotaoContorno(fila, texto, 0, Estilo.Dourado, () => campo.text = texto);
+                b.GetComponent<LayoutElement>().flexibleWidth = 1;
+            }
+            campo = CampoMotivo(caixa, "motivo (clique num acima ou escreva)");
+            Rodape(caixa, "Sair de cena", () =>
+            {
+                var r = mesa.SairDeCena(p.Id, campo.text);
+                if (!r.Ok)
+                {
+                    Mostrar(r);
+                    return;
+                }
+                FecharBatalha();
+                Aplicar(r);
+            });
         }
 
         /// <summary>
@@ -570,6 +933,60 @@ namespace TorreDeControle.UI
         /// O vilão em cena: retrato e nome, as condições que ele tem (clicar marca na luta e abre a carta da
         /// condição, porque o livro manda fazer o movimento dela na hora) e os movimentos de vilão.
         /// </summary>
+        /// <summary>
+        /// O assento de um NPC em cena que não é vilão (aliado, neutro): nome (abre a ficha), o papel, os lembretes e o
+        /// "+" para pôr outro. Menor que o do vilão: não tem condições de luta.
+        /// </summary>
+        void AssentoDeNpc(Transform aresta, Personagem n)
+        {
+            var c = Estilo.Rect("Npc " + n.NomeExibicao, aresta);
+            var le = c.gameObject.AddComponent<LayoutElement>();
+            le.minWidth = le.preferredWidth = 300;
+            le.minHeight = le.preferredHeight = 120;
+            le.flexibleWidth = le.flexibleHeight = 0;
+            le.layoutPriority = 2;
+            Estilo.Moldura(c.gameObject, Estilo.Cartao, Estilo.Azul);
+            var vl = c.gameObject.AddComponent<VerticalLayoutGroup>();
+            vl.padding = new RectOffset(12, 12, 8, 8);
+            vl.spacing = 6;
+            vl.childControlWidth = vl.childControlHeight = true;
+            vl.childForceExpandHeight = false;
+
+            var topo = Estilo.Fila(c, 52, 8);
+            var abrir = Estilo.Rect("AbrirFicha", topo);
+            Estilo.ColunaElastica(abrir);
+            var h = abrir.gameObject.AddComponent<HorizontalLayoutGroup>();
+            h.spacing = 8;
+            h.childControlWidth = h.childControlHeight = true;
+            h.childForceExpandWidth = false;
+            h.childAlignment = TextAnchor.MiddleLeft;
+            Retrato(abrir, n);
+            var papel = n.Papel == Papel.Aliado ? "aliado" : n.Papel == Papel.Neutro ? "neutro" : n.Papel.ToString().ToLowerInvariant();
+            var nome = Estilo.Rotulo(abrir, $"{n.NomeExibicao}\n<size=70%>{papel} · em cena</size>", 20, Estilo.Azul, FontStyles.Bold);
+            nome.textWrappingMode = TextWrappingModes.NoWrap;
+            nome.overflowMode = TextOverflowModes.Ellipsis;
+            Estilo.ColunaElastica(nome);
+            var fundoAbrir = abrir.gameObject.AddComponent<Image>();
+            fundoAbrir.color = new Color(1, 1, 1, 0);
+            var botaoAbrir = abrir.gameObject.AddComponent<Button>();
+            botaoAbrir.targetGraphic = fundoAbrir;
+            botaoAbrir.name = TextoLivre;
+            botaoAbrir.onClick.AddListener(() => AbrirFichaDoNpc(n));
+            abrir.gameObject.AddComponent<Dica>().Configurar("Abrir a ficha de " + n.NomeExibicao + ".");
+
+            var filaL = Estilo.Fila(c, 30, 6);
+            filaL.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleLeft;
+            foreach (var b in mesa.BonusDe(n.Id))
+                TokenDeBonus(filaL, b);
+            var mais = Estilo.BotaoContorno(filaL, "+", 30, Estilo.TextoSuave, () =>
+            {
+                bonusTipo = Mesa.BonusLembrete;
+                AbrirBonus(n.Id);
+            });
+            mais.gameObject.AddComponent<Dica>().Configurar("Pôr um lembrete.");
+            Estilo.Rect("Vao", filaL).gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+        }
+
         void AssentoDeVilao(Transform aresta, Personagem v)
         {
             var c = Estilo.Rect("Vilao " + v.NomeExibicao, aresta);
@@ -738,6 +1155,18 @@ namespace TorreDeControle.UI
             v.childControlWidth = v.childControlHeight = true;
             v.childForceExpandHeight = false;
 
+            // Sem cena, a mesa está vazia: tudo começa por criar a cena (quem está nela, quem assiste).
+            if (!mesa.TemCena)
+            {
+                Estilo.Rotulo(centro, "Nenhuma cena aberta", 26, Estilo.Azul, FontStyles.Bold).alignment = TextAlignmentOptions.Center;
+                var aviso = Estilo.Rotulo(centro, "Crie a cena e marque quem está nela; as outras assistem.", 18, Estilo.TextoSuave, FontStyles.Italic);
+                aviso.alignment = TextAlignmentOptions.Center;
+                var filaC = Estilo.Fila(centro, 64, 10);
+                filaC.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
+                Encolher(Estilo.BotaoPrincipal(filaC, "Criar cena", 300, AbrirCriarCena));
+                return;
+            }
+
             // A pilha fica à vista na mesa; mexer nela é pelo "Gerir pilha" (uma telinha).
             var topo = Estilo.Fila(centro, 70, 14);
             var t = Estilo.Rotulo(topo, "PILHA DE EQUIPE", 24, Estilo.Azul, FontStyles.Bold);
@@ -764,6 +1193,19 @@ namespace TorreDeControle.UI
             }
             if (mesa.Equipe == 0)
                 Estilo.Rotulo(fichas, "pilha vazia", 20, Estilo.TextoApagado, FontStyles.Italic);
+
+            var filaCena = Estilo.Fila(centro, 44, 12);
+            filaCena.GetComponent<HorizontalLayoutGroup>().childAlignment = TextAnchor.MiddleCenter;
+            var cena = mesa.CenaAtual;
+            var nomeDoLocal = cena.Local == null ? null : personagens.CenarioDaSala(sala.Id).FirstOrDefault(e => e.Id == cena.Local)?.Nome;
+            var gerirCena = Estilo.BotaoContorno(filaCena, $"CENA: {cena.Nome}" + (nomeDoLocal != null ? $" · {nomeDoLocal}" : "") + "  ›", 0,
+                Estilo.TextoSuave, AbrirGestaoDaCena);
+            gerirCena.GetComponent<LayoutElement>().flexibleWidth = 1;
+            Encolher(gerirCena);
+            gerirCena.gameObject.AddComponent<Dica>().Configurar("Gerir a cena: nome e local, quem está nela, os vilões e NPCs em cena.");
+            var nova = Estilo.BotaoContorno(filaCena, "Nova cena", 180, Estilo.Dourado, AbrirCriarCena);
+            Encolher(nova);
+            nova.gameObject.AddComponent<Dica>().Configurar("Abrir a próxima cena e marcar quem está nela (a pilha e as condições continuam).");
         }
 
         /// <summary>O log da mesa, no lado direito: do mais novo ao mais antigo, com desfazer o último.</summary>

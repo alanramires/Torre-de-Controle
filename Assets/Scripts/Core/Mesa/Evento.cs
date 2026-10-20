@@ -47,6 +47,17 @@ namespace TorreDeControle.Core.Salas
         [JsonProperty("pedido", NullValueHandling = NullValueHandling.Ignore)] public PedidoDeRolagem Pedido { get; set; }
     }
 
+    /// <summary>Uma cena da campanha: nome, o local do Cenário (opcional) e quando começou. Quem está nela é da mesa.</summary>
+    public sealed class Cena
+    {
+        [JsonProperty("id")] public string Id { get; set; }
+        [JsonProperty("nome")] public string Nome { get; set; }
+        /// <summary>Id do Local no Cenário da campanha, ou null.</summary>
+        [JsonProperty("local", NullValueHandling = NullValueHandling.Ignore)] public string Local { get; set; }
+        [JsonProperty("rodada")] public int Rodada { get; set; }
+        [JsonProperty("quando")] public string Quando { get; set; }
+    }
+
     /// <summary>Uma parte do modificador: "rotulo:perigoso" +1, "condicao:assustado" −2, "condicoes" +2 (golpe poderoso).</summary>
     public sealed class ParteDoModificador
     {
