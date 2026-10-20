@@ -1,6 +1,6 @@
 # Resumo — onde a Torre está
 
-> Handoff para a próxima conversa. Atualizado no fechamento da **v0.4.0** (2026-10-19).
+> Handoff para a próxima conversa. Atualizado no fechamento da **v0.5.0** (2026-10-20).
 > Se algo aqui contradiz o código, o código manda — e este arquivo precisa de poda.
 
 ## Leitura para retomar
@@ -17,8 +17,14 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
 
 ## Estado
 
-- **Versão:** v0.4.0 — *O MJ decide a ordem* (`docs/relatorio_v0.4.0.md`). Antes: v0.3.0 (*O primeiro movimento*:
-  o Enfrentar), v0.2.2, v0.2.1, v0.2.0 (*A mesa*).
+- **Versão:** v0.5.0 — *A cena* (`docs/relatorio_v0.5.0.md`). Antes: v0.4.0 (*O MJ decide a ordem*: golpe poderoso
+  e pendências no log), v0.3.0 (*O primeiro movimento*: o Enfrentar), v0.2.0 (*A mesa*).
+- **A cena organiza a mesa:** a mesa começa vazia; a cena (`Mesa.CriarCena`, `CenaAtual`, `HeroiEmCena`) diz quem
+  senta, e o resto assiste. Com cena aberta, o Core recusa quem está fora (`Mesa.ForaDeCena`): rolar, ser alvo,
+  intervir, usar a pilha, entrar em batalha (p.84). Cabem 6 (`MaximoEmCena`). Entrar, sair, cena nova, vilão/NPC
+  entrando são eventos que se desfazem. Na tela: `PainelMesa.CaixaAssistindo`, `AbrirCriarCena`,
+  `AbrirGestaoDaCena`, `AbrirEntrarEmCena`, `AbrirSairDeCena`, `AssentoDeNpc`; `NaMesa()` = em cena, `DaSala()` =
+  todas.
 - **O que organiza o que vem:** o que uma rolagem pede vira **pendência no log** (botão), nunca janela que abre
   sozinha: a condição do vilão interrompe a mesa com o movimento dela, e só o MJ sabe a ordem. Hoje há três:
   golpe pedido pela troca (`Mesa.GolpesPedidos`), movimento de condição do vilão (`CondicaoPedida` /
@@ -31,7 +37,7 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
 - **Como o Alan trabalha esta fase:** ele **desenha cada tela** e explica a regra; não adiantar conteúdo nem regra
   antes do desenho. Quando ele diz "não implemente, só leia", é só leitura.
 - **Validação pelo livro:** a ideia do Alan é reproduzir os exemplos do livro na Torre com "Rolar fixo" e ver se bate.
-  Ele criou a campanha **Pacatópolis** para isso (fichas ainda por criar). Arquétipos da equipe dos exemplos: Huma
+  Ele criou a campanha **Pacatópolis** com as 9 (Rótulos do livro ainda por conferir; a Toro tem Perigosa +2, p.34). Arquétipos da equipe dos exemplos: Huma
   (Legado), Toro (Bruta), Crepúsculo (Amaldiçoada), Vespa (Discípula), Gafanhoto (Janus), Tiro-Certo (Farol), Rex
   (Transformado); Vértice (Nova) e Canção dos Céus (Forasteira) **segundo o Alan**, o texto não diz. Não há fichas
   publicadas; o "Rolar fixo" escolhe a soma dos dados, então basta o arquétipo e o estado da cena.
@@ -47,22 +53,20 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
 
 ## Onde eu parei
 
-- **Próximo (combinado com o Alan): Cena e Spectate.** Desenho dele: quem está em cena (assentos) e quem assiste
-  (caixa "Spectate" no canto superior esquerdo, com o motivo: em outra cena, afastou-se, nocauteada, fugiu). Criar
-  cena registra quem está e quem assiste (sugere: a cena anterior + quem saiu nocauteada, que volta na seguinte).
-  **O MJ move qualquer uma para dentro e para fora à vontade** (exigência do Alan); entrar também pode gastar o
-  controle do "Chegar na hora certa" (Bruta). Saídas pela regra no Aceitar: golpe 10+ "afastar-se", precisar marcar
-  condição sem ter livre. O painel de rolagem e a intervenção passam a oferecer só quem está em cena (p.84). Hoje "sai
-  de cena" é só texto no log; NPCs já têm `em_cena` na mesa. Perguntas em aberto: a falha só tira de cena pelo botão
-  manual (movimento do MJ)? O Alan vai desenhar a janela de criar cena?
+- **Próximo: o deck do MJ** (decidido, memória `deck-do-mj-peso-na-hora`): botão "Movimento do MJ" ao lado do
+  "Rolar movimento"; a mão das cartas de `movimentos-mj` do catálogo; ao jogar, **Leve ou Pesado escolhido na hora**
+  (p.177: o peso não é da carta; tendência do livro pré-marcada), contra quem (em cena) e o que fez, no log;
+  "Infligir uma condição" marca no mesmo evento; "Fazer um movimento de vilão" abre a lista do vilão; a rolagem que
+  falha ganha a pendência "Movimento do MJ". Depois, a conta leves × pesados da sessão. A carta tutorial "Leve ou
+  pesado?" já existe; acrescentar a ela como a Torre registra o peso.
+- **Cena, o que falta:** saídas pela regra no Aceitar (golpe 10+ "afastar-se", precisar marcar condição sem ter livre);
+  a cena guardar quem estava nela no fim; a sugestão de quem volta na cena seguinte (quem saiu nocauteada).
 - **Depois:** Liberar seus poderes (o par do Enfrentar; o 7–9 já pede a condição), Defender (proteger alguém + a
   interrupção de PvP, hoje só intervenção −2) e o ganho de controle do "Chegar na hora certa" ("hold 1 instead of
   choosing", preso à pessoa defendida; o custo do 7–9 continua). Depois, patches de arquétipo um movimento por vez
   (ex.: Legado rolar Superior no Enfrentar).
 - **Modificador** (`Mesa.PartesDoModificador`): Rótulo + condições −2 já entram. Faltam adiante, constante e
   Influência passiva +1 (p.81).
-- **Atalho para os movimentos do MJ no help** (pedido do Alan, "parece rápido"): ainda não feito. `PainelAjuda` tem
-  `AbrirCategoria("movimentos-mj")`.
 - **Influência na mesa**: "descontar num colega" e a renúncia são só marca narrativa. `DefinirEstadoDaInfluencia`
   está no Core, sem tela e sem evento.
 - **Console** (`Core/Mesa/ConsoleDaMesa.cs`): `/eda`, `/tgp`, `/cena`, `/tempo`, `/salvar` (a tela grava: o Core só
@@ -82,7 +86,7 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
   rolagem (Sobrecarga 10+, Vou te salvar! 12+); Influência oculta e de nascença; o vilão derrotado na mesa;
   post BBCode; o exemplo `docs/exemplo_primeira_luta.md` revisado só até "Aurora sai dos escombros".
 - **Sons:** `Assets/audio` no `.gitignore` até confirmar a origem.
-- **Testes:** `Assets/Tests/EditMode/` — 197 passando no harness dotnet fora da Unity (scratchpad `testcore/t.csproj`:
+- **Testes:** `Assets/Tests/EditMode/` — 202 passando no harness dotnet fora da Unity (scratchpad `testcore/t.csproj`:
   Core + testes + Newtonsoft + NUnit, com os JSON de Regras ao lado). Rodar também no Test Runner da Unity. A outra
   IA tem testes próprios em `Assets/Tests/Dice/`.
 
@@ -105,6 +109,9 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
 | Teste passa no harness e falha na Unity | NUnit da Unity é antigo: `Does.Contain` só aceita texto | `Has.Member` para coleções |
 | `dotnet test` trava / dll presa | `testhost` de uma execução anterior | encerrar o `testhost` |
 | String C# quebrada / comando travado | heredoc do Bash come `\`; `cat >` sem entrada espera para sempre | patch em arquivo `.py` escrito com a ferramenta de arquivo |
+| Patch `.py` "não acha" o trecho | os `.cs` estão em CRLF e o trecho do script em LF | ler com `newline=''`, trocar `\n` pelo fim de linha do arquivo antes de comparar |
+| Pedido ambíguo ("rolagem dos vilões") | "rolagem" pode ser rolar dados ou a barra de rolagem; o MJ nunca rola (p.34) | perguntar com as duas leituras antes de fazer |
+| Coluna/aba vaza da tela com muita gente | pilha de botões sem rolagem estica o layout | `ListaRolavel` com `flexibleWidth = 1`; o que fica fixo, fora da lista |
 | **Busca-e-troca corrompeu PNG** | `grep -rl` sem `-I` lista binários e o `sed` reescreve | `grep -rlI` (só texto); conferir `git status` depois |
 | Busca com acento não acha | `grep -i` com `[aá]` falha no locale do Git Bash | sem `-i`, as duas grafias, ou Python |
 | Python não imprime acento | `-I` ignora `PYTHONIOENCODING`; console em cp1252 | `sys.stdout.reconfigure(encoding='utf-8')` |
@@ -141,7 +148,7 @@ arquivo novo é seu. Arquivo misto (as duas mexeram): pôr no índice só os seu
 |---|---|
 | Tela de entrada → partida | **de pé** |
 | Criar personagem | **de pé** (laboratório e revisão na sala) |
-| Mesa com N fichas clicáveis | **de pé**; com 9 heroínas falta o modo cena/Spectate |
+| Mesa com N fichas clicáveis | **de pé**, por cena (até 6 em cena; as outras assistem) |
 | Pilha de Equipe | **de pé** |
 | Mão de cartas por jogador | falta (base no Core: `CatalogoDeCartas` + `MontadorDeBaralho`) |
 | Rolador 2d6 + log | **de pé para Enfrentar e golpe poderoso**, com condições na conta, pendências e dados fixos; outros movimentos faltam |
@@ -155,6 +162,9 @@ exportar/importar ficha; console do mestre; dados 3D com animação dirigida (ou
 
 - Gravado em JSON por `ArmazenamentoLocalJson` (`persistentDataPath/dados/`): `jogadores.json`, `personagens.json`,
   `salas.json`, `mesa_<sala>.json`. Exportações em `dados/exportacoes` (inclui `log_<sala>_<data>.txt`).
+- v0.5.0 (sem migração): `mesa_<sala>.json` ganha `cenas` (id, nome, local, rodada, quando), `cena_atual` e
+  `herois_em_cena`; campos de mudança novos `cena:<heroína>` e `npc_em_cena:<npc>`. Mesa antiga abre vazia (sem
+  cena) até criar uma.
 - v0.4.0 (todos opcionais, sem migração; evento antigo continua valendo): na rolagem, `partes` (do modificador),
   `origem`; nas escolhas, `condicoes`, `faltaram_condicoes`, `dentro`, `para`; no evento, `pedido` (movimento, alvo)
   e `resolve` (a pendência de condição do vilão). Lembretes da abertura são `bonus` do tipo lembrete.
