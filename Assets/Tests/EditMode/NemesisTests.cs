@@ -171,6 +171,18 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Perguntas_de_historico_com_quem_dao_npc_na_amaldicoada_e_na_discipula()
+        {
+            foreach (var (arquetipo, pergunta) in new[] { ("amaldicoada", 3), ("discipula", 3) })
+            {
+                personagens.Criar("", "Teste " + arquetipo, arquetipo, null);
+                var p = personagens.Listar().Last();
+                Assert.That(personagens.DefinirNomeNoHistorico(p.Id, pergunta, "Alguém").Ok, Is.True, arquetipo + ": \"quem\" é pessoa, vira NPC");
+                Assert.That(personagens.DefinirNomeNoHistorico(p.Id, 0, "x").Ok, Is.False, arquetipo + ": a primeira não pede pessoa");
+            }
+        }
+
+        [Test]
         public void Janus_pessoa_de_cada_obrigacao_vira_npc_e_desmarcar_inativa()
         {
             const string ext = "janus/identidade-secreta";

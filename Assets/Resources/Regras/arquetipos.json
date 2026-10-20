@@ -382,6 +382,9 @@
         "Quem, fora da equipe, é essencial para derrotar seu nêmesis?",
         "Por que a equipe importa para você?"
       ],
+      "npcs_historico": [
+        { "pergunta": 3, "papel": "aliado", "maturidade": "mestre", "vinculo": "essencial para derrotar o nêmesis" }
+      ],
       "equipe": {
         "pergunta": "Pagamos caro pela vitória. Qual foi o preço?",
         "relacionamentos": [
@@ -1187,6 +1190,9 @@
         "Por que ela aceitou treinar você?",
         "Quem mais, fora da equipe, sabe do seu treinamento?",
         "Por que a equipe importa para você?"
+      ],
+      "npcs_historico": [
+        { "pergunta": 3, "papel": "neutro", "maturidade": "mestre", "vinculo": "sabe do treinamento" }
       ],
       "equipe": {
         "pergunta": "Continuamos juntos depois que tudo acabou. Por quê? Como mantivemos contato?",
