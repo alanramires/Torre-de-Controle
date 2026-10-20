@@ -168,6 +168,19 @@ namespace TorreDeControle.Core.Regras
             }
 
             /// <summary>
+            /// A alternativa marcada pede um golpe poderoso para quem rolou (o instável do Liberar seus poderes, p.61): fica
+            /// a pendência no log, como a do golpe da troca do Enfrentar.
+            /// </summary>
+            public bool AlternativaPedeGolpe(string opcao, int alternativa)
+            {
+                var decide = EfeitoDaOpcao(opcao, "mj_decide") ?? EfeitoDaOpcao(opcao, "quem_rolou_decide");
+                if (!(decide?["entre"] is JArray entre) || alternativa < 0 || alternativa >= entre.Count)
+                    return false;
+                return ((entre[alternativa] as JArray) ?? new JArray(entre[alternativa])).OfType<JObject>()
+                    .Any(e => (string)e["op"] == "rolar" && (string)e["movimento"] == "basico/golpe-poderoso");
+            }
+
+            /// <summary>
             /// A alternativa vale contra um alvo PJ? A opção com "contra_pj": "sem_equipe" não dá pontos à pilha
             /// brigando com colega (a oportunidade: só a chance a um aliado).
             /// </summary>
@@ -234,7 +247,7 @@ namespace TorreDeControle.Core.Regras
                     : o["lista"] != null ? (Lista((string)o["lista"]) as JArray)?.OfType<JObject>() ?? Enumerable.Empty<JObject>()
                     : o["opcoes_ref"] is JArray refs ? refs.Select(r => (Opcoes as JArray)?.OfType<JObject>().FirstOrDefault(x => (string)x["id"] == (string)r)).Where(x => x != null)
                     : Enumerable.Empty<JObject>();
-                return brutas.Select(x => new OpcaoDeEscolha((string)x["id"], (string)x["texto"], Alternativas(x["efeitos"]))).ToList();
+                return brutas.Select(x => new OpcaoDeEscolha((string)x["id"], (string)x["texto"], Alternativas(x["efeitos"]), (string)x["nota"])).ToList();
             }
 
             /// <summary>A escolha (op "escolher") de uma faixa, no topo ou dentro da lista de efeitos dela.</summary>
@@ -294,12 +307,15 @@ namespace TorreDeControle.Core.Regras
             public string Id { get; }
             public string Texto { get; }
             public IReadOnlyList<string> Alternativas { get; }
+            /// <summary>O que a opção significa na mesa (a "nota" do JSON: o que é temporário, o que é instável...), ou null.</summary>
+            public string Nota { get; }
 
-            public OpcaoDeEscolha(string id, string texto, IReadOnlyList<string> alternativas)
+            public OpcaoDeEscolha(string id, string texto, IReadOnlyList<string> alternativas, string nota = null)
             {
                 Id = id;
                 Texto = texto;
                 Alternativas = alternativas;
+                Nota = nota;
             }
         }
 

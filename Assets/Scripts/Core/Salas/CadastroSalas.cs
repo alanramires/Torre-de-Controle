@@ -165,6 +165,9 @@ namespace TorreDeControle.Core.Salas
                 return Resultado.Falha("Personagem não encontrada.");
             if (sala.Slots.Any(s => s.Personagem != null && personagens.Buscar(s.Personagem)?.Origem == origemId))
                 return Resultado.Falha("Essa personagem já está em outra vaga desta sala.");
+            // Um arquétipo por equipe (p.16); quem já saiu (aposentada, inativa) não conta.
+            if (personagens.QuemTemOArquetipoNaSala(sala.Id, origem.Foto?.Arquetipo ?? origem.Identidade.Arquetipo) is Personagem dona)
+                return Resultado.Falha(personagens.MensagemArquetipoRepetido(origem.Foto?.Arquetipo ?? origem.Identidade.Arquetipo, dona));
 
             var jogador = slot.Jogador;
             if (jogador == null && origem.Identidade.Jogador != null &&

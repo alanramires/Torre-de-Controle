@@ -140,6 +140,11 @@ namespace TorreDeControle.Core.Salas
         /// <summary>A troca de golpes do sucesso (Enfrentar), como o mestre marcou; null se não houve troca.</summary>
         [JsonProperty("troca", NullValueHandling = NullValueHandling.Ignore)] public TrocaDeGolpes Troca { get; set; }
         /// <summary>
+        /// Uma escolha do resultado pediu golpe poderoso para quem rolou (o instável do Liberar seus poderes): a pendência
+        /// "Golpe poderoso" fica no log. Gravado no Aceitar.
+        /// </summary>
+        [JsonProperty("pede_golpe_poderoso", DefaultValueHandling = DefaultValueHandling.Ignore)] public bool PedeGolpePoderoso { get; set; }
+        /// <summary>
         /// A falha pede um movimento do MJ (o movimento não descreve a própria falha): fica a pendência no log até o MJ
         /// fazer. Gravado no Aceitar.
         /// </summary>

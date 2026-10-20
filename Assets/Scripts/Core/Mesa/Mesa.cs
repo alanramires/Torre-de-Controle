@@ -1142,18 +1142,21 @@ namespace TorreDeControle.Core.Salas
 
         /// <summary>
         /// Quem esta rolagem aceita mandou tomar um golpe poderoso e ainda não rolou: o retorno da troca para quem rolou
-        /// e, contra PJ, o alvo. Null na lista é o herói genérico. Vazia se a rolagem foi desfeita ou escondida.
+        /// e, contra PJ, o alvo; ou uma escolha que pediu (o instável do Liberar seus poderes). Null na lista é o herói genérico. Vazia se a rolagem foi desfeita ou escondida.
         /// </summary>
         public IReadOnlyList<string> GolpesPedidos(Evento e)
         {
             var r = e?.Rolagem;
-            if (r?.Troca == null || !r.Aceita || e.Oculto || Corrigido(e))
+            if (r == null || !r.Aceita || e.Oculto || Corrigido(e))
                 return new List<string>();
             var quem = new List<string>();
-            if (r.Troca.Retorno == TrocaDeGolpes.RetornoGolpePoderoso)
+            if (r.Troca?.Retorno == TrocaDeGolpes.RetornoGolpePoderoso)
                 quem.Add(e.Personagem);
-            if (r.Troca.AlvoGolpePoderoso && r.Alvo != null)
+            if (r.Troca?.AlvoGolpePoderoso == true && r.Alvo != null)
                 quem.Add(r.Alvo);
+            // Uma escolha pediu (o instável do Liberar seus poderes).
+            if (r.PedeGolpePoderoso && !quem.Contains(e.Personagem))
+                quem.Add(e.Personagem);
             return quem.Where(id => !arquivo.Eventos.Any(x =>
                 x.Rolagem?.Origem == e.Id && x.Personagem == id && !x.Oculto && !Corrigido(x))).ToList();
         }
@@ -1288,6 +1291,8 @@ namespace TorreDeControle.Core.Salas
             r.Tipo = tipo;
             // Na falha, o MJ faz um movimento, a menos que o movimento descreva a própria falha (p.177).
             r.PedeMovimentoDoMj = tipo == RolagemDaMesa.TipoFalha && (movimento == null || movimento.FalhaPedeMovimentoDoMj);
+            r.PedeGolpePoderoso = movimento != null && gravadas.SelectMany(x => x.ComAsDeDentro)
+                .Any(x => x.Subopcao != null && movimento.AlternativaPedeGolpe(x.Opcao, x.Subopcao.Value));
             r.Escolhas = gravadas;
             r.Troca = trocaGravada;
             r.AceitaEm = DateTime.Now.ToString("s");

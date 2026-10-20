@@ -290,5 +290,28 @@ namespace TorreDeControle.Tests
             Assert.That(p2.Buscar(recarregada.Slots[2].Personagem).Sala, Is.EqualTo(sala.Id));
             Assert.That(p2.Listar(), Has.Count.EqualTo(1));
         }
+
+        [Test]
+        public void Equipe_nao_repete_arquetipo_mas_quem_saiu_nao_conta()
+        {
+            var sala = NovaSala();
+            var vertice = FichaPronta.Criada(personagens, "Vértice", arquetipo: "nova");
+            var fissao = FichaPronta.Criada(personagens, "Fissão", arquetipo: "nova");
+            var farol = FichaPronta.Criada(personagens, "Tiro-Certo", arquetipo: "farol");
+            Assert.That(salas.PorPersonagem(sala.Id, 0, vertice.Id, false).Ok, Is.True);
+            var repetido = salas.PorPersonagem(sala.Id, 1, fissao.Id, false);
+            Assert.That(repetido.Ok, Is.False, "dois Novas na mesma equipe (p.16)");
+            Assert.That(repetido.Erro, Does.Contain("Vértice"));
+            Assert.That(salas.PorPersonagem(sala.Id, 1, farol.Id, false).Ok, Is.True, "outro arquétipo entra");
+
+            // A Academia manda outro Nova depois que o Vértice sai da equipe (aposentado): agora pode.
+            salas.TirarPersonagem(sala.Id, 0);
+            Assert.That(salas.PorPersonagem(sala.Id, 0, fissao.Id, false).Ok, Is.True);
+
+            // Inativa também não conta.
+            var instanciaDoFissao = personagens.Buscar(sala.Slots[0].Personagem);
+            personagens.DefinirAtivo(instanciaDoFissao.Id, false);
+            Assert.That(personagens.QuemTemOArquetipoNaSala(sala.Id, "nova"), Is.Null);
+        }
     }
 }

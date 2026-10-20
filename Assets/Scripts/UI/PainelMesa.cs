@@ -1512,7 +1512,7 @@ namespace TorreDeControle.UI
                     var toma = tomaId;
                     var nome = toma == null ? HeroiGenerico : personagens.Buscar(toma)?.NomeExibicao ?? "?";
                     BotaoDePendencia(lista, $"Golpe poderoso: {nome}", Estilo.Dourado, () => AbrirGolpePoderoso(evento.Id, toma),
-                        "A troca de golpes pediu: rolar + condições marcadas (faixas invertidas).");
+                        "A rolagem pediu (troca de golpes, efeito instável): rolar + condições marcadas (faixas invertidas).");
                 }
             }
             if (mesa.VisiveisDaCena.Count == 0)
@@ -2025,9 +2025,8 @@ namespace TorreDeControle.UI
             {
                 if (linha.Nivel > 0 && textosDasOpcoes.Contains(linha.Texto))
                     continue; // aparece abaixo, como botão
+                // Todas as faixas aparecem (o movimento inteiro à vista); as que não valem para o resultado ficam apagadas.
                 var vale = !total.HasValue || Core.Regras.MovimentosBasicos.Vale(linha.Faixa, total.Value);
-                if (!vale)
-                    continue;
                 var t = Estilo.Rotulo(direita, (linha.Nivel > 0 ? new string(' ', linha.Nivel * 3) + "· " : string.Empty) + linha.Texto,
                     linha.Nivel == 0 ? 17 : 16, vale ? (linha.Nivel == 0 ? Estilo.Texto : Estilo.TextoSuave) : Estilo.TextoApagado,
                     linha.Nivel == 0 ? FontStyles.Bold : FontStyles.Normal);
@@ -2072,8 +2071,21 @@ namespace TorreDeControle.UI
                     b.GetComponent<LayoutElement>().flexibleWidth = 1;
                     b.name = TextoLivre;
                     TextoDeOpcao(b, 17);
+                    if (!string.IsNullOrWhiteSpace(opcao.Nota))
+                        b.gameObject.AddComponent<Dica>().Configurar(opcao.Nota);
                     if (marcada == null)
                         continue;
+                    // Marcada: o que a opção significa (temporário x instável, só "resistir" protege...) à vista.
+                    if (!string.IsNullOrWhiteSpace(opcao.Nota))
+                    {
+                        var filaNota = Estilo.Fila(direita, 0, 6);
+                        var alturaLivre = filaNota.GetComponent<LayoutElement>();
+                        alturaLivre.minHeight = alturaLivre.preferredHeight = -1; // a altura acompanha o texto
+                        Estilo.Rect("Recuo", filaNota).gameObject.AddComponent<LayoutElement>().preferredWidth = 20;
+                        var nota = Estilo.Rotulo(filaNota, opcao.Nota, 14, Estilo.TextoSuave, FontStyles.Italic);
+                        nota.textWrappingMode = TextWrappingModes.Normal;
+                        Estilo.ColunaElastica(nota);
+                    }
                     DetalhesDaEscolha(direita, movimento, opcao, marcada, quem, 20);
                 }
             }

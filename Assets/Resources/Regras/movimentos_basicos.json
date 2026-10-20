@@ -49,17 +49,27 @@
     {
       "id": "basico/liberar-poderes",
       "nome": "Liberar seus poderes",
+      "atalho": "lsp",
       "gatilho": "Forçar os poderes além do que você sabe que consegue para vencer um obstáculo, remodelar o ambiente ou ampliar os sentidos.",
+      "requisito": "ir além das capacidades conhecidas, ou usá-las em situação perigosa ou difícil; usar os poderes de sempre não aciona (o MJ diz o que acontece). Se outro movimento se encaixa melhor (atacar = Enfrentar; proteger alguém = Defender), é ele.",
       "rolagem": { "rotulo": "aberracao" },
       "forte": [{ "op": "narrativo", "texto": "Você consegue." }],
       "parcial": [
         { "op": "narrativo", "texto": "Você consegue, mas escolhe:" },
         { "op": "escolher", "n": 1, "quem_escolhe": "rolou", "opcoes": [
-          { "id": "condicao", "texto": "Marcar uma condição (sua escolha)", "efeitos": [{ "op": "marcar_condicao", "quem": "rolou", "escolhe": "rolou" }] },
-          { "id": "instavel", "texto": "O MJ diz como o efeito fica instável ou temporário", "efeitos": [{ "op": "narrativo", "quem": "mj" }] }
+          { "id": "condicao", "texto": "Marcar uma condição (sua escolha)", "efeitos": [{ "op": "marcar_condicao", "quem": "rolou", "escolhe": "rolou" }],
+            "nota": "a condição é de quem rolou escolher, não do MJ (p.61)" },
+          { "id": "instavel", "texto": "O MJ diz como o efeito fica instável ou temporário", "efeitos": [{ "op": "mj_decide", "entre": [
+              [{ "op": "narrativo", "texto": "temporário" }],
+              [{ "op": "narrativo", "texto": "instável" }],
+              [{ "op": "rolar", "movimento": "basico/golpe-poderoso", "quem": "rolou", "texto": "instável + golpe poderoso" }]
+            ] }],
+            "nota": "temporário: pressão de tempo (a gaiola não segura por muito tempo). Instável: consequência não intencional, perigosa (dano colateral); nunca desfaz o sucesso principal. O MJ diz qual (p.61).",
+            "_decisao": "Alan, 2026-10-20: o MJ marca temporário ou instável; no instável, pode pedir golpe poderoso (p.61: 'O MJ pode até pedir uma rolagem para tomar um golpe poderoso como resultado de um efeito instável'), e fica a pendência no log, sem abrir sozinha." }
         ] }
       ],
       "_correcao": "No 7-9 é condição OU instável/temporário, à escolha de quem rola. A falha é só a padrão (potencial + movimento do MJ).",
+      "exemplos": "livro p.62 (Fissão, um Nova, no reator: 13, absorve tudo e sobe; Tiro-Certo descendo de corda: não é liberar, não rola)",
       "origem": "livro p.60-62"
     },
     {

@@ -161,6 +161,9 @@ namespace TorreDeControle.Core.Personagens
             // Depois de criada, trocar de arquétipo é um avanço (tardio), não uma edição.
             if (!personagem.EmCriacao && identidade.Arquetipo != personagem.Identidade.Arquetipo)
                 return Resultado.Falha("Depois de criada, trocar de arquétipo é um avanço, não uma edição.");
+            if (personagem.Sala != null && identidade.Arquetipo != personagem.Identidade.Arquetipo &&
+                QuemTemOArquetipoNaSala(personagem.Sala, identidade.Arquetipo, personagem.Id) is Personagem dona)
+                return Resultado.Falha(MensagemArquetipoRepetido(identidade.Arquetipo, dona));
 
             // Em "novo", trocar de arquétipo reseta a ficha de criação: as escolhas eram do arquétipo antigo.
             // (A tela pede confirmação antes, se houver escolhas.)
@@ -180,6 +183,23 @@ namespace TorreDeControle.Core.Personagens
             Gravar();
             return Resultado.Sucesso();
         }
+
+        /// <summary>
+        /// A heroína da equipe (na sala, ativa, não aposentada) que já tem esse arquétipo, ou null. Pelo livro (p.16), não
+        /// há dois jogadores com o mesmo arquétipo; quem saiu da equipe (aposentada ou inativa) não conta: a Academia pode
+        /// mandar outro Nova depois que o primeiro saiu.
+        /// </summary>
+        public Personagem QuemTemOArquetipoNaSala(string sala, string arquetipo, string exceto = null) =>
+            arquetipo == null ? null
+                : personagens.FirstOrDefault(p => p.Sala == sala && p.Id != exceto && p.Controle == Controle.Jogador && p.Ativo &&
+                                                  p.Status != StatusCriacao.Aposentado &&
+                                                  (p.Foto?.Arquetipo ?? p.Identidade.Arquetipo) == arquetipo);
+
+        public string MensagemArquetipoRepetido(string arquetipo, Personagem dona) =>
+            $"A equipe já tem {NomeDoArquetipo(arquetipo)}: {dona.NomeExibicao}. Pelo livro (p.16), cada jogador tem um arquétipo " +
+            "diferente; só depois que ela sair da equipe (aposentada ou inativa) entra outra.";
+
+        string NomeDoArquetipo(string id) => regras.Buscar(id)?.Nome ?? id;
 
         // ---------- ficha de criação: Núcleo ----------
 

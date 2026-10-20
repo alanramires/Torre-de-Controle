@@ -1038,6 +1038,48 @@ namespace TorreDeControle.Tests
         }
 
         [Test]
+        public void Liberar_seus_poderes_condicao_ou_instavel_e_o_instavel_pode_pedir_golpe()
+        {
+            var basicos = TorreDeControle.Core.Regras.MovimentosBasicos.Carregar(new RegrasDeTeste());
+            var liberar = basicos.Todos.First(m => m.Id == "basico/liberar-poderes");
+            Assert.That(liberar.Atalho, Is.EqualTo("lsp"));
+            Assert.That(liberar.PedeAlvo, Is.False, "superar obstáculo, remodelar, ampliar sentidos: sem contra quem");
+            var aberracao = personagens.ValorDeJogo(heroi, Mesa.CampoRotulo(Rotulos.Aberracao));
+
+            // 10+ (Fissão, p.62): consegue, sem escolha nem custo.
+            mesa.RolarMovimento(heroi.Id, liberar, null, 6, 6, null);
+            var forte = mesa.Eventos.Last();
+            Assert.That(mesa.AceitarRolagem(forte.Id, liberar, null).Ok, Is.True);
+            Assert.That(mesa.GolpesPedidos(forte), Is.Empty);
+
+            // 7-9, condição à escolha de quem rolou.
+            mesa.RolarMovimento(heroi.Id, liberar, null, 4, 4 - aberracao, null);
+            var parcial = mesa.Eventos.Last();
+            Assert.That(parcial.Rolagem.Total, Is.EqualTo(8));
+            Assert.That(mesa.AceitarRolagem(parcial.Id, liberar, new[] { new EscolhaDaRolagem { Opcao = "condicao" } }).Ok, Is.False, "qual condição?");
+            Assert.That(mesa.AceitarRolagem(parcial.Id, liberar,
+                new[] { new EscolhaDaRolagem { Opcao = "condicao", Condicoes = new List<string> { "assustado" } } }).Ok, Is.True);
+            Assert.That(heroi.CondicoesMarcadas, Does.Contain("assustado"));
+
+            // 7-9, o MJ diz qual: temporário (sem golpe) ou instável, que pode pedir golpe poderoso.
+            mesa.RolarMovimento(heroi.Id, liberar, null, 4, 4 - aberracao, null);
+            var temporario = mesa.Eventos.Last();
+            Assert.That(mesa.AceitarRolagem(temporario.Id, liberar, new[] { new EscolhaDaRolagem { Opcao = "instavel" } }).Ok, Is.False, "temporário ou instável?");
+            mesa.AceitarRolagem(temporario.Id, liberar, new[] { new EscolhaDaRolagem { Opcao = "instavel", Subopcao = 0 } });
+            Assert.That(temporario.Descricao, Does.Contain("(temporário)"));
+            Assert.That(mesa.GolpesPedidos(temporario), Is.Empty);
+
+            mesa.RolarMovimento(heroi.Id, liberar, null, 4, 4 - aberracao, null);
+            var instavel = mesa.Eventos.Last();
+            mesa.AceitarRolagem(instavel.Id, liberar, new[] { new EscolhaDaRolagem { Opcao = "instavel", Subopcao = 2 } });
+            Assert.That(instavel.Descricao, Does.Contain("(instável + golpe poderoso)"));
+            Assert.That(mesa.GolpesPedidos(instavel), Is.EqualTo(new[] { heroi.Id }), "a pendência do golpe no log");
+            var golpe = basicos.Todos.First(m => m.Id == "basico/golpe-poderoso");
+            Assert.That(mesa.RolarMovimento(heroi.Id, golpe, null, 2, 3, null, origem: instavel.Id).Ok, Is.True);
+            Assert.That(mesa.GolpesPedidos(instavel), Is.Empty);
+        }
+
+        [Test]
         public void Cena_cabe_seis_herois()
         {
             Assert.That(Mesa.MaximoEmCena, Is.EqualTo(6));

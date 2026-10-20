@@ -255,15 +255,22 @@ namespace TorreDeControle.UI
                 var escolhido = k;
                 var b = Estilo.BotaoContorno(paiDosAtalhos, nomes[k], 0, Estilo.TextoSuave, () => Escolher(escolhido));
                 var tamanho = b.GetComponent<LayoutElement>();
-                tamanho.minHeight = tamanho.preferredHeight = 42;
+                // A altura acompanha o título: os longos dos movimentos do MJ ("Definir as possíveis consequências e
+                // esperar resposta") quebram em três linhas e, num botão de 42, vazavam para os vizinhos.
+                var comprimento = (nomes[k] ?? string.Empty).Length;
+                tamanho.minHeight = tamanho.preferredHeight = comprimento > 44 ? 66 : comprimento > 24 ? 54 : 42;
                 tamanho.flexibleHeight = 0;
                 var texto = b.GetComponentInChildren<TextMeshProUGUI>();
                 texto.fontSize = 15;
                 texto.enableAutoSizing = true;
-                texto.fontSizeMin = 12;
+                texto.fontSizeMin = 11;
                 texto.fontSizeMax = 15;
                 texto.characterSpacing = 0;
+                texto.lineSpacing = -12;
                 texto.textWrappingMode = TextWrappingModes.Normal;
+                texto.overflowMode = TextOverflowModes.Truncate;
+                texto.rectTransform.offsetMin = new Vector2(8, 3);
+                texto.rectTransform.offsetMax = new Vector2(-8, -3);
                 atalhos[k] = b;
             }
             MontarGaleria();

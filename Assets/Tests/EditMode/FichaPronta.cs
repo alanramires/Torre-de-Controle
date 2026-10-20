@@ -21,6 +21,7 @@ namespace TorreDeControle.Tests
                 var colega = Criada(personagens, "Colega de " + copia.NomeExibicao);
                 salas.PorPersonagem(sala.Id, livre, colega.Id, false);
             }
+            // A Nova escolhe "cara fechada"; os outros arquétipos têm outra regra de Influência (a chamada falha e não muda nada).
             personagens.EscolherComportamento(copia.Id, "cara_fechada");
             var quantas = personagens.QuantasInfluencias(copia) ?? 0;
             personagens.DarInfluencia(copia.Id, personagens.Colegas(copia).Take(quantas).Select(c => c.Id));
@@ -30,17 +31,44 @@ namespace TorreDeControle.Tests
             NUnit.Framework.Assert.That(personagens.AprovarParaCampanha(copia.Id).Ok, NUnit.Framework.Is.True);
         }
 
-        /// <summary>Uma Nova criada (foto congelada) no laboratório.</summary>
-        public static Personagem Criada(CadastroPersonagens cadastro, string codinome, string jogador = null)
+        /// <summary>
+        /// Os arquétipos das fichas prontas, na ordem: a primeira de cada teste é uma Nova (vários testes contam com isso);
+        /// as seguintes mudam, porque uma equipe não repete arquétipo (livro p.16). Só os de habilidade "escolha N da lista",
+        /// que se preenchem de forma genérica.
+        /// </summary>
+        static readonly string[] Rodizio = { "nova", "farol", "janus", "delinquente", "transformado", "forasteira", "amaldicoada" };
+
+        /// <summary>
+        /// Uma ficha criada (foto congelada) no laboratório. Sem <paramref name="arquetipo"/>, a primeira do cadastro é uma
+        /// Nova e as seguintes seguem o rodízio, para caberem juntas numa sala.
+        /// </summary>
+        public static Personagem Criada(CadastroPersonagens cadastro, string codinome, string jogador = null, string arquetipo = null)
         {
-            cadastro.Criar("", codinome, "nova", jogador);
+            arquetipo ??= Rodizio[cadastro.Listar().Count(x => x.Controle == Controle.Jogador) % Rodizio.Length];
+            cadastro.Criar("", codinome, arquetipo, jogador);
             var p = cadastro.Listar().Last();
-            cadastro.EscolherBonusLivre(p.Id, Rotulos.Superior);
-            cadastro.AlternarHabilidade(p.Id, "feiticaria");
+            if (arquetipo == "nova")
+            {
+                cadastro.EscolherBonusLivre(p.Id, Rotulos.Superior);
+                cadastro.AlternarHabilidade(p.Id, "feiticaria");
+            }
+            else
+            {
+                foreach (var r in Rotulos.Todos)
+                    if (cadastro.EscolherBonusLivre(p.Id, r).Ok)
+                        break;
+                var regra = cadastro.RegraDeHabilidades(p);
+                foreach (var o in regra.Opcoes.Take(regra.Escolher ?? regra.EscolherAte ?? 1))
+                {
+                    cadastro.AlternarHabilidade(p.Id, o.Id);
+                    cadastro.DescreverHabilidade(p.Id, o.Id, "como se manifesta");
+                }
+            }
             for (var k = 0; k < 5; k++)
                 cadastro.ResponderHistorico(p.Id, k, "resposta " + k);
             CompletarModulos(cadastro, p);
-            NUnit.Framework.Assert.That(cadastro.Aprovar(p.Id).Ok, NUnit.Framework.Is.True);
+            var aprovada = cadastro.Aprovar(p.Id);
+            NUnit.Framework.Assert.That(aprovada.Ok, NUnit.Framework.Is.True, arquetipo + ": " + aprovada.Erro);
             return p;
         }
 
