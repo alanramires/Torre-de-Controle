@@ -430,6 +430,7 @@ namespace TorreDeControle.UI
 
             // Esquerda: quem está em aprovação (em qualquer ordem; o enviar decide a fila).
             var coluna = Coluna(bloco, 340, 8);
+            var nomes = Estilo.ListaRolavel(coluna, 8); // com muitas heroínas (9 na Pacatópolis), os nomes rolam
             foreach (var c in candidatas)
             {
                 var alvo = c;
@@ -437,8 +438,8 @@ namespace TorreDeControle.UI
                 var situacao = posicao > 0 ? $"enviou · {posicao}º" : "ainda não enviou";
                 var texto = $"{c.NomeExibicao}\n<size=65%>{situacao}</size>";
                 var botao = c.Id == equipeSelecionada
-                    ? Estilo.BotaoPrincipal(coluna, texto, 0, () => { })
-                    : Estilo.BotaoContorno(coluna, texto, 0, posicao > 0 ? Estilo.TextoSuave : Estilo.Dourado, () =>
+                    ? Estilo.BotaoPrincipal(nomes, texto, 0, () => { })
+                    : Estilo.BotaoContorno(nomes, texto, 0, posicao > 0 ? Estilo.TextoSuave : Estilo.Dourado, () =>
                     {
                         equipeSelecionada = alvo.Id;
                         Mostrar(null);
@@ -622,6 +623,7 @@ namespace TorreDeControle.UI
             var bloco = areaEquipe;
 
             var coluna = Coluna(bloco, 300, 8);
+            var nomes = Estilo.ListaRolavel(coluna, 8); // com muitas heroínas (9 na Pacatópolis), os nomes rolam
             foreach (var c in candidatas)
             {
                 var alvo = c;
@@ -629,8 +631,8 @@ namespace TorreDeControle.UI
                 var feitas = Enumerable.Range(0, frases).Count(k => personagens.ColegaDoRelacionamento(c, k) != null);
                 var texto = $"{c.NomeExibicao}\n<size=65%>{(feitas == frases ? "escolheu" : $"falta{(frases - feitas == 1 ? "" : "m")} {frases - feitas}")}</size>";
                 var botao = c.Id == equipeSelecionada
-                    ? Estilo.BotaoPrincipal(coluna, texto, 0, () => { })
-                    : Estilo.BotaoContorno(coluna, texto, 0, feitas == frases ? Estilo.TextoSuave : Estilo.Dourado, () =>
+                    ? Estilo.BotaoPrincipal(nomes, texto, 0, () => { })
+                    : Estilo.BotaoContorno(nomes, texto, 0, feitas == frases ? Estilo.TextoSuave : Estilo.Dourado, () =>
                     {
                         equipeSelecionada = alvo.Id;
                         Mostrar(null);
@@ -706,14 +708,15 @@ namespace TorreDeControle.UI
 
             // Esquerda: quem está em aprovação.
             var coluna = Coluna(bloco, 300, 8);
+            var nomes = Estilo.ListaRolavel(coluna, 8); // com muitas heroínas (9 na Pacatópolis), os nomes rolam
             foreach (var c in candidatas)
             {
                 var alvo = c;
                 var feito = personagens.InfluenciaConfirmada(c);
                 var texto = $"{c.NomeExibicao}\n<size=65%>{(feito ? "deu Influência" : "ainda não deu")}</size>";
                 var botao = c.Id == equipeSelecionada
-                    ? Estilo.BotaoPrincipal(coluna, texto, 0, () => { })
-                    : Estilo.BotaoContorno(coluna, texto, 0, feito ? Estilo.TextoSuave : Estilo.Dourado, () =>
+                    ? Estilo.BotaoPrincipal(nomes, texto, 0, () => { })
+                    : Estilo.BotaoContorno(nomes, texto, 0, feito ? Estilo.TextoSuave : Estilo.Dourado, () =>
                     {
                         equipeSelecionada = alvo.Id;
                         Mostrar(null);
@@ -1167,14 +1170,26 @@ namespace TorreDeControle.UI
         /// </summary>
         void TrocaDeVinculos(Transform coluna)
         {
-            Estilo.Rect("Vao", coluna).gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
             var r = Estilo.Rotulo(coluna, "Influência e relacionamentos", 16, Estilo.TextoSuave, FontStyles.Italic);
             r.alignment = TextAlignmentOptions.Center;
             var fila = Estilo.Fila(coluna, 44, 8);
-            Estilo.BotaoContorno(fila, "Exportar", 0, Estilo.Dourado, ExportarVinculos)
-                .GetComponent<LayoutElement>().flexibleWidth = 1;
-            Estilo.BotaoContorno(fila, "Importar", 0, Estilo.Dourado, ImportarVinculos)
-                .GetComponent<LayoutElement>().flexibleWidth = 1;
+            foreach (var botao in new[]
+                     {
+                         Estilo.BotaoContorno(fila, "Exportar", 0, Estilo.Dourado, ExportarVinculos),
+                         Estilo.BotaoContorno(fila, "Importar", 0, Estilo.Dourado, ImportarVinculos),
+                     })
+            {
+                botao.GetComponent<LayoutElement>().flexibleWidth = 1;
+                // Meia coluna é estreita: o rótulo fica numa linha e a fonte encolhe ("EXPORTA/R" quebrava).
+                var rotulo = botao.GetComponentInChildren<TextMeshProUGUI>();
+                rotulo.textWrappingMode = TextWrappingModes.NoWrap;
+                rotulo.characterSpacing = 1;
+                rotulo.enableAutoSizing = true;
+                rotulo.fontSizeMin = 12;
+                rotulo.fontSizeMax = 22;
+                rotulo.rectTransform.offsetMin = new Vector2(6, 0);
+                rotulo.rectTransform.offsetMax = new Vector2(-6, 0);
+            }
         }
 
         void ExportarVinculos()
