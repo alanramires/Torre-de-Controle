@@ -307,7 +307,7 @@
     {
       "id": "bruta/la-quando-importa",
       "tipo": "arquetipo",
-      "titulo": "Lá quando importa",
+      "titulo": "Chegar na hora certa",
       "origem": "bruta",
       "regra": "arquetipos.json#bruta/movimentos/la-quando-importa",
       "ajuda": "arquetipo/bruta/la-quando-importa"
